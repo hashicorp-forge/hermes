@@ -1,0 +1,15 @@
+.my {
+  .hds-table {
+    td {
+      @apply py-0 pr-10;
+
+      > .inner {
+        @apply overflow-hidden;
+      }
+    }
+  }
+
+  .footer {
+    @apply mt-24;
+  }
+}

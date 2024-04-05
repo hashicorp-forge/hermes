@@ -2,15 +2,23 @@
   data-test-copy-url-button
   data-test-url={{@url}}
   data-test-icon={{this.icon}}
-  {{tooltip
-    this.tooltipText
-    placement=@tooltipPlacement
-    isForcedOpen=this.tooltipIsForcedOpen
-    stayOpenOnClick=true
-  }}
+  {{(if
+    @isIconOnly
+    (modifier
+      "tooltip"
+      this.tooltipText
+      placement=@tooltipPlacement
+      isForcedOpen=this.tooltipIsForcedOpen
+      stayOpenOnClick=true
+    )
+  )}}
   {{did-insert this.didInsertButton}}
   {{on "click" (perform this.copyURL)}}
+  class={{unless @isIconOnly "flex space-x-1.5"}}
   ...attributes
 >
-  <FlightIcon @name={{this.icon}} />
+  <FlightIcon @name={{this.icon}} class={{unless @isIconOnly "-ml-[3px]"}} />
+  {{#unless @isIconOnly}}
+    <span>{{this.defaultText}}</span>
+  {{/unless}}
 </Action>

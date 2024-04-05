@@ -9,9 +9,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/algolia/algoliasearch-client-go/v3/algolia/errs"
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/internal/email"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
+	"github.com/hashicorp-forge/hermes/pkg/document"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp-forge/hermes/pkg/links"
@@ -64,57 +66,47 @@ func ReviewHandler(
 				return
 			}
 
-			// Get base document object from Algolia so we can determine the doc type.
-			baseDocObj := &hcd.BaseDoc{}
-			err = ar.Drafts.GetObject(docID, &baseDocObj)
-			if err != nil {
-				l.Error("error requesting base document object from Algolia",
-					"error", err,
-					"path", r.URL.Path,
-					"method", r.Method,
-					"doc_id", docID,
-				)
-				http.Error(w, "Error creating review",
-					http.StatusInternalServerError)
-				return
-			}
-
-			// Create new document object of the proper doc type.
-			docObj, err := hcd.NewEmptyDoc(baseDocObj.DocType)
-			if err != nil {
-				l.Error("error creating new empty doc",
-					"error", err,
-					"path", r.URL.Path,
-					"method", r.Method,
-					"doc_id", docID,
-				)
-				http.Error(w, "Error creating review",
-					http.StatusInternalServerError)
-				return
-			}
-
 			// Get document object from Algolia.
-			err = ar.Drafts.GetObject(docID, &docObj)
+			var algoObj map[string]any
+			err = ar.Drafts.GetObject(docID, &algoObj)
 			if err != nil {
-				l.Error("error getting document from Algolia",
+				// Handle 404 from Algolia and only log a warning.
+				if _, is404 := errs.IsAlgoliaErrWithCode(err, 404); is404 {
+					l.Warn("document object not found in Algolia",
+						"error", err,
+						"path", r.URL.Path,
+						"method", r.Method,
+						"doc_id", docID,
+					)
+					http.Error(w, "Draft document not found", http.StatusNotFound)
+					return
+				} else {
+					l.Error("error requesting document draft from Algolia",
+						"error", err,
+						"doc_id", docID,
+					)
+					http.Error(w, "Error accessing draft document",
+						http.StatusInternalServerError)
+					return
+				}
+			}
+
+			// Convert Algolia object to a document.
+			doc, err := document.NewFromAlgoliaObject(
+				algoObj, cfg.DocumentTypes.DocumentType)
+			if err != nil {
+				l.Error("error converting Algolia object to document type",
 					"error", err,
 					"doc_id", docID,
-					"method", r.Method,
-					"path", r.URL.Path,
 				)
-				http.Error(w, "Error creating review",
+				http.Error(w, "Error accessing draft document",
 					http.StatusInternalServerError)
 				return
 			}
-			l.Info("retrieved document draft",
-				"doc_id", docID,
-				"method", r.Method,
-				"path", r.URL.Path,
-			)
 
 			// Get latest product number.
 			latestNum, err := models.GetLatestProductNumber(
-				db, docObj.GetDocType(), docObj.GetProduct())
+				db, doc.DocType, doc.Product)
 			if err != nil {
 				l.Error("error getting product document number",
 					"error", err,
@@ -129,7 +121,7 @@ func ReviewHandler(
 
 			// Get product from database so we can get the product abbreviation.
 			product := models.Product{
-				Name: docObj.GetProduct(),
+				Name: doc.Product,
 			}
 			if err := product.Get(db); err != nil {
 				l.Error("error getting product",
@@ -145,24 +137,22 @@ func ReviewHandler(
 
 			// Set the document number.
 			nextDocNum := latestNum + 1
-			docObj.SetDocNumber(fmt.Sprintf("%s-%03d",
+			doc.DocNumber = fmt.Sprintf("%s-%03d",
 				product.Abbreviation,
-				nextDocNum))
+				nextDocNum)
 
 			// Change document status to "In-Review".
-			docObj.SetStatus("In-Review")
+			doc.Status = "In-Review"
 
 			// Replace the doc header.
-			err = docObj.ReplaceHeader(
-				docID, cfg.BaseURL, true, s)
-			if err != nil {
+			if err = doc.ReplaceHeader(cfg.BaseURL, false, s); err != nil {
 				l.Error("error replacing doc header",
 					"error", err, "doc_id", docID)
 				http.Error(w, "Error creating review",
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, "", nil, cfg, aw, s,
+					*doc, product.Abbreviation, "", nil, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -204,7 +194,7 @@ func ReviewHandler(
 				http.Error(w, "Error creating review", http.StatusInternalServerError)
 				return
 			}
-			docObj.SetModifiedTime(modifiedTime.Unix())
+			doc.ModifiedTime = modifiedTime.Unix()
 
 			// Get latest Google Drive file revision.
 			latestRev, err := s.GetLatestRevision(docID)
@@ -218,7 +208,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, "", nil, cfg, aw, s,
+					*doc, product.Abbreviation, "", nil, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -242,7 +232,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, "", nil, cfg, aw, s,
+					*doc, product.Abbreviation, "", nil, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -261,7 +251,21 @@ func ReviewHandler(
 
 			// Record file revision in the Algolia document object.
 			revisionName := "Requested review"
-			docObj.SetFileRevision(latestRev.Id, revisionName)
+			doc.SetFileRevision(latestRev.Id, revisionName)
+
+			// Convert document to Algolia object.
+			docObj, err := doc.ToAlgoliaObject(true)
+			if err != nil {
+				l.Error("error converting document to Algolia object",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error patching document draft",
+					http.StatusInternalServerError)
+				return
+			}
 
 			// Move document object to docs index in Algolia.
 			saveRes, err := aw.Docs.SaveObject(docObj)
@@ -291,7 +295,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, latestRev.Id, nil, cfg, aw, s,
+					*doc, product.Abbreviation, latestRev.Id, nil, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -309,7 +313,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, latestRev.Id, nil, cfg, aw, s,
+					*doc, product.Abbreviation, latestRev.Id, nil, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -332,7 +336,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, latestRev.Id, nil, cfg, aw, s,
+					*doc, product.Abbreviation, latestRev.Id, nil, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -349,7 +353,7 @@ func ReviewHandler(
 			)
 
 			// Create shortcut in hierarchical folder structure.
-			shortcut, err := createShortcut(cfg, docObj, s)
+			shortcut, err := createShortcut(cfg, *doc, s)
 			if err != nil {
 				l.Error("error creating shortcut",
 					"error", err,
@@ -360,7 +364,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, latestRev.Id, shortcut, cfg, aw, s,
+					*doc, product.Abbreviation, latestRev.Id, shortcut, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -378,7 +382,7 @@ func ReviewHandler(
 
 			// Create go-link.
 			if err := links.SaveDocumentRedirectDetails(
-				aw, docID, docObj.GetDocType(), docObj.GetDocNumber()); err != nil {
+				aw, docID, doc.DocType, doc.DocNumber); err != nil {
 				l.Error("error saving redirect details",
 					"error", err,
 					"doc_id", docID,
@@ -388,7 +392,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, latestRev.Id, shortcut, cfg, aw, s,
+					*doc, product.Abbreviation, latestRev.Id, shortcut, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -418,7 +422,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, latestRev.Id, shortcut, cfg, aw, s,
+					*doc, product.Abbreviation, latestRev.Id, shortcut, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -430,6 +434,7 @@ func ReviewHandler(
 			}
 			d.Status = models.InReviewDocumentStatus
 			d.DocumentNumber = nextDocNum
+			d.DocumentModifiedAt = modifiedTime
 			if err := d.Upsert(db); err != nil {
 				l.Error("error upserting document in database",
 					"error", err,
@@ -440,7 +445,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					docObj, product.Abbreviation, latestRev.Id, shortcut, cfg, aw, s,
+					*doc, product.Abbreviation, latestRev.Id, shortcut, cfg, aw, s,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -467,16 +472,16 @@ func ReviewHandler(
 				}
 
 				// Send emails to approvers.
-				if len(docObj.GetApprovers()) > 0 {
+				if len(doc.Approvers) > 0 {
 					// TODO: use an asynchronous method for sending emails because we
 					// can't currently recover gracefully from a failure here.
-					for _, approverEmail := range docObj.GetApprovers() {
+					for _, approverEmail := range doc.Approvers {
 						err := email.SendReviewRequestedEmail(
 							email.ReviewRequestedEmailData{
 								BaseURL:           cfg.BaseURL,
-								DocumentOwner:     docObj.GetOwners()[0],
-								DocumentShortName: docObj.GetDocNumber(),
-								DocumentTitle:     docObj.GetTitle(),
+								DocumentOwner:     doc.Owners[0],
+								DocumentShortName: doc.DocNumber,
+								DocumentTitle:     doc.Title,
 								DocumentURL:       docURL,
 							},
 							[]string{approverEmail},
@@ -504,7 +509,7 @@ func ReviewHandler(
 
 				// Send emails to product subscribers.
 				p := models.Product{
-					Name: docObj.GetProduct(),
+					Name: doc.Product,
 				}
 				if err := p.Get(db); err != nil {
 					l.Error("error getting product from database",
@@ -525,12 +530,12 @@ func ReviewHandler(
 						err := email.SendSubscriberDocumentPublishedEmail(
 							email.SubscriberDocumentPublishedEmailData{
 								BaseURL:           cfg.BaseURL,
-								DocumentOwner:     docObj.GetOwners()[0],
-								DocumentShortName: docObj.GetDocNumber(),
-								DocumentTitle:     docObj.GetTitle(),
-								DocumentType:      docObj.GetDocType(),
+								DocumentOwner:     doc.Owners[0],
+								DocumentShortName: doc.DocNumber,
+								DocumentTitle:     doc.Title,
+								DocumentType:      doc.DocType,
 								DocumentURL:       docURL,
-								Product:           docObj.GetProduct(),
+								Product:           doc.Product,
 							},
 							[]string{subscriber.EmailAddress},
 							cfg.Email.FromAddress,
@@ -551,6 +556,7 @@ func ReviewHandler(
 							"doc_id", docID,
 							"method", r.Method,
 							"path", r.URL.Path,
+							"product", doc.Product,
 						)
 					}
 				}
@@ -566,6 +572,58 @@ func ReviewHandler(
 				"path", r.URL.Path,
 			)
 
+			// Compare Algolia and database documents to find data inconsistencies.
+			// Get document object from Algolia.
+			var algoDoc map[string]any
+			err = ar.Docs.GetObject(docID, &algoDoc)
+			if err != nil {
+				l.Error("error getting Algolia object for data comparison",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docID,
+				)
+				return
+			}
+			// Get document from database.
+			dbDoc := models.Document{
+				GoogleFileID: docID,
+			}
+			if err := dbDoc.Get(db); err != nil {
+				l.Error("error getting document from database for data comparison",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				return
+			}
+			// Get all reviews for the document.
+			var reviews models.DocumentReviews
+			if err := reviews.Find(db, models.DocumentReview{
+				Document: models.Document{
+					GoogleFileID: docID,
+				},
+			}); err != nil {
+				l.Error("error getting all reviews for document for data comparison",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docID,
+				)
+				return
+			}
+			if err := compareAlgoliaAndDatabaseDocument(
+				algoDoc, dbDoc, reviews, cfg.DocumentTypes.DocumentType,
+			); err != nil {
+				l.Warn("inconsistencies detected between Algolia and database docs",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docID,
+				)
+			}
+
 		default:
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			return
@@ -577,12 +635,12 @@ func ReviewHandler(
 // ("Shortcuts Folder/RFC/MyProduct/") under docsFolder.
 func createShortcut(
 	cfg *config.Config,
-	docObj hcd.Doc,
+	doc document.Document,
 	s *gw.Service) (shortcut *drive.File, retErr error) {
 
 	// Get folder for doc type.
 	docTypeFolder, err := s.GetSubfolder(
-		cfg.GoogleWorkspace.ShortcutsFolder, docObj.GetDocType())
+		cfg.GoogleWorkspace.ShortcutsFolder, doc.DocType)
 	if err != nil {
 		return nil, fmt.Errorf("error getting doc type subfolder: %w", err)
 	}
@@ -590,14 +648,14 @@ func createShortcut(
 	// Doc type folder wasn't found, so create it.
 	if docTypeFolder == nil {
 		docTypeFolder, err = s.CreateFolder(
-			docObj.GetDocType(), cfg.GoogleWorkspace.ShortcutsFolder)
+			doc.DocType, cfg.GoogleWorkspace.ShortcutsFolder)
 		if err != nil {
 			return nil, fmt.Errorf("error creating doc type subfolder: %w", err)
 		}
 	}
 
 	// Get folder for doc type + product.
-	productFolder, err := s.GetSubfolder(docTypeFolder.Id, docObj.GetProduct())
+	productFolder, err := s.GetSubfolder(docTypeFolder.Id, doc.Product)
 	if err != nil {
 		return nil, fmt.Errorf("error getting product subfolder: %w", err)
 	}
@@ -605,7 +663,7 @@ func createShortcut(
 	// Product folder wasn't found, so create it.
 	if productFolder == nil {
 		productFolder, err = s.CreateFolder(
-			docObj.GetProduct(), docTypeFolder.Id)
+			doc.Product, docTypeFolder.Id)
 		if err != nil {
 			return nil, fmt.Errorf("error creating product subfolder: %w", err)
 		}
@@ -613,7 +671,7 @@ func createShortcut(
 
 	// Create shortcut.
 	if shortcut, err = s.CreateShortcut(
-		docObj.GetObjectID(),
+		doc.ObjectID,
 		productFolder.Id); err != nil {
 
 		return nil, fmt.Errorf("error creating shortcut: %w", err)
@@ -642,7 +700,7 @@ func getDocumentURL(baseURL, docID string) (string, error) {
 // TODO: use some sort of undo stack of functions instead of checking if the
 // arguments for this function are set.
 func revertReviewCreation(
-	docObj hcd.Doc,
+	doc document.Document,
 	productAbbreviation string,
 	fileRevision string,
 	shortcut *drive.File,
@@ -655,7 +713,7 @@ func revertReviewCreation(
 
 	// Delete go-link if it exists.
 	if err := links.DeleteDocumentRedirectDetails(
-		a, docObj.GetObjectID(), docObj.GetDocType(), docObj.GetDocNumber(),
+		a, doc.ObjectID, doc.DocType, doc.DocNumber,
 	); err != nil {
 		result = multierror.Append(
 			result, fmt.Errorf("error deleting go-link: %w", err))
@@ -671,27 +729,37 @@ func revertReviewCreation(
 
 	// Move document back to drafts folder in Google Drive.
 	if _, err := s.MoveFile(
-		docObj.GetObjectID(), cfg.GoogleWorkspace.DraftsFolder); err != nil {
+		doc.ObjectID, cfg.GoogleWorkspace.DraftsFolder); err != nil {
 
 		result = multierror.Append(
 			result, fmt.Errorf("error moving doc back to drafts folder: %w", err))
 	}
 
 	// Change back document number to "ABC-???" and status to "WIP".
-	docObj.SetDocNumber(fmt.Sprintf("%s-???", productAbbreviation))
-	docObj.SetStatus("WIP")
+	doc.DocNumber = fmt.Sprintf("%s-???", productAbbreviation)
+	doc.Status = "WIP"
 
 	// Replace the doc header.
-	if err := docObj.ReplaceHeader(
-		docObj.GetObjectID(), cfg.BaseURL, true, s); err != nil {
+	if err := doc.ReplaceHeader(
+		cfg.BaseURL, true, s); err != nil {
 
 		result = multierror.Append(
 			result, fmt.Errorf("error replacing the doc header: %w", err))
 	}
 
-	// Delete file revision from Algolia document object.
+	// Delete file revision from document.
 	if fileRevision != "" {
-		docObj.DeleteFileRevision(fileRevision)
+		doc.DeleteFileRevision(fileRevision)
+	}
+
+	// Convert document to Algolia object.
+	docObj, err := doc.ToAlgoliaObject(true)
+	if err != nil {
+		result = multierror.Append(
+			result, fmt.Errorf("error converting document to Algolia object"))
+
+		// We can't go any further so just return here.
+		return result
 	}
 
 	// Save doc back in the drafts index and delete it from the docs index.
@@ -705,7 +773,7 @@ func revertReviewCreation(
 		result = multierror.Append(
 			result, fmt.Errorf("error saving draft in Algolia: %w", err))
 	}
-	delRes, err := a.Docs.DeleteObject(docObj.GetObjectID())
+	delRes, err := a.Docs.DeleteObject(doc.ObjectID)
 	if err != nil {
 		result = multierror.Append(
 			result, fmt.Errorf("error deleting doc in Algolia: %w", err))
@@ -721,6 +789,7 @@ func revertReviewCreation(
 
 // setLatestProductDocumentNumberinDB sets the latest product document number in
 // the database.
+// TODO: remove along with ProductLatestDocumentNumber (not used).
 func setLatestProductDocumentNumberinDB(
 	doc hcd.Doc,
 	db *gorm.DB,

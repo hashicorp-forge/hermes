@@ -1,4 +1,5 @@
 <X::DropdownList
+  data-test-facet-dropdown-popover
   @items={{@facets}}
   @listIsOrdered={{true}}
   @offset={{hash mainAxis=3 crossAxis=-5}}
@@ -7,15 +8,22 @@
   ...attributes
 >
   <:anchor as |dd|>
-    <dd.ToggleButton @text={{@label}} disabled={{@disabled}} />
+    <dd.ToggleButton
+      data-test-facet-dropdown-toggle
+      data-test-facet={{dasherize @name}}
+      class="focus:z-10 focus-visible:z-10 active:z-10"
+      @text={{get-facet-label @name}}
+      disabled={{this.isDisabled}}
+    />
   </:anchor>
   <:item as |dd|>
     <dd.LinkTo
-      @route={{this.currentRouteName}}
-      @query={{get-facet-query-hash @label dd.value dd.attrs.isSelected}}
+      data-test-facet-dropdown-link
+      @query={{get-facet-query-hash @name dd.value dd.attrs.isSelected}}
     >
       <X::DropdownList::CheckableItem
         @value={{dd.value}}
+        @shouldCapitalize={{eq @name "status"}}
         @count={{dd.attrs.count}}
         @isSelected={{dd.attrs.isSelected}}
       />

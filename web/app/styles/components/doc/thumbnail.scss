@@ -1,22 +1,22 @@
 .doc-thumbnail {
-  @apply relative w-12 shrink-0 flex overflow-hidden;
+  @apply relative flex w-12 shrink-0 overflow-hidden;
 
   // Outer border / shadow
   &::after {
     content: "";
-    @apply absolute z-10 pointer-events-none;
+    @apply pointer-events-none absolute z-[1];
     // Make the element 1px smaller than its container
     // so its shadow picks up colors from the elements below it.
     @apply top-px right-px bottom-px left-px;
-    @apply shadow-surface-low rounded-sm;
+    @apply rounded-sm shadow-surface-low;
   }
 
   .status-icon {
     @apply absolute opacity-75 mix-blend-multiply;
-    @apply w-9 h-9;
+    @apply h-9 w-9;
 
     &.approved {
-      @apply fill-color-palette-green-200 -rotate-6;
+      @apply -rotate-6 fill-color-palette-green-200;
       @apply -right-[7px] top-[5px];
     }
 
@@ -27,12 +27,7 @@
   }
 
   .product-badge {
-    @apply bottom-0 left-0;
-    @apply w-[19px] h-[17px] rounded-bl rounded-tr;
-
-    .flight-icon {
-      @apply scale-75;
-    }
+    @apply rounded-tl-none rounded-br-none rounded-bl rounded-tr;
   }
 
   &.obsolete {
@@ -41,24 +36,35 @@
     }
   }
 
+  &.medium {
+    @apply w-[72px];
+
+    .status-icon {
+      @apply h-[52px] w-[52px];
+
+      &.approved {
+        @apply -right-2 top-1;
+      }
+
+      &.obsolete {
+        @apply top-[3px] -left-2.5;
+      }
+    }
+  }
+
   &.large {
-    // Match the width of the progress bars
     @apply w-28;
 
     &::after {
-      @apply shadow-surface-mid rounded;
+      @apply rounded shadow-surface-mid;
     }
 
     .product-badge {
-      @apply w-[36px] h-[32px] rounded-bl rounded-tr;
-
-      .flight-icon {
-      @apply scale-100;
-    }
+      @apply rounded-bl rounded-tr;
     }
 
     .status-icon {
-      @apply w-[84px] h-[84px] top-[8px];
+      @apply top-[8px] h-[84px] w-[84px];
 
       &.approved {
         @apply -right-3.5;

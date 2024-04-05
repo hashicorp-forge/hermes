@@ -1,13 +1,16 @@
 {{on-document "keydown" this.maybeFocusInput}}
 
 <div ...attributes>
-  <form class="w-full relative" {{on "submit" this.viewAllResults}}>
+  <form class="relative w-full" {{on "submit" this.viewAllResults}}>
     <X::DropdownList
-      @items={{this.itemsToShow}}
-      @offset={{hash mainAxis=0 crossAxis=3}}
+      @items={{this.items}}
+      @offset={{hash mainAxis=0 crossAxis=2}}
       @placement="bottom-end"
-      class="search-popover
-        {{unless this.bestMatchesHeaderIsShown 'no-best-matches'}}"
+      @matchAnchorWidth={{hash enabled=true additionalWidth=4}}
+      @inputIsShown={{false}}
+      @isLoading={{this.maybeSearch.isRunning}}
+      class="search-popover theme--neutral
+        {{unless (or this.docMatches this.projectMatches) 'no-matches'}}"
     >
       <:anchor as |dd|>
         <Hds::Form::TextInput::Base
@@ -18,12 +21,13 @@
           {{on "mousedown" (fn this.maybeCloseDropdown dd)}}
           {{on "keydown" (fn this.maybeSubmitForm dd)}}
           {{on "focusin" (fn this.maybeOpenDropdown dd)}}
+          {{on "focusin" (perform this.maybeSearch)}}
           @type="search"
           @value={{this.query}}
           name="query"
           size="25"
-          placeholder="Find a document..."
-          aria-label="Find a document..."
+          placeholder="Search Hermes..."
+          aria-label="Search Hermes..."
           aria-controls={{dd.ariaControls}}
           aria-expanded={{dd.contentIsShown}}
           aria-haspopup="listbox"
@@ -34,93 +38,187 @@
           </span>
         {{/unless}}
       </:anchor>
+
       <:header>
-        <div id="global-search-popover-header">
-          {{! content is placed here by the in-element helper below }}
-        </div>
-        {{#if this.bestMatchesHeaderIsShown}}
-          <div class="global-search-best-matches-header">
-            <h5>Best matches</h5>
+
+        {{#if this.productAreaMatch}}
+          <h5>Product/Area</h5>
+          <div
+            data-test-product-area-hits
+            id={{this.productAreaID}}
+            class="global-search-section"
+          >
+            {{! placed by in-element}}
+          </div>
+        {{/if}}
+
+        {{#if this.projectMatches.length}}
+          <h5>Projects</h5>
+          <ul
+            data-test-project-hits
+            id={{this.projectsID}}
+            class="global-search-section"
+          >
+            {{! placed by in-element}}
+          </ul>
+        {{/if}}
+
+        {{#if this.docMatches}}
+          <h5>Documents</h5>
+          <ul
+            data-test-document-hits
+            id={{this.documentsID}}
+            class="global-search-section"
+          >
+            {{! placed by in-element}}
+          </ul>
+
+        {{/if}}
+
+        {{#if this.docMatches}}
+          <div
+            data-test-view-all-hits-container
+            id={{this.viewAllID}}
+            class="global-search-sectionX"
+          >
+            {{! placed by in-element}}
           </div>
         {{/if}}
       </:header>
+
       <:item as |dd|>
 
-        {{#if dd.attrs.itemShouldRenderOut}}
-          {{!
+        {{!
             We use this property to catch the "view all results" and "view all [productArea] documents" items and, for semantic purposes, render them outside of the DropdownList's primary `ul/ol` element while still retaining the keyboard navigability provided by the DropdownList component.
            }}
-          {{#unless this.searchInputIsEmpty}}
-            {{#in-element
-              (html-element "#global-search-popover-header")
-              insertBefore=null
-            }}
-              {{#if (eq dd.value "viewAllResultsObject")}}
+        {{#unless this.searchInputIsEmpty}}
+          {{#in-element
+            (html-element
+              (if
+                dd.attrs.hit
+                this.projectsSelector
+                (if
+                  dd.attrs.productAreaName
+                  this.productAreaSelector
+                  (if
+                    dd.attrs.viewAllResults
+                    this.viewAllSelector
+                    this.documentsSelector
+                  )
+                )
+              )
+            )
+            insertBefore=null
+          }}
+            {{#if dd.attrs.hit}}
+              {{! Project result }}
+              <li>
                 <dd.LinkTo
-                  {{did-insert this.registerViewAllResultsLink}}
-                  @route="authenticated.results"
-                  @query={{hash q=this.query page=1}}
-                  class="global-search-popover-header-link"
+                  data-test-project-hit
+                  class="flex items-center gap-2 px-3"
+                  @route="authenticated.projects.project"
+                  @model={{dd.attrs.hit.objectID}}
                 >
-                  <FlightIcon @name="search" class="mr-1.5" />
-                  <span>View all results for “{{this.query}}”</span>
+                  <div class="mt-px flex shrink-0 px-0.5">
+                    <Project::StatusIcon @status={{dd.attrs.hit.status}} />
+                  </div>
+                  <div class="overflow-hidden">
+                    <h4
+                      class="truncate font-semibold text-color-foreground-strong"
+                    >
+                      {{highlight-text dd.attrs.hit.title this.query}}
+                    </h4>
+                  </div>
                 </dd.LinkTo>
-              {{else if (eq dd.value "productAreaMatch")}}
+              </li>
+            {{else if dd.attrs.viewAllResults}}
+              {{! View all results link }}
+              <dd.LinkTo
+                data-test-view-all-results-link
+                {{did-insert this.registerViewAllResultsLink}}
+                @route="authenticated.results"
+                @query={{this.viewAllResultsQuery}}
+              >
+                <div
+                  class="flex items-center gap-1.5 px-1 pt-2 pb-2.5 text-body-100 text-color-foreground-faint"
+                >
+                  <span>View all results</span>
+                  <FlightIcon
+                    @name="arrow-right"
+                    class="text-color-foreground-disabled"
+                  />
+                </div>
+              </dd.LinkTo>
+            {{else if dd.attrs.productAreaName}}
+              {{! Product area  }}
+              <dd.LinkTo
+                data-test-product-area-hit
+                @route="authenticated.product-areas.product-area"
+                @model={{dasherize dd.attrs.productAreaName}}
+                class="flex items-center gap-2 px-3 font-semibold"
+              >
+                <Product::Avatar @product={{dd.attrs.productAreaName}} />
+                <h4 class="text-color-foreground-strong">
+                  {{highlight-text dd.attrs.productAreaName this.query}}
+                </h4>
+              </dd.LinkTo>
+            {{else}}
+              {{! Document }}
+              <li>
                 <dd.LinkTo
-                  data-test-product-match-link
-                  @route="authenticated.all"
-                  @query={{hash
-                    product=(array dd.attrs.productAreaName)
-                    page=1
-                  }}
-                  class="global-search-popover-header-link border-t border-t-color-border-primary"
+                  data-test-document-hit
+                  @route="authenticated.document"
+                  @model={{dd.attrs.objectID}}
+                  class="flex h-[74px] w-full gap-2 py-2 px-3"
                 >
-                  <FlightIcon @name="folder" class="mr-1.5" />
-                  <span class="flex items-center">
-                    View all
-                    <Hds::Badge
-                      @text={{dd.attrs.productAreaName}}
-                      @icon={{or (get-product-id dd.attrs.productAreaName) ""}}
-                      class="mx-2 mix-blend-multiply"
-                    />
-                    documents
-                  </span>
+                  <Product::Avatar @product={{dd.attrs.product}} />
+                  <div class="grid w-full gap-px overflow-hidden">
+                    <h4 class="global-search-result-title">
+                      {{highlight-text dd.attrs.title this.query}}
+                    </h4>
+                    <div
+                      class="truncate text-body-100 text-color-foreground-faint"
+                    >
+                      <span>
+                        {{dd.attrs.status}}
+                      </span>
+                      <span class="text-color-foreground-disabled">·</span>
+                      <span>
+                        {{dd.attrs.docType}}
+                      </span>
+                      <span class="text-color-foreground-disabled">·</span>
+                      <span>
+                        {{dd.attrs.product}}
+                      </span>
+                      {{#let (get dd.attrs.owners 0) as |owner|}}
+                        {{#if owner}}
+                          <span class="text-color-foreground-disabled">·</span>
+                          <span>
+                            {{or (get-model-attr "person.name" owner) owner}}
+                          </span>
+                        {{/if}}
+
+                      {{/let}}
+                    </div>
+                    {{#if dd.attrs._snippetResult.content.value}}
+                      <Doc::Snippet
+                        data-test-search-result-snippet
+                        @snippet={{dd.attrs._snippetResult.content.value}}
+                        class="truncate"
+                      />
+                    {{/if}}
+                  </div>
                 </dd.LinkTo>
-              {{/if}}
-            {{/in-element}}
-          {{/unless}}
-        {{else}}
-          <dd.LinkTo
-            data-test-search-result
-            @route="authenticated.document"
-            @model={{dd.value}}
-            class="global-search-result"
-          >
-            <Doc::Thumbnail
-              @status={{dd.attrs.status}}
-              @product={{dd.attrs.product}}
-            />
-            <div class="global-search-result-text-content">
-              <h4 class="global-search-result-title">
-                {{dd.attrs.title}}
-              </h4>
-              <Person
-                data-test-search-result-owner
-                @ignoreUnknown={{true}}
-                @imgURL={{get dd.attrs.ownerPhotos 0}}
-                @email={{get dd.attrs.owners 0}}
-              />
-              {{#if dd.attrs._snippetResult.content.value}}
-                <Doc::Snippet
-                  data-test-search-result-snippet
-                  @snippet={{dd.attrs._snippetResult.content.value}}
-                  class="truncate"
-                />
-              {{/if}}
-            </div>
-          </dd.LinkTo>
-        {{/if}}
+              </li>
+            {{/if}}
+          {{/in-element}}
+        {{/unless}}
       </:item>
+      <:no-matches>
+        <div data-test-no-matches class="x-dropdown-list-default-empty-state">
+          No matches
+        </div>
+      </:no-matches>
     </X::DropdownList>
   </form>
 </div>

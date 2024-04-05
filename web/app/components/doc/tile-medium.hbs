@@ -1,0 +1,140 @@
+{{!
+
+  1.
+  The hover effect requires a parent with the `group` and `relative` classes. Normally, we'd include that wrapper within this template, but we want the flexibility to work with components whose absolutely positioned controls are unknown to us but that we nonetheless consider "within the click area," such that interacting with them maintains the tile's hover and focus states. For example, in the projects screen, we want to keep the tile's hover state when the user focuses the overflow menu.
+
+  2.
+  Non-essential links have `tabindex="-1"` so they're not focusable with the keyboard. This allows the user to tab through documents without having to skip through the meta links that are otherwise accessible on the document details screen.
+
+}}
+
+{{#let (get @doc.owners 0) as |owner|}}
+  <div class="tile">
+    <div class="flex justify-between gap-[18px] pl-3 pr-9 pt-5 pb-6">
+      {{! Avatar }}
+      <LinkTo
+        data-test-document-owner-avatar
+        tabindex="-1"
+        @route="authenticated.documents"
+        @query={{get-owner-query owner}}
+        disabled={{not owner}}
+      >
+        <Person::Avatar
+          @size="large"
+          @email={{owner}}
+          class="relative z-10 -mt-1 shrink-0"
+        />
+      </LinkTo>
+
+      {{! Text }}
+      <div class="w-full">
+        <div class="mt-0.5 overflow-hidden">
+          <LinkTo
+            ...attributes
+            data-test-document-link
+            @route="authenticated.document"
+            @query={{hash draft=this.docIsDraft}}
+            @model={{this.docID}}
+            class="group/primary-link"
+          >
+            {{! Primary click area }}
+            <div
+              data-test-primary-click-area
+              aria-hidden="true"
+              class="absolute -top-px left-0 -bottom-px w-full mix-blend-multiply group-focus-within:bg-color-page-faint group-hover:bg-color-page-faint group-focus/primary-link:outline group-focus/primary-link:outline-2 group-focus/primary-link:outline-color-border-strong
+                {{if @canBeReordered '-left-[20px] right-0 w-auto'}}"
+            ></div>
+
+            <h3 class="relative">
+              {{! Title }}
+              <span data-test-document-title class="mr-1.5">
+                {{highlight-text @doc.title @query}}
+              </span>
+
+              {{! Doc Number }}
+              <span data-test-document-number class="shrink-0 font-regular">
+                <span class="whitespace-nowrap">
+                  {{this.docNumber}}
+                </span>
+              </span>
+            </h3>
+          </LinkTo>
+        </div>
+
+        <div class="pointer-events-none relative">
+          <div class="mt-1.5 text-color-foreground-faint">
+            {{! Owner }}
+            <LinkTo
+              tabindex="-1"
+              data-test-document-owner-name
+              @route="authenticated.documents"
+              @query={{get-owner-query owner}}
+              disabled={{not owner}}
+              class="underline-on-hover inline-block"
+            >
+              {{or (get-model-attr "person.name" owner) owner "Unknown"}}
+            </LinkTo>
+            <span class="vertical-line mx-0.5 inline-block">
+              /
+            </span>
+            {{! Product }}
+            <ProductLink
+              @product={{@doc.product}}
+              tabindex="-1"
+              class="underline-on-hover inline-block"
+            >
+              <:default>
+                {{@doc.product}}
+              </:default>
+            </ProductLink>
+            <span class="vertical-line mx-0.5 inline-block">
+              /
+            </span>
+            {{! Created time }}
+            <span class="inline-block">
+              {{time-ago @doc.createdTime}}
+            </span>
+          </div>
+
+          {{! Summary }}
+          {{#if (or this.snippet @doc.summary)}}
+            <p
+              data-test-document-summary
+              class="mt-2.5 text-body-300 wrap-anywhere
+                {{if this.snippet 'line-clamp line-clamp-2'}}"
+            >
+              {{#if this.snippet}}
+                {{! Triple-stashed to escape HTML }}
+                {{{this.snippet}}}
+              {{else}}
+                {{@doc.summary}}
+              {{/if}}
+            </p>
+          {{/if}}
+
+          <div class="tags mt-3.5">
+            {{! Status }}
+            <Doc::Status
+              data-test-document-status
+              @status={{@doc.status}}
+              @hideProgress={{true}}
+              class="interactive"
+            />
+            {{! Doc type }}
+            <Hds::Badge data-test-document-type @text={{this.docType}} />
+          </div>
+        </div>
+      </div>
+
+      {{! Thumbnail }}
+      <div class="pointer-events-none relative ml-4 shrink-0">
+        <Doc::Thumbnail
+          @status={{@doc.status}}
+          @product={{@doc.product}}
+          @size="medium"
+          class="self-start"
+        />
+      </div>
+    </div>
+  </div>
+{{/let}}

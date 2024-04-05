@@ -1,4 +1,8 @@
-<LinkTo @query={{this.query}} class="active-filter-list-item">
+<LinkTo
+  data-test-active-filter-link
+  @query={{this.query}}
+  class="active-filter-list-item"
+>
   <FlightIcon @name="x" />
-  {{@filter}}
+  {{this.filter}}
 </LinkTo>

@@ -1,30 +1,38 @@
-<div class="flex shrink-0 w-[22px]">
+<div class="mt-[3px] flex w-[22px] shrink-0">
   {{#if this.resourceIsDocument}}
     <div
-      class="flex mt-[3px] p-px hds-surface-mid rounded-sm overflow-hidden bg-white"
+      class="hds-surface-mid mt-[3px] flex overflow-hidden rounded-sm bg-white p-px"
     >
-      <img src="/images/document.png" class="w-[18px] h-auto" />
+      <img src="/images/document.png" class="h-auto w-[18px]" />
     </div>
   {{else}}
-    <FlightIcon
-      @name={{get-link-icon this.url}}
-      class={{if (eq (get-link-icon this.url) "file") "opacity-40"}}
-    />
+    <Favicon @url={{this.url}} />
   {{/if}}
 </div>
 
 <div class="w-full overflow-hidden">
   <TruncatedText
+    data-test-resource-title
     @tagName="h4"
-    class="text-body-200 text-color-foreground-strong font-medium"
+    class="text-body-200 font-medium text-color-foreground-strong"
+    title={{this.title}}
   >
     {{this.title}}
   </TruncatedText>
-  {{#if this.resourceIsDocument}}
-    <div class="text-color-foreground-faint text-body-100 mt-px">
-      {{this.docType}}
-      ·
-      {{this.docNumber}}
-    </div>
-  {{/if}}
+  <div class="pr-6">
+    <TruncatedText
+      data-test-resource-secondary-text
+      class="mt-px text-body-100 text-color-foreground-faint"
+    >
+      {{#if this.resourceIsDocument}}
+        {{#if this.docType}}
+          {{this.docType}}
+          ·
+        {{/if}}
+        {{this.docNumber}}
+      {{else}}
+        {{this.displayURL}}
+      {{/if}}
+    </TruncatedText>
+  </div>
 </div>

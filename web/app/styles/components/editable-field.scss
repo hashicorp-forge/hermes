@@ -1,61 +1,145 @@
+.editable-field-container {
+  @apply -mx-[5px];
+}
+
 .editable-field {
-  @apply w-full relative;
+  @apply relative flex w-full;
 
-  & > .field-toggle {
-    all: unset;
-    width: 100%;
-    cursor: pointer;
-    position: relative;
+  &.saving {
+    opacity: 0.5;
 
-    &[disabled] {
-      cursor: default;
-    }
+    .edit-affordance {
+      @apply visible;
 
-    &.loading {
-      opacity: 0.5;
-    }
-
-    &::before {
-      pointer-events: none;
-      content: "";
-      padding: 3px 5px;
-      position: absolute;
-      top: -5px;
-      right: -5px;
-      bottom: -5px;
-      left: -5px;
-    }
-
-    &::after {
-      pointer-events: none;
-      content: "edit";
-      position: absolute;
-      right: -5px;
-      top: -5px;
-      padding: 3px 5px;
-      background: var(--token-form-control-base-border-color-default);
-      border-top-right-radius: var(--token-form-control-border-radius);
-      border-bottom-left-radius: var(--token-form-control-border-radius);
-      color: var(--token-color-foreground-high-contrast);
-      visibility: hidden;
-    }
-
-    &:not([disabled]):hover,
-    &:not([disabled]):focus {
       &::before {
-        border: 1px solid var(--token-form-control-base-border-color-default);
-        border-radius: var(--token-form-control-border-radius);
+        @apply bg-gradient-to-l;
+        @apply opacity-100;
+      }
+    }
+
+    .field-toggle.field-toggle:not(.read-only) {
+      &:hover,
+      &:focus-visible &:focus {
+        @apply bg-transparent;
+      }
+    }
+  }
+
+  &.button-affordance {
+    .field-toggle:not(.read-only) {
+      &:hover,
+      &:focus-visible,
+      &:focus {
+        @apply border-color-border-strong bg-color-page-primary;
+      }
+    }
+  }
+
+  textarea,
+  .field-toggle {
+    @apply px-[5px] py-[7px];
+    @apply text-body-200 font-regular;
+  }
+
+  .field-toggle {
+    @apply flex w-full items-center rounded-button-md border border-transparent text-inherit transition-colors;
+    @apply min-h-[36px];
+    @apply break-words;
+
+    &:not(.read-only) {
+      &:hover,
+      &:focus-visible,
+      &:focus {
+        @apply bg-color-palette-neutral-175;
+
+        .edit-affordance {
+          @apply visible;
+
+          &::before {
+            @apply bg-gradient-to-l;
+            @apply opacity-100;
+          }
+
+          .flight-icon {
+            @apply relative;
+
+            animation:
+              slideLeftPx 200ms ease-out,
+              fadeIn 100ms ease-out;
+          }
+        }
       }
 
-      &::after {
-        visibility: visible;
+      h1 {
+        @apply text-color-foreground-strong;
+      }
+
+      .empty-state-text {
+        @apply text-color-foreground-disabled;
+      }
+    }
+
+    h1 {
+      font-size: inherit;
+      font-weight: inherit;
+      line-height: inherit;
+      color: inherit;
+    }
+
+    p {
+      color: inherit;
+    }
+  }
+
+  .edit-affordance {
+    @apply invisible absolute right-px top-px flex h-[calc(100%-2px)] w-14 justify-end overflow-hidden rounded-r-button-md py-[8px] pr-[7px];
+
+    &::before {
+      content: "";
+      @apply absolute top-0 left-0 h-full w-full opacity-0 transition-opacity;
+    }
+
+    .flight-icon-edit {
+      @apply mr-px;
+    }
+
+    &.gray {
+      &::before {
+        @apply from-color-palette-neutral-175 via-color-palette-neutral-175 to-transparent;
+      }
+    }
+
+    &.light-gray {
+      &::before {
+        @apply from-color-page-faint via-color-page-faint to-transparent;
       }
     }
   }
 
   .loading-indicator {
-    position: absolute;
-    top: 0;
-    right: 0;
+    @apply absolute top-2 right-2;
+  }
+
+  .edit-overlay-affordance {
+    @apply absolute -left-[5px] bottom-0 flex w-[calc(100%+10px)] translate-y-full gap-1 pt-2.5 pl-[5px] pb-[80px];
+
+    &::before {
+      content: "";
+      @apply absolute left-0 h-full w-full bg-gradient-to-b from-white via-white/90 to-transparent;
+    }
+
+    button {
+      &:first-child {
+        animation:
+          slideDownXs 150ms cubic-bezier(0, 1, 0.5, 1),
+          fadeIn 80ms ease-in-out;
+      }
+
+      &:nth-child(2) {
+        animation:
+          slideDownXs 350ms cubic-bezier(0, 1, 0.5, 1),
+          fadeIn 120ms ease-in-out;
+      }
+    }
   }
 }

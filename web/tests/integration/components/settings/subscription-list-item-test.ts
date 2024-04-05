@@ -1,10 +1,15 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { hbs } from "ember-cli-htmlbars";
-import { click, render, waitFor } from "@ember/test-helpers";
+import { click, render } from "@ember/test-helpers";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
-import { task } from "ember-concurrency";
+import { setupProductIndex } from "hermes/tests/mirage-helpers/utils";
+
+const ICON = "[data-test-product-avatar]";
+const NAME = "[data-test-subscription-list-item-link]";
+const BUTTON = "[data-test-product-subscription-toggle]";
+const LIST_ITEM = "[data-test-subscription-list-item]";
 
 interface SubscriptionListItemContext extends MirageTestContext {
   productArea: string;
@@ -16,74 +21,42 @@ module(
     setupRenderingTest(hooks);
     setupMirage(hooks);
 
-    hooks.beforeEach(function () {
+    hooks.beforeEach(async function (this: SubscriptionListItemContext) {
       const authenticatedUser = this.owner.lookup(
-        "service:authenticated-user"
+        "service:authenticated-user",
       ) as AuthenticatedUserService;
       authenticatedUser.subscriptions = [];
+
+      this.server.create("product", { name: "Waypoint" });
+
+      await setupProductIndex(this);
     });
 
     test("it renders and can be toggled", async function (this: SubscriptionListItemContext, assert) {
       this.set("productArea", "Waypoint");
 
-      await render(hbs`
-        {{! @glint-nocheck: not typesafe yet }}
+      await render<SubscriptionListItemContext>(hbs`
         <Settings::SubscriptionListItem
           @productArea={{this.productArea}}
         />
       `);
 
-      assert.dom(".subscription-list-item").exists();
+      assert.dom(LIST_ITEM).exists();
+      assert.dom(ICON).exists("it shows the product icon if there is one");
       assert
-        .dom(".flight-icon-waypoint-color")
-        .exists("it shows the product logo if there is one");
-      assert.dom("[data-test-subscription-list-item-name]").hasText("Waypoint");
-      assert.dom(".hds-form-toggle").exists();
-      assert.dom('.hds-form-toggle input[type="checkbox"]').isNotChecked();
+        .dom(NAME)
+        .hasText("Waypoint")
+        .hasAttribute(
+          "href",
+          "/product-areas/waypoint",
+          "the name is clickable to the product filter screen",
+        );
 
-      await click('.hds-form-toggle input[type="checkbox"]');
-      assert.dom('.hds-form-toggle input[type="checkbox"]').isChecked();
+      assert.dom(BUTTON).hasText("Subscribe");
 
-      this.set("productArea", "Labs");
-      assert
-        .dom(".flight-icon-folder")
-        .exists("it shows a folder icon if there is no product logo");
-      assert.dom("[data-test-subscription-list-item-name]").hasText("Labs");
-      assert.dom('.hds-form-toggle input[type="checkbox"]').isNotChecked();
+      await click(BUTTON);
 
-      this.set("productArea", "Waypoint");
-      assert.dom('.hds-form-toggle input[type="checkbox"]').isChecked();
+      assert.dom(BUTTON).hasText("Subscribed");
     });
-
-    test("it shows a temporary message when toggled", async function (assert) {
-      this.set("productArea", "Waypoint");
-
-      await render(hbs`
-        {{! @glint-nocheck: not typesafe yet }}
-        <Settings::SubscriptionListItem
-          @productArea={{this.productArea}}
-        />
-      `);
-
-      let promise = click('.hds-form-toggle input[type="checkbox"]');
-
-      assert.dom(".subscription-list-popover").doesNotExist();
-      await waitFor(".subscription-list-popover");
-
-      assert.dom(".subscription-list-popover").exists().hasText("Subscribed");
-
-      await promise;
-
-      assert
-        .dom(".subscription-list-popover")
-        .doesNotExist("it hides the popover after a timeout");
-
-      promise = click('.hds-form-toggle input[type="checkbox"]');
-
-      await waitFor(".subscription-list-popover");
-      assert.dom(".subscription-list-popover").hasText("Unsubscribed");
-
-      await promise;
-    });
-  }
+  },
 );

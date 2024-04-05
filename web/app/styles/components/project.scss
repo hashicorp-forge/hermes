@@ -1,0 +1,104 @@
+.project-screen {
+  .editable-field {
+    @apply -mx-2;
+
+    .field-toggle:not(.read-only) {
+      &:hover,
+      &:focus-visible,
+      &:focus {
+        @apply bg-color-page-primary shadow-surface-low;
+      }
+    }
+
+    .edit-affordance {
+      &.gray {
+        &::before {
+          @apply from-color-page-primary via-color-page-primary to-transparent;
+        }
+      }
+
+      &.light-gray {
+        &::before {
+          @apply from-color-page-primary via-color-page-primary to-transparent;
+        }
+      }
+    }
+  }
+
+  .edit-overlay-affordance::before {
+    @apply hidden;
+  }
+
+  .edit-overlay-affordance {
+    @apply pb-0;
+    filter: drop-shadow(0px 20px 15px white);
+  }
+
+  textarea:focus,
+  .active textarea {
+    filter: drop-shadow(0px 30px 15px white);
+  }
+
+  .project-title,
+  .project-description {
+    .field-toggle,
+    textarea {
+      @apply px-2 pr-10;
+      @apply items-start;
+    }
+  }
+
+  .project-title {
+    .field-toggle,
+    textarea {
+      @apply py-0.5 text-display-600 font-bold text-color-foreground-strong;
+    }
+  }
+
+  .project-description {
+    .field-toggle,
+    textarea {
+      @apply py-1.5 text-display-400 text-color-foreground-primary;
+    }
+  }
+
+  .add-project-resource-button {
+    &:hover,
+    &:focus {
+      @apply scale-105 transition-transform;
+    }
+  }
+
+  .project-resource {
+    @apply relative;
+
+    .title {
+      @apply text-display-200 font-semibold text-color-foreground-strong;
+    }
+
+    .owner {
+      @apply text-color-foreground-faint;
+    }
+
+    .overflow-button {
+      &:hover,
+      &:focus,
+      &:active,
+      &:focus-visible,
+      &.open {
+        .button-affordance {
+          @apply bg-color-page-primary;
+        }
+      }
+    }
+
+    .overflow-button-container {
+      @apply absolute right-1 top-1 z-10 h-[calc(100%-16px)] items-start;
+      @apply bg-none;
+    }
+  }
+
+  .highlight-affordance {
+    @apply border-transparent;
+  }
+}

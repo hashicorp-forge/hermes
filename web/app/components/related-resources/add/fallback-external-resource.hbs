@@ -1,0 +1,47 @@
+<div
+  class="related-resources-modal-container"
+  data-test-add-fallback-external-resource
+>
+  <div class="add-external-resource-container">
+    <div class="w-full">
+      <form {{on "submit" this.onSubmit}} class="mb-3">
+        <Hds::Form::TextInput::Field
+          data-test-title-input
+          {{on "input" @onInput}}
+          @value={{@title}}
+          placeholder="Enter a title"
+          required={{true}}
+          class="external-resource-title-input"
+          as |F|
+        >
+          <F.Label>Title</F.Label>
+        </Hds::Form::TextInput::Field>
+      </form>
+      <div class="external-resource-url">
+        <div class="truncate" data-test-url>
+          {{@url}}
+        </div>
+        <div class="external-resource-favicon">
+          <Favicon @url={{@url}} />
+        </div>
+      </div>
+      <Hds::Button
+        data-test-submit-button
+        {{on "click" @onSubmit}}
+        @isFullWidth={{true}}
+        @color="primary"
+        @text="Add"
+        class="mb-2.5"
+      />
+    </div>
+  </div>
+  {{#if this.errorIsShown}}
+    <Hds::Form::Error class="mt-5" data-test-error>
+      {{if
+        @linkIsDuplicate
+        "This resource has already been added."
+        "A title is required."
+      }}
+    </Hds::Form::Error>
+  {{/if}}
+</div>

@@ -1,0 +1,36 @@
+<X::DropdownList
+  @items={{@items}}
+  @renderOut={{@renderOut}}
+  @placement="bottom-end"
+  data-test-overflow-menu
+  ...attributes
+>
+  <:anchor as |dd|>
+    <div
+      class="overflow-button-container visible-with-group
+        {{if (or @isShown dd.contentIsShown) 'visible' 'invisible'}}
+        "
+    >
+      <dd.ToggleAction
+        data-test-overflow-menu-button
+        class="overflow-button quarternary-button
+          {{if dd.contentIsShown 'open'}}"
+      >
+        <FlightIcon @name="more-vertical" />
+      </dd.ToggleAction>
+    </div>
+  </:anchor>
+  <:item as |dd|>
+    <dd.Action
+      data-test-action
+      data-test-overflow-menu-action={{dasherize dd.attrs.label}}
+      {{on "click" dd.attrs.action}}
+      class="overflow-menu-item-button"
+    >
+      <FlightIcon @name={{dd.attrs.icon}} class="shrink-0" />
+      <span data-test-label>
+        {{dd.attrs.label}}
+      </span>
+    </dd.Action>
+  </:item>
+</X::DropdownList>

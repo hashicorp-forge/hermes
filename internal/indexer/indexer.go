@@ -9,9 +9,10 @@ import (
 	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
+	"github.com/hashicorp-forge/hermes/pkg/document"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
-	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp-forge/hermes/pkg/links"
 	"github.com/hashicorp-forge/hermes/pkg/models"
 	"github.com/hashicorp/go-hclog"
@@ -43,6 +44,9 @@ type Indexer struct {
 	// documents to index.
 	DocumentsFolderID string
 
+	// DocumentTypes are a slice of document types from the application config.
+	DocumentTypes []*config.DocumentType
+
 	// DraftsFolderID is the Google Drive ID of the folder containing draft
 	// documents to index.
 	DraftsFolderID string
@@ -62,6 +66,10 @@ type Indexer struct {
 
 	// UpdateDraftHeaders updates draft document headers, if true.
 	UpdateDraftHeaders bool
+
+	// UseDatabaseForDocumentData will use the database instead of Algolia as the
+	// source of truth for document data, if true.
+	UseDatabaseForDocumentData bool
 }
 
 type IndexerOption func(*Indexer)
@@ -101,6 +109,7 @@ func (idx *Indexer) validate() error {
 		validation.Field(&idx.BaseURL, validation.Required),
 		validation.Field(&idx.Database, validation.Required),
 		validation.Field(&idx.DocumentsFolderID, validation.Required),
+		validation.Field(&idx.DocumentTypes, validation.Required),
 		validation.Field(&idx.DraftsFolderID, validation.Required),
 		validation.Field(&idx.GoogleWorkspaceService, validation.Required),
 	)
@@ -131,6 +140,13 @@ func WithDatabase(db *gorm.DB) IndexerOption {
 func WithDocumentsFolderID(d string) IndexerOption {
 	return func(i *Indexer) {
 		i.DocumentsFolderID = d
+	}
+}
+
+// WithDocumentTypes sets the document types.
+func WithDocumentTypes(dts []*config.DocumentType) IndexerOption {
+	return func(i *Indexer) {
+		i.DocumentTypes = dts
 	}
 }
 
@@ -174,6 +190,14 @@ func WithUpdateDocumentHeaders(u bool) IndexerOption {
 func WithUpdateDraftHeaders(u bool) IndexerOption {
 	return func(i *Indexer) {
 		i.UpdateDraftHeaders = u
+	}
+}
+
+// WithUseDatabaseForDocumentData sets the boolean to use the database for
+// document data.
+func WithUseDatabaseForDocumentData(u bool) IndexerOption {
+	return func(i *Indexer) {
+		i.UseDatabaseForDocumentData = u
 	}
 }
 
@@ -394,6 +418,34 @@ func (idx *Indexer) Run() error {
 				os.Exit(1)
 			}
 
+			// Get reviews for the document from the database.
+			var reviews models.DocumentReviews
+			if err := reviews.Find(idx.Database, models.DocumentReview{
+				Document: models.Document{
+					GoogleFileID: file.Id,
+				},
+			}); err != nil {
+				log.Error("error getting reviews for document",
+					"error", err,
+					"google_file_id", file.Id,
+				)
+				os.Exit(1)
+			}
+
+			// Get group reviews for the document.
+			var groupReviews models.DocumentGroupReviews
+			if err := groupReviews.Find(idx.Database, models.DocumentGroupReview{
+				Document: models.Document{
+					GoogleFileID: file.Id,
+				},
+			}); err != nil {
+				log.Error("error getting group reviews for document",
+					"error", err,
+					"google_file_id", file.Id,
+				)
+				os.Exit(1)
+			}
+
 			// Parse document modified time.
 			modifiedTime, err := time.Parse(time.RFC3339Nano, file.ModifiedTime)
 			if err != nil {
@@ -401,7 +453,7 @@ func (idx *Indexer) Run() error {
 				os.Exit(1)
 			}
 
-			// Set new modified for document record and update in database.
+			// Set new modified time for document record.
 			dbDoc.DocumentModifiedAt = modifiedTime
 
 			// Update document in database.
@@ -410,17 +462,31 @@ func (idx *Indexer) Run() error {
 				os.Exit(1)
 			}
 
-			// Create new document object of the proper document type.
-			docObj, err := hcd.NewEmptyDoc(dbDoc.DocumentType.Name)
-			if err != nil {
-				logError("error creating new empty document", err)
-				os.Exit(1)
-			}
+			var doc *document.Document
+			if idx.UseDatabaseForDocumentData {
+				// Convert database record to a document.
+				doc, err = document.NewFromDatabaseModel(dbDoc, reviews, groupReviews)
+				if err != nil {
+					log.Error("error converting database record to document",
+						"error", err,
+						"google_file_id", file.Id,
+					)
+					os.Exit(1)
+				}
+			} else {
+				// Get document object from Algolia.
+				var algoObj map[string]any
+				if err = algo.Docs.GetObject(file.Id, &algoObj); err != nil {
+					logError("error retrieving document object from Algolia", err)
+					os.Exit(1)
+				}
 
-			// Get document object from Algolia.
-			if err := algo.Docs.GetObject(file.Id, &docObj); err != nil {
-				logError("error retrieving document object from Algolia", err)
-				os.Exit(1)
+				// Convert Algolia object to a document.
+				doc, err = document.NewFromAlgoliaObject(algoObj, idx.DocumentTypes)
+				if err != nil {
+					logError("error converting Algolia object to document", err)
+					os.Exit(1)
+				}
 			}
 
 			// Get document content.
@@ -440,11 +506,11 @@ func (idx *Indexer) Run() error {
 			}
 
 			// Update document object with content and latest modified time.
-			docObj.SetContent(string(content))
-			docObj.SetModifiedTime(modifiedTime.Unix())
+			doc.Content = (string(content))
+			doc.ModifiedTime = modifiedTime.Unix()
 
 			// Save the document in Algolia.
-			if err := saveDocInAlgolia(docObj, idx.AlgoliaClient); err != nil {
+			if err := saveDocInAlgolia(*doc, idx.AlgoliaClient); err != nil {
 				return fmt.Errorf("error saving document in Algolia: %w", err)
 			}
 
@@ -482,11 +548,18 @@ func (idx *Indexer) Run() error {
 
 // saveDoc saves a document struct and its redirect details in Algolia.
 func saveDocInAlgolia(
-	doc hcd.Doc,
+	doc document.Document,
 	algo *algolia.Client,
 ) error {
+	// Convert document to Algolia object.
+	docObj, err := doc.ToAlgoliaObject(true)
+	if err != nil {
+		return fmt.Errorf(
+			"error converting document to Algolia object: %w", err)
+	}
+
 	// Save document object.
-	res, err := algo.Docs.SaveObject(doc)
+	res, err := algo.Docs.SaveObject(docObj)
 	if err != nil {
 		return fmt.Errorf("error saving document: %w", err)
 	}
@@ -496,9 +569,9 @@ func saveDocInAlgolia(
 	}
 
 	// Save document redirect details.
-	if doc.GetDocNumber() != "" {
+	if doc.DocNumber != "" {
 		err = links.SaveDocumentRedirectDetails(
-			algo, doc.GetObjectID(), doc.GetDocType(), doc.GetDocNumber())
+			algo, doc.ObjectID, doc.DocType, doc.DocNumber)
 		if err != nil {
 			return err
 		}

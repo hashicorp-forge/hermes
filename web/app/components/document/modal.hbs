@@ -1,7 +1,7 @@
-{{! @glint-nocheck - not typesafe yet }}
 <Hds::Modal
-  @color={{@color}}
+  ...attributes
   @onClose={{@close}}
+  @color={{@color}}
   @isDismissDisabled={{this.taskIsRunning}}
   as |M|
 >
@@ -17,28 +17,25 @@
 
     {{#if this.errorIsShown}}
       <ModalAlertError
+        data-test-modal-error
         @onDismiss={{this.resetErrors}}
         @title={{this.errorTitle}}
         @description={{this.errorDescription}}
       />
     {{/if}}
   </M.Body>
-  {{#unless (and @hideFooterWhileSaving this.taskIsRunning)}}
+  {{#if this.footerIsShown}}
     <M.Footer data-test-document-modal-footer as |F|>
       <Hds::ButtonSet>
         <Hds::Button
           data-test-document-modal-primary-button
-          @text={{if this.taskIsRunning @taskButtonLoadingText @taskButtonText}}
-          @color={{@color}}
+          @text={{this.primaryButtonText}}
+          @color="primary"
           @icon={{if this.taskIsRunning "loading" @taskButtonIcon}}
           disabled={{or @taskButtonIsDisabled this.taskIsRunning}}
           {{on "click" (perform this.task)}}
         />
-        {{#if (and this.taskIsRunning @savingMessage)}}
-          <span class="text-body-100">
-            {{@savingMessage}}
-          </span>
-        {{else}}
+        {{#unless @secondaryButtonIsHidden}}
           <Hds::Button
             data-test-document-modal-secondary-button
             @text="Cancel"
@@ -46,8 +43,8 @@
             disabled={{this.taskIsRunning}}
             {{on "click" F.close}}
           />
-        {{/if}}
+        {{/unless}}
       </Hds::ButtonSet>
     </M.Footer>
-  {{/unless}}
+  {{/if}}
 </Hds::Modal>

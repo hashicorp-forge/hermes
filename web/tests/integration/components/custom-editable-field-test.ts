@@ -1,9 +1,10 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
-import { click, fillIn, findAll, render } from "@ember/test-helpers";
+import { click, fillIn, find, findAll, render } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
-import { HermesDocument, HermesUser } from "hermes/types/document";
+import { HermesDocument } from "hermes/types/document";
+import { authenticateTestUser } from "hermes/mirage/utils";
 
 interface CustomEditableFieldComponentTestContext extends MirageTestContext {
   attributes: any;
@@ -17,7 +18,8 @@ module("Integration | Component | custom-editable-field", function (hooks) {
   setupMirage(hooks);
 
   hooks.beforeEach(function (this: CustomEditableFieldComponentTestContext) {
-    this.server.createList("person", 10);
+    authenticateTestUser(this);
+    this.server.createList("google/person", 10);
     this.server.create("document");
 
     this.set("onChange", () => {});
@@ -36,19 +38,19 @@ module("Integration | Component | custom-editable-field", function (hooks) {
         @document={{this.document}}
         @field="stakeholders"
         @attributes={{this.attributes}}
-        @onChange={{this.onChange}}
+        @onSave={{this.onChange}}
       />
     `);
 
-    assert.dom("[data-test-custom-string-field]").hasText("---");
-    assert.dom("[data-test-custom-people-field]").doesNotExist();
+    assert.dom("[data-test-custom-field-type='string']").hasText("None");
+    assert.dom("[data-test-custom-field-type='people']").doesNotExist();
 
     this.set("attributes", {
       type: "PEOPLE",
     });
 
-    assert.dom("[data-test-custom-people-field]").hasText("---");
-    assert.dom("[data-test-custom-string-field]").doesNotExist();
+    assert.dom("[data-test-custom-field-type='people']").hasText("None");
+    assert.dom("[data-test-custom-field-type='string']").doesNotExist();
   });
 
   test("PEOPLE can be removed", async function (this: CustomEditableFieldComponentTestContext, assert) {
@@ -59,11 +61,8 @@ module("Integration | Component | custom-editable-field", function (hooks) {
       value: this.people,
     });
 
-    this.set("onChange", (people: HermesUser[]) => {
-      this.set(
-        "peopleValue",
-        people.map((person) => person.email)
-      );
+    this.set("onChange", (people: string[]) => {
+      this.set("people", people);
     });
 
     await render<CustomEditableFieldComponentTestContext>(hbs`
@@ -71,13 +70,14 @@ module("Integration | Component | custom-editable-field", function (hooks) {
         @document={{this.document}}
         @field="stakeholders"
         @attributes={{this.attributes}}
-        @onChange={{this.onChange}}
+        @onSave={{this.onChange}}
       />
       <div class="click-away-target"/>
     `);
+    const textSelector = "[data-test-custom-field] li [data-test-person-email]";
 
-    let listItemText = findAll("[data-test-custom-people-field] li").map((li) =>
-      li.textContent?.trim()
+    let listItemText = findAll(textSelector).map(
+      (li) => li.textContent?.trim(),
     );
 
     assert.deepEqual(listItemText, this.people, "shows the passed in people");
@@ -85,8 +85,9 @@ module("Integration | Component | custom-editable-field", function (hooks) {
     assert.dom("[data-test-custom-people-field-input]").doesNotExist();
 
     await click("button");
+
     assert
-      .dom("[data-test-custom-people-field-input]")
+      .dom("[data-test-custom-field]")
       .exists("shows the input field on click");
 
     // remove the first person
@@ -102,14 +103,43 @@ module("Integration | Component | custom-editable-field", function (hooks) {
 
     assert.dom("[data-test-custom-people-field-input]").doesNotExist();
 
-    listItemText = findAll("[data-test-custom-people-field] li").map((li) =>
-      li.textContent?.trim()
-    );
+    listItemText = findAll(textSelector).map((li) => li.textContent?.trim());
 
     assert.deepEqual(
       listItemText,
-      ["mishra@hashicorp.com", "user1@hashicorp.com"],
-      "the list updates via the onChange action"
+      ["mishra@hashicorp.com", "User 1"],
+      "the front-end list updates (using displayNames if they're in the store)",
+    );
+
+    const expectedPeople = ["mishra@hashicorp.com", "user1@hashicorp.com"];
+
+    assert.deepEqual(
+      this.people,
+      expectedPeople,
+      "the reference list updates (using email addresses)",
+    );
+  });
+
+  test("PEOPLE inputs receive focus on click", async function (this: CustomEditableFieldComponentTestContext, assert) {
+    this.set("attributes", {
+      type: "PEOPLE",
+      value: this.people,
+    });
+
+    await render<CustomEditableFieldComponentTestContext>(hbs`
+      <CustomEditableField
+        @document={{this.document}}
+        @field="stakeholders"
+        @attributes={{this.attributes}}
+        @onSave={{this.onChange}}
+      />
+    `);
+
+    const stakeholdersSelector = "[data-test-custom-field]";
+    await click(`${stakeholdersSelector} .field-toggle`);
+
+    assert.true(
+      document.activeElement === find(`${stakeholdersSelector} input`),
     );
   });
 });

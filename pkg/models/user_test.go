@@ -222,6 +222,64 @@ func TestUserModel(t *testing.T) {
 		})
 	})
 
+	t.Run("Upsert RecentlyViewedProjects", func(t *testing.T) {
+		db, tearDownTest := setupTest(t, dsn)
+		defer tearDownTest(t)
+
+		t.Run("Create user", func(t *testing.T) {
+			assert, require := assert.New(t), require.New(t)
+			u := User{
+				EmailAddress: "a@a.com",
+			}
+			err := u.FirstOrCreate(db)
+			require.NoError(err)
+			assert.EqualValues(1, u.ID)
+			assert.Empty(u.RecentlyViewedDocs)
+			assert.Equal("a@a.com", u.EmailAddress)
+		})
+
+		var proj1 Project
+		t.Run("Create a project", func(t *testing.T) {
+			assert, require := assert.New(t), require.New(t)
+			proj1 = Project{
+				Creator: User{
+					EmailAddress: "a@a.com",
+				},
+				Title: "Title1",
+			}
+			err := proj1.Create(db)
+			require.NoError(err)
+			assert.EqualValues(1, proj1.ID)
+		})
+
+		t.Run(
+			"Update user to add the project as a recently viewed project",
+			func(t *testing.T) {
+				assert, require := assert.New(t), require.New(t)
+				u := User{
+					EmailAddress:           "a@a.com",
+					RecentlyViewedProjects: []Project{proj1},
+				}
+				err := u.Upsert(db)
+				require.NoError(err)
+				require.Len(u.RecentlyViewedProjects, 1)
+				assert.EqualValues(1, u.RecentlyViewedProjects[0].ID)
+				assert.Equal("Title1", u.RecentlyViewedProjects[0].Title)
+			})
+
+		t.Run("Get the user and verify it was updated", func(t *testing.T) {
+			assert, require := assert.New(t), require.New(t)
+			u := User{
+				EmailAddress: "a@a.com",
+			}
+			err := u.Get(db)
+			require.NoError(err)
+			require.Len(u.RecentlyViewedProjects, 1)
+			assert.EqualValues(1, u.RecentlyViewedProjects[0].ID)
+			assert.Equal("Title1", u.RecentlyViewedProjects[0].Title)
+		})
+	})
+
 	t.Run("Product subscriptions", func(t *testing.T) {
 		db, tearDownTest := setupTest(t, dsn)
 		defer tearDownTest(t)

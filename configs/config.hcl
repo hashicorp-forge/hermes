@@ -2,6 +2,10 @@
 // URL of the application.
 base_url = "http://localhost:8000"
 
+// log_format configures the logging format. Supported values are "standard" or
+// "json".
+log_format = "standard"
+
 // algolia configures Hermes to work with Algolia.
 algolia {
   application_id            = ""
@@ -10,17 +14,23 @@ algolia {
   internal_index_name       = "internal"
   links_index_name          = "links"
   missing_fields_index_name = "missing_fields"
+  projects_index_name       = "projects"
   search_api_key            = ""
   write_api_key             = ""
 }
 
-// document_types configures document types. Currently this block should not be
-// modified, but Hermes will support custom document types in the near future.
-// *** DO NOT MODIFY document_types ***
+// datadog configures Hermes to send metrics to Datadog.
+datadog {
+  enabled = false
+  env     = "local"
+}
+
+// document_types configures document types.
 document_types {
   document_type "RFC" {
     long_name   = "Request for Comments"
     description = "Create a Request for Comments document to present a proposal to colleagues for their review and feedback."
+    flight_icon = "discussion-circle"
     template    = "1Oz_7FhaWxdFUDEzKCC5Cy58t57C4znmC_Qr80BORy1U"
 
     more_info_link {
@@ -49,6 +59,7 @@ document_types {
   document_type "PRD" {
     long_name   = "Product Requirements"
     description = "Create a Product Requirements Document to summarize a problem statement and outline a phased approach to addressing the problem."
+    flight_icon = "target"
     template    = "1oS4q6IPDr3aMSTTk9UDdOnEcFwVWW9kT8ePCNqcg1P4"
 
     more_info_link {
@@ -65,6 +76,13 @@ document_types {
       type = "people"
     }
   }
+
+  // document_type "Memo" {
+  //   long_name = "Memo"
+  //   description = "Create a Memo document to share an idea or brief note with colleagues."
+  //   flight_icon = "radio"
+  //   template = "file-id-for-a-blank-doc"
+  // }
 }
 
 // email configures Hermes to send email notifications.
@@ -74,6 +92,19 @@ email {
 
   // from_address is the email address to send email notifications from.
   from_address = "hermes@yourorganization.com"
+}
+
+// FeatureFlags contain available feature flags.
+feature_flags {
+  // api_v2 enables v2 of the API.
+  flag "api_v2" {
+    enabled = false
+  }
+
+  // projects enables the projects feature in the UI.
+  flag "projects" {
+    enabled = false
+  }
 }
 
 // google_workspace configures Hermes to work with Google Workspace.
@@ -91,19 +122,29 @@ google_workspace {
   // drafts_folder contains all draft documents.
   drafts_folder = "my-drafts-folder-id"
 
+	// groups_prefix is the prefix to use when searching for Google Groups.
+  // groups_prefix = "team-"
+
   // If create_doc_shortcuts is set to true, shortcuts_folder will contain an
   // organized hierarchy of folders and shortcuts to published files that can be
   // easily browsed directly in Google Drive:
   //   {shortcut_folder}/{doc_type}/{product}/{document}
   shortcuts_folder = "my-shortcuts-folder-id"
 
+  // temporary_drafts_folder is a folder that will brieflly contain document
+  // drafts before they are moved to the drafts_folder. This is used when
+  // create_docs_as_user is true in the auth block, so document notification
+  // settings will be the same as when a user creates their own document.
+  // temporary_drafts_folder = "my-temporary-drafts-folder-id"
+
   // auth is the configuration for interacting with Google Workspace using a
   // service account.
   // auth {
-  //   client_email = ""
-  //   private_key  = ""
-  //   subject      = ""
-  //   token_url    = "https://oauth2.googleapis.com/token"
+  //   client_email        = ""
+  //   create_docs_as_user = true
+  //   private_key         = ""
+  //   subject             = ""
+  //   token_url           = "https://oauth2.googleapis.com/token"
   // }
 
   // oauth2 is the configuration used to authenticate users via Google.
@@ -127,6 +168,25 @@ indexer {
   // update_draft_headers enables the indexer to automatically update document
   // headers for draft documents based on Hermes metadata.
   update_draft_headers = true
+
+  // use_database_for_document_data will use the database instead of Algolia as
+  // the source of truth for document data, if true.
+  use_database_for_document_data = false
+}
+
+// jira is the configuration for Hermes to work with Jira.
+jira {
+  // api_token is the API token for authenticating to Jira.
+  api_token = ""
+
+  // enabled enables integration with Jira.
+  enabled = false
+
+  // url is the URL of the Jira instance (ex: https://your-domain.atlassian.net).
+  url = ""
+
+  // user is the user for authenticating to Jira.
+  user = ""
 }
 
 // okta configures Hermes to authenticate users using an AWS Application Load

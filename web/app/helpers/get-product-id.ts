@@ -5,12 +5,12 @@ export interface GetProductIDSignature {
   Args: {
     Positional: [string | undefined];
   };
-  Return: string | null;
+  Return: string | undefined;
 }
 
 const getProductIDHelper = helper<GetProductIDSignature>(([productName]) => {
   if (!productName) {
-    return null;
+    return;
   }
   return getProductId(productName);
 });

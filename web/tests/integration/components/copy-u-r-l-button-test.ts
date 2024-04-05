@@ -34,6 +34,7 @@ module("Integration | Component | copy-u-r-l-button", function (hooks) {
           class="test-class"
           @url="https://hashicorp.com"
           @tooltipPlacement={{this.tooltipPlacement}}
+          @isIconOnly={{true}}
         />
       </div>
     `);
@@ -83,6 +84,7 @@ module("Integration | Component | copy-u-r-l-button", function (hooks) {
         <CopyURLButton
           @url="https://hashicorp.com"
           @tooltipIsForcedOpen={{true}}
+          @isIconOnly={{true}}
         />
       </div>
     `);
@@ -97,6 +99,7 @@ module("Integration | Component | copy-u-r-l-button", function (hooks) {
           @url="https://hashicorp.com"
           @tooltipIsForcedOpen={{true}}
           @tooltipText="Creating link..."
+          @isIconOnly={{true}}
         />
       </div>
     `);
@@ -111,6 +114,7 @@ module("Integration | Component | copy-u-r-l-button", function (hooks) {
           @url="https://hashicorp.com"
           @tooltipIsForcedOpen={{true}}
           @icon="loading"
+          @isIconOnly={{true}}
         />
       </div>
     `);

@@ -1,0 +1,16 @@
+<LinkTo
+  @route="authenticated.product-areas.product-area"
+  @model={{dasherize @product}}
+  class="product-link"
+  ...attributes
+>
+  {{#if (has-block "default")}}
+    {{yield}}
+  {{else}}
+    <Hds::Badge
+      @icon={{or (get-product-id @product) "folder"}}
+      @text={{this.productAreaName}}
+      title={{this.productAreaName}}
+    />
+  {{/if}}
+</LinkTo>

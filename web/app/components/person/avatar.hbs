@@ -1,0 +1,35 @@
+<div
+  data-test-person-avatar
+  data-test-is-loading={{@isLoading}}
+  class="avatar overflow-hidden rounded-full
+    {{unless @isLoading 'bg-color-palette-alpha-100'}}
+    {{this.size}}
+    "
+  ...attributes
+>
+  {{#if @isLoading}}
+    {{! Avatar loading affordance }}
+    <div
+      data-test-loading
+      class="h-full w-full animate-spin rounded-full bg-gradient-to-tr from-color-palette-neutral-50 to-color-palette-neutral-200"
+    ></div>
+  {{else}}
+    {{#if this.imgURL}}
+      <img
+        data-test-image
+        src={{this.imgURL}}
+        alt={{@email}}
+        referrerpolicy="no-referrer"
+        class="w-full"
+      />
+    {{else}}
+      <div data-test-fallback class="flex text-body-100">
+        <FlightIcon
+          class="default-user-icon text-color-foreground-faint"
+          @size={{if this.iconIsLarge "24"}}
+          @name="user"
+        />
+      </div>
+    {{/if}}
+  {{/if}}
+</div>

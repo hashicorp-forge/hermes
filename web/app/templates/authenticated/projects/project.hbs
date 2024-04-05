@@ -1,0 +1,6 @@
+{{page-title this.model.title}}
+{{set-body-class "project-screen"}}
+
+{{#unless this.newModelHasLoaded}}
+  <Project @project={{this.model}} />
+{{/unless}}

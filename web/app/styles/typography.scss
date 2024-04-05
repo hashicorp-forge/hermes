@@ -1,5 +1,27 @@
+@use "variables" as v;
+
+em {
+  @apply not-italic;
+}
+
+mark,
+.mark {
+  @apply bg-color-surface-warning text-color-foreground-warning-on-surface;
+}
+
+.line-clamp {
+  @apply overflow-hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+}
+
+.line-clamp-2 {
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
 .hermes-form-label {
-  @apply text-body-200 font-semibold flex text-color-foreground-strong;
+  @apply flex text-body-200 font-semibold text-color-foreground-strong;
 
   + .hermes-form-helper-text {
     @apply mt-1;
@@ -10,10 +32,42 @@
   @apply text-body-100;
 }
 
+.hermes-h-300 {
+  @apply text-display-300 font-semibold text-color-foreground-strong;
+}
+
 .hermes-h4 {
-  @apply text-color-foreground-faint uppercase tracking-wide font-medium text-body-100;
+  @apply text-body-100 font-medium uppercase tracking-wide text-color-foreground-faint;
 }
 
 .truncated-text-container {
-  @apply truncate block font-regular text-body-100 text-color-foreground-faint;
+  @apply block text-body-100 font-regular text-color-foreground-faint;
+
+  // These classes are applied by the TruncatedText component
+  // based on its optional `startingBreakpoint` argument:
+
+  &.default {
+    @apply truncate;
+  }
+
+  &.starting-breakpoint-md {
+    @media (min-width: v.$screen-md) {
+      @apply truncate;
+    }
+  }
+}
+
+.failed-to-load-text {
+  @apply mb-2 text-display-300 font-semibold text-color-foreground-faint opacity-50;
+}
+
+.underlined-link:not([disabled]):not(.underline-on-hover),
+.underline-on-hover:hover,
+.underline-on-hover:focus {
+  @apply text-color-foreground-primary underline decoration-color-palette-neutral-300 underline-offset-[3px];
+
+  &:hover,
+  &:focus {
+    @apply text-color-foreground-strong decoration-color-palette-neutral-400;
+  }
 }

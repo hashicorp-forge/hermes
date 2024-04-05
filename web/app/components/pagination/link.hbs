@@ -1,7 +1,6 @@
-{{! @glint-nocheck: not typesafe yet }}
 {{#if @disabled}}
   <span
-    class="w-9 h-12 grid place-items-center relative
+    class="relative grid h-12 w-9 place-items-center
       {{if @icon 'opacity-50' 'text-color-foreground-action'}}"
   >
     {{#if @icon}}
@@ -9,15 +8,15 @@
     {{else}}
       {{@page}}
       <div
-        class="absolute h-0.5 w-6 bg-color-palette-blue-200 bottom-0 left-1/2 -translate-x-1/2"
+        class="absolute bottom-0 left-1/2 h-0.5 w-6 -translate-x-1/2 bg-color-palette-blue-200"
       ></div>
     {{/if}}
   </span>
 {{else}}
   <LinkTo
-    @route={{this.currentRouteName}}
+    data-test-pagination-link-type={{if @icon "icon" "text"}}
     @query={{hash page=@page}}
-    class="w-9 h-12 hover:text-color-foreground-strong grid place-items-center"
+    class="grid h-12 w-9 place-items-center hover:text-color-foreground-strong"
   >
     {{#if @icon}}
       <FlightIcon @name={{@icon}} />

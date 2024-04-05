@@ -1,0 +1,40 @@
+{{#if this.modalIsShown}}
+  <Hds::Modal data-test-draft-created-modal as |M|>
+    <M.Header>
+      Draft created!
+    </M.Header>
+    <M.Body>
+      <p class="text-body-300">
+        Youʼll be notified about @mentions, threads involving you, and tasks
+        assigned to you. To subscribe to all comments,
+        <Hds::Link::Inline
+          @icon="external-link"
+          @iconPosition="trailing"
+          @isHrefExternal={{true}}
+          @href="https://support.google.com/docs/answer/91588"
+        >manage your notifications</Hds::Link::Inline>
+        on Google.
+      </p>
+      <p class="text-color-foreground-faint mt-3 mb-1">We expect to make this
+        easier in the future.</p>
+    </M.Body>
+    <M.Footer as |F|>
+      <div class="flex space-x-6 items-center">
+        <Hds::Button
+          data-test-draft-created-modal-button
+          @text="Continue to draft"
+          {{on "click" this.close}}
+        />
+        <Hds::Form::Checkbox::Field
+          data-test-draft-created-modal-checkbox
+          {{on "click" this.toggleChecked}}
+          as |F|
+        >
+          <F.Label>
+            Donʼt show this again
+          </F.Label>
+        </Hds::Form::Checkbox::Field>
+      </div>
+    </M.Footer>
+  </Hds::Modal>
+{{/if}}

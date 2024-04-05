@@ -1,0 +1,40 @@
+<div class="project-resource group" ...attributes>
+
+  {{yield}}
+
+  {{#unless @isReadOnly}}
+    <X::DropdownList @items={{this.sortOrderMenuItems}}>
+      <:anchor as |dd|>
+        <div
+          class="drag-handle-container shaded absolute left-0 -top-px z-10 flex h-[calc(100%+2px)] -translate-x-full justify-center"
+        >
+          <dd.ToggleAction
+            data-test-drag-handle
+            class="drag-handle visible-with-group relative left-2.5 -ml-1.5 mt-1 grid h-[26px] w-[26px] cursor-grab place-items-center rounded text-color-foreground-faint opacity-0 hover:text-color-foreground-primary
+              {{if
+                dd.contentIsShown
+                'bg-color-surface-interactive-active text-color-foreground-primary'
+              }}"
+          >
+            <FlightIcon @name="move" />
+          </dd.ToggleAction>
+        </div>
+      </:anchor>
+      <:item as |dd|>
+        <dd.Action
+          data-test-move-option
+          {{on "click" dd.attrs.action}}
+          class="flex items-center gap-2 px-4 py-1.5"
+        >
+          <FlightIcon data-test-move-icon @name={{dd.attrs.icon}} />
+          {{dd.attrs.label}}
+        </dd.Action>
+      </:item>
+    </X::DropdownList>
+
+    <OverflowMenu
+      @items={{@overflowMenuItems}}
+      @offset={{hash mainAxis=1 crossAxis=-3}}
+    />
+  {{/unless}}
+</div>

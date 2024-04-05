@@ -20,13 +20,15 @@
 }
 /* Maintain contrast across hover and focus states */
 .hds-badge-count--color-neutral.hds-badge-count--type-filled {
-  @apply mix-blend-multiply;
+  &:not(.checkable-item-count) {
+    @apply mix-blend-multiply;
+  }
 }
 
 .x-dropdown-list-item-link {
   &.is-aria-selected {
     .hds-badge-count--color-neutral.hds-badge-count--type-filled {
-      @apply bg-white bg-opacity-10 text-color-foreground-high-contrast mix-blend-screen;
+      @apply bg-white bg-opacity-10 text-color-foreground-high-contrast;
     }
   }
 }
@@ -36,5 +38,37 @@
 
   + .dropdown-caret {
     @apply absolute right-1.5 top-1/2 -translate-y-1/2;
+  }
+}
+
+a.hds-button {
+  &:hover,
+  &:focus,
+  &:active {
+    @apply no-underline;
+  }
+}
+
+.hds-button {
+  &.pill-button,
+  &.pill-button::before {
+    @apply rounded-l-full rounded-r-full;
+  }
+}
+
+.hds-alert--type-inline {
+  &.hds-alert--color-success {
+    // hds-green-500/a20
+    border-color: #05422133;
+  }
+
+  &.hds-alert--color-warning {
+    // hds-amber-500/a20
+    border-color: #52270033;
+  }
+
+  &.hds-alert--color-critical {
+    // hds-red-500/a20
+    border-color: #52140a33;
   }
 }

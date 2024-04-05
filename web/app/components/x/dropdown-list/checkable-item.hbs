@@ -1,17 +1,38 @@
-<FlightIcon
-  data-test-x-dropdown-list-checkable-item-check
-  data-test-is-checked={{@isSelected}}
-  @name="check"
-  class="check mr-2.5 {{if @isSelected 'visible' 'invisible'}}"
-/>
-<div class="x-dropdown-list-item-value">
-  {{@value}}
-</div>
-{{#if @count}}
-  <Hds::BadgeCount
-    data-test-x-dropdown-list-checkable-item-count
-    @text="{{@count}}"
-    @size="small"
-    class="x-dropdown-list-item-count"
+<div
+  data-test-checkable-item
+  class="checkable-item
+    {{if this.countIsShown 'has-count'}}
+    checkmark-position--{{or @checkmarkPosition 'leading'}}
+    w-full items-center gap-2.5"
+  ...attributes
+>
+
+  <FlightIcon
+    data-test-x-dropdown-list-checkable-item-check
+    data-test-is-checked={{@isSelected}}
+    @name="check"
+    class="check {{if @isSelected 'visible' 'invisible'}}"
   />
-{{/if}}
+
+  <div
+    data-test-checkable-item-content
+    class="checkable-item-content w-full overflow-hidden"
+  >
+    {{#if (has-block "default")}}
+      {{yield}}
+    {{else}}
+      <div data-test-x-dropdown-list-item-value class="truncate">
+        {{this.value}}
+      </div>
+    {{/if}}
+  </div>
+
+  {{#if this.countIsShown}}
+    <div
+      data-test-x-dropdown-list-checkable-item-count
+      class="checkable-item-count ml-auto opacity-60"
+    >
+      {{@count}}
+    </div>
+  {{/if}}
+</div>

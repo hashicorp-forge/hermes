@@ -11,6 +11,10 @@ import {
 import { hbs } from "ember-cli-htmlbars";
 import { assert as emberAssert } from "@ember/debug";
 
+const PRIMARY_BUTTON = "[data-test-document-modal-primary-button]";
+const SECONDARY_BUTTON = "[data-test-document-modal-secondary-button]";
+const ERROR = ".hds-alert";
+
 interface DocumentModalTestContext extends TestContext {
   color?: string;
   headerText: string;
@@ -68,10 +72,10 @@ module("Integration | Component | document/modal", function (hooks) {
       .dom(".hds-modal__body")
       .hasText(
         "Are you sure you want to archive this document?",
-        "can take a @bodyText argument"
+        "can take a @bodyText argument",
       );
 
-    const primaryButton = find("[data-test-document-modal-primary-button]");
+    const primaryButton = find(PRIMARY_BUTTON);
 
     emberAssert("primary button must exist", primaryButton);
 
@@ -86,10 +90,10 @@ module("Integration | Component | document/modal", function (hooks) {
       .hasAttribute(
         "data-test-icon",
         "archive",
-        "can take a @taskButtonIcon argument"
+        "can take a @taskButtonIcon argument",
       );
 
-    assert.dom(".hds-alert").doesNotExist("error is not shown by default");
+    assert.dom(ERROR).doesNotExist("error is not shown by default");
 
     this.set("task", async () => {
       throw new Error("error");
@@ -97,12 +101,12 @@ module("Integration | Component | document/modal", function (hooks) {
 
     await click(primaryButton);
 
-    assert.dom(".hds-alert").exists("failed tasks show an error");
-    assert.dom(".hds-alert .hds-alert__title").hasText("Error title");
+    assert.dom(ERROR).exists("failed tasks show an error");
+    assert.dom(`${ERROR} .hds-alert__title`).hasText("Error title");
 
     await click(".hds-alert__dismiss");
 
-    assert.dom(".hds-alert").doesNotExist("error can be dismissed");
+    assert.dom(ERROR).doesNotExist("error can be dismissed");
   });
 
   test("it yields a body block with a taskIsRunning property", async function (assert) {
@@ -134,7 +138,7 @@ module("Integration | Component | document/modal", function (hooks) {
 
     assert.dom("[data-test-body-block]").hasText("idle");
 
-    const clickPromise = click("[data-test-document-modal-primary-button]");
+    const clickPromise = click(PRIMARY_BUTTON);
 
     await waitFor("[data-test-body-block] span");
 
@@ -159,16 +163,15 @@ module("Integration | Component | document/modal", function (hooks) {
       />
     `);
 
-    const buttonSelector = "[data-test-document-modal-primary-button]";
-    const iconSelector = buttonSelector + " .flight-icon";
+    const iconSelector = PRIMARY_BUTTON + " .flight-icon";
 
-    assert.dom(buttonSelector).hasText("Yes, archive");
+    assert.dom(PRIMARY_BUTTON).hasText("Yes, archive");
     assert.dom(iconSelector).hasAttribute("data-test-icon", "archive");
 
-    const clickPromise = click(buttonSelector);
+    const clickPromise = click(PRIMARY_BUTTON);
 
     await waitUntil(() => {
-      return find(buttonSelector)?.textContent?.trim() === "Archiving...";
+      return find(PRIMARY_BUTTON)?.textContent?.trim() === "Archiving...";
     });
 
     assert.dom(iconSelector).hasAttribute("data-test-icon", "loading");
@@ -192,9 +195,7 @@ module("Integration | Component | document/modal", function (hooks) {
       />
     `);
 
-    assert
-      .dom("[data-test-document-modal-primary-button]")
-      .hasAttribute("disabled");
+    assert.dom(PRIMARY_BUTTON).hasAttribute("disabled");
   });
 
   test("the close action runs when the modal is dismissed", async function (assert) {
@@ -215,7 +216,7 @@ module("Integration | Component | document/modal", function (hooks) {
       />
     `);
 
-    await click("[data-test-document-modal-secondary-button]");
+    await click(SECONDARY_BUTTON);
     await waitUntil(() => count === 1);
 
     assert.equal(count, 1);
@@ -236,13 +237,54 @@ module("Integration | Component | document/modal", function (hooks) {
 
     assert.dom("[data-test-document-modal-footer]").exists();
 
-    const clickPromise = click("[data-test-document-modal-primary-button]");
+    const clickPromise = click(PRIMARY_BUTTON);
 
     await waitUntil(() => {
       return find("[data-test-document-modal-footer]") === null;
     });
 
     assert.dom("[data-test-document-modal-footer]").doesNotExist();
+
+    await clickPromise;
+  });
+
+  test("the secondary button can be hidden", async function (assert) {
+    await render<DocumentModalTestContext>(hbs`
+      <Document::Modal
+        @secondaryButtonIsHidden={{true}}
+        @headerText={{this.headerText}}
+        @close={{this.close}}
+      />
+    `);
+
+    assert.dom(SECONDARY_BUTTON).doesNotExist();
+  });
+
+  test("errors are not shown when a full-modal task is running", async function (assert) {
+    this.set("task", async () => {
+      await new Promise((resolve) => setTimeout(resolve, 1));
+      throw new Error("error");
+    });
+
+    await render<DocumentModalTestContext>(hbs`
+      <Document::Modal
+        @headerText={{this.headerText}}
+        @errorTitle={{this.errorTitle}}
+        @hideFooterWhileSaving={{true}}
+        @task={{this.task}}
+        @close={{this.close}}
+      />
+    `);
+
+    await click(PRIMARY_BUTTON);
+
+    assert.dom(ERROR).exists();
+
+    const clickPromise = click(PRIMARY_BUTTON);
+
+    await waitUntil(() => {
+      return find(ERROR) === null;
+    });
 
     await clickPromise;
   });

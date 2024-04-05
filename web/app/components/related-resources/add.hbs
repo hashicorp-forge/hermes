@@ -1,0 +1,115 @@
+{{#in-element (html-element ".ember-application") insertBefore=null}}
+  {{#if this.scopeIsExternalLinks}}
+    <RelatedResources::AddOrEditExternalResourceModal
+      @onClose={{@onClose}}
+      @onSave={{this.onExternalLinkSubmit}}
+    />
+  {{else}}
+    <Hds::Modal
+      data-test-add-related-resource-modal
+      @onClose={{@onClose}}
+      class="search-window related-resources-modal"
+      as |M|
+    >
+      <M.Header data-test-add-related-resource-modal-title>
+        {{@headerTitle}}
+      </M.Header>
+      <M.Body class="h-[440px]">
+        <X::DropdownList
+          data-test-add-related-resources-list
+          @items={{this.algoliaResults}}
+          @onItemClick={{this.onItemClick}}
+          @offset={{hash mainAxis=1 crossAxis=0}}
+          @isLoading={{this.loadInitialData.isRunning}}
+          @listIsShown={{this.listIsShown}}
+          @inputIsShown={{false}}
+          @disableClose={{true}}
+          @placement={{null}}
+          @keyboardNavIsEnabled={{this.keyboardNavIsEnabled}}
+          class="non-floating-list theme--neutral"
+        >
+          <:anchor as |dd|>
+            <div class="search-container">
+              <div class="relative">
+                <Hds::Form::TextInput::Base
+                  data-test-related-resources-search-input
+                  {{autofocus waitUntilNextRunloop=true}}
+                  {{did-insert (fn this.didInsertInput dd)}}
+                  {{on "input" this.onInput}}
+                  {{on "keydown" this.onInputKeydown}}
+                  {{on "focusin" this.enableKeyboardNav}}
+                  {{on "focusout" this.disableKeyboardNav}}
+                  @type="search"
+                  @value={{this.query}}
+                  name="related-resources-search"
+                  size="25"
+                  placeholder={{@inputPlaceholder}}
+                  aria-label={{@inputPlaceholder}}
+                  aria-controls={{dd.ariaControls}}
+                  aria-expanded={{dd.contentIsShown}}
+                  aria-haspopup="listbox"
+                />
+                {{#if this.searchLoaderIsShown}}
+                  <div
+                    data-test-related-resources-search-loading-icon
+                    class="absolute top-1/2 right-3 flex -translate-y-1/2 bg-white"
+                  >
+                    <FlightIcon @name="loading" />
+                  </div>
+                {{/if}}
+              </div>
+            </div>
+          </:anchor>
+          <:header>
+            {{#if this.listHeaderIsShown}}
+              <div class="related-resources-modal-container mt-0.5">
+                <h4 class="hermes-h4" data-test-related-resources-list-header>
+                  {{#if this.query.length}}
+                    Results
+                  {{else}}
+                    Latest docs
+                  {{/if}}
+                </h4>
+              </div>
+            {{/if}}
+            {{#if this.externalResourceFormIsShown}}
+              <RelatedResources::Add::FallbackExternalResource
+                @onInput={{this.onExternalLinkTitleInput}}
+                @onSubmit={{this.onExternalLinkSubmit}}
+                @linkIsDuplicate={{this.linkIsDuplicate}}
+                @titleErrorIsShown={{this.externalLinkTitleErrorIsShown}}
+                @title={{this.externalLinkTitle}}
+                @url={{this.query}}
+              />
+            {{/if}}
+          </:header>
+          <:loading>
+            <div class="pl-6 pt-4">
+              <FlightIcon
+                data-test-add-related-resource-spinner
+                @name="loading"
+              />
+            </div>
+          </:loading>
+          <:no-matches>
+            {{#unless this.noResultsMessageIsHidden}}
+              <div
+                data-test-no-related-resources-found
+                class="related-resources-modal-container mt-36"
+              >
+                <h3 class="related-resources-modal-body-header">
+                  {{this.noMatchesMessage}}
+                </h3>
+              </div>
+            {{/unless}}
+          </:no-matches>
+          <:item as |dd|>
+            <dd.Action class="related-document-option">
+              <RelatedResources::Add::Document @document={{dd.attrs}} />
+            </dd.Action>
+          </:item>
+        </X::DropdownList>
+      </M.Body>
+    </Hds::Modal>
+  {{/if}}
+{{/in-element}}

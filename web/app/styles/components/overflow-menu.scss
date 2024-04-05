@@ -1,0 +1,22 @@
+.overflow-button {
+  @apply pointer-events-auto relative z-10 h-[26px] w-[26px] rounded;
+
+  &:hover:not(.disabled):not(:focus),
+  &:focus {
+    @apply bg-color-surface-faint;
+  }
+}
+
+.overflow-menu-item-button {
+  @apply flex w-full space-x-2 py-2 px-4 leading-none;
+
+  > .flight-icon {
+    @apply text-inherit;
+  }
+}
+
+.overflow-button-container {
+  @apply pointer-events-none absolute top-[3px] -right-px;
+  @apply flex w-16 justify-end rounded-r;
+  @apply bg-gradient-to-l from-color-page-primary via-color-page-primary to-transparent;
+}

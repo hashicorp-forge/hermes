@@ -1,54 +1,104 @@
-{{! @glint-nocheck: not typesafe yet }}
-<section class="flex flex-col items-center flex-1 min-h-full">
-  <div class="x-container">
-      {{#if (and this.firstPageIsShown this.queryIsProductName)}}
-        <div class="flex flex-col items-start w-full pb-10" data-test-results-product-link>
-          <Hds::Card::Container
-            @level="mid"
-            @hasBorder="true"
-            @overflow="hidden"
-            class="flex flex-col items-start space-y-3 pt-4 px-4 pb-3"
-          >
-            <Hds::Badge
-              @text={{this.capitalizedQuery}}
-              @icon={{or (get-product-id @query) "folder"}}
-            />
-            <Hds::Link::Standalone
-              @text="View all {{this.capitalizedQuery}} documents"
-              @icon="arrow-right-circle"
-              @iconPosition="trailing"
-              @route="authenticated.all"
-              @query={{hash product=(array this.capitalizedQuery)}}
-            />
-          </Hds::Card::Container>
-        </div>
-      {{/if}}
+{{#unless (and this.scopeIsAll this.nbHits)}}
+  {{! Hit count (not shown on the "All" screen unless saying "0 matches") }}
+  <MatchCountHeadline data-test-results-match-count @count={{this.nbHits}} />
+{{/unless}}
 
-    <h1
-      class="hds-typography-display-300 hds-font-weight-semibold hds-foreground-strong"
-    >{{@results.nbHits}} documents matching “{{@query}}”</h1>
-    <div class="flex flex-col space-y-12 w-full py-10">
-      <div class="tile-list">
-        {{#each @results.hits as |doc index|}}
-          <Doc::Tile
-            @avatar="{{get doc.ownerPhotos 0}}"
-            @docID="{{doc.objectID}}"
-            @isResult="{true}"
-            @owner="{{get doc.owners 0}}"
-            @productArea="{{doc.product}}"
-            @snippet="{{doc._snippetResult.content.value}}"
-            @status="{{lowercase doc.status}}"
-            @title="{{doc.title}}"
-          />
-        {{/each}}
+{{#if this.nbHits}}
+  <div class="{{if this.scopeIsAll 'mt-[30px]'}} grid gap-10">
+    {{! Product/Areas }}
+    {{#if this.productFacetHits}}
+      <div data-test-product-results>
+        <Results::SectionHeader
+          @text="Product/Areas"
+          @count={{this.productFacetHits.length}}
+        />
+        {{! All product areas }}
+        <ol class="flex flex-wrap">
+          {{#each this.productFacetHits as |product|}}
+            <li data-test-product-list-item class="group relative">
+              <LinkTo
+                data-test-product-link
+                @route="authenticated.product-areas.product-area"
+                @model={{dasherize product.value}}
+                class="product-area-search-result"
+              >
+                <Product::Avatar @product={{product.value}} />
+                <span>
+                  {{product.value}}
+                </span>
+              </LinkTo>
+            </li>
+          {{/each}}
+        </ol>
       </div>
-
-    </div>
-
-    <Pagination
-      @currentPage={{(add @results.page 1)}}
-      @nbPages={{@results.nbPages}}
-    />
+    {{/if}}
+    {{! Projects }}
+    {{#if this.projectHits}}
+      <div data-test-project-results>
+        {{#if this.scopeIsAll}}
+          <Results::SectionHeader
+            @text="Projects"
+            @query={{hash q=@query scope=this.projectsScope}}
+            @count={{@projectResults.nbHits}}
+          />
+        {{/if}}
+        {{! First 5 projects }}
+        <ol class="divided-list">
+          {{#each this.projectHits as |p|}}
+            <li data-test-project-list-item class="group relative">
+              <Project::Tile
+                data-test-project-link
+                @project={{p}}
+                @query={{@query}}
+              />
+            </li>
+          {{/each}}
+        </ol>
+      </div>
+    {{/if}}
+    {{! Docs }}
+    {{#if this.docHits}}
+      <div data-test-doc-results>
+        {{#if this.scopeIsAll}}
+          <Results::SectionHeader
+            @text="Docs"
+            @query={{hash q=@query scope=this.docsScope}}
+            @count={{@docResults.nbHits}}
+          />
+        {{/if}}
+        {{! First page of results }}
+        <ol class="divided-list">
+          {{#each this.docHits as |doc|}}
+            <li data-test-doc-list-item class="group relative">
+              <Doc::TileMedium
+                data-test-doc-link
+                @doc={{doc}}
+                @query={{@query}}
+              />
+            </li>
+          {{/each}}
+        </ol>
+        {{! Link to next page }}
+        {{#if this.nextPageLinkIsShown}}
+          <div class="mx-auto mt-8 mb-8 max-w-[830px]">
+            <Hds::Button
+              data-test-next-page-link
+              @color="secondary"
+              @text="Next page of docs"
+              @icon="arrow-right"
+              @iconPosition="trailing"
+              @isFullWidth={{true}}
+              @route="authenticated.results"
+              @query={{hash scope=this.docsScope page=2}}
+              class="py-3"
+            />
+          </div>
+        {{/if}}
+      </div>
+    {{/if}}
   </div>
-
-</section>
+  {{! Pagination }}
+  {{#unless this.scopeIsAll}}
+    <Pagination @currentPage={{this.page}} @nbPages={{this.nbPages}} />
+  {{/unless}}
+{{/if}}

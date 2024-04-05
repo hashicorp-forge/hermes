@@ -1,0 +1,19 @@
+<Action
+  data-test-x-dropdown-list-toggle-select
+  {{did-insert @registerAnchor}}
+  {{on "keydown" @onTriggerKeydown}}
+  {{on "click" @toggleContent}}
+  disabled={{@disabled}}
+  aria-controls={{@ariaControls}}
+  aria-expanded={{@contentIsShown}}
+  aria-haspopup="listbox"
+  class="x-dropdown-list-toggle-select {{if @contentIsShown 'open'}}"
+  ...attributes
+>
+  {{yield}}
+  <FlightIcon
+    data-test-caret
+    @name="caret"
+    class="absolute top-1/2 right-2 -translate-y-1/2 text-color-foreground-faint"
+  />
+</Action>

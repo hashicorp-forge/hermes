@@ -10,7 +10,10 @@
   @placement={{@placement}}
   @offset={{@offset}}
   @disableClose={{@disableClose}}
-  class="{{unless (eq @placement null) 'hermes-popover'}} x-dropdown-list"
+  @matchAnchorWidth={{@matchAnchorWidth}}
+  class="x-dropdown-list
+    {{unless (eq @placement null) 'hermes-popover'}}
+    {{if this.inputIsShown 'has-input'}}"
   data-test-x-dropdown-list-content
   {{will-destroy this.onDestroy}}
   ...attributes
@@ -52,6 +55,22 @@
             f.contentID
           )
         )
+        ToggleSelect=(component
+          "x/dropdown-list/toggle-select"
+          contentIsShown=f.contentIsShown
+          registerAnchor=f.registerAnchor
+          onTriggerKeydown=(fn
+            this.onTriggerKeydown f.contentIsShown f.showContent
+          )
+          toggleContent=f.toggleContent
+          disabled=@disabled
+          ariaControls=(concat
+            "x-dropdown-list-"
+            (if this.inputIsShown "container" "items")
+            "-"
+            f.contentID
+          )
+        )
         ariaControls=(concat
           "x-dropdown-list-"
           (if this.inputIsShown "container" "items")
@@ -79,7 +98,7 @@
       {{will-destroy this.resetFilteredItems}}
       {{dismissible dismiss=f.hideContent related=f.anchor}}
       id="x-dropdown-list-container-{{f.contentID}}"
-      class="x-dropdown-list-container {{if this.inputIsShown 'has-input'}}"
+      class="x-dropdown-list-container"
       role={{if this.inputIsShown "combobox"}}
     >
       {{#if @isLoading}}
@@ -88,14 +107,17 @@
             {{yield to="loading"}}
           </div>
         {{else}}
-          <div class="x-dropdown-list-default-loading-container">
+          <div
+            data-test-x-dropdown-list-default-loading-block
+            class="x-dropdown-list-default-loading-container"
+          >
             <FlightIcon @name="loading" />
           </div>
         {{/if}}
       {{else}}
         <div
           data-test-x-dropdown-list-loaded-content
-          class="overflow-hidden flex flex-col"
+          class="flex flex-col overflow-hidden"
           {{did-insert this.didInsertContent}}
         >
           {{#if this.inputIsShown}}

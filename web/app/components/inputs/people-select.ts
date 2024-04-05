@@ -3,21 +3,69 @@ import { tracked } from "@glimmer/tracking";
 import { inject as service } from "@ember/service";
 import { restartableTask, timeout } from "ember-concurrency";
 import { action } from "@ember/object";
+import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
-import { HermesUser } from "hermes/types/document";
 import Ember from "ember";
+import StoreService from "hermes/services/store";
+import PersonModel from "hermes/models/person";
+import { Select } from "ember-power-select/components/power-select";
+import { next, schedule } from "@ember/runloop";
+import calculatePosition from "ember-basic-dropdown/utils/calculate-position";
+import AuthenticatedUserService from "hermes/services/authenticated-user";
 
 export interface GoogleUser {
   emailAddresses: { value: string }[];
+  names: { displayName: string; givenName: string }[];
   photos: { url: string }[];
+}
+
+enum ComputedVerticalPosition {
+  Above = "above",
+  Below = "below",
+}
+
+enum ComputedHorizontalPosition {
+  Left = "left",
+  Right = "right",
+}
+
+interface CalculatePositionOptions {
+  horizontalPosition: ComputedHorizontalPosition;
+  verticalPosition: ComputedVerticalPosition;
+  matchTriggerWidth: boolean;
+  previousHorizontalPosition?: ComputedHorizontalPosition;
+  previousVerticalPosition?: ComputedVerticalPosition;
+  renderInPlace: boolean;
+  dropdown: any;
 }
 
 interface InputsPeopleSelectComponentSignature {
   Element: HTMLDivElement;
   Args: {
-    selected: HermesUser[];
-    onBlur?: () => void;
-    onChange: (people: HermesUser[]) => void;
+    selected: string[];
+    onChange: (value: string[]) => void;
+    renderInPlace?: boolean;
+    disabled?: boolean;
+    onKeydown?: (dropdown: any, event: KeyboardEvent) => void;
+
+    /**
+     * Whether the dropdown should be single-select.
+     * When true, will not show the dropdown when there's a selection.
+     */
+    isSingleSelect?: boolean;
+
+    /**
+     * Whether to exclude the authenticated user from the dropdown.
+     * Used by the "Transfer ownership" modal, where suggesting the
+     * authenticated user as a new owner would be unhelpful.
+     */
+    excludeSelf?: boolean;
+
+    /**
+     * The ID of the EmberPowerSelect trigger. Allows the label
+     * to be associated with the input for accessibility purposes.
+     */
+    triggerId?: string;
   };
 }
 
@@ -25,13 +73,54 @@ const MAX_RETRIES = 3;
 const INITIAL_RETRY_DELAY = Ember.testing ? 0 : 500;
 
 export default class InputsPeopleSelectComponent extends Component<InputsPeopleSelectComponentSignature> {
+  @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
+  @service declare authenticatedUser: AuthenticatedUserService;
+  @service declare store: StoreService;
 
   /**
    * The list of people to display in the dropdown.
    * Instantiated empty and populated by the `searchDirectory` task.
    */
-  @tracked protected people = [];
+  @tracked protected people: string[] = [];
+
+  /**
+   * The action to run when the PowerSelect input is clicked.
+   * Prevents the dropdown from opening when the input is empty.
+   */
+  @action protected onClick(e: MouseEvent) {
+    const target = e.target as HTMLElement;
+    const input = target.closest(".ember-power-select-trigger") as HTMLElement;
+
+    if (input) {
+      const value = input.querySelector("input")?.value;
+      if (value === "") {
+        e.stopImmediatePropagation();
+      }
+    }
+  }
+
+  /**
+   * The action to run when the PowerSelect input is focused and a key is pressed.
+   * On Enter, ArrowDown, and ArrowUp, prevents the dropdown from opening in a
+   * useless state (e.g., "Type to search").
+   */
+  @action protected onKeydown(dropdown: Select, event: KeyboardEvent) {
+    switch (event.key) {
+      case "Enter":
+      case "ArrowDown":
+      case "ArrowUp":
+        event.stopPropagation();
+        schedule("afterRender", () => {
+          dropdown.actions.close();
+        });
+        break;
+      default:
+        if (this.args.onKeydown) {
+          this.args.onKeydown(dropdown, event);
+        }
+    }
+  }
 
   /**
    * An action occurring on every keystroke.
@@ -39,9 +128,17 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
    * since `onChange` is not called in that case.
    * See: https://ember-power-select.com/docs/custom-search-action
    */
-  @action onInput(inputValue: string) {
+  @action protected onInput(inputValue: string, select: Select) {
     if (inputValue === "") {
       this.people = [];
+
+      /**
+       * Stop the redundant "type to search" message
+       * from appearing when the last character is deleted.
+       */
+      next(() => {
+        select.actions.close();
+      });
     }
   }
 
@@ -49,10 +146,65 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
    * The action taken when focus leaves the component.
    * Clears the people list and calls `this.args.onBlur` if it exists.
    */
-  @action onClose() {
+  @action protected onClose() {
     this.people = [];
-    if (this.args.onBlur) {
-      this.args.onBlur();
+  }
+  /**
+   * The action to maybe close the dropdown. Passed to the PeopleSelect
+   * as `onOpen`. If the dropdown is single-select and has a selection, i.e.,
+   * when there's nothing to show in the dropdown, it closes the dropdown.
+   */
+  @action protected maybeClose(select: Select) {
+    if (this.args.isSingleSelect && select.selected.length > 0) {
+      select.actions.close();
+    }
+  }
+
+  /**
+   * Custom position-calculating function for the dropdown.
+   * Ensures the dropdown is at least 320px wide, instead of 100% of the trigger.
+   * Improves dropdown appearance when the trigger is small, e.g., in the sidebar.
+   */
+  @action protected calculatePosition(
+    trigger: HTMLElement,
+    content: HTMLElement,
+    destination: HTMLElement,
+    options: CalculatePositionOptions,
+  ) {
+    const position = calculatePosition(trigger, content, destination, options);
+
+    const extraOffsetLeft = 4;
+    const extraOffsetBelow = 2;
+    const extraOffsetAbove = extraOffsetBelow + 2;
+
+    const { verticalPosition, horizontalPosition } = position;
+
+    let { top, left, width } = position.style;
+
+    if (!top || !left || !width) {
+      return position;
+    } else {
+      switch (verticalPosition) {
+        case ComputedVerticalPosition.Above:
+          top -= extraOffsetAbove;
+          break;
+        case ComputedVerticalPosition.Below:
+          top += extraOffsetBelow;
+          break;
+      }
+
+      switch (horizontalPosition) {
+        case ComputedHorizontalPosition.Left:
+          left -= extraOffsetLeft;
+          break;
+      }
+
+      position.style.top = top;
+      position.style.left = left;
+      position.style.width = width + extraOffsetLeft * 2;
+      position.style["min-width"] = `320px`;
+
+      return position;
     }
   }
 
@@ -66,28 +218,24 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
       let retryDelay = INITIAL_RETRY_DELAY;
 
       try {
-        let response = await this.fetchSvc.fetch("/api/v1/people", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            query: query,
-          }),
+        const people = await this.store.query("person", {
+          query,
         });
 
-        const peopleJson = await response?.json();
-
-        if (peopleJson) {
-          this.people = peopleJson
-            .map((p: GoogleUser) => {
-              return {
-                email: p.emailAddresses[0]?.value,
-                imgURL: p.photos?.[0]?.url,
-              };
-            })
-            .filter((person: HermesUser) => {
+        if (people) {
+          this.people = people
+            .map((p: PersonModel) => p.email)
+            .filter((email: string) => {
               // filter out any people already selected
               return !this.args.selected.find(
-                (selectedPerson) => selectedPerson.email === person.email
+                (selectedEmail) => selectedEmail === email,
+              );
+            })
+            .filter((email: string) => {
+              // filter the authenticated user if `excludeSelf` is true
+              return (
+                !this.args.excludeSelf ||
+                email !== this.authenticatedUser.info.email
               );
             });
         } else {

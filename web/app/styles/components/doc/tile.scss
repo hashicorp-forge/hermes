@@ -1,7 +1,54 @@
-.doc-tile-title {
-  @apply text-display-200 font-semibold text-color-foreground-strong overflow-hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
+.tile {
+  .vertical-line {
+    @apply text-color-foreground-faint opacity-50;
+  }
+
+  .tags {
+    @apply flex shrink-0 gap-1;
+  }
+
+  h3 {
+    @apply text-display-300 font-semibold text-color-foreground-strong;
+  }
+
+  a {
+    @apply pointer-events-auto;
+
+    &[disabled] {
+      @apply pointer-events-none;
+    }
+  }
+}
+
+.divided-list > li {
+  &:hover,
+  &:focus-within {
+    .drag-handle-container.shaded::before {
+      content: "";
+      @apply absolute top-0 bottom-0 left-0 right-0;
+      @apply bg-color-surface-faint;
+    }
+  }
+
+  &:not(:last-child) {
+    &:hover,
+    &:focus-within {
+      .drag-handle-container {
+        @apply border-b-color-border-faint;
+      }
+    }
+  }
+
+  &:not(:first-child) {
+    &:hover,
+    &:focus-within {
+      .drag-handle-container {
+        @apply border-t-color-border-faint;
+      }
+    }
+  }
+
+  .drag-handle-container {
+    @apply border-t border-b border-t-transparent border-b-transparent;
+  }
 }

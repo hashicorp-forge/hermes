@@ -1,16 +1,12 @@
 .active-filter-list {
-  @apply pt-6 flex items-start;
+  @apply flex items-start gap-1;
 
   h3 {
-    @apply h-[30px] flex items-center mr-4 font-semibold shrink-0;
-  }
-
-  .active-filter-list-container {
-    @apply min-h-[30px] flex items-center flex-wrap;
+    @apply mr-4 flex h-[30px] shrink-0 items-center font-semibold text-color-foreground-strong;
   }
 
   .clear-all-link {
-    @apply no-underline text-color-foreground-faint flex items-center h-[30px] ml-2 shrink-0;
+    @apply ml-2 flex h-[30px] shrink-0 items-center text-color-foreground-faint no-underline;
 
     &:hover {
       @apply text-color-foreground-strong;

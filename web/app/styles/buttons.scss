@@ -1,0 +1,36 @@
+.quarternary-button {
+  @apply flex items-center justify-center gap-1.5 rounded-button-md border border-transparent;
+
+  &:hover:not(.disabled):not(:focus),
+  &:focus,
+  &.open {
+    @apply border-color-border-strong bg-color-foreground-high-contrast outline-none;
+  }
+
+  &:focus,
+  &:focus-visible {
+    @apply border-color-focus-action-internal;
+
+    &.disabled {
+      @apply border-color-border-strong;
+
+      &::before {
+        @apply border-color-border-primary;
+      }
+    }
+
+    &::before {
+      content: "";
+      @apply absolute -top-1 -right-1 -bottom-1 -left-1 -z-10 rounded-[8px] border-[3px] border-color-focus-action-external;
+    }
+  }
+
+  &[class=".rounded"]::before {
+    @apply rounded-[6px];
+  }
+}
+
+.pill-button,
+.pill-button:focus::before {
+  @apply rounded-l-full rounded-r-full;
+}

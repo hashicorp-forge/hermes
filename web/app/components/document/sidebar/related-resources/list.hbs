@@ -1,9 +1,11 @@
 <AnimatedContainer data-test-related-resources-list class="w-full">
   <div {{did-insert this.enableAnimation}}>
     {{#if this.listIsEmpty}}
-      <div class="mt-1.5" data-test-related-resources-list-empty-state>
-        <CustomEditableFields::EmptyState />
-      </div>
+      <Document::Sidebar::EmptyStateAddButton
+        @isReadOnly={{@editingIsDisabled}}
+        @action={{this.showModal}}
+        data-test-related-resources-list-empty-state
+      />
     {{else}}
       <ul class="related-resources-list" ...attributes>
         {{#animated-each

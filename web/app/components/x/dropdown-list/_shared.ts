@@ -12,7 +12,7 @@ export type XDropdownListInteractiveComponentArgs = {
 };
 
 /**
- * Used by Index, Items and BadgeDropdownList
+ * Used by Index and Items
  */
 export interface XDropdownListSharedArgs {
   items?: any;
@@ -21,7 +21,7 @@ export interface XDropdownListSharedArgs {
 }
 
 /**
- * Used by ToggleAction and ToggleButton
+ * Used by ToggleAction, ToggleSelect and ToggleButton
  */
 export interface XDropdownListToggleComponentArgs {
   registerAnchor: (e: HTMLElement) => void;

@@ -1,0 +1,40 @@
+.segmented-control {
+  @apply flex;
+
+  a {
+    @apply relative flex h-9 w-1/3 items-center justify-center gap-1.5 rounded-none border border-color-palette-neutral-300;
+    @apply bg-color-page-faint;
+
+    &:first-child {
+      @apply rounded-l-button-md;
+    }
+
+    &:last-child {
+      @apply rounded-r-button-md;
+    }
+
+    &:hover:not(.active) {
+      @apply bg-color-page-primary;
+    }
+
+    + a {
+      @apply -ml-px;
+    }
+
+    &:focus {
+      @apply z-20;
+    }
+  }
+
+  .active {
+    @apply z-10 border-color-foreground-action-hover bg-color-foreground-action text-white;
+
+    path {
+      @apply fill-current;
+    }
+
+    .status-icon-fill {
+      fill: none;
+    }
+  }
+}

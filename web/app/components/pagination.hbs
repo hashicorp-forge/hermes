@@ -1,0 +1,46 @@
+<div data-test-pagination class="pagination mt-8 flex justify-center">
+  {{#if (eq @nbPages 1)}}
+    {{! There is only one page of results }}
+    <Pagination::Link @icon="chevron-left" @disabled={{true}} />
+    <Pagination::Link @page={{1}} @disabled={{true}} />
+    <Pagination::Link @icon="chevron-right" @disabled={{true}} />
+  {{else}}
+    {{! There is more than one page of results }}
+    {{#each this.pages as |page index|}}
+      {{#if (eq page @currentPage)}}
+        {{! This is the current page }}
+        {{#if (eq this.pages.length (add index 1))}}
+          {{! This is the current page and also the last page }}
+          <Pagination::Link @page={{page}} @disabled={{true}} />
+          <Pagination::Link @icon="chevron-right" @disabled={{true}} />
+        {{else if (eq index 0)}}
+          {{! This is the current page and also the first page }}
+          <Pagination::Link @icon="chevron-left" @disabled={{true}} />
+          <Pagination::Link @page={{page}} @disabled={{true}} />
+        {{else}}
+          {{! This is the current page, but not the last page}}
+          <Pagination::Link @page={{page}} @disabled={{true}} />
+        {{/if}}
+      {{else}}
+        {{! This is not the current page }}
+        {{#if (eq this.pages.length (add index 1))}}
+          {{! This is the last page, and not current }}
+          <Pagination::Link @page={{page}} />
+          <Pagination::Link
+            @icon="chevron-right"
+            @page={{add @currentPage 1}}
+          />
+        {{else if (eq index 0)}}
+          {{! This is the first page, and not current }}
+          <Pagination::Link
+            @icon="chevron-left"
+            @page={{add @currentPage -1}}
+          />
+          <Pagination::Link @page={{page}} />
+        {{else}}
+          <Pagination::Link @page={{page}} />
+        {{/if}}
+      {{/if}}
+    {{/each}}
+  {{/if}}
+</div>

@@ -1,10 +1,10 @@
-{{! @glint-nocheck: not typesafe yet }}
 <Hds::Alert
   @type="inline"
   @color="critical"
   @icon={{false}}
   @onDismiss={{@onDismiss}}
   class="mt-3"
+  ...attributes
   as |A|
 >
   <A.Title>{{@title}}</A.Title>

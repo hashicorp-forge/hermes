@@ -1,0 +1,66 @@
+<tr data-test-table-row ...attributes>
+  <td class="name">
+    <LinkTo
+      data-test-document-link
+      @route="authenticated.document"
+      @model="{{@doc.objectID}}"
+      @query={{hash draft=this.isDraft}}
+      class="inner flex h-full w-full items-start gap-3.5 focus:outline-none"
+    >
+      <Doc::Thumbnail @product={{@doc.product}} @status={{@doc.status}} />
+      <div class="relative overflow-hidden">
+        <div>
+          <h4
+            class="hds-typography-body-200 hds-font-weight-semibold hds-foreground-strong"
+          >
+            {{@doc.title}}
+          </h4>
+          {{#if @doc.docNumber}}
+            <div class="whitespace-nowrap text-color-foreground-faint">
+              {{@doc.docNumber}}
+            </div>
+          {{/if}}
+        </div>
+      </div>
+    </LinkTo>
+  </td>
+  <td class="type">
+    <div class="inner">
+      {{@doc.docType}}
+    </div>
+  </td>
+  <td class="status">
+    <div class="inner">
+      <Doc::Status @status={{@doc.status}} @hideProgress={{true}} />
+    </div>
+  </td>
+  <td class="product">
+    <div class="inner">
+      <ProductLink @product={{@doc.product}} class="underlined-link">
+        {{get-product-label @doc.product}}
+      </ProductLink>
+    </div>
+  </td>
+  <td data-test-table-row-owner-cell class="owner">
+    <div class="inner flex flex-col items-start">
+      <LinkTo
+        data-test-owner-link
+        @route="authenticated.documents"
+        @query={{get-owner-query (get @doc.owners 0)}}
+        class="underlined-link grid"
+      >
+        <Person @email={{get @doc.owners 0}} />
+      </LinkTo>
+    </div>
+  </td>
+  <td class="time">
+    <div class="inner">
+      <div
+        data-test-table-row-time-cell
+        class={{if (eq this.time "Unknown") "text-color-foreground-disabled"}}
+      >
+        {{this.time}}
+      </div>
+    </div>
+  </td>
+</tr>

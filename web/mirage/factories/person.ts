@@ -1,6 +1,12 @@
 import { Factory } from "miragejs";
+import { TEST_USER_PHOTO } from "../utils";
 
 export default Factory.extend({
-  emailAddresses: (i: number) => [{ value: `user${i + 1}@hashicorp.com` }],
-  photos: (i: number) => [{ url: "" }],
+  id: (i) => `person-${i}`,
+  name: "Foo Bar",
+  firstName: "Foo",
+  email() {
+    return `${this.id}@hashicorp.com`;
+  },
+  picture: TEST_USER_PHOTO,
 });

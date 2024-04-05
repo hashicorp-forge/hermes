@@ -8,10 +8,13 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/hashicorp-forge/hermes/internal/cmd/base"
 	"github.com/hashicorp-forge/hermes/internal/config"
+	"github.com/hashicorp-forge/hermes/internal/datadog"
 	"github.com/hashicorp-forge/hermes/internal/db"
 	"github.com/hashicorp-forge/hermes/internal/indexer"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
+	"github.com/hashicorp/go-hclog"
+	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 )
 
 type Command struct {
@@ -76,6 +79,42 @@ func (c *Command) Run(args []string) int {
 		return 1
 	}
 
+	// Configure logger.
+	switch cfg.LogFormat {
+	case "json":
+		log = hclog.New(&hclog.LoggerOptions{
+			JSONFormat: true,
+		})
+	case "standard":
+	case "":
+	default:
+		ui.Error(fmt.Sprintf("invalid value for log format: %s", cfg.LogFormat))
+		return 1
+	}
+
+	// Initialize Datadog.
+	dd := datadog.NewConfig(*cfg)
+	if dd.Enabled {
+		tracerOpts := []tracer.StartOption{
+			tracer.WithLogStartup(false),
+		}
+
+		if dd.Env != "" {
+			tracerOpts = append(tracerOpts, tracer.WithEnv(dd.Env))
+		}
+		if dd.Service != "" {
+			tracerOpts = append(tracerOpts, tracer.WithService(dd.Service))
+		}
+		if dd.ServiceVersion != "" {
+			tracerOpts = append(
+				tracerOpts,
+				tracer.WithServiceVersion(dd.ServiceVersion),
+			)
+		}
+
+		tracer.Start(tracerOpts...)
+	}
+
 	// Initialize database connection.
 	db, err := db.NewDB(*cfg.Postgres)
 	if err != nil {
@@ -105,6 +144,7 @@ func (c *Command) Run(args []string) int {
 		indexer.WithAlgoliaClient(algo),
 		indexer.WithBaseURL(cfg.BaseURL),
 		indexer.WithDatabase(db),
+		indexer.WithDocumentTypes(cfg.DocumentTypes.DocumentType),
 		indexer.WithDocumentsFolderID(cfg.GoogleWorkspace.DocsFolder),
 		indexer.WithDraftsFolderID(cfg.GoogleWorkspace.DraftsFolder),
 		indexer.WithGoogleWorkspaceService(goog),
@@ -121,6 +161,10 @@ func (c *Command) Run(args []string) int {
 	if cfg.Indexer.UpdateDraftHeaders {
 		idxOpts = append(idxOpts,
 			indexer.WithUpdateDraftHeaders(true))
+	}
+	if cfg.Indexer.UseDatabaseForDocumentData {
+		idxOpts = append(idxOpts,
+			indexer.WithUseDatabaseForDocumentData(true))
 	}
 	idx, err := indexer.NewIndexer(idxOpts...)
 	if err != nil {

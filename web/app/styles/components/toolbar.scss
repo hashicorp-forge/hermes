@@ -11,3 +11,39 @@
     }
   }
 }
+
+.facets {
+  li {
+    &:not(:first-child) {
+      button,
+      input {
+        @apply rounded-none;
+      }
+
+      button,
+      input {
+        @apply border-l-0;
+      }
+    }
+
+    &:first-child {
+      button {
+        @apply rounded-r-none;
+      }
+    }
+
+    &:last-child {
+      button,
+      input {
+        @apply rounded-r-button-md;
+      }
+
+      input {
+        &:focus,
+        &.mock-focus {
+          @apply -ml-px rounded-l-button-md border-l;
+        }
+      }
+    }
+  }
+}

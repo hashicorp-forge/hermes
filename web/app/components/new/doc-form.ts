@@ -3,35 +3,25 @@ import { task, timeout } from "ember-concurrency";
 import { inject as service } from "@ember/service";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
+import ConfigService from "hermes/services/config";
 import Ember from "ember";
 import FetchService from "hermes/services/fetch";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import RouterService from "@ember/routing/router-service";
-import ModalAlertsService from "hermes/services/modal-alerts";
-import { HermesUser } from "hermes/types/document";
-import FlashService from "ember-cli-flash/services/flash-messages";
+import ModalAlertsService, { ModalType } from "hermes/services/modal-alerts";
 import { assert } from "@ember/debug";
 import cleanString from "hermes/utils/clean-string";
-import { ProductArea } from "../inputs/product-select";
+import { ProductArea } from "hermes/services/product-areas";
+import { next } from "@ember/runloop";
+import HermesFlashMessagesService from "hermes/services/flash-messages";
+import DocumentTypesService from "hermes/services/document-types";
 
 interface DocFormErrors {
   title: string | null;
-  summary: string | null;
   productAbbreviation: string | null;
-  tags: string | null;
-  contributors: string | null;
 }
 
-const FORM_ERRORS: DocFormErrors = {
-  title: null,
-  summary: null,
-  productAbbreviation: null,
-  tags: null,
-  contributors: null,
-};
-
 const AWAIT_DOC_DELAY = Ember.testing ? 0 : 2000;
-const AWAIT_DOC_CREATED_MODAL_DELAY = Ember.testing ? 0 : 1500;
 
 interface NewDocFormComponentSignature {
   Args: {
@@ -40,28 +30,28 @@ interface NewDocFormComponentSignature {
 }
 
 export default class NewDocFormComponent extends Component<NewDocFormComponentSignature> {
+  @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
+  @service declare documentTypes: DocumentTypesService;
   @service declare authenticatedUser: AuthenticatedUserService;
-  @service declare flashMessages: FlashService;
+  @service declare flashMessages: HermesFlashMessagesService;
   @service declare modalAlerts: ModalAlertsService;
   @service declare router: RouterService;
 
   @tracked protected title: string = "";
   @tracked protected summary: string = "";
-  @tracked protected productArea: string | null = null;
+  @tracked protected productArea?: string;
   @tracked protected productAbbreviation: string | null = null;
-  @tracked protected contributors: HermesUser[] = [];
+  @tracked protected contributors: string[] = [];
 
   @tracked protected _form: HTMLFormElement | null = null;
 
-  /**
-   * Whether the form has all required fields filled out.
-   * True if the title and product area are filled out.
-   */
-  @tracked protected formRequirementsMet = false;
+  @tracked protected summaryIsLong = false;
 
   /**
-   * Whether the document is being created.
+   * Whether the document is being created, or in the process of
+   * transitioning to the document screen after successful creation.
+   * Used by the `New::Form` component for conditional rendering.
    * Set true when the createDoc task is running.
    * Reverted only if an error occurs.
    */
@@ -70,13 +60,10 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
   /**
    * An object containing error messages for each applicable form field.
    */
-  @tracked protected formErrors = { ...FORM_ERRORS };
-
-  /**
-   * Whether the summary is more than 200 characters.
-   * Used in the template to gently discourage long summaries.
-   */
-  @tracked protected summaryIsLong = false;
+  @tracked protected formErrors: DocFormErrors = {
+    title: null,
+    productAbbreviation: null,
+  };
 
   /**
    * Whether to validate eagerly, that is, after every change to the form.
@@ -92,23 +79,25 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     return this._form;
   }
 
+  protected get docTypeIcon() {
+    return this.documentTypes.getFlightIcon(this.args.docType);
+  }
+
   /**
    * Whether the form has errors.
    */
   private get hasErrors(): boolean {
-    const defined = (a: unknown) => a != null;
-    return Object.values(this.formErrors).filter(defined).length > 0;
+    return Object.values(this.formErrors).some((error) => error !== null);
+  }
+
+  protected get buttonIsActive() {
+    return !!this.title && !!this.productAbbreviation;
   }
 
   /**
-   * Sets `formRequirementsMet` and conditionally validates the form.
+   * Validates the form if `validateEagerly` is true.
    */
   private maybeValidate() {
-    if (this.title && this.productArea) {
-      this.formRequirementsMet = true;
-    } else {
-      this.formRequirementsMet = false;
-    }
     if (this.validateEagerly) {
       this.validate();
     }
@@ -118,21 +107,12 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    * Validates the form and updates the `formErrors` property.
    */
   private validate() {
-    const errors = { ...FORM_ERRORS };
-    if (this.productAbbreviation) {
-      if (/\d/.test(this.productAbbreviation)) {
-        errors.productAbbreviation =
-          "Product abbreviation can't include a number";
-      }
-    }
-    this.formErrors = errors;
-  }
-
-  /**
-   * Returns contributor emails as an array of strings.
-   */
-  private getEmails(values: HermesUser[]) {
-    return values.map((person) => person.email);
+    this.formErrors = {
+      title: this.title ? null : "Title is required",
+      productAbbreviation: this.productAbbreviation
+        ? null
+        : "Product/area is required",
+    };
   }
 
   @action protected registerForm(form: HTMLFormElement) {
@@ -141,10 +121,9 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
 
   /**
    * Binds the FormData to our locally tracked properties.
-   * If the summary is long, shows a gentle warning.
    * Conditionally validates.
    */
-  @action protected updateForm() {
+  @action protected onKeydown(e: KeyboardEvent) {
     const formObject = Object.fromEntries(new FormData(this.form).entries());
 
     assert("title is missing from formObject", "title" in formObject);
@@ -153,14 +132,27 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
     this.title = formObject["title"] as string;
     this.summary = formObject["summary"] as string;
 
-    if ("productArea" in formObject) {
-      this.productArea = formObject["productArea"] as string;
-    }
-
     if (this.summary.length > 200) {
       this.summaryIsLong = true;
     } else {
       this.summaryIsLong = false;
+    }
+
+    if ("productArea" in formObject) {
+      this.productArea = formObject["productArea"] as string;
+    }
+
+    if (e.key === "Enter") {
+      e.preventDefault();
+      this.submit();
+      return;
+    }
+
+    if (this.formErrors.title || this.formErrors.productAbbreviation) {
+      // Validate once the input values are captured
+      next("afterRender", () => {
+        this.validate();
+      });
     }
 
     this.maybeValidate();
@@ -169,13 +161,13 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
   /**
    * Updates the contributors property and conditionally validates the form.
    */
-  @action protected updateContributors(contributors: HermesUser[]) {
+  @action protected updateContributors(contributors: string[]) {
     this.contributors = contributors;
   }
 
   @action protected onProductSelect(
     productName: string,
-    attributes: ProductArea
+    attributes: ProductArea,
   ) {
     this.productArea = productName;
     this.productAbbreviation = attributes.abbreviation;
@@ -186,11 +178,11 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    * Validates the form, and, if valid, creates a document.
    * If the form is invalid, sets `validateEagerly` true.
    */
-  @action protected submit(event: SubmitEvent) {
-    event.preventDefault();
+  @action protected submit(event?: SubmitEvent) {
+    event?.preventDefault();
     this.validateEagerly = true;
     this.validate();
-    if (this.formRequirementsMet && !this.hasErrors) {
+    if (!this.hasErrors) {
       this.createDoc.perform();
     }
   }
@@ -204,11 +196,11 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
 
     try {
       const doc = await this.fetchSvc
-        .fetch("/api/v1/drafts", {
+        .fetch(`/api/${this.configSvc.config.api_version}/drafts`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            contributors: this.getEmails(this.contributors),
+            contributors: this.contributors,
             docType: this.args.docType,
             product: this.productArea,
             productAbbreviation: this.productAbbreviation,
@@ -221,23 +213,28 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
       // Wait for document to be available.
       await timeout(AWAIT_DOC_DELAY);
 
-      // Set modal on a delay so it appears after transition.
-      this.modalAlerts.setActive.perform(
-        "docCreated",
-        AWAIT_DOC_CREATED_MODAL_DELAY
-      );
-
-      this.router.transitionTo("authenticated.document", doc.id, {
-        queryParams: { draft: true },
-      });
-    } catch (err: unknown) {
+      this.router
+        .transitionTo("authenticated.document", doc.id, {
+          queryParams: { draft: true },
+        })
+        .then(() => {
+          if (this.configSvc.config.create_docs_as_user) {
+            this.flashMessages.success("", {
+              title: "Draft created!",
+            });
+          } else {
+            /**
+             * If `create_docs_as_user` is false, show a modal alert
+             * explaining the limitations on notifications.
+             */
+            this.modalAlerts.open(ModalType.DraftCreated);
+          }
+        });
+    } catch (e) {
       this.docIsBeingCreated = false;
-      this.flashMessages.add({
+
+      this.flashMessages.critical((e as any).message, {
         title: "Error creating document draft",
-        message: `${err}`,
-        type: "critical",
-        timeout: 6000,
-        extendedTimeout: 1000,
       });
     }
   });

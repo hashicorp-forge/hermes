@@ -11,6 +11,12 @@ interface DismissibleModifierSignature {
     Named: {
       dismiss: () => void;
       related?: HTMLElement | HTMLElement[];
+      /**
+       * Whether to defer the Escape key to the calling component.
+       * Used when the Escape key is used for something other than dismissing,
+       * such as cancelling an EditableField and restoring its original value.
+       */
+      shouldIgnoreEscape?: boolean;
     };
   };
 }
@@ -33,6 +39,7 @@ export default class DismissibleModifier extends Modifier<DismissibleModifierSig
   @tracked private _element: HTMLElement | null = null;
   @tracked private _dismiss?: () => void;
   @tracked private related?: HTMLElement | HTMLElement[];
+  @tracked private shouldIgnoreEscape?: boolean;
 
   get element(): HTMLElement {
     assert("_element must exist", this._element);
@@ -74,6 +81,9 @@ export default class DismissibleModifier extends Modifier<DismissibleModifierSig
   @action maybeDismiss(event: FocusEvent | PointerEvent | KeyboardEvent) {
     if (event instanceof KeyboardEvent) {
       if (event.key === "Escape") {
+        if (this.shouldIgnoreEscape) {
+          return;
+        }
         let activeElement = document.activeElement;
         if (
           activeElement?.attributes.getNamedItem("type")?.value === "search"
@@ -102,14 +112,13 @@ export default class DismissibleModifier extends Modifier<DismissibleModifierSig
   modify(
     element: HTMLElement,
     _positional: [],
-    named: {
-      dismiss: () => void;
-      related?: HTMLElement | HTMLElement[];
-    }
+    named: DismissibleModifierSignature["Args"]["Named"],
   ) {
     this._element = element;
     this._dismiss = named.dismiss;
     this.related = named.related;
+    this.shouldIgnoreEscape = named.shouldIgnoreEscape;
+
     document.addEventListener("focusin", this.maybeDismiss);
     document.addEventListener("click", this.maybeDismiss);
     document.addEventListener("keydown", this.maybeDismiss);

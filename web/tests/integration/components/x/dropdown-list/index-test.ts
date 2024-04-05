@@ -39,11 +39,13 @@ const FIRST_ITEM_ID = "x-dropdown-list-item-0";
 const SECOND_ITEM_ID = "x-dropdown-list-item-1";
 const LAST_ITEM_ID = "x-dropdown-list-item-7";
 const LINK_TO_SELECTOR = "[data-test-x-dropdown-list-item-link-to]";
+const EXTERNAL_LINK = "[data-test-x-dropdown-list-item-external-link]";
 const FILTER_INPUT_SELECTOR = "[data-test-x-dropdown-list-input]";
 const DEFAULT_NO_MATCHES_SELECTOR = ".x-dropdown-list-default-empty-state";
 const LOADED_CONTENT_SELECTOR = "[data-test-x-dropdown-list-loaded-content]";
 const LOADING_BLOCK_SELECTOR = "[data-test-x-dropdown-list-loading-block]";
 const DEFAULT_LOADER_SELECTOR = ".x-dropdown-list-default-loading-container";
+const TOGGLE_ACTION_CHEVRON = "[data-test-toggle-action-chevron]";
 
 interface XDropdownListComponentTestContext extends TestContext {
   items: Record<string, { count: number; isSelected: boolean }>;
@@ -51,6 +53,8 @@ interface XDropdownListComponentTestContext extends TestContext {
   buttonWasClicked?: boolean;
   isLoading?: boolean;
   placement?: Placement | null;
+  selected?: string;
+  hasChevron?: boolean;
 }
 
 module("Integration | Component | x/dropdown-list", function (hooks) {
@@ -77,7 +81,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
     assert.ok(
       ariaControlsValue?.startsWith("x-dropdown-list-items"),
-      "the correct aria-controls attribute is set"
+      "the correct aria-controls attribute is set",
     );
 
     await click("[data-test-toggle]");
@@ -97,13 +101,13 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
     assert.ok(
       ariaControlsValue?.startsWith(CONTAINER_CLASS),
-      "the correct aria-controls attribute is set"
+      "the correct aria-controls attribute is set",
     );
 
     assert.equal(
       document.activeElement,
       this.element.querySelector(FILTER_INPUT_SELECTOR),
-      "the input is autofocused"
+      "the input is autofocused",
     );
   });
 
@@ -140,6 +144,54 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
     assert.dom("[data-test-x-dropdown-list]").doesNotExist();
     assert.dom(DEFAULT_NO_MATCHES_SELECTOR).hasText("No matches");
+  });
+
+  test("filtering works as expected when a secondary filter is passed in", async function (assert) {
+    this.set("items", {
+      foo: {
+        alias: "abc",
+      },
+      bar: {
+        alias: "def",
+      },
+      baz: {
+        alias: "foo", // Use an alias that matches the value of an item
+      },
+    });
+
+    await render<XDropdownListComponentTestContext>(hbs`
+      <X::DropdownList
+        @inputIsShown={{true}}
+        @secondaryFilterAttribute="alias"
+        @items={{this.items}}
+      >
+        <:anchor as |dd|>
+          <dd.ToggleButton @text="Toggle" />
+        </:anchor>
+        <:item as |dd|>
+          <dd.Action>
+            {{dd.value}}
+          </dd.Action>
+        </:item>
+      </X::DropdownList>
+    `);
+
+    await click(TOGGLE_BUTTON_SELECTOR);
+
+    assert.dom("[data-test-x-dropdown-list-item]").exists({ count: 3 });
+
+    await fillIn(FILTER_INPUT_SELECTOR, "foo");
+
+    assert
+      .dom("[data-test-x-dropdown-list-item]")
+      .exists(
+        { count: 2 },
+        "the list is filtered by both the primary value and secondary filter",
+      );
+
+    await fillIn(FILTER_INPUT_SELECTOR, "abc");
+
+    assert.dom("[data-test-x-dropdown-list-item]").exists({ count: 1 });
   });
 
   test("dropdown trigger has keyboard support", async function (assert) {
@@ -285,7 +337,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     assert.deepEqual(
       listItemIDs,
       ["0", "1", "2", "3", "4", "5", "6", "7"],
-      "the IDs are assigned in order"
+      "the IDs are assigned in order",
     );
   });
 
@@ -317,15 +369,15 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
     assert.false(
       findAll("[data-test-item-button]").some((item) =>
-        item.getAttribute("aria-selected")
+        item.getAttribute("aria-selected"),
       ),
-      "no items are aria-selected"
+      "no items are aria-selected",
     );
 
     await triggerKeyEvent(
       "[data-test-x-dropdown-list]",
       "keydown",
-      "ArrowDown"
+      "ArrowDown",
     );
 
     assert.dom("#" + FIRST_ITEM_ID).hasAttribute("aria-selected");
@@ -333,7 +385,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     await triggerKeyEvent(
       "[data-test-x-dropdown-list]",
       "keydown",
-      "ArrowDown"
+      "ArrowDown",
     );
 
     assert.dom("#" + FIRST_ITEM_ID).doesNotHaveAttribute("aria-selected");
@@ -352,7 +404,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     await triggerKeyEvent(
       "[data-test-x-dropdown-list]",
       "keydown",
-      "ArrowDown"
+      "ArrowDown",
     );
 
     assert.dom("#" + LAST_ITEM_ID).doesNotHaveAttribute("aria-selected");
@@ -367,7 +419,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     assert
       .dom("[data-test-button-clicked]")
       .exists(
-        "keying Enter triggers the click action of the aria-selected item"
+        "keying Enter triggers the click action of the aria-selected item",
       );
 
     assert
@@ -395,9 +447,9 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
     assert.false(
       findAll("[data-test-item-button]").some((item) =>
-        item.getAttribute("aria-selected")
+        item.getAttribute("aria-selected"),
       ),
-      "no items are aria-selected"
+      "no items are aria-selected",
     );
 
     await triggerEvent("#" + FIRST_ITEM_ID, "mouseenter");
@@ -455,49 +507,49 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
     assert.true(
       itemBottom > scrollviewBottom,
-      "item four is not fully visible"
+      "item four is not fully visible",
     );
 
     await triggerKeyEvent(
       "[data-test-x-dropdown-list]",
       "keydown",
-      "ArrowDown"
+      "ArrowDown",
     );
 
     assert.equal(
       itemBottom,
       item.offsetTop + itemHeight,
-      "container isn't scrolled unless the target is out of view"
+      "container isn't scrolled unless the target is out of view",
     );
 
     await triggerKeyEvent(
       "[data-test-x-dropdown-list]",
       "keydown",
-      "ArrowDown"
+      "ArrowDown",
     );
 
     assert.equal(
       itemBottom,
       item.offsetTop + itemHeight,
-      "container isn't scrolled unless the target is out of view"
+      "container isn't scrolled unless the target is out of view",
     );
 
     await triggerKeyEvent(
       "[data-test-x-dropdown-list]",
       "keydown",
-      "ArrowDown"
+      "ArrowDown",
     );
 
     assert.equal(
       itemBottom,
       item.offsetTop + itemHeight,
-      "container isn't scrolled unless the target is out of view"
+      "container isn't scrolled unless the target is out of view",
     );
 
     await triggerKeyEvent(
       "[data-test-x-dropdown-list]",
       "keydown",
-      "ArrowDown"
+      "ArrowDown",
     );
 
     measure();
@@ -505,13 +557,13 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     assert.equal(
       container.scrollTop,
       itemTop + itemHeight - containerHeight,
-      "item four scrolled into view"
+      "item four scrolled into view",
     );
 
     await triggerKeyEvent(
       "[data-test-x-dropdown-list]",
       "keydown",
-      "ArrowDown"
+      "ArrowDown",
     );
 
     measure("#x-dropdown-list-item-4");
@@ -519,7 +571,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     assert.equal(
       container.scrollTop,
       itemTop + itemHeight - containerHeight,
-      "item five scrolled into view"
+      "item five scrolled into view",
     );
 
     measure("#" + SECOND_ITEM_ID);
@@ -533,7 +585,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     assert.equal(
       itemTop,
       item.offsetTop,
-      "container isn't scrolled unless the target is out of view"
+      "container isn't scrolled unless the target is out of view",
     );
 
     await triggerKeyEvent("[data-test-x-dropdown-list]", "keydown", "ArrowUp");
@@ -541,7 +593,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     assert.equal(
       itemTop,
       item.offsetTop,
-      "container isn't scrolled unless the target is out of view"
+      "container isn't scrolled unless the target is out of view",
     );
 
     await triggerKeyEvent("[data-test-x-dropdown-list]", "keydown", "ArrowUp");
@@ -560,7 +612,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
           <dd.ToggleButton @text="Toggle" data-test-toggle />
         </:anchor>
         <:item as |dd|>
-          <dd.LinkTo @route="authenticated.all" @query={{hash products="Labs"}}>
+          <dd.LinkTo @route="authenticated.documents" @query={{hash products="Labs"}}>
             {{dd.value}}
           </dd.LinkTo>
         </:item>
@@ -575,9 +627,57 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
     assert.equal(
       firstLink.getAttribute("href"),
-      "/all?products=Labs",
-      "route and query are set"
+      "/documents?products=Labs",
+      "route and query are set",
     );
+  });
+
+  test("the list can be rendered with ExternalLinks", async function (assert) {
+    this.set("items", SHORT_ITEM_LIST);
+
+    await render<XDropdownListComponentTestContext>(hbs`
+      <X::DropdownList @items={{this.items}}>
+        <:anchor as |dd|>
+          <dd.ToggleButton @text="Toggle" data-test-toggle />
+        </:anchor>
+        <:item as |dd|>
+          <dd.ExternalLink href="authenticated.documents">
+            {{dd.value}}
+          </dd.ExternalLink>
+        </:item>
+      </X::DropdownList>
+    `);
+
+    await click("button");
+
+    assert.dom(EXTERNAL_LINK).exists({ count: 3 });
+    assert.dom(EXTERNAL_LINK).hasAttribute("target", "_blank");
+  });
+  test("the toggle action can render with a chevron", async function (assert) {
+    this.set("hasChevron", false);
+
+    await render<XDropdownListComponentTestContext>(hbs`
+      <X::DropdownList>
+        <:anchor as |dd|>
+          <dd.ToggleAction @hasChevron={{this.hasChevron}} data-test-toggle>
+            ---
+          </dd.ToggleAction>
+        </:anchor>
+      </X::DropdownList>
+    `);
+
+    assert.dom(TOGGLE_ACTION_CHEVRON).doesNotExist();
+
+    this.set("hasChevron", true);
+
+    assert.dom(TOGGLE_ACTION_CHEVRON).exists();
+    assert.dom(TOGGLE_ACTION_CHEVRON).hasClass("flight-icon-chevron-down");
+
+    await click(TOGGLE_ACTION_SELECTOR);
+
+    assert.dom(TOGGLE_ACTION_SELECTOR).hasClass("open");
+
+    assert.dom(TOGGLE_ACTION_CHEVRON).hasClass("flight-icon-chevron-up");
   });
 
   test("the list can be rendered with a toggle button", async function (assert) {
@@ -614,31 +714,31 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     assert.dom(".flight-icon-chevron-up").exists();
 
     const ariaControlsValue = htmlElement(TOGGLE_BUTTON_SELECTOR).getAttribute(
-      "aria-controls"
+      "aria-controls",
     );
 
     const dropdownListItemsID = htmlElement(
-      ".x-dropdown-list-items"
+      ".x-dropdown-list-items",
     ).getAttribute("id");
 
     assert.equal(
       ariaControlsValue,
       dropdownListItemsID,
-      "the aria-controls value matches the dropdown list ID"
+      "the aria-controls value matches the dropdown list ID",
     );
 
     let dataAnchorID = htmlElement(TOGGLE_BUTTON_SELECTOR).getAttribute(
-      "data-anchor-id"
+      "data-anchor-id",
     );
 
     let contentAnchoredTo = htmlElement("." + CONTAINER_CLASS).getAttribute(
-      "data-anchored-to"
+      "data-anchored-to",
     );
 
     assert.equal(
       dataAnchorID,
       contentAnchoredTo,
-      "the anchor is properly registered"
+      "the anchor is properly registered",
     );
   });
 
@@ -675,31 +775,31 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     assert.dom("." + CONTAINER_CLASS).exists();
 
     const ariaControlsValue = htmlElement(TOGGLE_ACTION_SELECTOR).getAttribute(
-      "aria-controls"
+      "aria-controls",
     );
 
     const dropdownListItemsID = htmlElement(
-      ".x-dropdown-list-items"
+      ".x-dropdown-list-items",
     ).getAttribute("id");
 
     assert.equal(
       ariaControlsValue,
       dropdownListItemsID,
-      "the aria-controls value matches the dropdown list ID"
+      "the aria-controls value matches the dropdown list ID",
     );
 
     let dataAnchorID = htmlElement(TOGGLE_ACTION_SELECTOR).getAttribute(
-      "data-anchor-id"
+      "data-anchor-id",
     );
 
     let contentAnchoredTo = htmlElement("." + CONTAINER_CLASS).getAttribute(
-      "data-anchored-to"
+      "data-anchored-to",
     );
 
     assert.equal(
       dataAnchorID,
       contentAnchoredTo,
-      "the anchor is properly registered"
+      "the anchor is properly registered",
     );
   });
 
@@ -751,7 +851,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       .dom(".target-div")
       .hasText(
         "View all items",
-        "the rendered-out item was place into the target div"
+        "the rendered-out item was place into the target div",
       );
 
     assert
@@ -892,5 +992,55 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       .doesNotExist("the default empty state is not shown");
 
     assert.dom("[data-test-nothing]").exists("the custom empty state is shown");
+  });
+
+  test("it renders a ToggleSelect to the anchor API", async function (assert) {
+    this.set("items", {});
+
+    await render<XDropdownListComponentTestContext>(hbs`
+      <X::DropdownList @items={{this.items}}>
+        <:anchor as |dd|>
+          <dd.ToggleSelect data-test-toggle>
+            ---
+          </dd.ToggleSelect>
+        </:anchor>
+      </X::DropdownList>
+    `);
+
+    const toggleSelect = "[data-test-toggle]";
+    const content = `.${CONTAINER_CLASS}`;
+
+    assert.dom(toggleSelect).hasClass("x-dropdown-list-toggle-select");
+    assert.dom(`${toggleSelect} [data-test-caret]`).exists();
+
+    assert.dom(content).doesNotExist();
+
+    await click(toggleSelect);
+
+    assert.dom(content).exists();
+
+    await click(toggleSelect);
+
+    assert.dom(content).doesNotExist();
+  });
+
+  test("it renders the selected value to the anchor API", async function (assert) {
+    this.set("items", {});
+    this.set("selected", "Foo");
+
+    await render<XDropdownListComponentTestContext>(hbs`
+      <X::DropdownList
+        @items={{this.items}}
+        @selected={{this.selected}}
+      >
+        <:anchor as |dd|>
+          <div data-test-div>
+            {{dd.selected}}
+          </div>
+        </:anchor>
+      </X::DropdownList>
+    `);
+
+    assert.dom("[data-test-div]").hasText("Foo");
   });
 });

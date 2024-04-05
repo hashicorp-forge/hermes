@@ -1,0 +1,61 @@
+<div ...attributes>
+  <div class="mb-3 flex h-6 items-center gap-2">
+    <h3 data-test-resource-list-header class="hermes-h4">
+      {{yield to="header"}}
+    </h3>
+    {{#animated-if this.badgeIsShown rules=this.badgeTransitionRules}}
+      <Hds::BadgeCount
+        data-test-project-resource-list-count
+        @text={{this.badgeCount}}
+      />
+    {{/animated-if}}
+  </div>
+
+  {{! @glint-ignore }}
+  <AnimatedContainer @motion={{@motion}}>
+    {{#animated-if
+      (gt @items.length 0)
+      rules=this.emptyStateTransitionRules
+      initialInsertion=true
+      finalRemoval=true
+    }}
+      <div>
+        <ol data-test-resource-list class="divided-list">
+          {{#animated-each
+            @items
+            rules=this.listTransitionRules
+            initialInsertion=true
+            finalRemoval=true
+            as |item i|
+          }}
+            <Project::ResourceListItem
+              @isReadOnly={{@isReadOnly}}
+              @itemCount={{@items.length}}
+              @onSave={{@onSave}}
+              @item={{item}}
+              @index={{i}}
+              as |r|
+            >
+              {{yield
+                (hash
+                  item=item
+                  index=i
+                  isReadOnly=@isReadOnly
+                  canMoveUp=(gt i 0)
+                  canMoveDown=(lt i (add @items.length -1))
+                  moveToTop=r.moveToTop
+                  moveUp=r.moveUp
+                  moveDown=r.moveDown
+                  moveToBottom=r.moveToBottom
+                )
+                to="item"
+              }}
+            </Project::ResourceListItem>
+          {{/animated-each}}
+        </ol>
+      </div>
+    {{else}}
+      <Project::ResourceEmptyState />
+    {{/animated-if}}
+  </AnimatedContainer>
+</div>

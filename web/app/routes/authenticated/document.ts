@@ -1,26 +1,53 @@
-// @ts-nocheck - Not yet typed
 import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
-import timeAgo from "hermes/utils/time-ago";
-import RSVP from "rsvp";
-import parseDate from "hermes/utils/parse-date";
 import htmlElement from "hermes/utils/html-element";
-import { scheduleOnce } from "@ember/runloop";
+import { schedule } from "@ember/runloop";
+import ConfigService from "hermes/services/config";
+import FetchService from "hermes/services/fetch";
+import RouterService from "@ember/routing/router-service";
+import { HermesDocument } from "hermes/types/document";
+import Transition from "@ember/routing/transition";
+import { HermesDocumentType } from "hermes/types/document-type";
+import AuthenticatedDocumentController from "hermes/controllers/authenticated/document";
+import RecentlyViewedService from "hermes/services/recently-viewed";
+import { assert } from "@ember/debug";
+import HermesFlashMessagesService from "hermes/services/flash-messages";
+import { FLASH_MESSAGES_LONG_TIMEOUT } from "hermes/utils/ember-cli-flash/timeouts";
+import StoreService from "hermes/services/store";
 
-const serializePeople = (people) =>
-  people.map((p) => ({
-    email: p.emailAddresses[0].value,
-    imgURL: p.photos?.[0]?.url,
-  }));
+interface AuthenticatedDocumentRouteParams {
+  document_id: string;
+  draft: boolean;
+}
 
-export default class DocumentRoute extends Route {
-  @service algolia;
-  @service("config") configSvc;
-  @service("fetch") fetchSvc;
-  @service("recently-viewed-docs") recentDocs;
-  @service session;
-  @service flashMessages;
-  @service router;
+interface DocumentRouteModel {
+  doc: HermesDocument;
+  docType: HermesDocumentType;
+}
+
+export enum DocStatus {
+  Draft = "WIP",
+  Approved = "Approved",
+  InReview = "In-Review",
+  Archived = "Obsolete",
+}
+
+export enum DocStatusLabel {
+  Draft = "Draft",
+  Approved = "Approved",
+  InReview = "In Review",
+  Archived = "Archived",
+}
+
+export default class AuthenticatedDocumentRoute extends Route {
+  @service("config") declare configSvc: ConfigService;
+  @service("fetch") declare fetchSvc: FetchService;
+  @service declare recentlyViewed: RecentlyViewedService;
+  @service declare flashMessages: HermesFlashMessagesService;
+  @service declare router: RouterService;
+  @service declare store: StoreService;
+
+  declare controller: AuthenticatedDocumentController;
 
   // Ideally we'd refresh the model when the draft query param changes, but
   // because of a suspected bug in Ember, we can't do that.
@@ -31,36 +58,55 @@ export default class DocumentRoute extends Route {
   //   },
   // };
 
-  showErrorMessage(err) {
-    this.flashMessages.add({
+  showErrorMessage(err: Error) {
+    this.flashMessages.critical(err.message, {
       title: "Error fetching document",
-      message: err.message,
-      type: "critical",
-      sticky: true,
-      extendedTimeout: 1000,
+      timeout: FLASH_MESSAGES_LONG_TIMEOUT,
     });
   }
 
-  async model(params, transition) {
+  async docType(doc: HermesDocument) {
+    const docTypes = (await this.fetchSvc
+      .fetch(`/api/${this.configSvc.config.api_version}/document-types`)
+      .then((r) => r?.json())) as HermesDocumentType[];
+
+    assert("docTypes must exist", docTypes);
+
+    const docType = docTypes.find((dt) => dt.name === doc.docType);
+
+    assert("docType must exist", docType);
+    return docType;
+  }
+
+  async model(
+    params: AuthenticatedDocumentRouteParams,
+    transition: Transition,
+  ) {
     let doc = {};
     let draftFetched = false;
+    let peopleToMaybeFetch: Array<string | undefined> = [];
 
     // Get doc data from the app backend.
     if (params.draft) {
       try {
         doc = await this.fetchSvc
-          .fetch("/api/v1/drafts/" + params.document_id, {
-            method: "GET",
-            headers: {
-              // We set this header to differentiate between document views and
-              // requests to only retrieve document metadata.
-              "Add-To-Recently-Viewed": "true",
+          .fetch(
+            `/api/${this.configSvc.config.api_version}/drafts/` +
+              params.document_id,
+            {
+              method: "GET",
+              headers: {
+                // We set this header to differentiate between document views and
+                // requests to only retrieve document metadata.
+                "Add-To-Recently-Viewed": "true",
+              },
             },
-          })
-          .then((r) => r.json());
-
-        doc.isDraft = params.draft;
+          )
+          .then((r) => r?.json());
         draftFetched = true;
+
+        // Add the draft owner to the list of people to fetch.
+        peopleToMaybeFetch.push((doc as HermesDocument).owners?.[0]);
       } catch (err) {
         /**
          * The doc may have been published since the user last viewed it
@@ -70,100 +116,122 @@ export default class DocumentRoute extends Route {
          */
         transition.abort();
         this.router.transitionTo("authenticated.document", params.document_id);
-        return;
       }
     }
 
     if (!draftFetched) {
       try {
         doc = await this.fetchSvc
-          .fetch("/api/v1/documents/" + params.document_id, {
-            method: "GET",
-            headers: {
-              // We set this header to differentiate between document views and
-              // requests to only retrieve document metadata.
-              "Add-To-Recently-Viewed": "true",
+          .fetch(
+            `/api/${this.configSvc.config.api_version}/documents/` +
+              params.document_id,
+            {
+              method: "GET",
+              headers: {
+                // We set this header to differentiate between document views and
+                // requests to only retrieve document metadata.
+                "Add-To-Recently-Viewed": "true",
+              },
             },
-          })
-          .then((r) => r.json());
+          )
+          .then((r) => r?.json());
 
-        doc.isDraft = false;
+        // Add the doc owner to the list of people to fetch.
+        peopleToMaybeFetch.push((doc as HermesDocument).owners?.[0]);
       } catch (err) {
-        this.showErrorMessage(err);
+        const typedError = err as Error;
+        this.showErrorMessage(typedError);
 
-        // Transition to dashboard
-        this.router.transitionTo("authenticated.dashboard");
-        throw new Error(errorMessage);
+        if (transition.from && transition.from.name !== transition.to.name) {
+          this.router.transitionTo(transition.from.name);
+        } else {
+          this.router.transitionTo("authenticated.dashboard");
+        }
+
+        throw new Error(typedError.message);
       }
     }
 
-    if (!!doc.createdTime) {
-      doc.createdDate = parseDate(doc.createdTime * 1000, "long");
+    const typedDoc = doc as HermesDocument;
+
+    typedDoc.isDraft = typedDoc.status === "WIP";
+
+    if (typedDoc.contributors?.length) {
+      // Add the contributors to the list of people to fetch.
+      peopleToMaybeFetch.push(...typedDoc.contributors);
     }
 
-    // Build strings for created and last-modified.
-    doc.lastModified = `${timeAgo(new Date(doc.modifiedTime * 1000))}`;
+    if (typedDoc.approvers?.length) {
+      // Add the approvers to the list of people to fetch.
+      peopleToMaybeFetch.push(...typedDoc.approvers);
+    }
 
-    // Record analytics.
-    try {
-      await this.fetchSvc.fetch("/api/v1/web/analytics", {
+    const customFields = typedDoc.customEditableFields;
+
+    if (customFields) {
+      const customPeopleFields = Object.entries(customFields)
+        .filter(([_key, attrs]) => attrs.type === "PEOPLE")
+        .map(([key, _attrs]) => key);
+
+      /**
+       * These custom people fields are attributes on the document.
+       * E.g., a custom of "stakeholders" field would be `typedDoc.stakeholders`.
+       * We grab the these attributes and add them to the list of people to fetch.
+       */
+      customPeopleFields.forEach((field) => {
+        // @ts-ignore - Valid but can't be re-cast
+        const value = typedDoc[field];
+
+        if (Array.isArray(value)) {
+          peopleToMaybeFetch.push(...value);
+        }
+      });
+    }
+
+    if (customFields) {
+      /**
+       * If the value is an array, that means it's a PEOPLE field
+       * and we can add its values to the list of people to fetch.
+       */
+      for (const [_key, value] of Object.entries(customFields)) {
+        if (Array.isArray(value)) {
+          peopleToMaybeFetch.push(...value);
+        }
+      }
+    }
+
+    // Load people into the store.
+    await this.store.maybeFetchPeople.perform(peopleToMaybeFetch.compact());
+
+    return {
+      doc: typedDoc,
+      docType: this.docType(typedDoc),
+    };
+  }
+
+  afterModel(model: DocumentRouteModel, transition: any) {
+    /**
+     * Record the document view with the analytics backend.
+     */
+    void this.fetchSvc.fetch(
+      `/api/${this.configSvc.config.api_version}/web/analytics`,
+      {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          document_id: params.document_id,
-          product_name: doc.product,
+          document_id: model.doc.objectID,
+          product_name: model.doc.product,
         }),
-      });
-    } catch (err) {
-      console.log("Error recording analytics: " + err);
-    }
+      },
+    );
 
-    // Load the document as well as the logged in user info
-
-    // Preload avatars for all approvers in the Algolia index.
-    if (doc.contributors?.length) {
-      const contributors = await this.fetchSvc
-        .fetch(`/api/v1/people?emails=${doc.contributors.join(",")}`)
-        .then((r) => r.json());
-
-      if (contributors) {
-        doc.contributors = serializePeople(contributors);
-      } else {
-        doc.contributors = [];
-      }
-    }
-    if (doc.approvers?.length) {
-      const approvers = await this.fetchSvc
-        .fetch(`/api/v1/people?emails=${doc.approvers.join(",")}`)
-        .then((r) => r.json());
-
-      if (approvers) {
-        doc.approvers = serializePeople(approvers);
-      } else {
-        doc.approvers = [];
-      }
-    }
-
-    let docTypes = await this.fetchSvc
-      .fetch("/api/v1/document-types")
-      .then((r) => r.json());
-
-    let docType = docTypes.find((docType) => docType.name === doc.docType);
-
-    return RSVP.hash({
-      doc,
-      docType,
-    });
-  }
-
-  /**
-   * Once the model has resolved, check if the document is loading from
-   * another document, as is the case in related Hermes documents.
-   * In those cases, we scroll the sidebar to the top and toggle the
-   * `modelIsChanging` property to remove and rerender the sidebar,
-   * resetting its local state to reflect the new model data.
-   */
-  afterModel(model, transition) {
+    /**
+     * Once the model has resolved, check if the document is loading from
+     * another document, as is the case in related Hermes documents.
+     * In those cases, we scroll the sidebar to the top and toggle the
+     * `modelIsChanging` property to remove and rerender the sidebar,
+     * resetting its local state to reflect the new model data.
+     */
     if (transition.from) {
       if (transition.from.name === transition.to.name) {
         if (
@@ -174,7 +242,7 @@ export default class DocumentRoute extends Route {
 
           htmlElement(".sidebar-body").scrollTop = 0;
 
-          scheduleOnce("afterRender", () => {
+          schedule("afterRender", () => {
             this.controller.set("modelIsChanging", false);
           });
         }

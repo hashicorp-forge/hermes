@@ -1,7 +1,10 @@
+const plugin = require("tailwindcss/plugin");
+
 module.exports = {
-  content: ["./app/**/*.{html,js,hbs}"],
+  content: ["./app/**/*.{html,js,hbs,gts}"],
   theme: {
     fontSize: {
+      "display-600": ["45px", "55px"],
       "display-500": [
         "var(--token-typography-display-500-font-size)",
         "var(--token-typography-display-500-line-height)",
@@ -47,8 +50,10 @@ module.exports = {
         "button-md": "5px",
       },
       boxShadow: {
+        "elevation-low": "var(--token-elevation-low-box-shadow)",
         "surface-low": "var(--token-surface-low-box-shadow)",
         "surface-mid": "var(--token-surface-mid-box-shadow)",
+        "focus-ring-action": "var(--token-focus-ring-action-box-shadow)",
       },
       colors: {
         // Note: Because the tokens are HEX and not RGB values,
@@ -63,21 +68,25 @@ module.exports = {
         "color-surface-interactive": "var(--token-color-surface-interactive)",
         "color-surface-interactive-hover":
           "var(--token-color-surface-interactive-hover)",
+        "color-surface-interactive-active":
+          "var(--token-color-surface-interactive-active)",
         "color-surface-primary": "var(--token-color-surface-primary)",
         "color-surface-strong": "var(--token-color-surface-strong)",
         "color-surface-warning": "var(--token-color-surface-warning)",
 
         // Border
-        "color-border-faint": "var(--token-color-border-faint)",
         "color-border-critical": "var(--token-color-border-critical)",
         "color-border-highlight": "var(--token-color-border-highlight)",
         "color-border-faint": "var(--token-color-border-faint)",
         "color-border-primary": "var(--token-color-border-primary)",
         "color-border-strong": "var(--token-color-border-strong)",
         "color-border-warning": "var(--token-color-border-warning)",
+        "color-border-input":
+          "var(--token-form-control-base-border-color-default)",
 
         // Page
         "color-page-faint": "var(--token-color-page-faint)",
+        "color-page-faint-90": "#fafafa90",
         "color-page-primary": "var(--token-color-page-primary)",
 
         // Foreground
@@ -162,9 +171,14 @@ module.exports = {
         "color-focus-action-internal":
           "var(--token-color-focus-action-internal)",
 
+        // Alpha
+        "color-palette-alpha-100": "var(--token-color-palette-alpha-100)",
+        "color-palette-alpha-300": "var(--token-color-palette-alpha-300)",
+
         // Neutral
         "color-palette-neutral-50": "var(--token-color-palette-neutral-50)",
         "color-palette-neutral-100": "var(--token-color-palette-neutral-100)",
+        "color-palette-neutral-175": "#eaebed", // custom
         "color-palette-neutral-200": "var(--token-color-palette-neutral-200)",
         "color-palette-neutral-300": "var(--token-color-palette-neutral-300)",
         "color-palette-neutral-400": "var(--token-color-palette-neutral-400)",
@@ -180,7 +194,15 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    plugin(function ({ addUtilities }) {
+      addUtilities({
+        ".wrap-anywhere": {
+          "overflow-wrap": "anywhere",
+        },
+      });
+    }),
+  ],
   corePlugins: {
     // Disable Tailwind's preflight to prevent clashes
     // with @hashicorp/design-system-components

@@ -1,0 +1,8 @@
+a {
+  &:hover,
+  &:focus {
+    .interactive-card {
+      @apply bg-gradient-to-t from-color-page-faint to-color-page-primary;
+    }
+  }
+}

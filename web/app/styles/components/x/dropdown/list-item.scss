@@ -3,7 +3,7 @@
 }
 
 .x-dropdown-list-item-link {
-  @apply no-underline flex text-body-200 items-center py-[7px] pl-2.5 pr-8 w-full text-color-foreground-primary;
+  @apply flex w-full items-center py-[7px] pl-2.5 pr-8 text-body-200 text-color-foreground-primary no-underline;
 
   &.is-aria-selected {
     @apply bg-color-foreground-action text-color-foreground-high-contrast outline-none;
@@ -32,10 +32,35 @@
   }
 }
 
-.x-dropdown-list-item-value {
-  @apply w-full truncate whitespace-nowrap;
-}
+.checkable-item {
+  @apply grid;
+  grid-template-columns: 16px auto;
+  grid-template-areas: "check label";
 
-.x-dropdown-list-item-count {
-  @apply ml-8 shrink-0;
+  &.checkmark-position--trailing {
+    grid-template-columns: auto 16px;
+    grid-template-areas: "label check";
+  }
+
+  &.has-count {
+    grid-template-columns: 16px auto 60px;
+    grid-template-areas: "check label count";
+
+    &.checkmark-position--trailing {
+      grid-template-areas: "label count check";
+      grid-template-columns: auto 60px 16px;
+    }
+  }
+
+  .checkable-item-content {
+    grid-area: label;
+  }
+
+  .checkable-item-count {
+    grid-area: count;
+  }
+
+  .check {
+    grid-area: check;
+  }
 }

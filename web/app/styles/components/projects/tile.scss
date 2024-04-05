@@ -1,0 +1,19 @@
+.project-tile-grid {
+  grid-template-columns: 1fr 120px 160px;
+
+  .title-and-description {
+    grid-column: 1;
+
+    .inner {
+      grid-template-columns: 20px 1fr;
+    }
+  }
+
+  .jira {
+    grid-column: 2;
+  }
+
+  .products {
+    grid-column: 3;
+  }
+}

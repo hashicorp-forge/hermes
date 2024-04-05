@@ -10,15 +10,29 @@ import { SearchOptions, SearchResponse } from "@algolia/client-search";
 import { assert } from "@ember/debug";
 import ConfigService from "./config";
 import {
+  FacetDropdownGroups,
   FacetDropdownObjectDetails,
   FacetRecord,
   FacetRecords,
 } from "hermes/types/facets";
 import SessionService from "./session";
+import { SearchScope } from "hermes/routes/authenticated/results";
+import { FacetName } from "hermes/components/header/toolbar";
+import StoreService from "./_store";
 
+// FIXME: drafts endpoint breaks when you increase this number (to 100, e.g.)
 export const HITS_PER_PAGE = 12;
 export const MAX_VALUES_PER_FACET = 100;
-export const FACET_NAMES = ["docType", "owners", "product", "status"];
+export const DOC_FACET_NAMES = ["docType", "owners", "product", "status"];
+export const PROJECT_FACET_NAMES = ["status"];
+
+export interface AlgoliaHit {
+  objectID: string;
+  _highlightResult?: {};
+  _snippetResult?: {};
+  _rankingInfo?: {};
+  _distinctSeqID?: number;
+}
 
 export type AlgoliaSearchParams = RequestOptions & SearchOptions;
 export type AlgoliaFacetsObject = NonNullable<SearchResponse["facets"]>;
@@ -26,6 +40,7 @@ export type AlgoliaFacetsObject = NonNullable<SearchResponse["facets"]>;
 export default class AlgoliaService extends Service {
   @service("config") declare configSvc: ConfigService;
   @service declare session: SessionService;
+  @service declare store: StoreService;
   @service declare authenticatedUser: AuthenticatedUserService;
 
   /**
@@ -45,7 +60,7 @@ export default class AlgoliaService extends Service {
      */
     if (config.environment != "production") {
       console.log(
-        "Running as non-production environment: Algolia client configured to directly interact with Algolia's API."
+        "Running as non-production environment: Algolia client configured to directly interact with Algolia's API.",
       );
       return algoliaSearch(config.algolia.appID, config.algolia.apiKey);
     }
@@ -58,7 +73,7 @@ export default class AlgoliaService extends Service {
       window.location.hostname === "localhost"
     ) {
       console.log(
-        "Running locally as production environment: Algolia client configured to proxy requests through the Hermes API."
+        "Running locally as production environment: Algolia client configured to proxy requests through the Hermes API.",
       );
       return algoliaSearch("", "", {
         headers: {
@@ -108,7 +123,9 @@ export default class AlgoliaService extends Service {
    * Iterates over the keys of a facet object and transforms the `count` value
    * into a `FacetDropdownObjectDetails` object with `count` and `selected` properties.
    */
-  mapStatefulFacetKeys = (facetObject: AlgoliaFacetsObject): FacetRecords => {
+  mapStatefulFacetKeys = (
+    facetObject: AlgoliaFacetsObject,
+  ): Partial<FacetDropdownGroups> => {
     /**
      * e.g., facetObject === {
      *  owners: {
@@ -148,7 +165,7 @@ export default class AlgoliaService extends Service {
         newObj[key] = newVal;
         return newObj;
       },
-      {}
+      {},
     );
     /**
      * e.g., entries === {
@@ -179,7 +196,11 @@ export default class AlgoliaService extends Service {
        * e.g., selection === ["Approved"]
        */
       for (let param of selection) {
-        (facet[param] as FacetDropdownObjectDetails).isSelected = true;
+        const facetParam = facet[param];
+
+        if (facetParam) {
+          facetParam.isSelected = true;
+        }
       }
       /**
        * e.g., facet["Approved"] === { count: 6, isSelected: true }
@@ -195,11 +216,11 @@ export default class AlgoliaService extends Service {
     async (
       indexName: string,
       query: string,
-      params: AlgoliaSearchParams
+      params: AlgoliaSearchParams,
     ): Promise<SearchResponse<unknown>> => {
       let index: SearchIndex = this.client.initIndex(indexName);
       return await index.search(query, params);
-    }
+    },
   );
 
   /**
@@ -215,18 +236,25 @@ export default class AlgoliaService extends Service {
    * and whether the owner is looking at their own docs.
    */
   buildFacetFilters(params: AlgoliaSearchParams, userIsOwner = false) {
-    let facets = FACET_NAMES;
+    let facets = DOC_FACET_NAMES;
+
     let facetFilters = [];
 
-    for (let facet of facets) {
-      let facetValues = [];
+    // if params.facetFilters is an empty array, it means we're intentionally
+    // requesting no facet filters
+    if (!(params.facetFilters && params.facetFilters.length === 0)) {
+      for (let facet of facets) {
+        let facetValues = [];
 
-      for (let val of params[facet]) {
-        facetValues.push(`${facet}:${val}`);
-      }
+        if (!params[facet]) continue;
 
-      if (facetValues.length > 0) {
-        facetFilters.push(facetValues);
+        for (let val of params[facet]) {
+          facetValues.push(`${facet}:${val}`);
+        }
+
+        if (facetValues.length > 0) {
+          facetFilters.push(facetValues);
+        }
       }
     }
 
@@ -247,7 +275,7 @@ export default class AlgoliaService extends Service {
     async (objectID: string, indexName?: string): Promise<unknown> => {
       const index = indexName ? this.client.initIndex(indexName) : this.index;
       return await index.getObject(objectID);
-    }
+    },
   );
 
   /**
@@ -257,7 +285,7 @@ export default class AlgoliaService extends Service {
   search = restartableTask(
     async (
       query: string,
-      params
+      params,
     ): Promise<SearchResponse<unknown> | undefined> => {
       try {
         return await this.index
@@ -266,54 +294,47 @@ export default class AlgoliaService extends Service {
       } catch (e: unknown) {
         console.error(e);
       }
-    }
+    },
   );
 
   /**
    * Returns FacetRecords for a given index and params.
-   * If the user is the owner, the facets will be filtered by the owner's email.
+   * Sends a non-faceted query to Algolia to get the facets of the entire index.
+   * (We don't yet scope facets to the current facetFilters.)
    */
-  getFacets = task(
-    async (
-      searchIndex: string,
-      params: AlgoliaSearchParams,
-      userIsOwner = false
-    ): Promise<FacetRecords | undefined> => {
-      let query = params["q"] || "";
-      try {
-        let facetFilters = userIsOwner ? [`owners:${this.userEmail}`] : [];
-        let algoliaFacets = await this.searchIndex.perform(searchIndex, query, {
-          facetFilters: facetFilters,
-          facets: FACET_NAMES,
-          hitsPerPage: HITS_PER_PAGE,
-          maxValuesPerFacet: MAX_VALUES_PER_FACET,
-          page: params.page ? params.page - 1 : 0,
-        });
+  getFacets = task(async (searchIndex: string, params: AlgoliaSearchParams) => {
+    const query = params["q"] || "";
+    const { scope } = params;
 
-        assert("getFacets expects facets to exist", algoliaFacets.facets);
+    try {
+      const initialFacets =
+        scope === SearchScope.Projects ? PROJECT_FACET_NAMES : DOC_FACET_NAMES;
 
+      const algoliaFacets = await this.searchIndex.perform(searchIndex, query, {
+        facets: initialFacets,
+        hitsPerPage: HITS_PER_PAGE,
+        maxValuesPerFacet: MAX_VALUES_PER_FACET,
+        page: 0,
+      });
+
+      const facets = this.mapStatefulFacetKeys(
+        algoliaFacets.facets as AlgoliaFacetsObject,
+      );
+
+      // Mark facets as selected based on query parameters
+      Object.entries(facets).forEach(([name, facet]) => {
         /**
-         * Map the facets to a new object with additional nested properties
+         * e.g., name === "owner"
+         * e.g., facet === { "meg@hashicorp.com": { count: 1, isSelected: false }}
          */
-        let facets: FacetRecords = this.mapStatefulFacetKeys(
-          algoliaFacets.facets
-        );
+        this.markSelected(facet, params[name]);
+      });
 
-        // Mark facets as selected based on query parameters
-        Object.entries(facets).forEach(([name, facet]) => {
-          /**
-           * e.g., name === "owner"
-           * e.g., facet === { "meg@hashicorp.com": { count: 1, isSelected: false }}
-           */
-          this.markSelected(facet, params[name]);
-        });
-
-        return facets;
-      } catch (e: unknown) {
-        console.error(e);
-      }
+      return facets;
+    } catch (e) {
+      console.error(e);
     }
-  );
+  });
 
   /**
    * Returns a SearchResponse for a given index and params.
@@ -324,22 +345,46 @@ export default class AlgoliaService extends Service {
     async (
       searchIndex: string,
       params: AlgoliaSearchParams,
-      userIsOwner = false
+      userIsOwner = false,
     ): Promise<SearchResponse | unknown> => {
       let query = params["q"] || "";
 
       try {
         return await this.searchIndex.perform(searchIndex, query, {
           facetFilters: this.buildFacetFilters(params, userIsOwner),
-          facets: FACET_NAMES,
-          hitsPerPage: HITS_PER_PAGE,
+          facets: DOC_FACET_NAMES,
+          hitsPerPage: params.hitsPerPage ?? HITS_PER_PAGE,
           maxValuesPerFacet: MAX_VALUES_PER_FACET,
           page: params.page ? params.page - 1 : 0,
+          filters: params.filters,
         });
       } catch (e: unknown) {
         console.error(e);
       }
-    }
+    },
+  );
+
+  /**
+   *
+   */
+  getProjectResults = task(
+    async (params: AlgoliaSearchParams): Promise<SearchResponse | unknown> => {
+      let query = params["q"] || "";
+
+      try {
+        return await this.searchIndex.perform(
+          this.configSvc.config.algolia_projects_index_name,
+          query,
+          {
+            facetFilters: this.buildFacetFilters(params),
+            hitsPerPage: params.hitsPerPage ?? HITS_PER_PAGE,
+            page: params.page ? params.page - 1 : 0,
+          },
+        );
+      } catch (e: unknown) {
+        console.error(e);
+      }
+    },
   );
 
   /**
@@ -351,14 +396,26 @@ export default class AlgoliaService extends Service {
       indexName: string,
       facetName: string,
       query: string,
-      params: RequestOptions
+      params?: RequestOptions,
     ): Promise<SearchForFacetValuesResponse | undefined> => {
       try {
         let index = this.client.initIndex(indexName);
-        return await index.searchForFacetValues(facetName, query, params);
+        const results = await index.searchForFacetValues(
+          facetName,
+          query,
+          params,
+        );
+
+        if (facetName === FacetName.Owners) {
+          await this.store.maybeFetchPeople.perform(
+            results.facetHits.map((hit) => hit.value),
+          );
+        }
+
+        return results;
       } catch (e: unknown) {
         console.error(e);
       }
-    }
+    },
   );
 }

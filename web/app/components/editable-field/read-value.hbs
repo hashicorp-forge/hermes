@@ -1,0 +1,25 @@
+{{#let (element (or @tag "div")) as |Field|}}
+  <Field class="w-full" data-test-editable-field-read-value>
+    {{#if this.valueIsEmpty}}
+      <EmptyStateText @value={{@placeholder}} />
+    {{else}}
+      {{#if this.typeIsPeople}}
+        <ol data-test-person-list class="person-list">
+          {{#each this.emails as |email|}}
+            <li>
+              <EditableField::ReadValue::Person
+                @email={{email}}
+                @document={{@document}}
+              />
+
+            </li>
+          {{/each}}
+        </ol>
+      {{else}}
+        <span data-test-string-value>
+          {{this.stringValue}}
+        </span>
+      {{/if}}
+    {{/if}}
+  </Field>
+{{/let}}

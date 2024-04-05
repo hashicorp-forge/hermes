@@ -1,46 +1,59 @@
+@use "components/action";
+
 @use "@hashicorp/design-system-components";
 
+@use "./variables";
+
+@use "./body";
 @use "./animations";
 @use "./typography";
 
 @use "routes/admin";
 
-@use "components/action";
+@use "components/dashboard";
+@use "components/new";
 @use "components/toolbar";
-@use "components/tooltip";
+@use "components/x-tooltip";
 @use "components/popover";
 @use "components/footer";
 @use "components/nav";
-@use "components/x-hds-tab";
+@use "components/segmented-control";
 @use "components/x/dropdown/list";
 @use "components/x/dropdown/list-item";
 @use "components/x/dropdown/toggle-select";
 @use "components/editable-field";
 @use "components/modal-dialog";
 @use "components/multiselect";
+@use "components/overflow-menu";
 @use "components/page";
-@use "components/row-results";
-@use "components/template-card";
+@use "components/hds-table";
 @use "components/header/active-filter-list";
 @use "components/header/active-filter-list-item";
 @use "components/header/search";
-@use "components/inputs/product-select/index.scss";
-@use "components/doc/tile-list";
 @use "components/doc/thumbnail";
 @use "components/doc/folder-affordance";
-@use "components/doc/tile";
-@use "components/doc/state";
+@use "components/doc/tile" as doc-tile;
+@use "components/doc/status";
+@use "components/table/sortable-header";
 @use "components/preview-card";
+@use "components/project";
+@use "components/interactive-card";
 @use "components/notification";
 @use "components/sidebar";
 @use "components/document/related-resources";
 @use "components/hds-badge";
-@use "components/product-badge-link";
+@use "components/jira-widget";
+@use "components/product-link";
+@use "components/projects/tile" as project-tile;
 @use "components/header/facet-dropdown";
 @use "components/floating-u-i/content";
-@use "components/settings/subscription-list-item";
 @use "hashicorp/product-badge";
 @use "hashicorp/hermes-logo";
+@use "hermes/avatar";
+@use "routes/results";
+@use "routes/my";
+
+@use "./buttons";
 
 @use "./ember-power-select-theme";
 
@@ -50,6 +63,12 @@
 @use "tailwindcss/base";
 @use "tailwindcss/components";
 @use "tailwindcss/utilities";
+
+@layer utilities {
+  .hermes-h4 {
+    @apply text-body-100 font-medium uppercase tracking-wide text-color-foreground-faint;
+  }
+}
 
 *,
 *::before,
@@ -63,7 +82,8 @@
 }
 
 dialog {
-  margin: auto; // centers the dialog
+  @apply m-auto; // center the dialog
+  @apply -translate-y-5; // move it up a bit
 }
 
 body,
@@ -92,10 +112,39 @@ ol {
 }
 
 h1 {
-  @apply mb-1.5 text-display-500 font-bold text-color-foreground-strong;
+  @apply text-display-500 font-bold text-color-foreground-strong;
 
   + p {
     @apply text-body-300;
+  }
+}
+
+.divided-list {
+  > li {
+    @apply border-t border-t-transparent;
+  }
+
+  > li:not(:first-child) {
+    @apply border-t-color-border-faint;
+  }
+}
+
+.horizontally-divided-list {
+  li {
+    @apply border-l border-l-transparent;
+  }
+
+  > li:not(:first-child) {
+    @apply border-l-color-border-faint;
+  }
+}
+
+.visible-with-group {
+  @apply group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100;
+
+  &:hover,
+  &:focus-within {
+    @apply visible opacity-100;
   }
 }
 

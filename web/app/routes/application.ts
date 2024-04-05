@@ -4,18 +4,16 @@ import { action } from "@ember/object";
 import { inject as service } from "@ember/service";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
-import SessionService from "hermes/services/session";
+import SessionService, { REDIRECT_STORAGE_KEY } from "hermes/services/session";
 import RouterService from "@ember/routing/router-service";
 
 import window from "ember-window-mock";
-import { REDIRECT_STORAGE_KEY } from "hermes/services/session";
 import Transition from "@ember/routing/transition";
-import MetricsService from "hermes/services/metrics";
+import MetricsService from "hermes/services/_metrics";
 
 export default class ApplicationRoute extends Route {
   @service declare config: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
-  @service declare flags: any;
   @service declare session: SessionService;
   @service declare router: RouterService;
   @service declare metrics: MetricsService;
@@ -60,16 +58,14 @@ export default class ApplicationRoute extends Route {
         JSON.stringify({
           url: transitionTo,
           expiresOn: Date.now() + 60 * 5000, // 5 minutes
-        })
+        }),
       );
     }
 
     await this.session.setup();
 
-    this.flags.initialize();
-
     await this.fetchSvc
-      .fetch("/api/v1/web/config")
+      .fetch(`/api/${this.config.config.api_version}/web/config`)
       .then((response) => response?.json())
       .then((json) => {
         this.config.setConfig(json);

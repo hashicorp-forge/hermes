@@ -11,12 +11,16 @@ import (
 	"time"
 
 	"github.com/hashicorp-forge/hermes/internal/api"
+	apiv2 "github.com/hashicorp-forge/hermes/internal/api/v2"
 	"github.com/hashicorp-forge/hermes/internal/auth"
 	"github.com/hashicorp-forge/hermes/internal/cmd/base"
 	"github.com/hashicorp-forge/hermes/internal/config"
+	"github.com/hashicorp-forge/hermes/internal/datadog"
 	"github.com/hashicorp-forge/hermes/internal/db"
+	"github.com/hashicorp-forge/hermes/internal/jira"
 	"github.com/hashicorp-forge/hermes/internal/pkg/doctypes"
 	"github.com/hashicorp-forge/hermes/internal/pub"
+	"github.com/hashicorp-forge/hermes/internal/server"
 	"github.com/hashicorp-forge/hermes/internal/structs"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
@@ -24,6 +28,9 @@ import (
 	"github.com/hashicorp-forge/hermes/pkg/links"
 	"github.com/hashicorp-forge/hermes/pkg/models"
 	"github.com/hashicorp-forge/hermes/web"
+	"github.com/hashicorp/go-hclog"
+	httptrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/net/http"
+	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 	"gorm.io/gorm"
 )
 
@@ -158,6 +165,19 @@ func (c *Command) Run(args []string) int {
 		}
 	}
 
+	// Configure logger.
+	switch cfg.LogFormat {
+	case "json":
+		c.Log = hclog.New(&hclog.LoggerOptions{
+			JSONFormat: true,
+		})
+	case "standard":
+	case "":
+	default:
+		c.UI.Error(fmt.Sprintf("invalid value for log format: %s", cfg.LogFormat))
+		return 1
+	}
+
 	// Build configuration for Okta authentication.
 	if !cfg.Okta.Disabled {
 		// Check for required Okta configuration.
@@ -175,10 +195,41 @@ func (c *Command) Run(args []string) int {
 		}
 	}
 
+	// Initialize Datadog.
+	dd := datadog.NewConfig(*cfg)
+	if dd.Enabled {
+		tracerOpts := []tracer.StartOption{
+			tracer.WithLogStartup(false),
+		}
+
+		if dd.Env != "" {
+			tracerOpts = append(tracerOpts, tracer.WithEnv(dd.Env))
+		}
+		if dd.Service != "" {
+			tracerOpts = append(tracerOpts, tracer.WithService(dd.Service))
+		}
+		if dd.ServiceVersion != "" {
+			tracerOpts = append(
+				tracerOpts,
+				tracer.WithServiceVersion(dd.ServiceVersion),
+			)
+		}
+
+		tracer.Start(tracerOpts...)
+	}
+
 	// Initialize Google Workspace service.
 	var goog *gw.Service
+	// Use Google Workspace service user auth if it is defined in the config.
 	if cfg.GoogleWorkspace.Auth != nil {
-		// Use Google Workspace auth if it is defined in the config.
+		// Validate temporary drafts folder is configured if creating docs as user.
+		if cfg.GoogleWorkspace.Auth.CreateDocsAsUser &&
+			cfg.GoogleWorkspace.TemporaryDraftsFolder == "" {
+			c.UI.Error(
+				"error initializing server: Google Workspace temporary drafts folder is required if create_docs_as_user is true")
+			return 1
+		}
+
 		goog = gw.NewFromConfig(cfg.GoogleWorkspace.Auth)
 	} else {
 		// Use OAuth if Google Workspace auth is not defined in the config.
@@ -215,7 +266,20 @@ func (c *Command) Run(args []string) int {
 		return 1
 	}
 
+	// Initialize Jira service.
+	var jiraSvc *jira.Service
+	if cfg.Jira != nil && cfg.Jira.Enabled {
+		jiraSvc, err = jira.NewService(*cfg.Jira)
+		if err != nil {
+			c.UI.Error(fmt.Sprintf("error initializing Jira service: %v", err))
+			return 1
+		}
+	}
+
 	// Initialize database.
+	if val, ok := os.LookupEnv("HERMES_SERVER_POSTGRES_PASSWORD"); ok {
+		cfg.Postgres.Password = val
+	}
 	db, err := db.NewDB(*cfg.Postgres)
 	if err != nil {
 		c.UI.Error(fmt.Sprintf("error initializing database: %v", err))
@@ -254,14 +318,34 @@ func (c *Command) Run(args []string) int {
 		}
 	}
 
-	mux := http.NewServeMux()
+	type serveMux interface {
+		Handle(pattern string, handler http.Handler)
+		ServeHTTP(http.ResponseWriter, *http.Request)
+	}
+	var mux serveMux
+	if dd.Enabled {
+		mux = httptrace.NewServeMux()
+	} else {
+		mux = http.NewServeMux()
+	}
+
+	srv := server.Server{
+		AlgoSearch: algoSearch,
+		AlgoWrite:  algoWrite,
+		Config:     cfg,
+		DB:         db,
+		GWService:  goog,
+		Jira:       jiraSvc,
+		Logger:     c.Log,
+	}
 
 	// Define handlers for authenticated endpoints.
-	// TODO: stop passing around all these arguments to handlers and use a struct
-	// with (functional) options.
 	authenticatedEndpoints := []endpoint{
+		// Algolia proxy.
 		{"/1/indexes/",
 			algolia.AlgoliaProxyHandler(algoSearch, cfg.Algolia, c.Log)},
+
+		// API v1.
 		{"/api/v1/approvals/",
 			api.ApprovalHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
 		{"/api/v1/document-types", api.DocumentTypesHandler(*cfg, c.Log)},
@@ -271,6 +355,8 @@ func (c *Command) Run(args []string) int {
 			api.DraftsHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
 		{"/api/v1/drafts/",
 			api.DraftsDocumentHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
+		{"/api/v1/jira/issue/picker", apiv2.JiraIssuePickerHandler(srv)},
+		{"/api/v1/jira/issues/", apiv2.JiraIssueHandler(srv)},
 		{"/api/v1/me", api.MeHandler(c.Log, goog)},
 		{"/api/v1/me/recently-viewed-docs",
 			api.MeRecentlyViewedDocsHandler(cfg, c.Log, db)},
@@ -278,9 +364,32 @@ func (c *Command) Run(args []string) int {
 			api.MeSubscriptionsHandler(cfg, c.Log, goog, db)},
 		{"/api/v1/people", api.PeopleDataHandler(cfg, c.Log, goog)},
 		{"/api/v1/products", api.ProductsHandler(cfg, algoSearch, c.Log)},
+		{"/api/v1/projects", apiv2.ProjectsHandler(srv)},
+		{"/api/v1/projects/", apiv2.ProjectHandler(srv)},
 		{"/api/v1/reviews/",
 			api.ReviewHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
 		{"/api/v1/web/analytics", api.AnalyticsHandler(c.Log)},
+
+		// API v2.
+		{"/api/v2/approvals/", apiv2.ApprovalsHandler(srv)},
+		{"/api/v2/document-types", apiv2.DocumentTypesHandler(srv)},
+		{"/api/v2/documents/", apiv2.DocumentHandler(srv)},
+		{"/api/v2/drafts", apiv2.DraftsHandler(srv)},
+		{"/api/v2/drafts/", apiv2.DraftsDocumentHandler(srv)},
+		{"/api/v2/groups", apiv2.GroupsHandler(srv)},
+		{"/api/v2/jira/issues/", apiv2.JiraIssueHandler(srv)},
+		{"/api/v2/jira/issue/picker", apiv2.JiraIssuePickerHandler(srv)},
+		{"/api/v2/me", apiv2.MeHandler(srv)},
+		{"/api/v2/me/recently-viewed-docs", apiv2.MeRecentlyViewedDocsHandler(srv)},
+		{"/api/v2/me/recently-viewed-projects",
+			apiv2.MeRecentlyViewedProjectsHandler(srv)},
+		{"/api/v2/me/subscriptions", apiv2.MeSubscriptionsHandler(srv)},
+		{"/api/v2/people", apiv2.PeopleDataHandler(srv)},
+		{"/api/v2/products", apiv2.ProductsHandler(srv)},
+		{"/api/v2/projects", apiv2.ProjectsHandler(srv)},
+		{"/api/v2/projects/", apiv2.ProjectHandler(srv)},
+		{"/api/v2/reviews/", apiv2.ReviewsHandler(srv)},
+		{"/api/v2/web/analytics", apiv2.AnalyticsHandler(srv)},
 	}
 
 	// Define handlers for unauthenticated endpoints.
@@ -293,6 +402,7 @@ func (c *Command) Run(args []string) int {
 	webEndpoints := []endpoint{
 		{"/", web.Handler()},
 		{"/api/v1/web/config", web.ConfigHandler(cfg, algoSearch, c.Log)},
+		{"/api/v2/web/config", web.ConfigHandler(cfg, algoSearch, c.Log)},
 		{"/l/", links.RedirectHandler(algoSearch, cfg.Algolia, c.Log)},
 	}
 
@@ -396,6 +506,7 @@ func registerDocumentTypes(cfg config.Config, db *gorm.DB) error {
 			Name:         d.Name,
 			LongName:     d.LongName,
 			Description:  d.Description,
+			FlightIcon:   d.FlightIcon,
 			Checks:       checksJSON,
 			CustomFields: cfs,
 		}

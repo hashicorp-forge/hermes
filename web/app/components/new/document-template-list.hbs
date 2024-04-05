@@ -1,0 +1,100 @@
+<div class="flex h-12 items-center justify-between">
+
+  <div class="flex items-center gap-3.5">
+    <h1>Choose a template</h1>
+    <div class="hermes-h4 mt-[5px] mr-0.5">
+      or
+    </div>
+    <div class="relative">
+      <Hds::Button
+        data-test-start-a-project-button
+        @text="Start a project"
+        @icon="chevron-right"
+        @iconPosition="trailing"
+        @route="authenticated.new.project"
+        @color="secondary"
+        class="-ml-px pl-[18px]"
+      />
+    </div>
+  </div>
+  <WhatsAProject />
+</div>
+<ol class="mt-8 grid auto-rows-min grid-cols-2 gap-2">
+  {{#each this.docTypes as |docType|}}
+    <li
+      data-test-template-option
+      class="relative flex min-h-[112px] items-stretch"
+    >
+      <LinkTo
+        @route="authenticated.new.doc"
+        @query={{hash docType=docType.name}}
+        class="flex w-full items-stretch"
+      >
+        <Hds::Card::Container
+          @levelHover="mid"
+          @hasBorder={{true}}
+          class="interactive-card relative w-full px-5 pt-5 pb-6"
+        >
+          <div class="flex w-full gap-3.5">
+            <FlightIcon
+              data-test-icon
+              @size="24"
+              @name={{or docType.flightIcon "file-text"}}
+              class="-mt-1 shrink-0 text-color-foreground-faint"
+            />
+            <div class="w-full">
+              <div class="flex w-full items-start justify-between gap-2.5">
+                <h2
+                  data-test-long-name
+                  class="hermes-h-300 -mt-1 leading-tight"
+                >
+                  {{docType.longName}}
+                </h2>
+                {{#unless
+                  (eq (lowercase docType.longName) (lowercase docType.name))
+                }}
+                  <p
+                    data-test-name
+                    class="mt-px mr-2 shrink-0 leading-none text-color-foreground-disabled"
+                  >
+                    {{docType.name}}
+                  </p>
+                {{/unless}}
+              </div>
+              <p
+                data-test-description
+                class="mt-0.5 max-w-[360px] text-body-300 text-color-foreground-faint"
+              >
+                {{docType.description}}
+              </p>
+            </div>
+          </div>
+        </Hds::Card::Container>
+      </LinkTo>
+    </li>
+  {{/each}}
+</ol>
+
+{{#if this.moreInfoLinksAreShown}}
+  <div class="mt-12 max-w-md">
+    <h3 class="mb-2 text-display-100 font-medium text-color-foreground-faint">
+      Related links
+    </h3>
+    <ul class="grid gap-1">
+      {{#each this.docTypes as |docType|}}
+        {{#if docType.moreInfoLink}}
+          <li>
+            <ExternalLink
+              data-test-more-info-link
+              @iconIsShown={{true}}
+              href={{docType.moreInfoLink.url}}
+              class="relative inline-flex text-body-200 text-color-foreground-faint decoration-color-palette-neutral-200 hover:text-color-foreground-primary"
+            >
+              {{docType.moreInfoLink.text}}
+            </ExternalLink>
+          </li>
+        {{/if}}
+      {{/each}}
+    </ul>
+  </div>
+{{/if}}

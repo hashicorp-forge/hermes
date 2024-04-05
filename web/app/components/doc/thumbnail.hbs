@@ -1,16 +1,16 @@
 <div
   data-test-doc-thumbnail
   class="doc-thumbnail
-    {{if @isLarge 'large'}}
+    {{this.size}}
     {{if this.isObsolete 'obsolete'}}
-    bg-color-palette-neutral-100 rounded"
+    rounded bg-color-palette-neutral-100"
   ...attributes
 >
-  <img src="/images/document.png" class="w-full h-auto" />
+  <img src="/images/document.png" class="h-auto w-full" />
 
-  <div class="w-full h-full absolute">
+  <div class="absolute h-full w-full">
     {{#if this.isObsolete}}
-      <Doc::FolderAffordance @isLarge={{@isLarge}} />
+      <Doc::FolderAffordance @size={{@size}} />
     {{/if}}
 
     {{#if (or this.isApproved this.isObsolete)}}
@@ -24,13 +24,14 @@
       </div>
     {{/if}}
 
-    {{#if this.productShortName}}
-      <div
+    {{#if this.badgeIsShown}}
+      <Product::Avatar
+        data-test-product={{@product}}
         data-test-doc-thumbnail-product-badge
-        class="product-badge {{this.productShortName}}"
-      >
-        <FlightIcon @size="16" @name={{this.productShortName}} />
-      </div>
+        @product={{@product}}
+        @size={{this.size}}
+        class="absolute left-0 bottom-0"
+      />
     {{/if}}
   </div>
 </div>

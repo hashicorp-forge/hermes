@@ -4,15 +4,37 @@ import { action } from "@ember/object";
 import ConfigService from "hermes/services/config";
 import SessionService from "hermes/services/session";
 import RouterService from "@ember/routing/router-service";
-import AuthenticatedUserService, {
-  AuthenticatedUser,
-} from "hermes/services/authenticated-user";
+import AuthenticatedUserService from "hermes/services/authenticated-user";
 import window from "ember-window-mock";
 import { tracked } from "@glimmer/tracking";
 import { HERMES_GITHUB_REPO_URL } from "hermes/utils/hermes-urls";
+import { SortByValue } from "./toolbar";
+import { ProjectStatus } from "hermes/types/project-status";
+import PersonModel from "hermes/models/person";
+
+interface UserNavItem {
+  label: string;
+  isNew?: boolean;
+}
+
+interface UserNavLinkTo extends UserNavItem {
+  route: string;
+}
+
+interface UserNavExternalLink extends UserNavItem {
+  href: string;
+}
+
+interface UserNavAction extends UserNavItem {
+  action: () => void;
+}
+
+type UserNavMenuItem = UserNavLinkTo | UserNavExternalLink | UserNavAction;
 
 interface HeaderNavComponentSignature {
-  Args: {};
+  Args: {
+    query?: string;
+  };
 }
 
 export default class HeaderNavComponent extends Component<HeaderNavComponentSignature> {
@@ -21,7 +43,7 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
   @service declare router: RouterService;
   @service declare authenticatedUser: AuthenticatedUserService;
 
-  protected get profile(): AuthenticatedUser {
+  protected get profile(): PersonModel {
     return this.authenticatedUser.info;
   }
 
@@ -41,6 +63,38 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
     return this.configSvc.config.support_link_url;
   }
 
+  protected get dropdownListItems(): UserNavMenuItem[] {
+    const defaultItems = [
+      {
+        label: "Email notifications",
+        route: "authenticated.settings",
+        isNew: this.emailNotificationsHighlightIsShown,
+      },
+      {
+        label: "GitHub",
+        href: this.gitHubRepoURL,
+      },
+      {
+        label: "Support",
+        href: this.supportDocsURL,
+      },
+    ] as UserNavMenuItem[];
+
+    if (this.showSignOut) {
+      defaultItems.push({
+        label: "Sign out",
+        action: this.invalidateSession,
+      });
+    }
+
+    return defaultItems;
+  }
+
+  protected defaultProjectsScreenQueryParams = {
+    status: ProjectStatus.Active,
+    page: 1,
+  };
+
   /**
    * The default query params for the browse screens.
    * Ensures a clear filter state when navigating tabs.
@@ -51,7 +105,13 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
     page: 1,
     product: [],
     status: [],
-    sortBy: "dateDesc",
+    sortBy: SortByValue.DateDesc,
+  };
+
+  protected defaultMyQueryParams = {
+    includeSharedDrafts: true,
+    page: 1,
+    sortBy: SortByValue.DateDesc,
   };
 
   /**
@@ -79,14 +139,6 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
   @action protected onDropdownOpen(): void {
     this.userMenuHighlightIsShown = false;
     window.localStorage.setItem("emailNotificationsHighlightIsShown", "false");
-  }
-
-  /**
-   * The actions to take when the dropdown menu is closed.
-   * Force-hides the emailNotificationsHighlight if it's visible.
-   */
-  @action protected onDropdownClose(): void {
-    this.emailNotificationsHighlightIsShown = false;
   }
 
   @action protected invalidateSession(): void {

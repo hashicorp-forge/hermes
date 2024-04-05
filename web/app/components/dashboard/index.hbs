@@ -1,0 +1,20 @@
+<Dashboard::NewFeaturesBanner />
+
+<h4 data-test-welcome-message class="hermes-h4 mt-2.5 mb-6 hidden lg:block">
+  Welcome back,
+  {{this.firstName}}!
+</h4>
+
+<div class="flex w-full flex-col-reverse gap-5 lg:flex-row lg:gap-0">
+  {{! Main }}
+  <div class="min-h-[500px] w-full pb-20">
+    <div class="main pr-4">
+      {{#if @docsAwaitingReview}}
+        <Dashboard::DocsAwaitingReview @docs={{@docsAwaitingReview}} />
+      {{/if}}
+      <Dashboard::LatestDocs />
+    </div>
+  </div>
+  {{! Secondary }}
+  <Dashboard::RecentlyViewed />
+</div>

@@ -1,0 +1,212 @@
+<div
+  data-test-jira-widget
+  class="jira-widget relative flex h-[36px] w-full max-w-3xl items-center"
+  ...attributes
+>
+  <div
+    class="inner relative flex w-full
+      {{if
+        (and this.issue @isNewProjectForm)
+        'h-9 items-center rounded-button-md pr-2 shadow-surface-low'
+      }}"
+  >
+    <div
+      class="relative flex items-center
+        {{unless this.issue 'w-full'}}
+        {{if @isNewProjectForm 'min-h-[24px]'}}"
+    >
+
+      {{#unless (or (not this.issue) @isNewProjectForm)}}
+        <div
+          data-test-jira-icon
+          class="relative z-10 mr-3 flex h-6 items-center"
+        >
+          <div class="mr-3 flex shrink-0 gap-2">
+            <FlightIcon @name="jira" />
+          </div>
+          <div
+            class="absolute top-1/2 right-0 h-5 w-px -translate-y-1/2 bg-color-border-strong"
+          />
+        </div>
+      {{/unless}}
+
+      {{#if this.issue}}
+        <ExternalLink
+          data-test-jira-link
+          href={{if @isNewProjectForm "" this.issue.url}}
+          class="{{if
+              @isNewProjectForm
+              'disabled pointer-events-none block'
+              'inline-flex'
+            }}"
+        >
+
+          {{! Content }}
+          <div class="attached-jira-issue {{if @isNewProjectForm 'pl-2.5'}}">
+            <img
+              data-test-jira-issue-type-icon
+              width="16"
+              height="16"
+              alt="{{this.issueType}}"
+              src="{{this.issueTypeImage}}"
+              class="h-4 w-4"
+            />
+            <div
+              class="primary-text w-full truncate text-color-foreground-faint"
+            >
+              <span
+                data-test-jira-key
+                class={{if (eq this.issueStatus "done") "line-through"}}
+              >
+                {{this.issue.key}}
+              </span>
+              <span data-test-jira-summary>
+                {{this.issue.summary}}
+              </span>
+            </div>
+          </div>
+
+          {{#if (or this.issuePriority this.issueAssignee this.issueStatus)}}
+            <div class="relative flex h-6 shrink-0 items-center gap-2">
+              {{#if this.issuePriority}}
+                <img
+                  data-test-jira-priority-icon
+                  width="16"
+                  height="16"
+                  alt={{this.issuePriority}}
+                  src={{this.issuePriorityImage}}
+                  class="h-4 w-4"
+                />
+              {{/if}}
+              {{#if this.issueAssignee}}
+                <Person::Avatar
+                  data-test-jira-assignee-avatar-wrapper
+                  @email={{this.issueAssignee}}
+                  @imgURL={{this.assigneeAvatar}}
+                  @size="small"
+                />
+              {{/if}}
+              {{#if this.issueStatus}}
+                <div
+                  data-test-jira-status
+                  class="{{dasherize this.issueStatus}}
+                    rounded-sm px-1.5 py-px text-body-100 font-medium uppercase"
+                >
+                  {{this.issueStatus}}
+                </div>
+              {{/if}}
+            </div>
+          {{/if}}
+        </ExternalLink>
+        {{#unless @isReadOnly}}
+          <OverflowMenu
+            @items={{hash
+              unlink=(hash
+                label="Remove" icon="trash" action=(fn this.removeIssue)
+              )
+            }}
+            @isShown={{true}}
+            @offset={{hash mainAxis=1 crossAxis=-3}}
+            @renderOut={{true}}
+          />
+        {{/unless}}
+      {{else if @isLoading}}
+        <FlightIcon data-test-jira-loading @name="loading" class="mt-[3px]" />
+      {{else}}
+        {{! + Add Jira issue }}
+        <X::DropdownList
+          @inputIsShown={{false}}
+          @onItemClick={{this.onIssueSelect}}
+          @items={{this.results}}
+          @matchAnchorWidth={{true}}
+          {{will-destroy this.onDropdownClose}}
+          class="theme--neutral"
+          data-test-jira-picker-dropdown
+        >
+          <:anchor as |dd|>
+            <div
+              class="relative h-9 w-full
+                {{unless @isNewProjectForm 'X-mt-1.5 -ml-1.5'}}"
+              {{did-insert (fn this.registerDropdown dd)}}
+              {{did-insert dd.registerAnchor}}
+            >
+              {{#if this.inputIsShown}}
+                <Hds::Form::TextInput::Base
+                  data-test-add-jira-input
+                  {{on "input" this.onInput}}
+                  {{on "focusout" this.hideInput}}
+                  {{(unless @isNewProjectForm (modifier "autofocus"))}}
+                  @value={{this.query}}
+                  disabled={{@isDisabled}}
+                  id="jira-search-input"
+                  placeholder={{if
+                    @isNewProjectForm
+                    "Search issues..."
+                    "Add Jira issue"
+                  }}
+                  class="jira-input relative"
+                  @type="search"
+                />
+                {{! search icon  }}
+                <div class="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2">
+                  <FlightIcon
+                    data-test-search-icon
+                    @name="search"
+                    class="text-color-foreground-faint
+                      {{unless @isNewProjectForm 'animated-icon'}}"
+                  />
+                </div>
+              {{else}}
+                <Action
+                  data-test-add-jira-button
+                  disabled={{@isDisabled}}
+                  class="add-jira-issue-button absolute flex h-full w-auto items-center gap-2 text-body-200 text-color-foreground-faint"
+                  {{on "click" this.showInput}}
+                >
+                  <FlightIcon
+                    data-test-add-jira-button-plus
+                    @name="plus"
+                    class={{if this.plusIconShouldAnimate "animated-icon"}}
+                  />
+                  Add Jira issue...
+                </Action>
+              {{/if}}
+
+              {{#if this.searchJiraIssues.isRunning}}
+                <div
+                  data-test-related-resources-search-loading-icon
+                  class="absolute top-1/2 right-3 flex -translate-y-1/2 bg-white"
+                >
+                  <FlightIcon @name="loading" />
+                </div>
+              {{/if}}
+            </div>
+          </:anchor>
+          <:no-matches>
+            {{#unless (lt this.query.length 1)}}
+              <div
+                data-test-no-matches
+                class="x-dropdown-list-default-empty-state"
+              >
+                {{#unless this.searchJiraIssues.isRunning}}
+                  No matches
+                {{/unless}}
+              </div>
+            {{/unless}}
+          </:no-matches>
+          <:item as |dd|>
+            <dd.Action data-test-jira-picker-result class="block py-1">
+              <div class="flex items-center gap-1.5">
+                <img width="16" height="16" src={{dd.attrs.issueTypeImage}} />
+                <div class="truncate">
+                  {{dd.attrs.key}}
+                  {{dd.attrs.summary}}
+                </div>
+              </div>
+            </dd.Action>
+          </:item>
+        </X::DropdownList>
+      {{/if}}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,42 @@
+<div class="flex items-center gap-3.5">
+  <h2>Latest docs</h2>
+  {{#if this.fetchIsRunning}}
+    <FlightIcon data-test-running-icon @name="running" />
+  {{/if}}
+</div>
+
+{{#if this.docs.length}}
+  <ol class="divided-list mt-5">
+    {{#each this.docs as |doc|}}
+      <li class="group relative" data-test-latest-doc>
+        <Doc::TileMedium @doc={{doc}} />
+      </li>
+    {{/each}}
+  </ol>
+  {{#if this.linkToAllDocsIsShown}}
+    <div class="main-inner mt-5">
+      <Hds::Button
+        data-test-link-to-all-docs
+        @color="secondary"
+        @text="See older documents"
+        @icon="arrow-right"
+        @iconPosition="trailing"
+        @isFullWidth={{true}}
+        @route="authenticated.documents"
+        @query={{this.query}}
+        class="py-3"
+      />
+    </div>
+  {{/if}}
+{{else}}
+  <div data-test-no-docs-published class="empty-text">
+    No documents have been published yet.
+  </div>
+  <Hds::Button
+    data-test-new-document-button
+    @route="authenticated.new"
+    @text="New document"
+    @icon="plus"
+    class="mt-6 pl-2.5 pr-4"
+  />
+{{/if}}

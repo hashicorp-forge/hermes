@@ -1,0 +1,95 @@
+<div
+  data-test-project-tile
+  class="group relative h-10 pr-2.5 focus-within:z-10"
+  ...attributes
+>
+  {{! Hover/focus affordance area }}
+  <div
+    class="absolute top-0 left-0 -bottom-px right-0 group-focus-within:-left-0.5 group-focus-within:-right-0.5 group-focus-within:rounded group-focus-within:bg-color-page-primary group-focus-within:outline group-focus-within:outline-2 group-focus-within:outline-color-border-strong group-hover:bg-color-page-faint"
+  ></div>
+
+  <div class="project-tile-grid relative grid h-full w-full gap-2">
+    <LinkTo
+      data-test-project-tile-link
+      @route="authenticated.projects.project"
+      @model={{this.projectID}}
+      class="title-and-description grid items-center pl-2.5 outline-none"
+    >
+
+      <div class="inner grid w-full items-center gap-3">
+        <Project::StatusIcon @status={{@project.status}} class="status" />
+        <div class="overflow-hidden">
+          <h3
+            data-test-title
+            class="truncate text-display-300 font-semibold text-color-foreground-strong"
+          >
+            {{highlight-text @project.title @query}}
+          </h3>
+        </div>
+      </div>
+    </LinkTo>
+
+    {{#if (or this.jiraIssue this.fetchJiraIssue.isRunning)}}
+      <ExternalLink
+        data-test-jira-link
+        href={{this.jiraIssue.url}}
+        class="jira inline-flex items-center gap-1.5"
+        tabindex="-1"
+      >
+        <div class="flex h-4 w-4">
+          {{#if this.jiraIssue}}
+            <img
+              data-test-issue-type-image
+              alt={{this.jiraIssue.issueType}}
+              src={{this.jiraIssue.issueTypeImage}}
+              height="16"
+              width="16"
+            />
+          {{else}}
+            <FlightIcon @name="loading" />
+          {{/if}}
+        </div>
+        {{#if this.jiraIssue}}
+          <span
+            data-test-jira-key
+            class="truncate text-body-100 text-color-foreground-faint
+              {{if this.jiraIssueIsClosed 'line-through'}}"
+          >
+            {{this.jiraIssue.key}}
+          </span>
+        {{/if}}
+      </ExternalLink>
+    {{/if}}
+
+    {{#if @project.products}}
+      <div
+        class="products flex flex-row-reverse items-center gap-2 text-body-100 text-color-foreground-faint"
+      >
+        <ul class="flex gap-px">
+          {{#each (take this.maxProducts @project.products) as |product|}}
+            <li class="flex items-center" data-test-product>
+              <LinkTo
+                {{tooltip product}}
+                @route="authenticated.product-areas.product-area"
+                @model={{dasherize product}}
+                tabindex="-1"
+              >
+                <Product::Avatar @product={{product}} />
+              </LinkTo>
+            </li>
+          {{/each}}
+        </ul>
+        {{#if this.additionalProductsLabelIsShown}}
+          <div
+            data-test-additional-products-label
+            class="shrink-0 text-color-foreground-faint"
+          >
+
+            +{{this.additionalProductsCount}}
+          </div>
+        {{/if}}
+      </div>
+    {{/if}}
+
+  </div>
+</div>

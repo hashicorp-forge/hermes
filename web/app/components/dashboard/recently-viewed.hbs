@@ -1,0 +1,72 @@
+{{on-window "resize" this.updateAffordances}}
+
+<div class="secondary flex shrink-0 lg:w-72">
+  <div
+    class="relative h-full w-full border-l-color-border-primary lg:border-l lg:pl-4"
+  >
+    <div class="mt-2.5 flex w-full items-center justify-between lg:pl-3">
+      <h4 class="max-lg:hermes-h4">
+        Recently viewed
+      </h4>
+      <div class="flex gap-1 lg:hidden">
+        <Hds::Button
+          data-test-scroll-back
+          {{on "click" this.scrollBack}}
+          @color="secondary"
+          @icon="arrow-left"
+          class="pill-button"
+          @text="Scroll left"
+          @isIconOnly={{true}}
+          @size="small"
+          disabled={{not this.canScrollBack}}
+        />
+        <Hds::Button
+          data-test-scroll-forward
+          {{on "click" this.scrollForward}}
+          @color="secondary"
+          @icon="arrow-right"
+          class="pill-button"
+          @text="Scroll right"
+          @isIconOnly={{true}}
+          @size="small"
+          disabled={{not this.canScrollForward}}
+        />
+      </div>
+    </div>
+    {{#if this.index}}
+      <div class="relative mt-4">
+        <ol
+          data-test-recently-viewed
+          {{did-insert this.registerScrollBody}}
+          {{on "scroll" this.updateAffordances}}
+          class="{{if
+              this.screenIsSmall
+              'horizontally-divided-list flex snap-x snap-proximity overflow-auto rounded-md pb-4'
+              'divided-list'
+            }}"
+        >
+          {{#each this.index as |r|}}
+            <li class="w-72 shrink-0 snap-start lg:w-full">
+              <Dashboard::RecentlyViewed::Item @item={{r}} />
+            </li>
+          {{/each}}
+        </ol>
+        {{! Scroll affordances }}
+        <div
+          class="scroll-affordance left-0 rounded-l-md bg-gradient-to-r
+            {{unless this.canScrollBack 'opacity-0'}}"
+          aria-hidden="true"
+        />
+        <div
+          class="scroll-affordance right-0 rounded-r-md bg-gradient-to-l
+            {{unless this.canScrollForward 'opacity-0'}}"
+          aria-hidden="true"
+        />
+      </div>
+    {{else}}
+      <div data-test-no-recently-viewed class="empty-text lg:px-3">
+        You haven't viewed any projects or documents.
+      </div>
+    {{/if}}
+  </div>
+</div>

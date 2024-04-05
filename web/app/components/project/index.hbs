@@ -1,0 +1,295 @@
+<div class="relative">
+
+  <div class="project-header flex h-9 w-full items-center justify-between">
+    {{! Project Badge }}
+    <div
+      class="flex items-center gap-1.5 rounded bg-color-palette-neutral-100 px-2 pt-1 pb-0.5 text-color-foreground-faint"
+    >
+      <h5 class="hermes-h4">
+        Project
+      </h5>
+    </div>
+
+    {{! Status and CopyURLButton }}
+    <div class="flex items-center gap-2">
+      <span class="font-bold">
+        Status:
+      </span>
+      <X::DropdownList
+        @items={{this.statuses}}
+        @placement="bottom-end"
+        @selected={{this.status}}
+        @onItemClick={{this.changeStatus}}
+        class="theme--neutral"
+      >
+        <:anchor as |dd|>
+          <dd.ToggleAction
+            data-test-project-status-toggle
+            class="hds-button hds-button--size-medium hds-button--color-secondary pill-button border-color-border-strong"
+            @hasChevron={{true}}
+          >
+            <Project::StatusIcon @status={{dd.selected}} />
+            <span class="ml-1 mr-0.5">
+              {{this.statusLabel}}
+            </span>
+          </dd.ToggleAction>
+        </:anchor>
+        <:item as |dd|>
+          <dd.Action data-test-status-action={{dd.value}}>
+            <X::DropdownList::CheckableItem
+              @isSelected={{dd.isSelected}}
+              @checkmarkPosition="trailing"
+            >
+              <:default>
+                <div class="flex items-center gap-2 pl-1.5">
+                  <Project::StatusIcon @status={{dd.value}} />
+                  <span>
+                    {{dd.attrs.label}}
+                  </span>
+                </div>
+              </:default>
+            </X::DropdownList::CheckableItem>
+          </dd.Action>
+        </:item>
+      </X::DropdownList>
+      <CopyURLButton
+        @isIconOnly={{true}}
+        @url={{this.url}}
+        class="hds-button hds-button--color-secondary pill-button h-9 w-9 justify-center border-color-border-strong p-0"
+      />
+    </div>
+  </div>
+
+  <AnimatedContainer @motion={{this.containerMotion}}>
+    <div class="pb-6">
+      <div class="relative z-20 max-w-3xl pb-5">
+        <AnimatedContainer @motion={{this.containerMotion}}>
+          {{! Title }}
+          <div class="mt-7 flex">
+            <EditableField
+              class="project-title text-display-600"
+              data-test-project-title
+              @value={{this.title}}
+              @tag="h1"
+              @placeholder="Add project title"
+              @buttonSize="medium"
+              @onSave={{this.saveTitle}}
+              @isReadOnly={{not this.projectIsActive}}
+              @isRequired={{true}}
+              @isSaving={{this.titleIsSaving}}
+            />
+          </div>
+
+          {{! Description }}
+          {{#animated-if
+            (or this.description this.projectIsActive)
+            rules=this.descriptionTransitionRules
+          }}
+            <div class="flex">
+              <EditableField
+                class="project-description"
+                data-test-project-description
+                @value="{{this.description}}"
+                @onSave={{this.saveDescription}}
+                @isReadOnly={{not this.projectIsActive}}
+                @isSaving={{this.descriptionIsSaving}}
+                @placeholder="Add a description"
+                @buttonSize="medium"
+              />
+            </div>
+          {{/animated-if}}
+        </AnimatedContainer>
+      </div>
+
+      {{! Jira }}
+      {{#if this.jiraIsEnabled}}
+        <AnimatedContainer
+          @motion={{this.containerMotion}}
+          {{did-insert this.maybeLoadJiraInfo}}
+        >
+          {{#animated-if this.jiraWidgetIsShown rules=this.jiraTransitionRules}}
+            <div class="mt-5 w-full">
+              <Project::JiraWidget
+                @issue={{this.jiraIssue}}
+                @onIssueRemove={{this.removeJiraIssue}}
+                @onIssueSelect={{this.addJiraIssue}}
+                @isLoading={{this.loadJiraIssue.isRunning}}
+                @isReadOnly={{not this.projectIsActive}}
+              />
+            </div>
+          {{/animated-if}}
+        </AnimatedContainer>
+      {{/if}}
+
+      {{! Plus button }}
+      <RelatedResources
+        @items={{this.relatedResources}}
+        @modalHeaderTitle="Add project resource"
+        @modalInputPlaceholder="Search docs or paste a URL..."
+        @addResource={{this.addResource}}
+      >
+        <:header as |rr|>
+          {{#animated-if
+            this.projectIsActive
+            rules=this.plusButtonTransitionRules
+            initialInsertion=true
+            finalRemoval=true
+          }}
+            <Action
+              data-test-add-project-resource-button
+              {{on "click" rr.showModal}}
+              class="hds-button hds-button--color-primary add-project-resource-button pill-button pointer-events-auto absolute right-14 -bottom-10 z-10 grid h-20 w-20 place-items-center"
+            >
+              <FlightIcon @name="plus" @size="24" class="relative h-9 w-9" />
+            </Action>
+          {{/animated-if}}
+        </:header>
+      </RelatedResources>
+
+    </div>
+  </AnimatedContainer>
+</div>
+
+{{! Resources }}
+<div class="relative border-t border-t-color-border-primary">
+  <div class="max-w-3xl">
+    <AnimatedContainer @motion={{this.containerMotion}}>
+      {{! Documents }}
+      <Project::ResourceList
+        data-test-document-list
+        @items={{this.hermesDocuments}}
+        @shouldAnimate={{this.shouldAnimate}}
+        @motion={{this.resourceListContainerMotion}}
+        @isReadOnly={{not this.projectIsActive}}
+        @onSave={{this.saveDocumentOrder}}
+        class="mt-7"
+      >
+        <:header>
+          <span data-test-documents-header>
+            Documents
+          </span>
+        </:header>
+        <:item as |i|>
+          <RelatedResource::HermesDocument @resource={{i.item}} as |doc|>
+            <Project::Resource
+              @isReadOnly={{i.isReadOnly}}
+              @canMoveUp={{i.canMoveUp}}
+              @canMoveDown={{i.canMoveDown}}
+              @moveToTop={{i.moveToTop}}
+              @moveUp={{i.moveUp}}
+              @moveDown={{i.moveDown}}
+              @moveToBottom={{i.moveToBottom}}
+              @overflowMenuItems={{hash
+                delete=(hash
+                  label="Remove"
+                  icon="trash"
+                  action=(fn this.deleteResource doc)
+                )
+              }}
+            >
+              <Doc::TileMedium @canBeReordered={{true}} @doc={{doc}} />
+            </Project::Resource>
+          </RelatedResource::HermesDocument>
+        </:item>
+      </Project::ResourceList>
+
+      {{!
+        We add a page background color to overlay any
+        removed documents that are still animating out.
+       }}
+      <div class="relative z-10 mt-1 bg-color-page-primary pt-7">
+        {{! External links }}
+        <Project::ResourceList
+          data-test-external-link-list
+          @items={{this.externalLinks}}
+          @shouldAnimate={{this.shouldAnimate}}
+          @motion={{this.resourceListContainerMotion}}
+          @isReadOnly={{not this.projectIsActive}}
+          @onSave={{this.saveLinkOrder}}
+        >
+          <:header>
+            <span data-test-external-links-header>
+              External links
+            </span>
+          </:header>
+          <:item as |i|>
+            <Project::Resource
+              @isReadOnly={{i.isReadOnly}}
+              @canMoveUp={{i.canMoveUp}}
+              @canMoveDown={{i.canMoveDown}}
+              @moveToTop={{i.moveToTop}}
+              @moveUp={{i.moveUp}}
+              @moveDown={{i.moveDown}}
+              @moveToBottom={{i.moveToBottom}}
+              @overflowMenuItems={{hash
+                edit=(hash
+                  label="Edit"
+                  icon="edit"
+                  action=(fn this.showEditModal i.item i.index)
+                )
+                delete=(hash
+                  label="Remove"
+                  icon="trash"
+                  action=(fn this.deleteResource i.item)
+                )
+              }}
+            >
+              <RelatedResource::ExternalLink @resource={{i.item}} as |link|>
+                <ExternalLink
+                  data-test-related-link
+                  href={{link.url}}
+                  class="block h-[34px] pt-[7px] pl-2 pr-8 group-hover:bg-color-surface-faint"
+                >
+                  <div class="flex items-center gap-3">
+                    <div class="ml-1 flex">
+                      <Favicon @url={{link.url}} />
+                    </div>
+                    <div class="flex w-full min-w-0 items-end gap-2">
+                      <h4
+                        class="max-w-[60%] truncate text-body-200 font-semibold text-color-foreground-strong"
+                      >
+                        {{link.name}}
+                      </h4>
+                      <div
+                        class="max-w-[40%] truncate text-body-200 text-color-foreground-faint"
+                      >
+                        {{link.url}}
+                      </div>
+                    </div>
+                  </div>
+                </ExternalLink>
+              </RelatedResource::ExternalLink>
+            </Project::Resource>
+          </:item>
+        </Project::ResourceList>
+      </div>
+    </AnimatedContainer>
+  </div>
+</div>
+
+{{! Footer }}
+<div
+  {{did-insert this.enableAnimation}}
+  class="mt-14 -mb-6 flex gap-[5px] text-body-100 text-color-foreground-disabled"
+>
+  <span data-test-created-time>
+    Created
+    {{time-ago @project.createdTime}}
+    by
+    {{@project.creator}}
+  </span>
+  <span class="opacity-50">|</span>
+  <span data-test-modified-time>
+    Last modified
+    {{time-ago @project.modifiedTime}}
+  </span>
+</div>
+
+{{! Modal }}
+{{#if this.editModalIsShown}}
+  <RelatedResources::AddOrEditExternalResourceModal
+    @resource={{this.resourceToEdit}}
+    @onClose={{this.hideEditModal}}
+    @onSave={{this.saveExternalLink}}
+  />
+{{/if}}
