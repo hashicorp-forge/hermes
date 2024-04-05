@@ -180,5 +180,16 @@ module("Acceptance | authenticated/projects", function (hooks) {
     assert
       .dom(getPageTwoButton())
       .hasAttribute("href", "/projects?page=2&status=archived");
+
+    // Click a pagination link
+    await click(getPageTwoButton());
+    assert.equal(currentURL(), "/projects?page=2&status=archived");
+
+    // Assert that the segmented controls have the correct hrefs (no page number)
+    assert.dom(ACTIVE_TAB).hasAttribute("href", "/projects");
+    assert
+      .dom(COMPLETED_TAB)
+      .hasAttribute("href", "/projects?status=completed");
+    assert.dom(ARCHIVED_TAB).hasAttribute("href", "/projects?status=archived");
   });
 });

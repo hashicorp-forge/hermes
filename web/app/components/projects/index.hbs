@@ -7,7 +7,7 @@
       <LinkTo
         data-test-tab={{status.value}}
         @route="authenticated.projects"
-        @query={{hash status=status.value}}
+        @query={{hash status=status.value page=1}}
         class="hds-button hds-button--color-secondary"
       >
         {{status.label}}
