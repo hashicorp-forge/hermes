@@ -4,13 +4,14 @@
   @searchEnabled={{true}}
   @search={{perform this.searchDirectory}}
   @searchField="email"
-  @options={{this.people}}
+  @options={{this.options}}
   @selected={{@selected}}
   @renderInPlace={{@renderInPlace}}
-  @placeholder="Search for your peers..."
+  @placeholder="Search by name or email..."
   @onChange={{@onChange}}
   @onInput={{this.onInput}}
   @onClose={{this.onClose}}
+  @onFocus={{this.onFocus}}
   @onOpen={{this.maybeClose}}
   @triggerId={{@triggerId}}
   @onKeydown={{this.onKeydown}}
@@ -22,17 +23,19 @@
   class="hds-form-field__control multiselect w-full
     {{if (and @isSingleSelect @selected.length) 'selection-made'}}"
   ...attributes
-  as |value|
+  as |option|
 >
   <div class="flex items-center gap-2 overflow-hidden py-1">
-    <Person::Avatar @email={{value}} />
+    <Person::Avatar @email={{option}} />
     <div class="w-full min-w-0">
-      <div class="truncate text-body-200 leading-tight">
-        {{get-model-attr "person.name" value}}
+      <TruncatedText
+        class="text-body-200 leading-tight text-color-foreground-primary"
+      >
+        {{get-model-attr "person.name" option fallback="group.name"}}
         <span class="ml-0.5 text-body-100 text-color-foreground-disabled">
-          {{get-model-attr "person.email" value}}
+          {{option}}
         </span>
-      </div>
+      </TruncatedText>
     </div>
   </div>
 </PowerSelectMultiple>

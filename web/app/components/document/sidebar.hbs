@@ -284,11 +284,12 @@
             <EditableField
               data-test-document-approvers
               data-test-editable={{this.isOwner}}
-              @value={{this.approvers}}
+              @value={{this.allApprovers}}
               @onChange={{this.updateApprovers}}
-              @onSave={{perform this.save "approvers"}}
+              @onSave={{perform this.saveApprovers}}
               @isSaving={{this.saveIsRunning}}
               @isReadOnly={{this.editingIsDisabled}}
+              @includeGroupsInPeopleSelect={{true}}
               {{! Provide the document to the `has-approved-doc` helper }}
               @document={{@document}}
             />
@@ -333,7 +334,7 @@
                     @model={{project.id}}
                     class="related-resource-link quarternary-button peer flex h-[32px] items-center gap-2 px-[5px]"
                   >
-                    <div class="flex w-[18px] shrink-0 justify-center py-[2px]">
+                    <div class="flex w-[18px] shrink-0 justify-center">
                       <Project::StatusIcon @status={{project.status}} />
                     </div>
                     <div class="overflow-hidden">
@@ -475,9 +476,8 @@
         </div>
       {{else}}
         {{#let (and this.isDraft this.isOwner) as |canPublish|}}
-          {{#if (or canPublish this.isApprover)}}
+          {{#if (or canPublish this.isApprover this.isGroupApproverOnly)}}
             <div class="flex gap-2 px-3">
-
               {{#if canPublish}}
                 {{! Publish for review... }}
                 <Hds::Button
@@ -498,7 +498,7 @@
                   {{on "click" (fn (set this "deleteModalIsShown" true))}}
                 />
               {{else}}
-                {{! isApprover }}
+                {{! isApprover or isGroupApproverOnly}}
 
                 {{! Read-only / isRunning state }}
                 {{#if
@@ -540,6 +540,7 @@
                     class="w-full"
                     {{on "click" (perform this.approve)}}
                   />
+
                   {{#if (eq @document.docType "FRD")}}
                     {{! Reject FRD }}
                     <Hds::Button
@@ -552,42 +553,45 @@
                       {{on "click" (perform this.rejectFRD)}}
                     />
                   {{/if}}
-                  {{! Overflow menu (Leave approver role) }}
-                  <X::DropdownList
-                    data-test-sidebar-footer-overflow-menu
-                    @placement="top-start"
-                    @items={{array
-                      (hash
-                        icon="user-minus"
-                        label="Leave approver role"
-                        action=(perform this.leaveApproverRole)
-                      )
-                    }}
-                  >
-                    <:anchor as |dd|>
-                      <dd.ToggleAction>
-                        <Hds::Button
-                          data-test-sidebar-footer-secondary-dropdown-button
-                          @text="More actions"
-                          @icon="more-horizontal"
-                          @color="secondary"
-                          @isIconOnly={{true}}
-                        />
-                      </dd.ToggleAction>
-                    </:anchor>
-                    <:item as |dd|>
-                      <dd.Action
-                        class="flex gap-2.5"
-                        {{on "click" dd.attrs.action}}
-                      >
-                        <FlightIcon
-                          @name={{dd.attrs.icon}}
-                          class="opacity-60"
-                        />
-                        {{dd.attrs.label}}
-                      </dd.Action>
-                    </:item>
-                  </X::DropdownList>
+
+                  {{#unless this.isGroupApproverOnly}}
+                    {{! Overflow menu (Leave approver role) }}
+                    <X::DropdownList
+                      data-test-sidebar-footer-overflow-menu
+                      @placement="top-start"
+                      @items={{array
+                        (hash
+                          icon="user-minus"
+                          label="Leave approver role"
+                          action=(perform this.leaveApproverRole)
+                        )
+                      }}
+                    >
+                      <:anchor as |dd|>
+                        <dd.ToggleAction>
+                          <Hds::Button
+                            data-test-sidebar-footer-secondary-dropdown-button
+                            @text="More actions"
+                            @icon="more-horizontal"
+                            @color="secondary"
+                            @isIconOnly={{true}}
+                          />
+                        </dd.ToggleAction>
+                      </:anchor>
+                      <:item as |dd|>
+                        <dd.Action
+                          class="flex gap-2.5"
+                          {{on "click" dd.attrs.action}}
+                        >
+                          <FlightIcon
+                            @name={{dd.attrs.icon}}
+                            class="opacity-60"
+                          />
+                          {{dd.attrs.label}}
+                        </dd.Action>
+                      </:item>
+                    </X::DropdownList>
+                  {{/unless}}
                 {{/if}}
               {{/if}}
             </div>
@@ -763,6 +767,7 @@
           <Hds::Form::Field @layout="vertical" as |F|>
             <F.Control>
               <Inputs::PeopleSelect
+                @includeGroups={{true}}
                 @renderInPlace={{true}}
                 @selected={{this.approvers}}
                 @onChange={{this.updateApprovers}}

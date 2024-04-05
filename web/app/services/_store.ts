@@ -22,7 +22,7 @@ export default class StoreService extends Store {
     ) => {
       if (!emailsOrDocs) return;
 
-      let promises: Promise<void>[] = [];
+      let promises: Promise<void | any>[] = [];
       let uniqueEmails: string[] = [];
 
       emailsOrDocs = emailsOrDocs.uniq(); // Remove duplicates
@@ -55,7 +55,8 @@ export default class StoreService extends Store {
         /**
          * Skip processing if the record is already in the store.
          */
-        if (this.peekRecord("person", email)) return;
+        if (this.peekRecord("person", email) || this.peekRecord("group", email))
+          return;
 
         /**
          * Skip emails already queued for processing.
@@ -86,6 +87,28 @@ export default class StoreService extends Store {
 
             if (!cachedRecord) {
               this.createRecord("person", {
+                id: email,
+                email,
+              });
+            }
+          }),
+          /**
+           * Groups API doesn't have a `findRecord` equivalent, so we query instead.
+           */
+          this.query("group", {
+            query: email,
+          }).catch(() => {
+            /**
+             * Errors here are not necessarily indicative of a problem;
+             * for example, we get a 404 if a once-valid user is no longer in
+             * the directory. So we conditionally create a record for the email
+             * to prevent future requests for the same email.
+             */
+            if (!email) return;
+            const cachedRecord = this.peekRecord("group", email);
+
+            if (!cachedRecord) {
+              this.createRecord("group", {
                 id: email,
                 email,
               });

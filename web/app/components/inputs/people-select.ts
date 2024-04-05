@@ -11,6 +11,7 @@ import PersonModel from "hermes/models/person";
 import { Select } from "ember-power-select/components/power-select";
 import { next, schedule } from "@ember/runloop";
 import calculatePosition from "ember-basic-dropdown/utils/calculate-position";
+import GroupModel from "hermes/models/group";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 
 export interface GoogleUser {
@@ -46,6 +47,7 @@ interface InputsPeopleSelectComponentSignature {
     onChange: (value: string[]) => void;
     renderInPlace?: boolean;
     disabled?: boolean;
+    includeGroups?: boolean;
     onKeydown?: (dropdown: any, event: KeyboardEvent) => void;
 
     /**
@@ -82,7 +84,7 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
    * The list of people to display in the dropdown.
    * Instantiated empty and populated by the `searchDirectory` task.
    */
-  @tracked protected people: string[] = [];
+  @tracked protected options: string[] = [];
 
   /**
    * The action to run when the PowerSelect input is clicked.
@@ -130,7 +132,7 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
    */
   @action protected onInput(inputValue: string, select: Select) {
     if (inputValue === "") {
-      this.people = [];
+      this.options = [];
 
       /**
        * Stop the redundant "type to search" message
@@ -147,7 +149,7 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
    * Clears the people list and calls `this.args.onBlur` if it exists.
    */
   @action protected onClose() {
-    this.people = [];
+    this.options = [];
   }
   /**
    * The action to maybe close the dropdown. Passed to the PeopleSelect
@@ -173,7 +175,7 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
   ) {
     const position = calculatePosition(trigger, content, destination, options);
 
-    const extraOffsetLeft = 4;
+    const extraOffsetLeft = 2;
     const extraOffsetBelow = 2;
     const extraOffsetAbove = extraOffsetBelow + 2;
 
@@ -217,13 +219,24 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
     for (let i = 0; i < MAX_RETRIES; i++) {
       let retryDelay = INITIAL_RETRY_DELAY;
 
-      try {
-        const people = await this.store.query("person", {
+      let p: string[] = [];
+      let g: string[] = [];
+
+      let promises = [
+        this.store.query("person", {
           query,
-        });
+        }),
+      ];
+
+      try {
+        if (this.args.includeGroups) {
+          promises.push(this.store.query("group", { query }));
+        }
+
+        const [people, groups] = await Promise.all(promises);
 
         if (people) {
-          this.people = people
+          p = people
             .map((p: PersonModel) => p.email)
             .filter((email: string) => {
               // filter out any people already selected
@@ -231,7 +244,7 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
                 (selectedEmail) => selectedEmail === email,
               );
             })
-            .filter((email: string) => {
+            .filter((email) => {
               // filter the authenticated user if `excludeSelf` is true
               return (
                 !this.args.excludeSelf ||
@@ -239,9 +252,34 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
               );
             });
         } else {
-          this.people = [];
+          p = [];
         }
-        // stop the loop if the query was successful
+
+        if (groups) {
+          g = groups
+            .filter((g: GroupModel) => {
+              const name = g.name.toLowerCase();
+              if (name.includes("departed") || name.includes("terminated")) {
+                return false;
+              } else {
+                return true;
+              }
+            })
+            .map((g: GroupModel) => g.email)
+            .filter((email) => {
+              // Filter out any people already selected
+              return !this.args.selected.find(
+                (selectedEmail) => selectedEmail === email,
+              );
+            });
+        } else {
+          g = [];
+        }
+
+        // Concatenate and sort alphabetically
+        this.options = [...p, ...g].sort((a, b) => a.localeCompare(b));
+
+        // Stop the loop if the query was successful
         return;
       } catch (e) {
         // Throw an error if this is the last retry.

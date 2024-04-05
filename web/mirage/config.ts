@@ -7,6 +7,7 @@ import { ProjectStatus } from "hermes/types/project-status";
 import { HITS_PER_PAGE } from "hermes/services/algolia";
 import { PROJECT_HITS_PER_PAGE } from "hermes/routes/authenticated/projects/index";
 import { assert as emberAssert } from "@ember/debug";
+import { HermesDocument } from "hermes/types/document";
 import { FacetName } from "hermes/components/header/toolbar";
 
 import {
@@ -818,12 +819,20 @@ export default function (mirageConfig) {
         });
 
         if (document) {
-          if (!document.attrs.approvedBy?.includes(TEST_USER_EMAIL)) {
-            const approvedBy = document.attrs.approvedBy || [];
-            document.update({
-              approvedBy: [...approvedBy, TEST_USER_EMAIL],
-            });
-          }
+          const { attrs } = document as { attrs: HermesDocument };
+          const { approvedBy, approvers } = attrs;
+
+          document.update({
+            approvedBy: [...(approvedBy || []), TEST_USER_EMAIL],
+            /**
+             * Add any new approvers to the list,
+             * such as in the case of group approvals.
+             */
+            approvers: approvers?.includes(TEST_USER_EMAIL)
+              ? approvers
+              : [...(approvers || []), TEST_USER_EMAIL],
+          });
+
           return new Response(200, {}, document.attrs);
         }
 
@@ -849,6 +858,10 @@ export default function (mirageConfig) {
         return new Response(404, {}, {});
       });
 
+      this.options("/approvals/:document_id", (schema, request) => {
+        return new Response(200, {}, { allow: [] });
+      });
+
       /*************************************************************************
        *
        * People
@@ -857,18 +870,37 @@ export default function (mirageConfig) {
 
       // Query via the PeopleSelect
       this.post("/people", (schema, request) => {
-        let query: string = JSON.parse(request.requestBody).query;
+        let query: string = JSON.parse(request.requestBody).query.toLowerCase();
+
         // Search everyone's first emailAddress for matches
         let matches: Collection<unknown> = schema["google/people"].where(
           (person) => {
             return (
-              person.emailAddresses[0].value.includes(query) ||
-              person.names[0].displayName.includes(query)
+              person.emailAddresses[0].value.toLowerCase().includes(query) ||
+              person.names[0].displayName.toLowerCase().includes(query)
             );
           },
         );
 
         // Return the Collection models in Response format
+        return new Response(200, {}, matches.models);
+      });
+
+      /*************************************************************************
+       *
+       * Google Groups
+       *
+       ************************************************************************/
+
+      // Query via the PeopleSelect
+      this.post("/groups", (schema, request) => {
+        const requestBody = JSON.parse(request.requestBody);
+        const { query } = requestBody;
+
+        const matches = schema.groups.where((group) => {
+          return group.email.includes(query) || group.name.includes(query);
+        });
+
         return new Response(200, {}, matches.models);
       });
 
