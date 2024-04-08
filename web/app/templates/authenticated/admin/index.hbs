@@ -1,0 +1,42 @@
+<div class="mb-6">
+  <h1 class="hermes-h4X text-center text-display-300 font-regular">
+    ⪽⊚♫TR◌L_cℇNℸ℮ℜ
+  </h1>
+</div>
+<div class="mx-auto max-w-2xl">
+
+  {{!-- <nav class="mx-auto mt-4 mb-20 grid max-w-md gap-1 text-center">
+  {{! TODO: accordion }}
+  <Hds::Button
+    @isFullWidth={{true}}
+    @text="New product/area"
+    @route="authenticated.admin.product-areas"
+  />
+  <Hds::Button
+    @isFullWidth={{true}}
+    @text="New doctype"
+    @route="authenticated.admin.doc-types"
+  />
+</nav> --}}
+
+  <div class="mb-32 grid gap-2">
+    <X::Accordion>
+      <:toggle>
+        Add product/area
+      </:toggle>
+      <:content>
+        <Admin::ProductAreas />
+      </:content>
+    </X::Accordion>
+
+    <X::Accordion>
+      <:toggle>
+        Add doctype
+      </:toggle>
+      <:content>
+        <Admin::DocTypes />
+      </:content>
+    </X::Accordion>
+
+  </div>
+</div>

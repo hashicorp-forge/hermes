@@ -1,0 +1,14 @@
+<Hds::Card::Container
+  @hasBorder={{true}}
+  @level="mid"
+  @levelHover="high"
+  class="mx-auto w-full rounded-button-md
+    {{if this.contentIsShown 'max-w-2xl' 'max-w-xl'}}"
+>
+  <Action class="accordion-button" {{on "click" this.toggleContent}}>
+    {{yield to="toggle"}}
+  </Action>
+  {{#if this.contentIsShown}}
+    {{yield to="content"}}
+  {{/if}}
+</Hds::Card::Container>

@@ -34,3 +34,11 @@
 .pill-button:focus::before {
   @apply rounded-l-full rounded-r-full;
 }
+
+.vowel {
+  @apply inline-flex rounded-t-full rounded-b-full bg-color-foreground-strong px-0.5 font-regular leading-none text-color-page-primary;
+}
+
+.accordion-button {
+  @apply grid h-14 w-full place-items-center px-4 text-body-300 font-semibold;
+}
