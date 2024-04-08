@@ -80,6 +80,14 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
       },
     ] as UserNavMenuItem[];
 
+    // if the user is an admin, show the admin link at the top
+    if (this.authenticatedUser.isAdmin) {
+      defaultItems.push({
+        label: "Admin panel",
+        route: "authenticated.admin",
+      });
+    }
+
     if (this.showSignOut) {
       defaultItems.push({
         label: "Sign out",

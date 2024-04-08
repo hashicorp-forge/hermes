@@ -1,7 +1,59 @@
 {{page-title "Admin"}}
+{{set-body-class "secondary-screen admin"}}
 
-<div class="x-container">
+<div class="pl-6 pr-2">
+  <div class="flex h-screen gap-6 py-2">
 
-  {{outlet}}
+    <nav class="flex w-64 shrink-0 flex-col">
+      <div class="relative ml-1 mt-4 shrink-0">
 
+        <LinkTo @route="authenticated.dashboard">
+          <HermesLogo />
+        </LinkTo>
+        <Hds::Badge
+          @text="Admin panel"
+          @type="outlined"
+          class="absolute top-0 right-0"
+        />
+      </div>
+      {{! <LinkTo
+        @route="authenticated.admin.index"
+        class="mt-10 grid h-8 shrink-0 items-center text-display-200 font-regular"
+      >
+        ⪽⊚♫TR◌L_cℇNℸ℮ℜ
+      </LinkTo> }}
+      {{! TODO: scrollable... iframe? }}
+      <ul class="nav-links mt-6 flex h-full flex-col">
+        <li>
+          <LinkTo
+            @current-when="authenticated.admin.product-areas"
+            @route="authenticated.admin.product-areas"
+          >
+            + New product/area
+          </LinkTo>
+        </li>
+        <li>
+          <LinkTo
+            @current-when="authenticated.admin.doc-types"
+            @route="authenticated.admin.doc-types"
+          >
+            + New doctype
+          </LinkTo>
+        </li>
+      </ul>
+
+    </nav>
+
+    {{! TODO: scrollable... iframe? }}
+    <Hds::Card::Container
+      @level="mid"
+      @hasBorder={{true}}
+      class="w-full overflow-hidden"
+    >
+      <div class="h-full overflow-scroll px-20 pt-16">
+        {{outlet}}
+      </div>
+    </Hds::Card::Container>
+
+  </div>
 </div>

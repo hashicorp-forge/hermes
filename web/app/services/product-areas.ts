@@ -75,6 +75,15 @@ export default class ProductAreasService extends Service {
     assert("_index must exist", this._index);
     return this._index;
   }
+
+  get abbreviations(): string[] {
+    return Object.values(this.index).map((product) => product.abbreviation);
+  }
+
+  get names() {
+    return Object.keys(this.index);
+  }
+
   /**
    * A helper to get a hash-based color for a product.
    * Used wherever the color is needed, e.g.,

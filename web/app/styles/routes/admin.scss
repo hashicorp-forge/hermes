@@ -1,0 +1,40 @@
+body.admin {
+  .nav-links {
+    a {
+      @apply block rounded-button-md py-1.5 px-3 text-body-300 font-medium text-color-foreground-faint;
+
+      &:hover,
+      &:focus {
+        @apply text-color-foreground-primary;
+      }
+
+      &.active {
+        @apply bg-color-surface-interactive-active text-color-foreground-strong;
+      }
+    }
+  }
+
+  h1 {
+    @apply mb-8;
+  }
+
+  .hermes-logo {
+    // @apply space-x-2;
+
+    // .flight-icon {
+    //   @apply h-4 w-4;
+    // }
+
+    // .hermes-logo-divider {
+    //   @apply h-5;
+    // }
+
+    // .hermes-logo-text {
+    //   @apply text-body-300;
+    // }
+  }
+
+  form {
+    @apply max-w-3xl;
+  }
+}

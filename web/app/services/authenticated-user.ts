@@ -26,11 +26,18 @@ export default class AuthenticatedUserService extends Service {
   @service declare store: StoreService;
 
   @tracked subscriptions: Subscription[] | null = null;
-  @tracked _info: PersonModel | null = null;
+  @tracked _info: (PersonModel & { isAdmin: boolean }) | null = null;
 
   get info(): PersonModel {
     assert("user info must exist", this._info);
     return this._info;
+  }
+
+  get isAdmin(): boolean {
+    /**
+     * TODO: Implement isAdmin
+     */
+    return true;
   }
 
   /**
