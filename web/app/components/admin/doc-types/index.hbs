@@ -1,31 +1,47 @@
 <h1>New doctype</h1>
 
-<form>
+<form {{on "submit" this.submit}}>
   <div class="mb-5 grid gap-5">
 
     {{! TODO: try this as a tile? }}
     <Hds::Form::TextInput::Field
-      @value=""
+      {{on "input" this.setLongName}}
+      @value={{this.longName}}
       placeholder="E.g., Request for Comments"
       as |F|
     >
-      <F.Label>Name</F.Label>
+      <F.Label>Full name</F.Label>
+      {{#if this.longNameErrorIsShown}}
+        <F.Error>Whoop</F.Error>
+      {{/if}}
     </Hds::Form::TextInput::Field>
 
     <Hds::Form::TextInput::Field
-      @value=""
+      {{on "input" this.setName}}
+      @value={{this.name}}
       placeholder="E.g., RFC, PRFAQ"
       as |F|
     >
       <F.Label>Abbreviation</F.Label>
+      {{#if this.nameErrorIsShown}}
+        <F.Error>Whoop</F.Error>
+      {{/if}}
     </Hds::Form::TextInput::Field>
-    <Hds::Form::Textarea::Field @value="" as |F|>
-      <F.Label>Description</F.Label>
-    </Hds::Form::Textarea::Field>
 
-    <Hds::Form::TextInput::Field @value="" placeholder="" as |F|>
+    <Hds::Form::TextInput::Field
+      {{on "input" this.setTemplateID}}
+      @value={{this.templateID}}
+      as |F|
+    >
       <F.Label>Template ID</F.Label>
     </Hds::Form::TextInput::Field>
+    <Hds::Form::Textarea::Field
+      {{on "input" this.setDescription}}
+      @value={{this.description}}
+      as |F|
+    >
+      <F.Label>Description</F.Label>
+    </Hds::Form::Textarea::Field>
 
   </div>
   <div>
@@ -52,14 +68,14 @@
             </F.Label>
 
           </Hds::Form::Checkbox::Field>
-          {{#unless field.isRequired}}
+          {{!-- {{#unless field.isRequired}}
             <Action class="cursor-move">
               <FlightIcon
                 @name="menu"
                 class="text-color-foreground-faint opacity-75"
               />
             </Action>
-          {{/unless}}
+          {{/unless}} --}}
         </li>
       {{/each}}
     </ul>

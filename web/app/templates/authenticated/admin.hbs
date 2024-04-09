@@ -1,59 +1,69 @@
 {{page-title "Admin"}}
 {{set-body-class "secondary-screen admin"}}
 
-<div class="pl-6 pr-2">
-  <div class="flex h-screen gap-6 py-2">
+<div class="">
+  <div class="flex h-screen gap-6 bg-color-palette-neutral-700">
 
-    <nav class="flex w-64 shrink-0 flex-col">
-      <div class="relative ml-1 mt-4 shrink-0">
-
+    <nav class="flex w-[270px] shrink-0 flex-col">
+      <div
+        class="relative mb-10 flex w-full shrink-0 items-center justify-between pt-6 pl-6"
+      >
         <LinkTo @route="authenticated.dashboard">
           <HermesLogo />
         </LinkTo>
         <Hds::Badge
           @text="Admin panel"
           @type="outlined"
-          class="absolute top-0 right-0"
+          @color="highlight"
+          class="mix-blend-normal"
+          {{! @size="large" }}
         />
-      </div>
-      {{! <LinkTo
-        @route="authenticated.admin.index"
-        class="mt-10 grid h-8 shrink-0 items-center text-display-200 font-regular"
-      >
-        ⪽⊚♫TR◌L_cℇNℸ℮ℜ
-      </LinkTo> }}
-      {{! TODO: scrollable... iframe? }}
-      <ul class="nav-links mt-6 flex h-full flex-col">
-        <li>
-          <LinkTo
-            @current-when="authenticated.admin.product-areas"
-            @route="authenticated.admin.product-areas"
-          >
-            + New product/area
-          </LinkTo>
-        </li>
-        <li>
-          <LinkTo
-            @current-when="authenticated.admin.doc-types"
-            @route="authenticated.admin.doc-types"
-          >
-            + New doctype
-          </LinkTo>
-        </li>
-      </ul>
 
+      </div>
+      <div class="flex h-full flex-col pl-6">
+
+        {{! ⪽⊚♫TR◌L_cℇNℸ℮ℜ }}
+        <ul class="nav-links flex h-full flex-col">
+          <li>
+            <LinkTo
+              @current-when="authenticated.admin.product-areas"
+              @route="authenticated.admin.product-areas"
+            >
+              <FlightIcon @name="tag" />
+              New product/area
+            </LinkTo>
+          </li>
+          <li>
+            <LinkTo
+              @current-when="authenticated.admin.doc-types"
+              @route="authenticated.admin.doc-types"
+            >
+              <FlightIcon @name="files" />
+              New doctype
+            </LinkTo>
+          </li>
+          <li>
+            {{! placeholder }}
+            <LinkTo @route="authenticated.admin.index">
+              <FlightIcon @name="identity-user" />
+              New admin
+            </LinkTo>
+          </li>
+        </ul>
+
+        {{!-- <LinkTo @route="authenticated.dashboard" class="mb-4">
+          <FlightIcon @name="hashicorp" class="text-color-white h-8 w-8" />
+          {{! <HermesLogo /> }}
+        </LinkTo> --}}
+      </div>
     </nav>
 
     {{! TODO: scrollable... iframe? }}
-    <Hds::Card::Container
-      @level="mid"
-      @hasBorder={{true}}
-      class="w-full overflow-hidden"
-    >
-      <div class="h-full overflow-scroll px-20 pt-16">
+    <div class="w-full bg-color-surface-faint py-0">
+      <div class="h-full overflow-scroll px-20 py-14">
         {{outlet}}
       </div>
-    </Hds::Card::Container>
+    </div>
 
   </div>
 </div>

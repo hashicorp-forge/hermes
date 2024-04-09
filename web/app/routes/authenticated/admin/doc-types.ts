@@ -1,14 +1,13 @@
 import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
-import FetchService from "hermes/services/fetch";
-import { HermesDocumentType } from "hermes/types/document-type";
+import DocumentTypesService from "hermes/services/document-types";
 
 export default class AuthenticatedDocTypesRoute extends Route {
-  @service("fetch") declare fetchSvc: FetchService;
+  @service declare documentTypes: DocumentTypesService;
 
   async model() {
-    return (await this.fetchSvc
-      .fetch("/api/v1/document-types")
-      .then((response) => response?.json())) as HermesDocumentType[];
+    if (!this.documentTypes.index) {
+      await this.documentTypes.fetch.perform();
+    }
   }
 }

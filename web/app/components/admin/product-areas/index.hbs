@@ -1,30 +1,63 @@
-<h1>New product/area</h1>
+{{#if this.formIsSubmitting}}
+  <div class="grid">
+    <h1>
 
-<form {{on "submit" this.submit}}>
-  <div class="mb-5 grid gap-5">
-    <Hds::Form::TextInput::Field
-      @value={{this.name}}
-      {{on "input" this.setName}}
-      placeholder="E.g., Product Management"
-      as |F|
-    >
-      {{! DO we need some logic for determining duplicates }}
-      <F.Label>Name</F.Label>
-      {{#if this.nameErrorIsShown}}
-        <F.Error>{{this.nameErrorText}}</F.Error>
-      {{/if}}
-    </Hds::Form::TextInput::Field>
-    <Hds::Form::TextInput::Field
-      {{on "input" this.setAbbreviation}}
-      @value={{this.abbreviation}}
-      placeholder="PRM"
-      as |F|
-    >
-      <F.Label>Abbreviation</F.Label>
-      {{#if this.abbreviationErrorIsShown}}
-        <F.Error>{{this.abbreviationErrorText}}</F.Error>
-      {{/if}}
-    </Hds::Form::TextInput::Field>
+      Creating product/area...
+    </h1>
+    <p>
+      This may take a few seconds.
+    </p>
+    <FlightIcon @name="running" @size="24" class="mt-8" />
   </div>
-  <Hds::Button @text="Create product/area" class="my-8" type="submit" />
-</form>
+{{else if this.successStateIsShown}}
+  <h1>
+    Done!
+  </h1>
+  <p>
+    The product/area
+    <strong class="font-bold">
+
+      {{this.name}}
+    </strong>
+    has been created.
+  </p>
+  <Hds::Button
+    {{on "click" this.resetState}}
+    @color="secondary"
+    @text="Add another product/area"
+    class="my-8"
+  />
+{{else}}
+  <h1>
+    New product/area
+  </h1>
+  <form {{on "submit" this.submit}}>
+    <div class="mb-5 grid gap-5">
+      <Hds::Form::TextInput::Field
+        {{on "input" this.setName}}
+        @value={{this.name}}
+        placeholder="E.g., Product Management"
+        as |F|
+      >
+        {{! DO we need some logic for determining duplicates }}
+        <F.Label>Name</F.Label>
+        {{#if this.nameErrorIsShown}}
+          <F.Error>{{this.nameErrorText}}</F.Error>
+        {{/if}}
+      </Hds::Form::TextInput::Field>
+      <Hds::Form::TextInput::Field
+        {{on "input" this.setAbbreviation}}
+        @value={{this.abbreviation}}
+        placeholder="E.g., PRM"
+        as |F|
+      >
+        <F.Label>Abbreviation</F.Label>
+        {{#if this.abbreviationErrorIsShown}}
+          <F.Error>{{this.abbreviationErrorText}}</F.Error>
+        {{/if}}
+      </Hds::Form::TextInput::Field>
+    </div>
+    <Hds::Button @text="Create product/area" class="my-8" type="submit" />
+  </form>
+{{/if}}
+{{! TODO: completed state }}

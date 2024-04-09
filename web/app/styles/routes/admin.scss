@@ -1,40 +1,49 @@
 body.admin {
   .nav-links {
     a {
-      @apply block rounded-button-md py-1.5 px-3 text-body-300 font-medium text-color-foreground-faint;
+      @apply flex w-full items-center gap-2.5 rounded-button-md py-1.5 px-3 text-body-300 font-regular text-color-palette-neutral-300;
 
       &:hover,
       &:focus {
-        @apply text-color-foreground-primary;
+        @apply text-color-palette-neutral-200;
       }
 
       &.active {
-        @apply bg-color-surface-interactive-active text-color-foreground-strong;
+        @apply bg-color-palette-neutral-600 text-white;
+
+        .flight-icon {
+          @apply text-color-palette-neutral-300;
+        }
+      }
+
+      .flight-icon {
+        @apply text-color-palette-neutral-500;
       }
     }
   }
 
   h1 {
-    @apply mb-8;
+    @apply mb-5;
   }
 
   .hermes-logo {
     // @apply space-x-2;
+    @apply text-white;
 
     // .flight-icon {
     //   @apply h-4 w-4;
     // }
 
-    // .hermes-logo-divider {
-    //   @apply h-5;
-    // }
+    .hermes-logo-divider {
+      @apply bg-color-palette-neutral-600;
+    }
 
-    // .hermes-logo-text {
-    //   @apply text-body-300;
-    // }
+    .hermes-logo-text {
+      // @apply text-body-300;
+    }
   }
 
   form {
-    @apply max-w-3xl;
+    @apply max-w-2xl;
   }
 }

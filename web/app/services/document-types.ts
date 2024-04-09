@@ -11,6 +11,18 @@ export default class DocumentTypesService extends Service {
 
   @tracked index: HermesDocumentType[] | null = null;
 
+  get names(): string[] {
+    return this.index?.map((t) => t.name) ?? [];
+  }
+
+  get longNames(): string[] {
+    return this.index?.map((t) => t.longName) ?? [];
+  }
+
+  get icons(): string[] {
+    return this.index?.map((t) => t.flightIcon).compact() ?? [];
+  }
+
   fetch = task(async () => {
     this.index = (await this.fetchSvc
       .fetch(`/api/${this.configSvc.config.api_version}/document-types`)

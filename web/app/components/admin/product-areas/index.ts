@@ -3,6 +3,7 @@ import { action } from "@ember/object";
 import { tracked } from "@glimmer/tracking";
 import { inject as service } from "@ember/service";
 import ProductAreasService from "hermes/services/product-areas";
+import { dropTask, timeout } from "ember-concurrency";
 
 const DEFAULT_ERROR = "This field is required";
 
@@ -17,7 +18,11 @@ interface AdminProductAreasSignature {
 export default class AdminProductAreas extends Component<AdminProductAreasSignature> {
   @service declare productAreas: ProductAreasService;
 
-  @tracked private formIsValid = false;
+  @tracked protected formIsValid = false;
+
+  @tracked protected formIsSubmitting = false;
+
+  @tracked protected successStateIsShown = false;
 
   /**
    *
@@ -73,11 +78,25 @@ export default class AdminProductAreas extends Component<AdminProductAreasSignat
     }
   }
 
+  @action protected resetState() {
+    this.name = "";
+    this.nameErrorText = "";
+    this.nameErrorIsShown = false;
+    this.abbreviation = "";
+    this.abbreviationErrorText = "";
+    this.abbreviationErrorIsShown = false;
+    this.formIsValid = false;
+    this.successStateIsShown = false;
+    // TODO: autofocus the name input
+  }
+
   /**
    *
    */
   @action protected setAbbreviation(event: Event): void {
-    this.abbreviation = (event.target as HTMLInputElement).value;
+    this.abbreviation = (event.target as HTMLInputElement).value
+      .toUpperCase()
+      .replace(/\s/g, "");
     this.checkForDuplicateAbbreviation();
   }
 
@@ -128,12 +147,26 @@ export default class AdminProductAreas extends Component<AdminProductAreasSignat
     this.validateForm();
 
     if (this.formIsValid) {
-      // should run some code
-      console.log("Form is valid");
-    } else {
-      console.log("Form is not valid");
+      this.formIsSubmitting = true;
+      void this.addProductArea.perform();
     }
   }
+
+  /**
+   *
+   */
+  protected addProductArea = dropTask(async () => {
+    try {
+      this.formIsSubmitting = true;
+      await timeout(1000);
+      // show success state
+      this.successStateIsShown = true;
+    } catch {
+      // handle error
+    } finally {
+      this.formIsSubmitting = false;
+    }
+  });
 }
 
 declare module "@glint/environment-ember-loose/registry" {
