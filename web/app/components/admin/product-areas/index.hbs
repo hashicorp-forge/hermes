@@ -28,9 +28,53 @@
     class="my-8"
   />
 {{else}}
-  <h1>
-    New product/area
-  </h1>
+  <div class="mb-5 flex w-full items-center justify-between">
+
+    <h1>
+      Product/areas
+    </h1>
+    <Hds::Button @text="+ New product/area" />
+  </div>
+
+  {{! List existing }}
+  {{! should this just be a table }}
+  <table class="hds-table w-full">
+    <thead>
+      <tr>
+        <th class="w-1/2">Name</th>
+        <th class="">Abbreviation</th>
+        <th class="">Docs</th>
+        <th class="overflow">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      {{#each-in this.productAreas.index as |p attrs|}}
+        {{log "attrs" attrs}}
+        <tr class="">
+          <td class="w-1/2">
+            <div class="flex">
+              <Product::Avatar @product={{p}} />
+              {{p}}
+            </div>
+          </td>
+          <td class="">
+            {{attrs.abbreviation}}
+          </td>
+          <td class="">
+            {{! Number of docs? }}
+            45
+          </td>
+          <td class="overflow">
+
+            <OverflowMenu @isShown={{true}} @items={{hash}} />
+          </td>
+        </tr>
+      {{/each-in}}
+    </tbody>
+  </table>
+
+  {{! ADD NEW }}
   <form {{on "submit" this.submit}}>
     <div class="mb-5 grid gap-5">
       <Hds::Form::TextInput::Field
