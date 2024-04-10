@@ -15,12 +15,19 @@
     </tr>
   </thead>
   <tbody>
-    {{#each this.documentTypes.index as |docType|}}
+    {{#each this.documentTypes.index as |doctype|}}
       <tr class="">
-        <td>{{docType.name}}</td>
-        <td>{{docType.longName}}</td>
-        <td>{{docType.description}}</td>
-        <td>{{docType.flightIcon}}</td>
+        <td>
+          <LinkTo
+            @route="authenticated.admin.doctypes.doctype"
+            @model={{doctype.name}}
+          >
+            {{doctype.name}}
+          </LinkTo>
+        </td>
+        <td>{{doctype.longName}}</td>
+        <td>{{doctype.description}}</td>
+        <td>{{doctype.flightIcon}}</td>
       </tr>
     {{/each}}
   </tbody>

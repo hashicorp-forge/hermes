@@ -54,10 +54,14 @@
       {{#each-in this.productAreas.index as |p attrs|}}
         <tr class="">
           <td class="w-1/2">
-            <div class="flex">
+            <LinkTo
+              @route="authenticated.admin.product-areas.product-area"
+              @model={{p}}
+              class="flex"
+            >
               <Product::Avatar @product={{p}} />
               {{p}}
-            </div>
+            </LinkTo>
           </td>
           <td class="">
             {{attrs.abbreviation}}

@@ -15,7 +15,6 @@ export default class AuthenticatedController extends Controller {
 
   protected get standardTemplateIsShown() {
     const routeName = this.router.currentRouteName;
-    console.log("routeName", routeName);
     return (
       !routeName.includes("authenticated.admin") &&
       routeName !== "authenticated.document" &&
