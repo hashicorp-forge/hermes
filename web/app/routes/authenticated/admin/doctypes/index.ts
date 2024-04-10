@@ -2,7 +2,7 @@ import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
 import DocumentTypesService from "hermes/services/document-types";
 
-export default class AuthenticatedDocTypesRoute extends Route {
+export default class AuthenticatedDocTypesIndexRoute extends Route {
   @service declare documentTypes: DocumentTypesService;
 
   async model() {

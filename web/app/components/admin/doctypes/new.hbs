@@ -1,27 +1,6 @@
-<div class="mb-5 flex w-full items-center justify-between">
-  <h1>Doctypes</h1>
-  <Hds::Button @text="+ New doctype" />
+<div class="mb-5">
+  <h1>New doctype</h1>
 </div>
-<table class="hds-table w-full">
-  <thead>
-    <tr>
-      <th class="w-1/8">Name</th>
-      <th class="w-1/4">Long name</th>
-      <th class="w-1/4">Description</th>
-      <th class="w-1/4">Flight Icon</th>
-    </tr>
-  </thead>
-  <tbody>
-    {{#each this.documentTypes.index as |docType|}}
-      <tr class="">
-        <td>{{docType.name}}</td>
-        <td>{{docType.longName}}</td>
-        <td>{{docType.description}}</td>
-        <td>{{docType.flightIcon}}</td>
-      </tr>
-    {{/each}}
-  </tbody>
-</table>
 
 <form {{on "submit" this.submit}}>
   <div class="mb-5 grid gap-5">
@@ -266,12 +245,3 @@
     </M.Footer>
   </Hds::Modal>
 {{/if}}
-
-<!--
-{{#each @docTypes as |d|}}
-  <div>
-    {{log "d" d}}
-    {{d.name}}
-  </div>
-{{/each}}
--->

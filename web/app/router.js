@@ -34,8 +34,12 @@ Router.map(function () {
     });
     this.route("admin", function () {
       this.route("index", { path: "/" });
-      this.route("product-areas");
-      this.route("doc-types");
+      this.route("product-areas", function () {
+        this.route("new");
+      });
+      this.route("doctypes", function () {
+        this.route("new");
+      });
     });
   });
   this.route("authenticate");

@@ -5,17 +5,15 @@ import { tracked } from "@glimmer/tracking";
 import DocumentTypesService from "hermes/services/document-types";
 import { HermesDocumentType } from "hermes/types/document-type";
 
-interface AdminDocTypesSignature {
+interface AdminDoctypesNewSignature {
   Element: null;
-  Args: {
-    docTypes: HermesDocumentType[];
-  };
+  Args: {};
   Blocks: {
     default: [];
   };
 }
 
-export default class AdminDocTypes extends Component<AdminDocTypesSignature> {
+export default class AdminDoctypesNew extends Component<AdminDoctypesNewSignature> {
   @service declare documentTypes: DocumentTypesService;
 
   @tracked protected longName = "";
@@ -228,6 +226,6 @@ export default class AdminDocTypes extends Component<AdminDocTypesSignature> {
 
 declare module "@glint/environment-ember-loose/registry" {
   export default interface Registry {
-    "Admin::DocTypes": typeof AdminDocTypes;
+    "Admin::Doctypes::New": typeof AdminDoctypesNew;
   }
 }

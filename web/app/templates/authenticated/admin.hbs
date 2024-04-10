@@ -35,8 +35,8 @@
           </li>
           <li>
             <LinkTo
-              @current-when="authenticated.admin.doc-types"
-              @route="authenticated.admin.doc-types"
+              @current-when="authenticated.admin.doctypes"
+              @route="authenticated.admin.doctypes"
             >
               <FlightIcon @name="files" />
               Doctypes
@@ -60,8 +60,10 @@
 
     {{! TODO: scrollable... iframe? }}
     <div class="w-full bg-color-surface-faint py-0">
-      <div class="h-full overflow-scroll px-20 py-14">
-        {{outlet}}
+      <div class="h-full overflow-scroll px-20 pb-14">
+        <div class="mt-14">
+          {{outlet}}
+        </div>
       </div>
     </div>
 

@@ -33,7 +33,10 @@
     <h1>
       Product/areas
     </h1>
-    <Hds::Button @text="+ New product/area" />
+    <Hds::Button
+      @route="authenticated.admin.product-areas.new"
+      @text="+ New product/area"
+    />
   </div>
 
   {{! List existing }}
@@ -49,7 +52,6 @@
     <tbody>
 
       {{#each-in this.productAreas.index as |p attrs|}}
-        {{log "attrs" attrs}}
         <tr class="">
           <td class="w-1/2">
             <div class="flex">
@@ -68,35 +70,5 @@
       {{/each-in}}
     </tbody>
   </table>
-
-  {{! ADD NEW }}
-  <form {{on "submit" this.submit}}>
-    <div class="mb-5 grid gap-5">
-      <Hds::Form::TextInput::Field
-        {{on "input" this.setName}}
-        @value={{this.name}}
-        placeholder="E.g., Product Management"
-        as |F|
-      >
-        {{! DO we need some logic for determining duplicates }}
-        <F.Label>Name</F.Label>
-        {{#if this.nameErrorIsShown}}
-          <F.Error>{{this.nameErrorText}}</F.Error>
-        {{/if}}
-      </Hds::Form::TextInput::Field>
-      <Hds::Form::TextInput::Field
-        {{on "input" this.setAbbreviation}}
-        @value={{this.abbreviation}}
-        placeholder="E.g., PRM"
-        as |F|
-      >
-        <F.Label>Abbreviation</F.Label>
-        {{#if this.abbreviationErrorIsShown}}
-          <F.Error>{{this.abbreviationErrorText}}</F.Error>
-        {{/if}}
-      </Hds::Form::TextInput::Field>
-    </div>
-    <Hds::Button @text="Create product/area" class="my-8" type="submit" />
-  </form>
 {{/if}}
 {{! TODO: completed state }}
