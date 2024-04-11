@@ -1808,9 +1808,10 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     assert.true(doc.approverGroups.includes(email));
 
-    // assert that it also appears in the people select on the Request Review modal
     await click(SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON_SELECTOR);
 
-    assert.dom(MODAL_PEOPLE_SELECT).containsText(name);
+    assert
+      .dom(MODAL_PEOPLE_SELECT)
+      .containsText(name, "the modal PeopleSelect includes groups");
   });
 });
