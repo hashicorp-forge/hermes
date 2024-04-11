@@ -219,8 +219,9 @@ type GoogleWorkspace struct {
 	// DraftsFolder is the folder that contains all document drafts.
 	DraftsFolder string `hcl:"drafts_folder"`
 
-	// GroupsPrefix is the prefix to use when searching for Google Groups.
-	GroupsPrefix string `hcl:"groups_prefix,optional"`
+	// GoogleWorkspaceGroupApprovals is the configuration for using Google Groups as
+	// document approvers.
+	GroupApprovals *GoogleWorkspaceGroupApprovals `hcl:"group_approvals,block"`
 
 	// OAuth2 is the configuration to use OAuth 2.0 to access Google Workspace
 	// APIs.
@@ -239,6 +240,16 @@ type GoogleWorkspace struct {
 	// UserNotFoundEmail is the configuration to send an email when a user is not
 	// found in Google Workspace.
 	UserNotFoundEmail *GoogleWorkspaceUserNotFoundEmail `hcl:"user_not_found_email,block"`
+}
+
+// GoogleWorkspaceGroupApprovals is the configuration for using Google Groups as
+// document approvers.
+type GoogleWorkspaceGroupApprovals struct {
+	// Enabled enables using Google Groups as document approvers.
+	Enabled bool `hcl:"enabled,optional"`
+
+	// SearchPrefix is the prefix to use when searching for Google Groups.
+	SearchPrefix string `hcl:"search_prefix,optional"`
 }
 
 // GoogleWorkspaceOAuth2 is the configuration to use OAuth 2.0 to access Google
