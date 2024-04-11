@@ -43,6 +43,13 @@ body.admin {
     thead {
       @apply bg-color-page-faint;
     }
+
+    th,
+    td {
+      &:last-child:not(:first-child):not(.numeric) {
+        @apply text-left;
+      }
+    }
   }
 
   form {

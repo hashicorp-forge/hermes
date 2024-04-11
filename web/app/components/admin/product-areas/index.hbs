@@ -44,9 +44,9 @@
   <table class="hds-table w-full">
     <thead>
       <tr>
-        <th class="w-1/2">Name</th>
-        <th class="">Abbreviation</th>
-        <th class="">Docs</th>
+        <th class="w-5/12">Name</th>
+        <th class="w-1/12">Abbreviation</th>
+        <th class="numeric w-1/2">Docs</th>
       </tr>
     </thead>
     <tbody>
@@ -57,18 +57,22 @@
             <LinkTo
               @route="authenticated.admin.product-areas.product-area"
               @model={{p}}
-              class="flex"
+              class="inner flex items-center gap-2.5"
             >
               <Product::Avatar @product={{p}} />
               {{p}}
             </LinkTo>
           </td>
           <td class="">
-            {{attrs.abbreviation}}
+            <div class="inner">
+              {{attrs.abbreviation}}
+            </div>
           </td>
-          <td class="">
-            {{! Number of docs? }}
-            45
+          <td class="numeric">
+            <div class="inner">
+              {{! TODO: Number of docs? }}
+              --
+            </div>
           </td>
         </tr>
       {{/each-in}}
