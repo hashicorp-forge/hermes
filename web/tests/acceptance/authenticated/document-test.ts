@@ -74,6 +74,7 @@ const TRANSFER_OWNERSHIP_MODAL = "[data-test-transfer-ownership-modal]";
 const OWNERSHIP_TRANSFERRED_MODAL = "[data-test-ownership-transferred-modal]";
 const TRANSFERRING_DOC = "[data-test-transferring-doc]";
 const SELECT_NEW_OWNER_LABEL = "[data-test-select-new-owner-label]";
+const MODAL_PEOPLE_SELECT = "dialog [data-test-people-select]";
 const PEOPLE_SELECT_INPUT = ".ember-power-select-trigger-multiple-input";
 const PEOPLE_SELECT_OPTION =
   ".ember-power-select-option:not(.ember-power-select-option--no-matches-message)";
@@ -776,7 +777,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert.dom(PUBLISH_FOR_REVIEW_MODAL_SELECTOR).exists();
 
     // Add an approver
-    await click("dialog [data-test-people-select]");
+    await click(MODAL_PEOPLE_SELECT);
 
     await fillIn(
       ".ember-power-select-trigger-multiple-input",
@@ -1806,5 +1807,11 @@ module("Acceptance | authenticated/document", function (hooks) {
     const doc = this.server.schema.document.find(1).attrs;
 
     assert.true(doc.approverGroups.includes(email));
+
+    await click(SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON_SELECTOR);
+
+    assert
+      .dom(MODAL_PEOPLE_SELECT)
+      .containsText(name, "the modal PeopleSelect includes groups");
   });
 });
