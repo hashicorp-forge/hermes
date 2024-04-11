@@ -772,9 +772,6 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     assert.dom(DOC_STATUS).hasText("WIP");
 
-    // Add a group approver before publishing
-    await click(APPROVERS_SELECTOR);
-
     await click(SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON_SELECTOR);
 
     assert.dom(PUBLISH_FOR_REVIEW_MODAL_SELECTOR).exists();
