@@ -27,7 +27,6 @@ export default class GroupSerializer extends JSONSerializer {
      * the "No results found" message in the PeopleSelect.
      */
     if (!payload.results) return { data: [] };
-    console.log(payload.results);
     const groups = payload.results.map((g) => {
       return {
         id: g.email,
