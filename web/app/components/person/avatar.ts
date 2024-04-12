@@ -32,6 +32,14 @@ export default class PersonAvatarComponent extends Component<PersonAvatarCompone
       getModelAttr(this.store, ["person.picture", this.args.email])
     );
   }
+
+  protected get fallbackIcon(): string {
+    if (!this.args.email) return "user";
+
+    const isGroup = this.store.peekRecord("group", this.args.email);
+
+    return isGroup ? "users" : "user";
+  }
 }
 
 declare module "@glint/environment-ember-loose/registry" {

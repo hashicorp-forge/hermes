@@ -1,0 +1,4 @@
+.person {
+  @apply grid gap-2;
+  grid-template-columns: 20px 1fr;
+}

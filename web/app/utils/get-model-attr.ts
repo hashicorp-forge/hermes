@@ -10,6 +10,9 @@ export type GetModelAttrArgs = [modelAndAttribute: string, id?: string];
 export default function getModelAttr(
   store: StoreService,
   positional: GetModelAttrArgs,
+  named?: {
+    fallback?: string;
+  },
 ) {
   const [modelAndAttribute, id] = positional;
 
@@ -21,5 +24,21 @@ export default function getModelAttr(
 
   const record = store.peekRecord(model, id);
 
-  return record?.get(attribute);
+  if (!record) {
+    if (named?.fallback) {
+      const [model, attribute] = named.fallback.split(".");
+
+      if (!(model && attribute)) return;
+
+      const record = store.peekRecord(model, id);
+
+      if (!record) return;
+
+      return record.get(attribute);
+    } else {
+      return;
+    }
+  } else {
+    return record.get(attribute);
+  }
 }

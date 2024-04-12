@@ -1,10 +1,14 @@
 import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { hbs } from "ember-cli-htmlbars";
-import { click, fillIn, render, rerender, waitFor } from "@ember/test-helpers";
+import { click, fillIn, render, waitFor } from "@ember/test-helpers";
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
-import { TEST_USER_EMAIL, authenticateTestUser } from "hermes/mirage/utils";
+import {
+  TEST_USER_EMAIL,
+  authenticateTestUser,
+  pushMirageIntoStore,
+} from "hermes/mirage/utils";
 import { Response } from "miragejs";
 
 const MULTISELECT = ".multiselect";
@@ -13,6 +17,9 @@ const INPUT = ".ember-power-select-trigger-multiple-input";
 const OPTION =
   ".ember-power-select-option:not(.ember-power-select-option--no-matches-message)";
 const NO_MATCHES_MESSAGE = ".ember-power-select-option--no-matches-message";
+
+const PERSON_COUNT = 10;
+const GROUP_COUNT = 5;
 
 interface PeopleSelectContext extends MirageTestContext {
   people: string[];
@@ -27,18 +34,31 @@ module("Integration | Component | inputs/people-select", function (hooks) {
   setupMirage(hooks);
 
   hooks.beforeEach(function (this: PeopleSelectContext) {
-    authenticateTestUser(this);
-    this.server.createList("google/person", 10);
+    this.server.createList("google/person", PERSON_COUNT);
+    this.server.createList("group", GROUP_COUNT);
 
     this.set("people", []);
     this.set("onChange", (newValue: string[]) => this.set("people", newValue));
+
+    authenticateTestUser(this);
   });
 
   test("it functions as expected", async function (this: PeopleSelectContext, assert) {
+    this.server.create("group", {
+      name: "Departed User",
+    });
+
+    this.server.create("group", {
+      name: "User Who Was Terminated",
+    });
+
+    pushMirageIntoStore(this);
+
     await render<PeopleSelectContext>(hbs`
       <Inputs::PeopleSelect
         @selected={{this.people}}
         @onChange={{this.onChange}}
+        @includeGroups={{true}}
       />
     `);
 
@@ -50,25 +70,33 @@ module("Integration | Component | inputs/people-select", function (hooks) {
 
     assert
       .dom(OPTION)
-      .exists({ count: 10 }, "Options matching `u` are suggested");
+      .exists(
+        { count: PERSON_COUNT + GROUP_COUNT },
+        'Options matching `u` are suggested, and groups containing "departed" or "terminated" are filtered out',
+      );
 
-    await fillIn(INPUT, "1");
+    await fillIn(INPUT, "user 1");
 
-    assert.dom(OPTION).exists({ count: 2 }, "Results are filtered to match 1");
+    assert
+      .dom(OPTION)
+      .exists(
+        { count: 2 },
+        'Results are filtered to match "user 1" (this will includes user 10)',
+      );
 
     await click(OPTION);
     assert
       .dom(".ember-power-select-multiple-option .person-email")
       .hasText("User 1", "User 1 was successfully selected");
 
-    await fillIn(INPUT, "2");
+    await fillIn(INPUT, "User 2");
 
     await click(OPTION);
     assert
       .dom(".ember-power-select-multiple-option .person-email")
       .exists({ count: 2 }, "User 2 was successfully selected");
 
-    await fillIn(INPUT, "2");
+    await fillIn(INPUT, "User 2");
     assert
       .dom(NO_MATCHES_MESSAGE)
       .hasText("No results found", "No duplicate users can be added");
@@ -80,6 +108,12 @@ module("Integration | Component | inputs/people-select", function (hooks) {
     assert
       .dom(".ember-power-select-multiple-option .person-email")
       .exists({ count: 1 }, "People are removed from the list when clicked");
+
+    await fillIn(INPUT, "group");
+
+    assert
+      .dom(OPTION)
+      .exists({ count: GROUP_COUNT }, "Valid groups are suggested");
   });
 
   test("it will retry if the server returns an error", async function (this: PeopleSelectContext, assert) {

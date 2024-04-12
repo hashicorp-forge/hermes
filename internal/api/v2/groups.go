@@ -47,6 +47,14 @@ func GroupsHandler(srv server.Server) http.Handler {
 			return
 		}
 
+		// Respond with error if group approvals are not enabled.
+		if srv.Config.GoogleWorkspace.GroupApprovals == nil ||
+			!srv.Config.GoogleWorkspace.GroupApprovals.Enabled {
+			http.Error(w,
+				"Group approvals have not been enabled", http.StatusUnprocessableEntity)
+			return
+		}
+
 		switch r.Method {
 		case "POST":
 			// Decode request.
@@ -73,11 +81,16 @@ func GroupsHandler(srv server.Server) http.Handler {
 			)
 
 			// Retrieve groups with prefix, if configured.
-			if srv.Config.GoogleWorkspace.GroupsPrefix != "" {
+			searchPrefix := ""
+			if srv.Config.GoogleWorkspace.GroupApprovals != nil &&
+				srv.Config.GoogleWorkspace.GroupApprovals.SearchPrefix != "" {
+				searchPrefix = srv.Config.GoogleWorkspace.GroupApprovals.SearchPrefix
+			}
+			if searchPrefix != "" {
 				maxNonPrefixGroups = maxGroupResults - maxPrefixGroupResults
 
 				prefixQuery := fmt.Sprintf(
-					"%s%s", srv.Config.GoogleWorkspace.GroupsPrefix, query)
+					"%s%s", searchPrefix, query)
 				prefixGroups, err = srv.GWService.AdminDirectory.Groups.List().
 					Domain(srv.Config.GoogleWorkspace.Domain).
 					MaxResults(maxPrefixGroupResults).

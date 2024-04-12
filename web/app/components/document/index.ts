@@ -11,6 +11,7 @@ interface DocumentIndexComponentSignature {
     document: HermesDocument;
     modelIsChanging: boolean;
     docType: Promise<HermesDocumentType>;
+    viewerIsGroupApprover: boolean;
   };
 }
 

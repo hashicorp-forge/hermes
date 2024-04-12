@@ -18,6 +18,7 @@ export default class ConfigService extends Service {
     support_link_url: config.supportLinkURL,
     version: config.version,
     short_revision: config.shortRevision,
+    group_approvals: config.groupApprovals,
   };
 
   setConfig(param: HermesConfig) {
