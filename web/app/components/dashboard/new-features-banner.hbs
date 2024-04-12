@@ -11,13 +11,14 @@
     <A.Title>What's new in Hermes</A.Title>
     <A.Description>
       <ul class="icon-list">
-        {{! Conditional }}
-        <li>
-          <FlightIcon @name="users" />
-          <p>
-            Google Groups can be added as document approvers
-          </p>
-        </li>
+        {{#if this.configSvc.config.group_approvals}}
+          <li>
+            <FlightIcon @name="users" />
+            <p>
+              Google Groups can be added as document approvers
+            </p>
+          </li>
+        {{/if}}
         <li>
           <FlightIcon @name="swap-horizontal" />
           <p>
