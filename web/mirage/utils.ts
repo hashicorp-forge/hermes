@@ -50,6 +50,7 @@ export const TEST_WEB_CONFIG = {
   google_doc_folders: "",
   short_link_base_url: TEST_SHORT_LINK_BASE_URL,
   skip_google_auth: false,
+  group_approvals: true,
   google_analytics_tag_id: undefined,
   support_link_url: TEST_SUPPORT_URL,
   version: "1.2.3",

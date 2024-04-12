@@ -157,17 +157,19 @@ export default class AuthenticatedDocumentRoute extends Route {
 
     // Check if the user is a group approver.
 
-    const resp = await this.fetchSvc
-      .fetch(
-        `/api/${this.configSvc.config.api_version}/approvals/${params.document_id}`,
-        { method: "OPTIONS" },
-      )
-      .then((r) => r);
+    if (this.configSvc.config.group_approvals) {
+      const resp = await this.fetchSvc
+        .fetch(
+          `/api/${this.configSvc.config.api_version}/approvals/${params.document_id}`,
+          { method: "OPTIONS" },
+        )
+        .then((r) => r);
 
-    const allowed = resp?.headers.get("allowed");
+      const allowed = resp?.headers.get("allowed");
 
-    if (allowed?.includes("POST")) {
-      viewerIsGroupApprover = true;
+      if (allowed?.includes("POST")) {
+        viewerIsGroupApprover = true;
+      }
     }
 
     const typedDoc = doc as HermesDocument;
