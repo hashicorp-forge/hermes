@@ -3,15 +3,39 @@
     data-test-new-features-banner
     @type="inline"
     @color="highlight"
-    @icon="folder-star"
+    {{! Icon is hidden by CSS; See `dashboard.scss` }}
     @onDismiss={{this.dismiss}}
     class="mb-10"
     as |A|
   >
-    <A.Title>Introducing Projects!</A.Title>
+    <A.Title>What's new in Hermes</A.Title>
     <A.Description>
-      Projects are a new way to organize documents and links around an effort.
-      <div class="mt-2 mb-1 flex items-center gap-2">
+      <ul class="icon-list">
+        {{! Conditional }}
+        <li>
+          <FlightIcon @name="users" />
+          <p>
+            Google Groups can be added as document approvers
+          </p>
+        </li>
+        <li>
+          <FlightIcon @name="swap-horizontal" />
+          <p>
+            Document ownership can be transferred between users
+          </p>
+        </li>
+        <li>
+          <FlightIcon @name="smile" />
+          <p>
+            We've improved owner filtering on the
+            <LinkTo @route="authenticated.documents" class="underlined-link">
+              All Docs
+            </LinkTo>
+            view
+          </p>
+        </li>
+      </ul>
+      {{! <div class="mt-2 mb-1 flex items-center gap-2">
         <Hds::Button
           @route="authenticated.projects"
           @text="Browse projects"
@@ -24,7 +48,7 @@
           @color="secondary"
           @size="small"
         />
-      </div>
+      </div> }}
     </A.Description>
   </Hds::Alert>
 {{/if}}

@@ -4,7 +4,7 @@ import window from "ember-window-mock";
 import { action } from "@ember/object";
 
 export const NEW_FEATURES_BANNER_LOCAL_STORAGE_ITEM =
-  "jan-18-2024-newFeatureBannerIsShown";
+  "apr-12-2024-newFeatureBannerIsShown";
 
 interface DashboardNewFeaturesBannerSignature {
   Args: {};
