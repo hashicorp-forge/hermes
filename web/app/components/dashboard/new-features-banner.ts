@@ -2,15 +2,22 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import window from "ember-window-mock";
 import { action } from "@ember/object";
+import { inject as service } from "@ember/service";
+import ConfigService from "hermes/services/config";
 
 export const NEW_FEATURES_BANNER_LOCAL_STORAGE_ITEM =
-  "jan-18-2024-newFeatureBannerIsShown";
+  "apr-12-2024-newFeatureBannerIsShown";
 
 interface DashboardNewFeaturesBannerSignature {
   Args: {};
 }
 
 export default class DashboardNewFeaturesBanner extends Component<DashboardNewFeaturesBannerSignature> {
+  /**
+   * Used to determine whether the Google Groups callout should be shown.
+   */
+  @service("config") declare configSvc: ConfigService;
+
   @tracked protected isDismissed = false;
 
   /**

@@ -64,6 +64,7 @@ type ConfigResponse struct {
 	GoogleAnalyticsTagID     string          `json:"google_analytics_tag_id"`
 	GoogleOAuth2ClientID     string          `json:"google_oauth2_client_id"`
 	GoogleOAuth2HD           string          `json:"google_oauth2_hd"`
+	GroupApprovals           bool            `json:"group_approvals"`
 	JiraURL                  string          `json:"jira_url"`
 	ShortLinkBaseURL         string          `json:"short_link_base_url"`
 	SkipGoogleAuth           bool            `json:"skip_google_auth"`
@@ -120,6 +121,13 @@ func ConfigHandler(
 			createDocsAsUser = true
 		}
 
+		// Set GroupApprovals if enabled in the config.
+		groupApprovals := false
+		if cfg.GoogleWorkspace.GroupApprovals != nil &&
+			cfg.GoogleWorkspace.GroupApprovals.Enabled {
+			groupApprovals = true
+		}
+
 		// Set JiraURL if enabled in the config.
 		jiraURL := ""
 		if cfg.Jira != nil && cfg.Jira.Enabled {
@@ -136,6 +144,7 @@ func ConfigHandler(
 			GoogleAnalyticsTagID:     cfg.GoogleAnalyticsTagID,
 			GoogleOAuth2ClientID:     cfg.GoogleWorkspace.OAuth2.ClientID,
 			GoogleOAuth2HD:           cfg.GoogleWorkspace.OAuth2.HD,
+			GroupApprovals:           groupApprovals,
 			JiraURL:                  jiraURL,
 			ShortLinkBaseURL:         shortLinkBaseURL,
 			SkipGoogleAuth:           skipGoogleAuth,

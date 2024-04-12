@@ -24,6 +24,7 @@ export interface HermesConfig {
   };
   shortLinkBaseURL: string;
   skipGoogleAuth: boolean;
+  groupApprovals: boolean;
   showEmberAnimatedTools: boolean;
   supportLinkURL: string;
   version: string;
