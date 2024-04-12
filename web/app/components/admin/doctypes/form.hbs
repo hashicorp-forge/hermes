@@ -4,10 +4,11 @@
     <Hds::Form::TextInput::Field
       {{on "input" this.setName}}
       @value={{this.name}}
+      {{!-- @isRequired={{true}} --}}
       placeholder="E.g., RFC, PRFAQ"
       as |F|
     >
-      <F.Label>Name</F.Label>
+      <F.Label>Short name</F.Label>
       {{#if this.nameErrorIsShown}}
         <F.Error>Whoop</F.Error>
       {{/if}}
@@ -15,6 +16,7 @@
     <Hds::Form::TextInput::Field
       {{on "input" this.setLongName}}
       @value={{this.longName}}
+      @isOptional={{true}}
       placeholder="E.g., Request for Comments"
       as |F|
     >
@@ -24,32 +26,40 @@
       {{/if}}
     </Hds::Form::TextInput::Field>
 
-    <Hds::Form::TextInput::Field
-      {{on "input" this.setTemplateID}}
-      @value={{this.templateID}}
-      as |F|
-    >
-      <F.Label>Template ID</F.Label>
-    </Hds::Form::TextInput::Field>
     <Hds::Form::Textarea::Field
       {{on "input" this.setDescription}}
       @value={{this.description}}
+      {{!-- @isRequired={{true}} --}}
+      rows="2"
       as |F|
     >
       <F.Label>Description</F.Label>
     </Hds::Form::Textarea::Field>
 
-  </div>
-  <div>
+    <Hds::Form::TextInput::Field
+      {{on "input" this.setTemplateID}}
+      @value={{this.templateID}}
+      {{!-- @isRequired={{true}} --}}
+      as |F|
+    >
+      <F.Label>Template ID</F.Label>
+    </Hds::Form::TextInput::Field>
 
+    <Hds::Form::TextInput::Field
+      {{on "input" this.setTemplateID}}
+      @value={{this.templateID}}
+      @isOptional={{true}}
+      as |F|
+    >
+      <F.Label>Flight icon</F.Label>
+    </Hds::Form::TextInput::Field>
+
+  </div>
+  <div class="mb-5">
     <h5 class="hermes-form-label mb-2">Fields</h5>
-    <ul class="mb-5">
+    <ul class="mb-3">
       {{#each this.suggestedFields as |field|}}
-        <li
-          class="border border-color-palette-neutral-200 py-1.5 px-2
-            {{if field.isRequired 'bg-color-page-faint'}}
-            -mt-px flex items-center justify-between rounded"
-        >
+        <li class="py-1">
           <Hds::Form::Checkbox::Field
             disabled={{field.isRequired}}
             checked={{field.isRequired}}
@@ -75,12 +85,39 @@
         </li>
       {{/each}}
     </ul>
+    <div>
+      <Action
+        {{on "click" this.showModal}}
+        class="mb-2 text-color-foreground-faint hover:text-color-foreground-primary"
+      >
+        + Add custom field...
+      </Action>
+    </div>
 
+  </div>
+
+  <div class="mb-5">
+    <h5 class="hermes-form-label mb-2">
+      Required checks
+    </h5>
     <Action
+      {{! TODO }}
       {{on "click" this.showModal}}
       class="text-color-foreground-faint hover:text-color-foreground-primary"
     >
-      + Add custom field...
+      + Add...
+    </Action>
+  </div>
+  <div>
+    <h5 class="hermes-form-label mb-2">
+      More info link
+    </h5>
+    <Action
+      {{! TODO }}
+      {{on "click" this.showModal}}
+      class="text-color-foreground-faint hover:text-color-foreground-primary"
+    >
+      + Add...
     </Action>
   </div>
 
