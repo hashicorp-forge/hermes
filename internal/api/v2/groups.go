@@ -73,11 +73,11 @@ func GroupsHandler(srv server.Server) http.Handler {
 			)
 
 			// Retrieve groups with prefix, if configured.
-			if srv.Config.GoogleWorkspace.GroupsPrefix != "" {
+			if srv.Config.GoogleWorkspace.GroupApprovals.SearchPrefix != "" {
 				maxNonPrefixGroups = maxGroupResults - maxPrefixGroupResults
 
 				prefixQuery := fmt.Sprintf(
-					"%s%s", srv.Config.GoogleWorkspace.GroupsPrefix, query)
+					"%s%s", srv.Config.GoogleWorkspace.GroupApprovals.SearchPrefix, query)
 				prefixGroups, err = srv.GWService.AdminDirectory.Groups.List().
 					Domain(srv.Config.GoogleWorkspace.Domain).
 					MaxResults(maxPrefixGroupResults).
