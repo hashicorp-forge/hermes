@@ -33,6 +33,7 @@ export default class AdminDoctypesForm extends Component<AdminDoctypesFormSignat
 
   @tracked protected customFieldModalIsShown = false;
   @tracked protected checkModalIsShown = false;
+  @tracked protected moreInfoLinkModalIsShown = false;
 
   protected get suggestedFields() {
     return [
@@ -105,6 +106,14 @@ export default class AdminDoctypesForm extends Component<AdminDoctypesFormSignat
 
   @action protected hideCheckModal() {
     this.checkModalIsShown = false;
+  }
+
+  @action protected showMoreInfoLinkModal() {
+    this.moreInfoLinkModalIsShown = true;
+  }
+
+  @action protected hideMoreInfoLinkModal() {
+    this.moreInfoLinkModalIsShown = false;
   }
 
   /**

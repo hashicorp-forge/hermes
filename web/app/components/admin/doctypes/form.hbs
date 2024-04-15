@@ -99,6 +99,7 @@
   <div class="mb-5">
     <h5 class="hermes-form-label mb-2">
       Required checks
+      {{! TODO: tooltip }}
     </h5>
     <Action
       {{! TODO }}
@@ -135,4 +136,10 @@
 
 {{#if this.checkModalIsShown}}
   <Admin::Doctypes::Modal::Check @onClose={{this.hideCheckModal}} />
+{{/if}}
+
+{{#if this.moreInfoLinkModalIsShown}}
+  <Admin::Doctypes::Modal::MoreInfoLink
+    @onClose={{this.hideMoreInfoLinkModal}}
+  />
 {{/if}}

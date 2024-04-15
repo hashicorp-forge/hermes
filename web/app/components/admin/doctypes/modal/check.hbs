@@ -4,7 +4,61 @@
   </M.Header>
   <M.Body>
     <form {{on "submit" this.submit}}>
-      NEED TO MAKE A FORM
+      <Hds::Form::TextInput::Field
+        {{autofocus}}
+        @value=""
+        placeholder="E.g., I agree to the terms and conditions"
+        class="mb-5"
+        as |F|
+      >
+        <F.Label>Label</F.Label>
+      </Hds::Form::TextInput::Field>
+
+      <Hds::Form::Textarea::Field
+        @value=""
+        @isOptional={{true}}
+        class="mb-5"
+        rows="2"
+        as |F|
+      >
+        <F.Label>Description</F.Label>
+      </Hds::Form::Textarea::Field>
+      {{! TODO: this needs to be its own component }}
+
+      {{#if this.addLinkFormIsShown}}
+        <div class="rounded bg-color-page-faint p-3">
+          {{! fieldset legend? }}
+          <fieldset>
+            <legend>Add link</legend>
+          </fieldset>
+          <Hds::Form::TextInput::Field @value="" as |F|>
+            <F.Label>Label</F.Label>
+          </Hds::Form::TextInput::Field>
+
+          <Hds::Form::TextInput::Field @value="" as |F|>
+            <F.Label>URL</F.Label>
+          </Hds::Form::TextInput::Field>
+
+          <Hds::ButtonSet>
+            <Hds::Button @color="secondary" @text="Add link" />
+            <Action
+              {{on "click" this.hideAndResetAddLinkForm}}
+              class="quarternary-button"
+            >
+              Cancel
+            </Action>
+          </Hds::ButtonSet>
+        </div>
+      {{else}}
+        <Action {{on "click" this.showAddLinkForm}}>+ Add link</Action>
+      {{/if}}
+
     </form>
   </M.Body>
+  <M.Footer>
+    <Hds::ButtonSet>
+      <Hds::Button {{on "click" this.submit}} @text="Save" />
+      <Hds::Button {{on "click" @onClose}} @color="secondary" @text="Cancel" />
+    </Hds::ButtonSet>
+  </M.Footer>
 </Hds::Modal>

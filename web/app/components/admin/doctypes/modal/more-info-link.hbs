@@ -1,0 +1,26 @@
+{{! TODO: add confirm-to-close function if something is typed in }}
+<Hds::Modal @onClose={{@onClose}} as |M|>
+  <M.Header>
+    Add required check
+  </M.Header>
+  <M.Body>
+    <form {{on "submit" this.submit}}>
+      <Hds::Form::TextInput::Field @value="todo" as |F|>
+        <F.Label>Label</F.Label>
+      </Hds::Form::TextInput::Field>
+
+      <Hds::Form::Textarea::Field @value="todo" rows="2" as |F|>
+        <F.Label>Description</F.Label>
+      </Hds::Form::Textarea::Field>
+
+      {{! TODO: group these, allow to be editable }}
+      <Hds::Form::TextInput::Field @value="todo" as |F|>
+        <F.Label>Link</F.Label>
+      </Hds::Form::TextInput::Field>
+
+      <Hds::Form::TextInput::Field @value="todo" as |F|>
+        <F.Label>URL</F.Label>
+      </Hds::Form::TextInput::Field>
+    </form>
+  </M.Body>
+</Hds::Modal>
