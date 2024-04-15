@@ -24,34 +24,64 @@
         <F.Label>Description</F.Label>
       </Hds::Form::Textarea::Field>
       {{! TODO: this needs to be its own component }}
+      {{! TODO: semantics }}
+      {{! fieldset legend? }}
+      <fieldset>
+        <legend class="hermes-form-label mb-2">Links
+          <span
+            class="ml-1 text-body-100 font-regular text-color-foreground-faint"
+          >(Optional)</span>
+        </legend>
+      </fieldset>
 
-      {{#if this.addLinkFormIsShown}}
-        <div class="rounded bg-color-page-faint p-3">
-          {{! fieldset legend? }}
-          <fieldset>
-            <legend>Add link</legend>
-          </fieldset>
-          <Hds::Form::TextInput::Field @value="" as |F|>
-            <F.Label>Label</F.Label>
-          </Hds::Form::TextInput::Field>
+      <div
+        class="grid items-start gap-4 rounded border border-color-border-primary bg-color-page-faint"
+      >
+        {{#if this.addLinkFormIsShown}}
+          <div class="p-3">
 
-          <Hds::Form::TextInput::Field @value="" as |F|>
-            <F.Label>URL</F.Label>
-          </Hds::Form::TextInput::Field>
+            <div class="grid w-full rounded border border-color-border-strong">
 
-          <Hds::ButtonSet>
-            <Hds::Button @color="secondary" @text="Add link" />
-            <Action
-              {{on "click" this.hideAndResetAddLinkForm}}
-              class="quarternary-button"
-            >
-              Cancel
-            </Action>
-          </Hds::ButtonSet>
-        </div>
-      {{else}}
-        <Action {{on "click" this.showAddLinkForm}}>+ Add link</Action>
-      {{/if}}
+              {{! TODO: semantics }}
+              <input
+                type="text"
+                placeholder="Label"
+                class="h-8 w-full rounded-tl rounded-tr px-3"
+              />
+              {{! separator }}
+              <div class="h-px w-full bg-color-border-strong" />
+
+              <input
+                type="text"
+                placeholder="URL"
+                class="h-8 w-full rounded-bl rounded-br px-3"
+              />
+            </div>
+
+            <div class="flex shrink-0">
+              <Hds::Button
+                @color="primary"
+                @icon=""
+                @isIconOnly={{false}}
+                @size="small"
+                @text="Add"
+              />
+              <Hds::Button
+                {{on "click" this.hideAndResetAddLinkForm}}
+                @color="secondary"
+                @icon=""
+                @isIconOnly={{false}}
+                @size="small"
+                @text="Cancel"
+              />
+            </div>
+          </div>
+        {{else}}
+
+          <Action class="px-3 py-2" {{on "click" this.showAddLinkForm}}>+ Add
+            link</Action>
+        {{/if}}
+      </div>
 
     </form>
   </M.Body>
