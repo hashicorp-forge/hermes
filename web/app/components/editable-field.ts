@@ -25,6 +25,7 @@ interface EditableFieldComponentSignature {
     buttonSize?: "medium"; // Default is `small`
     tag?: "h1"; // Default is `p`
     document?: HermesDocument; // Used to check an approver's approval status
+    includeGroupsInPeopleSelect?: boolean;
   };
   Blocks: {};
 }

@@ -35,6 +35,7 @@ import { ProjectStatus } from "hermes/types/project-status";
 import { RelatedHermesDocument } from "../related-resources";
 import PersonModel from "hermes/models/person";
 import RecentlyViewedService from "hermes/services/recently-viewed";
+import StoreService from "hermes/services/store";
 import ModalAlertsService, { ModalType } from "hermes/services/modal-alerts";
 
 interface DocumentSidebarComponentSignature {
@@ -43,6 +44,7 @@ interface DocumentSidebarComponentSignature {
     document: HermesDocument;
     docType: Promise<HermesDocumentType>;
     isCollapsed: boolean;
+    viewerIsGroupApprover: boolean;
     toggleCollapsed: () => void;
   };
 }
@@ -71,6 +73,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @service declare recentlyViewed: RecentlyViewedService;
   @service declare router: RouterService;
   @service declare session: SessionService;
+  @service declare store: StoreService;
   @service declare flashMessages: HermesFlashMessagesService;
   @service declare modalAlerts: ModalAlertsService;
 
@@ -95,9 +98,21 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   @tracked title = this.args.document.title || "";
   @tracked summary = this.args.document.summary || "";
   @tracked contributors: string[] = this.args.document.contributors || [];
-  @tracked approvers: string[] = this.args.document.approvers || [];
   @tracked product = this.args.document.product || "";
   @tracked status = this.args.document.status;
+
+  /**
+   * A locally tracked array of approvers. Used to update the UI immediately
+   * instead of waiting for the back end to confirm the change.
+   */
+  @tracked approvers: string[] = this.args.document.approvers || [];
+
+  /**
+   * A locally tracked array of approverGroups. Used to update the UI immediately
+   * instead of waiting for the back end to confirm the change.
+   */
+
+  @tracked approverGroups: string[] = this.args.document.approverGroups || [];
 
   /**
    * Whether the user has left the approver role since page load.
@@ -143,7 +158,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   /**
    * Whether the Approvers list is shown.
    * True except immediately after the user leaves the approver role.
-   * See note in `leaveApproverRole` for more information.
+   * See note in `toggleApproverVisibility` for more information.
    */
   @tracked protected approversAreShown = true;
 
@@ -416,6 +431,29 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
   }
 
   /**
+   * Whether the viewer is a group approver, but not an individual approver.
+   * If true, hides the "Remove me" overflow menu next to the "Approve" button.
+   */
+  protected get isGroupApproverOnly() {
+    return this.args.viewerIsGroupApprover && !this.isApprover;
+  }
+
+  /**
+   * A computed property that returns all approvers and approverGroups.
+   * Passed to the EditableField component to render the list of approvers and groups.
+   * Recomputes when the approvers or approverGroups arrays change.
+   */
+  protected get allApprovers() {
+    return this.approverGroups.concat(this.approvers);
+  }
+
+  get isContributor() {
+    return this.args.document.contributors?.some(
+      (e) => e === this.args.profile.email,
+    );
+  }
+
+  /**
    * Whether the document viewer is its owner.
    * True if the logged in user's email matches the documents owner.
    */
@@ -468,7 +506,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
    * immediately after the user leaves the approver role.
    */
   protected get footerIsShown() {
-    return !this.hasJustLeftApproverRole && (this.isApprover || this.isOwner);
+    return (
+      !this.hasJustLeftApproverRole &&
+      (this.isApprover || this.isOwner || this.isGroupApproverOnly)
+    );
   }
 
   /**
@@ -623,8 +664,20 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     this.ownershipTransferredModalIsShown = false;
   }
 
+  /**
+   * The action passed to the approvers EditableField as `onChange`.
+   * Updates the local approver arrays when people are added or removed.
+   */
   @action updateApprovers(approvers: string[]) {
-    this.approvers = approvers;
+    this.approverGroups = approvers.filter((approver) => {
+      return this.store.peekRecord("group", approver);
+    });
+
+    this.approvers = approvers.filter((approver) => {
+      if (!this.approverGroups.includes(approver)) {
+        return this.store.peekRecord("person", approver);
+      }
+    });
   }
 
   @action updateContributors(contributors: string[]) {
@@ -814,6 +867,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     return (
       this.save.isRunning ||
       this.saveCustomField.isRunning ||
+      this.patchDocument.isRunning ||
       this.saveProduct.isRunning
     );
   }
@@ -870,6 +924,17 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       }
     },
   );
+
+  /**
+   * The action to save approvers. Called by the EditableField component `onSave`.
+   * Sends a patch request to update the `approvers` and `approverGroups` fields.
+   */
+  protected saveApprovers = dropTask(async () => {
+    await this.patchDocument.perform({
+      approvers: this.approvers,
+      approverGroups: this.approverGroups,
+    });
+  });
 
   patchDocument = enqueueTask(async (fields: any, throwOnError?: boolean) => {
     const endpoint = this.isDraft ? "drafts" : "documents";
@@ -1095,6 +1160,15 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         );
 
         this.hasApproved = true;
+
+        /**
+         * This will be the case with a group approver.
+         */
+        if (!this.approvers.includes(this.args.profile.email)) {
+          this.approvers.push(this.args.profile.email);
+          this.approvers = this.approvers;
+          this.toggleApproverVisibility();
+        }
 
         if (options instanceof MouseEvent || !options?.skipSuccessMessage) {
           this.showFlashSuccess("Done!", "Document approved");

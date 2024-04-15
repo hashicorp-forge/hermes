@@ -1,9 +1,14 @@
 import Controller from "@ember/controller";
 import { tracked } from "@glimmer/tracking";
+import AuthenticatedDocumentRoute from "hermes/routes/authenticated/document";
+import { ModelFrom } from "hermes/types/route-models";
 
 export default class AuthenticatedDocumentController extends Controller {
+  declare model: ModelFrom<AuthenticatedDocumentRoute>;
+
   queryParams = ["draft"];
   draft = false;
+
   /**
    * Whether the model is loading a new document from another one,
    * as is when loading a related Hermes document.

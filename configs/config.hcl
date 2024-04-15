@@ -122,6 +122,16 @@ google_workspace {
   // drafts_folder contains all draft documents.
   drafts_folder = "my-drafts-folder-id"
 
+  // group_approvals is the configuration for using Google Groups as document
+  // approvers.
+  group_approvals {
+    // enabled enables using Google Groups as document approvers.
+    enabled = false
+
+    // search_prefix is the prefix to use when searching for Google Groups.
+    // search_prefix = "team-"
+  }
+
   // If create_doc_shortcuts is set to true, shortcuts_folder will contain an
   // organized hierarchy of folders and shortcuts to published files that can be
   // easily browsed directly in Google Drive:

@@ -219,6 +219,10 @@ type GoogleWorkspace struct {
 	// DraftsFolder is the folder that contains all document drafts.
 	DraftsFolder string `hcl:"drafts_folder"`
 
+	// GoogleWorkspaceGroupApprovals is the configuration for using Google Groups as
+	// document approvers.
+	GroupApprovals *GoogleWorkspaceGroupApprovals `hcl:"group_approvals,block"`
+
 	// OAuth2 is the configuration to use OAuth 2.0 to access Google Workspace
 	// APIs.
 	OAuth2 *GoogleWorkspaceOAuth2 `hcl:"oauth2,block"`
@@ -232,6 +236,20 @@ type GoogleWorkspace struct {
 	// create_docs_as_user is true in the auth block, so document notification
 	// settings will be the same as when a user creates their own document.
 	TemporaryDraftsFolder string `hcl:"temporary_drafts_folder,optional"`
+
+	// UserNotFoundEmail is the configuration to send an email when a user is not
+	// found in Google Workspace.
+	UserNotFoundEmail *GoogleWorkspaceUserNotFoundEmail `hcl:"user_not_found_email,block"`
+}
+
+// GoogleWorkspaceGroupApprovals is the configuration for using Google Groups as
+// document approvers.
+type GoogleWorkspaceGroupApprovals struct {
+	// Enabled enables using Google Groups as document approvers.
+	Enabled bool `hcl:"enabled,optional"`
+
+	// SearchPrefix is the prefix to use when searching for Google Groups.
+	SearchPrefix string `hcl:"search_prefix,optional"`
 }
 
 // GoogleWorkspaceOAuth2 is the configuration to use OAuth 2.0 to access Google
@@ -247,6 +265,20 @@ type GoogleWorkspaceOAuth2 struct {
 	// RedirectURI is an authorized redirect URI for the given client_id as
 	// specified in the Google API Console Credentials page.
 	RedirectURI string `hcl:"redirect_uri,optional"`
+}
+
+// GoogleWorkspaceUserNotFoundEmail is the configuration to send an email when a
+// user is not found in Google Workspace.
+type GoogleWorkspaceUserNotFoundEmail struct {
+	// Body is the body of the email.
+	Body string `hcl:"body,optional"`
+
+	// Enabled enables sending an email when a user is not found in Google
+	// Workspace.
+	Enabled bool `hcl:"enabled,optional"`
+
+	// Subject is the subject of the email.
+	Subject string `hcl:"subject,optional"`
 }
 
 // Jira is the configuration for Hermes to work with Jira.

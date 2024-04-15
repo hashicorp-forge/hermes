@@ -74,6 +74,7 @@ const TRANSFER_OWNERSHIP_MODAL = "[data-test-transfer-ownership-modal]";
 const OWNERSHIP_TRANSFERRED_MODAL = "[data-test-ownership-transferred-modal]";
 const TRANSFERRING_DOC = "[data-test-transferring-doc]";
 const SELECT_NEW_OWNER_LABEL = "[data-test-select-new-owner-label]";
+const MODAL_PEOPLE_SELECT = "dialog [data-test-people-select]";
 const PEOPLE_SELECT_INPUT = ".ember-power-select-trigger-multiple-input";
 const PEOPLE_SELECT_OPTION =
   ".ember-power-select-option:not(.ember-power-select-option--no-matches-message)";
@@ -676,6 +677,41 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert.true(changesRequestedBy?.includes(TEST_USER_EMAIL));
   });
 
+  test("group approvers can approve a document", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    this.server.options("/approvals/:document_id", () => {
+      return new Response(200, { allowed: "POST" }, {});
+    });
+
+    this.server.create("document", {
+      id: 1,
+      objectID: 1,
+      isDraft: false,
+      status: "In-review",
+      approvers: [],
+      approvedBy: [],
+    });
+
+    await visit("/document/1");
+
+    assert
+      .dom(OVERFLOW_MENU_BUTTON)
+      .doesNotExist(
+        'the "remove me" function is not available to group approvers',
+      );
+
+    await click(APPROVE_BUTTON);
+
+    assert.dom(SIDEBAR_FOOTER_PRIMARY_BUTTON_READ_ONLY).hasText("Approved");
+
+    assert.dom(APPROVERS_SELECTOR).containsText("Me");
+
+    const doc = this.server.schema.document.find(1).attrs;
+
+    const { approvers } = doc;
+
+    assert.true(approvers.includes(TEST_USER_EMAIL));
+  });
+
   test("non-owner viewers of shareable drafts cannot edit the metadata of a draft", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     this.server.create("document", {
       objectID: 1,
@@ -741,7 +777,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert.dom(PUBLISH_FOR_REVIEW_MODAL_SELECTOR).exists();
 
     // Add an approver
-    await click("dialog [data-test-people-select]");
+    await click(MODAL_PEOPLE_SELECT);
 
     await fillIn(
       ".ember-power-select-trigger-multiple-input",
@@ -1738,5 +1774,44 @@ module("Acceptance | authenticated/document", function (hooks) {
     await click(DOCUMENT_MODAL_PRIMARY_BUTTON);
 
     assert.dom(MODAL_ERROR).exists();
+  });
+
+  test("you can add a group as an approver", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
+    const name = "Engineering";
+    const email = "engineering@hashicorp.com";
+
+    this.server.create("group", {
+      name,
+      email,
+    });
+
+    this.server.create("document", {
+      objectID: 1,
+      id: 1,
+    });
+
+    await visit("/document/1?draft=true");
+
+    await click(`${APPROVERS_SELECTOR} button`);
+
+    await fillIn(`${APPROVERS_SELECTOR} input`, name);
+
+    assert.dom(PEOPLE_SELECT_OPTION).containsText(name).containsText(email);
+
+    await click(PEOPLE_SELECT_OPTION);
+
+    await click(EDITABLE_FIELD_SAVE_BUTTON_SELECTOR);
+
+    assert.dom(APPROVERS_SELECTOR).containsText(name);
+
+    const doc = this.server.schema.document.find(1).attrs;
+
+    assert.true(doc.approverGroups.includes(email));
+
+    await click(SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON_SELECTOR);
+
+    assert
+      .dom(MODAL_PEOPLE_SELECT)
+      .containsText(name, "the modal PeopleSelect includes groups");
   });
 });

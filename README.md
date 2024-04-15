@@ -23,6 +23,7 @@ Hermes was created and is currently maintained by HashiCorp Labs, a small team i
 
 1. Enable the following APIs for [Google Workspace APIs](https://developers.google.com/workspace/guides/enable-apis)
 
+   - Admin SDK API (optional, if enabling Google Groups as document approvers)
    - Google Docs API
    - Google Drive API
    - Gmail API
@@ -145,12 +146,12 @@ NOTE: when not using a Google service account, this will automatically open a br
 
 - Create a new key (JSON type) for the service account and download it.
 - Go to [Delegating domain-wide authority to the service account](https://developers.google.com/identity/protocols/oauth2/service-account#delegatingauthority) and follow the instructions to enter the OAuth scopes.
-- Add the following OAuth scopes (comma-delimited list):
+- Add the following OAuth scopes (if enabling group approvals, add `https://www.googleapis.com/auth/admin.directory.group.readonly` to the comma-delimited list):
   `https://www.googleapis.com/auth/directory.readonly,https://www.googleapis.com/auth/documents,https://www.googleapis.com/auth/drive,https://www.googleapis.com/auth/gmail.send`
 
 1. Configure the service account in the `auth` block under the `google_workspace` config block.
 
-More to come here...
+1. If enabling group approvals, add the `https://www.googleapis.com/auth/admin.directory.group.readonly` role to the service user configured as the `subject` in the `auth` block (from previous step).
 
 ## Architecture
 

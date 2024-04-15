@@ -23,6 +23,7 @@ interface AuthenticatedDocumentRouteParams {
 interface DocumentRouteModel {
   doc: HermesDocument;
   docType: HermesDocumentType;
+  viewerIsGroupApprover: boolean;
 }
 
 export enum DocStatus {
@@ -152,18 +153,41 @@ export default class AuthenticatedDocumentRoute extends Route {
       }
     }
 
+    let viewerIsGroupApprover = false;
+
+    // Check if the user is a group approver.
+
+    if (this.configSvc.config.group_approvals) {
+      const resp = await this.fetchSvc
+        .fetch(
+          `/api/${this.configSvc.config.api_version}/approvals/${params.document_id}`,
+          { method: "OPTIONS" },
+        )
+        .then((r) => r);
+
+      const allowed = resp?.headers.get("allowed");
+
+      if (allowed?.includes("POST")) {
+        viewerIsGroupApprover = true;
+      }
+    }
+
     const typedDoc = doc as HermesDocument;
 
     typedDoc.isDraft = typedDoc.status === "WIP";
 
+    // Push the document's people into the store.
+
     if (typedDoc.contributors?.length) {
-      // Add the contributors to the list of people to fetch.
       peopleToMaybeFetch.push(...typedDoc.contributors);
     }
 
     if (typedDoc.approvers?.length) {
-      // Add the approvers to the list of people to fetch.
       peopleToMaybeFetch.push(...typedDoc.approvers);
+    }
+
+    if (typedDoc.approverGroups?.length) {
+      peopleToMaybeFetch.push(...typedDoc.approverGroups);
     }
 
     const customFields = typedDoc.customEditableFields;
@@ -206,6 +230,7 @@ export default class AuthenticatedDocumentRoute extends Route {
     return {
       doc: typedDoc,
       docType: this.docType(typedDoc),
+      viewerIsGroupApprover,
     };
   }
 
