@@ -102,7 +102,7 @@
     </h5>
     <Action
       {{! TODO }}
-      {{on "click" this.showCustomFieldModal}}
+      {{on "click" this.showCheckModal}}
       class="text-color-foreground-faint hover:text-color-foreground-primary"
     >
       + Add...
@@ -131,4 +131,8 @@
     {{! TODO: @onSave }}
     @onClose={{this.hideCustomFieldModal}}
   />
+{{/if}}
+
+{{#if this.checkModalIsShown}}
+  <Admin::Doctypes::Modal::Check @onClose={{this.hideCheckModal}} />
 {{/if}}

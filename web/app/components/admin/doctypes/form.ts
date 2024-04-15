@@ -32,6 +32,7 @@ export default class AdminDoctypesForm extends Component<AdminDoctypesFormSignat
   @tracked protected icon = "";
 
   @tracked protected customFieldModalIsShown = false;
+  @tracked protected checkModalIsShown = false;
 
   protected get suggestedFields() {
     return [
@@ -96,6 +97,14 @@ export default class AdminDoctypesForm extends Component<AdminDoctypesFormSignat
 
   @action protected hideCustomFieldModal() {
     this.customFieldModalIsShown = false;
+  }
+
+  @action protected showCheckModal() {
+    this.checkModalIsShown = true;
+  }
+
+  @action protected hideCheckModal() {
+    this.checkModalIsShown = false;
   }
 
   /**
