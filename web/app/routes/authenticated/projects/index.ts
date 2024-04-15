@@ -27,7 +27,6 @@ export default class AuthenticatedProjectsIndexRoute extends Route {
   };
 
   async model(params: AuthenticatedProjectsIndexRouteParams) {
-    console.log("params", params);
     const payload = await this.fetchSvc
       .fetch(
         `/api/${this.configSvc.config.api_version}/projects?status=${
