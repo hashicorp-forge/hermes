@@ -736,32 +736,17 @@
           </div>
         {{else}}
           <ul class="mb-6 space-y-1 text-body-300">
-            <li class="flex items-center">
-              <div
-                class="mr-2.5 inline-flex rounded-full text-color-palette-neutral-400"
-              >
-                <FlightIcon @size="16" @name="at-sign" />
-              </div>
-              Approvers and people subscribed to “{{@document.product}}” will be
-              notified.
-            </li>
-            <li class="flex items-center">
-              <div
-                class="mr-2.5 inline-flex rounded-full text-color-palette-neutral-400"
-              >
-                <FlightIcon @size="16" @name="radio" />
-              </div>
-              Your document will appear in Hermes and Google Workspace search.
-            </li>
-            <li class="flex items-center">
-              <div
-                class="mr-2.5 inline-flex rounded-full text-color-palette-neutral-400"
-              >
-
-                <FlightIcon @size="16" @name="globe-private" />
-              </div>
-              Published documents cannot be deleted but can be archived.
-            </li>
+            {{#each this.requestReviewBulletPoints as |b|}}
+              <li class="flex gap-2.5">
+                <FlightIcon
+                  @name={{b.icon}}
+                  class="mt-1 text-color-foreground-disabled"
+                />
+                <span>
+                  {{b.text}}
+                </span>
+              </li>
+            {{/each}}
           </ul>
 
           <Hds::Form::Field @layout="vertical" as |F|>
