@@ -31,11 +31,9 @@ export default class AdminDoctypesForm extends Component<AdminDoctypesFormSignat
   @tracked protected templateID = "";
   @tracked protected icon = "";
 
-  @tracked modalIsShown = false;
-  @tracked customFieldHasTooltip = false;
-  @tracked selectedCustomFieldType = "string";
+  @tracked protected customFieldModalIsShown = false;
 
-  get suggestedFields() {
+  protected get suggestedFields() {
     return [
       {
         name: "Title",
@@ -92,71 +90,12 @@ export default class AdminDoctypesForm extends Component<AdminDoctypesFormSignat
     ];
   }
 
-  get customFieldTypes() {
-    return {
-      string: {
-        name: "Short text",
-        icon: "type",
-      },
-      "long-string": {
-        name: "Long text",
-        icon: "align-left",
-      },
-      people: {
-        name: "People",
-        icon: "users",
-      },
-      document: {
-        name: "Hermes Doc",
-        icon: "file-text",
-      },
-    };
+  @action protected showCustomFieldModal() {
+    this.customFieldModalIsShown = true;
   }
 
-  get selectedCustomFieldIcon() {
-    switch (this.selectedCustomFieldType) {
-      case "long-string":
-        return "align-left";
-      case "string":
-        return "type";
-      case "people":
-        return "users";
-      case "document":
-        return "file-text";
-    }
-  }
-
-  get selectedCustomFieldLabel() {
-    switch (this.selectedCustomFieldType) {
-      case "long-string":
-        return "Long text";
-      case "string":
-        return "Short text";
-      case "people":
-        return "People";
-      case "document":
-        return "Hermes Doc";
-    }
-  }
-
-  @action showModal() {
-    this.modalIsShown = true;
-  }
-
-  @action hideModal() {
-    this.modalIsShown = false;
-  }
-
-  @action addField() {
-    return;
-  }
-
-  @action toggleHasTooltip() {
-    this.customFieldHasTooltip = !this.customFieldHasTooltip;
-  }
-
-  @action setCustomFieldType(type: string) {
-    this.selectedCustomFieldType = type;
+  @action protected hideCustomFieldModal() {
+    this.customFieldModalIsShown = false;
   }
 
   /**

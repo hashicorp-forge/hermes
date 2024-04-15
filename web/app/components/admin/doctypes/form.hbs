@@ -87,7 +87,7 @@
     </ul>
     <div>
       <Action
-        {{on "click" this.showModal}}
+        {{on "click" this.showCustomFieldModal}}
         class="mb-2 text-color-foreground-faint hover:text-color-foreground-primary"
       >
         + Add custom field...
@@ -102,7 +102,7 @@
     </h5>
     <Action
       {{! TODO }}
-      {{on "click" this.showModal}}
+      {{on "click" this.showCustomFieldModal}}
       class="text-color-foreground-faint hover:text-color-foreground-primary"
     >
       + Add...
@@ -113,8 +113,7 @@
       More info link
     </h5>
     <Action
-      {{! TODO }}
-      {{on "click" this.showModal}}
+      {{on "click" this.showCustomFieldModal}}
       class="text-color-foreground-faint hover:text-color-foreground-primary"
     >
       + Add...
@@ -127,157 +126,9 @@
   />
 </form>
 
-{{#if this.modalIsShown}}
-  <Hds::Modal @onClose={{this.hideModal}} as |M|>
-    <M.Header>Add custom field</M.Header>
-    <M.Body>
-      {{! TODO: wrap in a form }}
-      <div class="mb-3 grid gap-4">
-        <div>
-          <X::DropdownList
-            @items={{this.customFieldTypes}}
-            @selected={{this.selectedCustomFieldType}}
-            class="w-56"
-          >
-            <:anchor as |dd|>
-              <div class="hermes-form-label mb-1.5">
-                Field type
-              </div>
-              <dd.ToggleAction
-                class="x-dropdown-list-toggle-select hds-button hds-button--color-secondary hds-button--size-medium w-[200px]"
-              >
-                <FlightIcon
-                  @name={{this.selectedCustomFieldIcon}}
-                  class="mr-2"
-                />
-                {{this.selectedCustomFieldLabel}}
-                <FlightIcon @name="caret" class="product-select-toggle-caret" />
-
-              </dd.ToggleAction>
-            </:anchor>
-            <:item as |dd|>
-              <dd.Action
-                class="relative flex items-center justify-between"
-                {{on "click" (fn this.setCustomFieldType dd.value)}}
-              >
-                <div class="flex items-center">
-                  <FlightIcon @name={{dd.attrs.icon}} class="mr-2" />
-                  {{dd.attrs.name}}
-                </div>
-
-                <FlightIcon
-                  @name="check"
-                  class="check absolute right-4 top-1/2 -translate-y-1/2
-                    {{if dd.isSelected 'visible' 'invisible'}}"
-                />
-              </dd.Action>
-            </:item>
-          </X::DropdownList>
-        </div>
-        <div>
-          <div class="hermes-form-label mb-1.5">
-            Name
-          </div>
-          <Hds::Form::TextInput::Base @value="" />
-        </div>
-        {{#if this.customFieldHasTooltip}}
-          <div>
-            <div class="hermes-form-label mb-1.5">
-              Tooltip text
-              <div
-                class="ml-1.5 font-regular text-color-foreground-faint"
-              >(Optional)</div>
-            </div>
-            <Hds::Form::TextInput::Base @value="" />
-          </div>
-        {{/if}}
-        {{#if (eq this.selectedCustomFieldType "document")}}
-          <div>
-            <div class="hermes-form-label mb-1.5">
-              Search filters
-            </div>
-            <Hds::Form::TextInput::Base
-              @value=""
-              placeholder="E.g., doctype:RFC AND NOT status:obsolete"
-            />
-          </div>
-          <div>
-
-            <div class="hermes-form-label mb-1.5">
-              Optional search filters
-            </div>
-            <Hds::Form::TextInput::Base
-              @value=""
-              placeholder={{concat "E.g., product:{" "{product}}"}}
-            />
-          </div>
-
-        {{/if}}
-        {{#if (eq this.selectedCustomFieldType "people")}}
-          <div>
-            <div class="hermes-form-label mb-1.5">
-              People in this list...
-            </div>
-            <div class="grid gap-1">
-
-              <Hds::Form::Checkbox::Field as |F|>
-                <F.Label class="font-regular">
-                  Get notified when added
-                </F.Label>
-              </Hds::Form::Checkbox::Field>
-              <Hds::Form::Checkbox::Field as |F|>
-                <F.Label class="font-regular">
-                  Get edit access on Google
-                </F.Label>
-              </Hds::Form::Checkbox::Field>
-              <Hds::Form::Checkbox::Field as |F|>
-                <F.Label class="font-regular">
-                  Get edit access on Hermes
-                </F.Label>
-              </Hds::Form::Checkbox::Field>
-            </div>
-          </div>
-        {{/if}}
-      </div>
-    </M.Body>
-    <M.Footer>
-      <div class="flex w-full justify-between">
-        <Hds::Button @text="Add field" {{on "click" this.addField}} />
-        <div class="flex items-center gap-5 pr-1.5">
-          <div>
-            <Hds::Form::Checkbox::Field as |F|>
-              <F.Label class="font-regular text-color-foreground-primary">
-                Required field
-              </F.Label>
-            </Hds::Form::Checkbox::Field>
-          </div>
-          <div>
-            <Hds::Form::Checkbox::Field
-              {{on "click" this.toggleHasTooltip}}
-              as |F|
-            >
-              <F.Label
-                @value={{this.customFieldHasTooltip}}
-                class="font-regular text-color-foreground-primary"
-              >
-                Has tooltip
-              </F.Label>
-            </Hds::Form::Checkbox::Field>
-          </div>
-          <div>
-            <Hds::Form::Checkbox::Field as |F|>
-              <F.Label class="font-regular">
-                <Hds::Badge
-                  @size="small"
-                  @text="New"
-                  @color="highlight"
-                  @type="inverted"
-                />
-              </F.Label>
-            </Hds::Form::Checkbox::Field>
-          </div>
-        </div>
-      </div>
-    </M.Footer>
-  </Hds::Modal>
+{{#if this.customFieldModalIsShown}}
+  <Admin::Doctypes::Modal::CustomField
+    {{! TODO: @onSave }}
+    @onClose={{this.hideCustomFieldModal}}
+  />
 {{/if}}
