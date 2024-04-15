@@ -376,6 +376,23 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     };
   }
 
+  protected get requestReviewBulletPoints() {
+    return [
+      {
+        icon: "at-sign",
+        text: `Approvers and people subscribed to “${this.args.document.product}” will be notified.`,
+      },
+      {
+        icon: "radio",
+        text: "Your document will appear in Hermes and Google Workspace search.",
+      },
+      {
+        icon: "globe-private",
+        text: "Published documents cannot be deleted but can be archived.",
+      },
+    ];
+  }
+
   /**
    * Whether the share button is in the process of creating a shareable link.
    * Used to determine the icon and tooltip text of the share button.
