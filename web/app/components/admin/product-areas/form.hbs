@@ -1,0 +1,34 @@
+<form {{on "submit" this.submit}}>
+  <div class="mb-5 grid gap-5">
+    <Hds::Form::TextInput::Field
+      {{on "input" this.setName}}
+      @value={{this.name}}
+      disabled={{@product}}
+      placeholder="E.g., Product Management"
+      as |F|
+    >
+      {{! DO we need some logic for determining duplicates }}
+      <F.Label>Name</F.Label>
+      {{#if this.nameErrorIsShown}}
+        <F.Error>{{this.nameErrorText}}</F.Error>
+      {{/if}}
+    </Hds::Form::TextInput::Field>
+    <Hds::Form::TextInput::Field
+      {{on "input" this.setAbbreviation}}
+      @value={{this.abbreviation}}
+      disabled={{@product}}
+      placeholder="E.g., PRM"
+      as |F|
+    >
+      <F.Label>Abbreviation</F.Label>
+      {{#if this.abbreviationErrorIsShown}}
+        <F.Error>{{this.abbreviationErrorText}}</F.Error>
+      {{/if}}
+    </Hds::Form::TextInput::Field>
+  </div>
+  <Hds::Button
+    @text={{if @product "Save changes" "Create product/area"}}
+    class="my-8"
+    type="submit"
+  />
+</form>

@@ -16,8 +16,8 @@ export default class AuthenticatedAdminProductAreasProductAreaRoute extends Rout
     assert("product area must exist", productArea);
 
     return {
-      name: params.product_area_id,
       ...productArea,
+      name: params.product_area_id,
     };
   }
 }

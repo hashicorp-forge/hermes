@@ -59,6 +59,7 @@ const EXTENDED_COLORS = [
 ];
 
 export type ProductArea = {
+  name: string;
   abbreviation: string;
 };
 
