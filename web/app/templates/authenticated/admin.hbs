@@ -24,7 +24,7 @@
 
         {{! ⪽⊚♫TR◌L_cℇNℸ℮ℜ }}
         <ul class="nav-links flex h-full flex-col">
-          <li>
+          <li class="relative">
             <LinkTo
               @current-when="authenticated.admin.product-areas"
               @route="authenticated.admin.product-areas"
@@ -32,8 +32,15 @@
               <FlightIcon @name="tag" />
               Product/areas
             </LinkTo>
+            <LinkTo
+              {{tooltip "New product/area" placement="right"}}
+              @route="authenticated.admin.product-areas.new"
+              class="nav-link-add-button"
+            >
+              <FlightIcon @name="plus" />
+            </LinkTo>
           </li>
-          <li>
+          <li class="relative">
             <LinkTo
               @current-when="authenticated.admin.doctypes"
               @route="authenticated.admin.doctypes"
@@ -41,6 +48,14 @@
               <FlightIcon @name="files" />
               Doctypes
             </LinkTo>
+            <LinkTo
+              {{tooltip "New doctype" placement="right"}}
+              @route="authenticated.admin.doctypes.new"
+              class="nav-link-add-button"
+            >
+              <FlightIcon @name="plus" />
+            </LinkTo>
+
           </li>
         </ul>
 

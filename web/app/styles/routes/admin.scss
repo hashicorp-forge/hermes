@@ -6,6 +6,10 @@ body.admin {
       &:hover,
       &:focus {
         @apply text-color-palette-neutral-200;
+
+        + .nav-link-add-button {
+          @apply opacity-100;
+        }
       }
 
       &.active {
@@ -18,6 +22,19 @@ body.admin {
 
       .flight-icon {
         @apply text-color-palette-neutral-500;
+      }
+    }
+
+    .nav-link-add-button {
+      @apply absolute right-1 top-1/2 w-auto -translate-y-1/2 p-1 opacity-0;
+
+      &:hover,
+      &:focus {
+        @apply bg-color-palette-neutral-500 opacity-100;
+
+        .flight-icon {
+          @apply text-white;
+        }
       }
     }
   }
