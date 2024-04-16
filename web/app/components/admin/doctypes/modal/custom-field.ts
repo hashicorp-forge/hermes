@@ -13,7 +13,6 @@ interface AdminDoctypesModalCustomFieldComponentSignature {
 
 export default class AdminDoctypesModalCustomFieldComponent extends Component<AdminDoctypesModalCustomFieldComponentSignature> {
   @tracked protected selectedCustomFieldType = "string"; // TODO: enum
-  @tracked protected customFieldHasTooltip = false;
 
   protected get customFieldTypes() {
     return {
@@ -68,11 +67,6 @@ export default class AdminDoctypesModalCustomFieldComponent extends Component<Ad
 
   @action protected addField() {
     return;
-  }
-
-  @action protected toggleHasTooltip() {
-    // explain this better, rename
-    this.customFieldHasTooltip = !this.customFieldHasTooltip;
   }
 }
 

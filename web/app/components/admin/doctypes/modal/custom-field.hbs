@@ -45,17 +45,15 @@
         </div>
         <Hds::Form::TextInput::Base @value="" />
       </div>
-      {{#if this.customFieldHasTooltip}}
-        <div>
-          <div class="hermes-form-label mb-1.5">
-            Tooltip text
-            <div
-              class="ml-1.5 font-regular text-color-foreground-faint"
-            >(Optional)</div>
-          </div>
-          <Hds::Form::TextInput::Base @value="" />
+      <div>
+        <div class="hermes-form-label mb-1.5">
+          Tooltip text
+          <div
+            class="ml-1.5 font-regular text-color-foreground-faint"
+          >(Optional)</div>
         </div>
-      {{/if}}
+        <Hds::Form::TextInput::Base @value="" />
+      </div>
       {{#if (eq this.selectedCustomFieldType "document")}}
         <div>
           <div class="hermes-form-label mb-1.5">
@@ -113,20 +111,6 @@
           <Hds::Form::Checkbox::Field as |F|>
             <F.Label class="font-regular text-color-foreground-primary">
               Required field
-            </F.Label>
-          </Hds::Form::Checkbox::Field>
-        </div>
-        {{! TODO: move this? }}
-        <div>
-          <Hds::Form::Checkbox::Field
-            {{on "click" this.toggleHasTooltip}}
-            as |F|
-          >
-            <F.Label
-              @value={{this.customFieldHasTooltip}}
-              class="font-regular text-color-foreground-primary"
-            >
-              Has tooltip
             </F.Label>
           </Hds::Form::Checkbox::Field>
         </div>

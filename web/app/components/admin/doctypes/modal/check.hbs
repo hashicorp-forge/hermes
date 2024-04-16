@@ -8,7 +8,7 @@
         {{autofocus waitUntilNextRunloop=true}}
         @value=""
         placeholder="E.g., I agree to the terms and conditions"
-        class="mb-5"
+        class="mb-4"
         as |F|
       >
         <F.Label>Label</F.Label>
@@ -17,7 +17,7 @@
       <Hds::Form::Textarea::Field
         @value=""
         @isOptional={{true}}
-        class="mb-5"
+        class="mb-4"
         rows="2"
         as |F|
       >
@@ -33,7 +33,7 @@
         </legend>
       </fieldset>
 
-      <div class="mb-2.5 grid gap-4">
+      <div class="mb-4 grid gap-4">
 
         {{#each this.links}}
           {{! TODO: Componentize }}
@@ -63,7 +63,7 @@
       </div>
 
       <Action
-        class="flex items-center gap-1.5 text-body-100 text-color-foreground-faint"
+        class="mb-2 flex items-center gap-1.5 text-body-100 text-color-foreground-faint"
         {{on "click" this.increaseLinkCount}}
       >
         <FlightIcon @name="plus-circle" class="flex" />
