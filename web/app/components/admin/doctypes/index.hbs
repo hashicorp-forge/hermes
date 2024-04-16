@@ -21,9 +21,12 @@
           <LinkTo
             @route="authenticated.admin.doctypes.doctype"
             @model={{doctype.name}}
-            class="inner flex items-center gap-2.5"
+            class="inner flex items-start gap-2.5"
           >
-            <FlightIcon @name={{or doctype.flightIcon "file-text"}} />
+            <FlightIcon
+              @name={{or doctype.flightIcon "file-text"}}
+              class="mt-0.5 shrink-0"
+            />
             {{doctype.longName}}
           </LinkTo>
         </td>
