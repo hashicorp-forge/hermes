@@ -3,7 +3,6 @@ import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import DocumentTypesService from "hermes/services/document-types";
-import { HermesDocumentType } from "hermes/types/document-type";
 
 interface AdminDoctypesNewSignature {
   Element: null;

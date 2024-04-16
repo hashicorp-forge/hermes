@@ -4,7 +4,6 @@
     <Hds::Form::TextInput::Field
       {{on "input" this.setName}}
       @value={{this.name}}
-      {{!-- @isRequired={{true}} --}}
       placeholder="E.g., RFC, PRFAQ"
       as |F|
     >
@@ -29,7 +28,6 @@
     <Hds::Form::Textarea::Field
       {{on "input" this.setDescription}}
       @value={{this.description}}
-      {{!-- @isRequired={{true}} --}}
       rows="2"
       as |F|
     >
@@ -39,7 +37,6 @@
     <Hds::Form::TextInput::Field
       {{on "input" this.setTemplateID}}
       @value={{this.templateID}}
-      {{!-- @isRequired={{true}} --}}
       as |F|
     >
       <F.Label>Template ID</F.Label>
@@ -72,16 +69,7 @@
               />
               {{field.name}}
             </F.Label>
-
           </Hds::Form::Checkbox::Field>
-          {{!-- {{#unless field.isRequired}}
-            <Action class="cursor-move">
-              <FlightIcon
-                @name="menu"
-                class="text-color-foreground-faint opacity-75"
-              />
-            </Action>
-          {{/unless}} --}}
         </li>
       {{/each}}
     </ul>
@@ -111,10 +99,10 @@
   </div>
   <div>
     <h5 class="hermes-form-label mb-2">
-      More info link
+      Related links
     </h5>
     <Action
-      {{on "click" this.showCustomFieldModal}}
+      {{on "click" this.showMoreInfoLinkModal}}
       class="text-color-foreground-faint hover:text-color-foreground-primary"
     >
       + Add...
@@ -129,17 +117,21 @@
 
 {{#if this.customFieldModalIsShown}}
   <Admin::Doctypes::Modal::CustomField
-    {{! TODO: @onSave }}
+    {{! TODO: @onCommit }}
     @onClose={{this.hideCustomFieldModal}}
   />
 {{/if}}
 
 {{#if this.checkModalIsShown}}
-  <Admin::Doctypes::Modal::Check @onClose={{this.hideCheckModal}} />
+  <Admin::Doctypes::Modal::Check
+    {{! TODO: @onCommit }}
+    @onClose={{this.hideCheckModal}}
+  />
 {{/if}}
 
 {{#if this.moreInfoLinkModalIsShown}}
   <Admin::Doctypes::Modal::MoreInfoLink
+    {{! TODO: @onCommit }}
     @onClose={{this.hideMoreInfoLinkModal}}
   />
 {{/if}}

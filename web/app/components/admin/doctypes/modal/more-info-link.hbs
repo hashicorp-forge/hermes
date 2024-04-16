@@ -1,26 +1,26 @@
 {{! TODO: add confirm-to-close function if something is typed in }}
 <Hds::Modal @onClose={{@onClose}} as |M|>
   <M.Header>
-    Add required check
+    Add related link
   </M.Header>
   <M.Body>
-    <form {{on "submit" this.submit}}>
-      <Hds::Form::TextInput::Field @value="todo" as |F|>
-        <F.Label>Label</F.Label>
+    <form {{on "submit" this.submit}} class="pb-3">
+      <Hds::Form::TextInput::Field @value="" class="mb-5" as |F|>
+        <F.Label>Title</F.Label>
+        <F.HelperText>
+          Include the doctype name if possible, e.g., "When to write a PRFAQ"
+        </F.HelperText>
       </Hds::Form::TextInput::Field>
 
-      <Hds::Form::Textarea::Field @value="todo" rows="2" as |F|>
-        <F.Label>Description</F.Label>
-      </Hds::Form::Textarea::Field>
-
-      {{! TODO: group these, allow to be editable }}
-      <Hds::Form::TextInput::Field @value="todo" as |F|>
-        <F.Label>Link</F.Label>
-      </Hds::Form::TextInput::Field>
-
-      <Hds::Form::TextInput::Field @value="todo" as |F|>
+      <Hds::Form::TextInput::Field @value="" as |F|>
         <F.Label>URL</F.Label>
       </Hds::Form::TextInput::Field>
     </form>
   </M.Body>
+  <M.Footer>
+    <Hds::ButtonSet>
+      <Hds::Button {{on "click" this.submit}} @text="Add" />
+      <Hds::Button {{on "click" @onClose}} @color="secondary" @text="Cancel" />
+    </Hds::ButtonSet>
+  </M.Footer>
 </Hds::Modal>

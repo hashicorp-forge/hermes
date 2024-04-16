@@ -32,7 +32,7 @@ export default class AdminDoctypesForm extends Component<AdminDoctypesFormSignat
   @tracked protected icon = "";
 
   @tracked protected customFieldModalIsShown = false;
-  @tracked protected checkModalIsShown = true;
+  @tracked protected checkModalIsShown = false;
   @tracked protected moreInfoLinkModalIsShown = false;
 
   protected get suggestedFields() {
