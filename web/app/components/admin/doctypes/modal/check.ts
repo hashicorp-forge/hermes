@@ -14,13 +14,24 @@ interface AdminDoctypesModalCheckComponentSignature {
 export default class AdminDoctypesModalCheckComponent extends Component<AdminDoctypesModalCheckComponentSignature> {
   @tracked protected addLinkFormIsShown = false;
 
-  @action protected showAddLinkForm() {
-    this.addLinkFormIsShown = true;
+  @tracked protected links = ["link"];
+
+  @action protected increaseLinkCount() {
+    this.links.push("link");
+    // Arrays don't automatically re-render in Glimmer components
+    this.links = this.links;
   }
 
   @action protected hideAndResetAddLinkForm() {
     this.addLinkFormIsShown = false;
     // TODO: reset values
+    this.links = [];
+  }
+
+  @action protected removeLink(index: number) {
+    this.links.splice(index, 1);
+    // Arrays don't automatically re-render in Glimmer components
+    this.links = this.links;
   }
 
   @action protected submit() {

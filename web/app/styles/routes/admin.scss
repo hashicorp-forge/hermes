@@ -56,3 +56,8 @@ body.admin {
     @apply max-w-2xl;
   }
 }
+
+.doctype-check-link {
+  @apply grid;
+  grid-template-columns: 1fr 16px;
+}

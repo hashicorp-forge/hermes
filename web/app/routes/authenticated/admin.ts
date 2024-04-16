@@ -7,6 +7,5 @@ export default class AuthenticatedAdminRoute extends Route {
 
   beforeModel() {
     // TODO: Reject those who aren't authorized.
-    this.router.replaceWith("authenticated.admin.product-areas");
   }
 }

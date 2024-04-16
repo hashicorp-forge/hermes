@@ -84,7 +84,11 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
     if (this.authenticatedUser.isAdmin) {
       defaultItems.push({
         label: "Admin panel",
-        route: "authenticated.admin",
+        /**
+         * At some point we may have an index route for the admin panel;
+         * for now, we link to the product-areas screen.
+         */
+        route: "authenticated.admin.product-areas",
       });
     }
 

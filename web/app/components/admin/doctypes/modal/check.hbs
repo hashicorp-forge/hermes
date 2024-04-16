@@ -5,7 +5,7 @@
   <M.Body>
     <form {{on "submit" this.submit}}>
       <Hds::Form::TextInput::Field
-        {{autofocus}}
+        {{autofocus waitUntilNextRunloop=true}}
         @value=""
         placeholder="E.g., I agree to the terms and conditions"
         class="mb-5"
@@ -25,63 +25,50 @@
       </Hds::Form::Textarea::Field>
       {{! TODO: this needs to be its own component }}
       {{! TODO: semantics }}
-      {{! fieldset legend? }}
-      <fieldset>
-        <legend class="hermes-form-label mb-2">Links
-          <span
-            class="ml-1 text-body-100 font-regular text-color-foreground-faint"
-          >(Optional)</span>
+      <fieldset class="mb-2 items-center">
+        <legend class="hermes-form-label flex items-center gap-1">Links
+          <span class="text-body-100 font-regular text-color-foreground-faint">
+            (Optional)
+          </span>
         </legend>
       </fieldset>
 
-      <div
-        class="grid items-start gap-4 rounded border border-color-border-primary bg-color-page-faint"
-      >
-        {{#if this.addLinkFormIsShown}}
-          <div class="p-3">
+      <div class="mb-2.5 grid gap-4">
 
-            <div class="grid w-full rounded border border-color-border-strong">
+        {{#each this.links}}
+          {{! TODO: Componentize }}
+          <div class="grid w-full">
 
-              {{! TODO: semantics }}
-              <input
-                type="text"
-                placeholder="Label"
-                class="h-8 w-full rounded-tl rounded-tr px-3"
-              />
-              {{! separator }}
-              <div class="h-px w-full bg-color-border-strong" />
+            {{! TODO: semantics }}
+            <input
+              {{!
+               This `autofocus` call is initially overruled by the modal's
+               focus-trapping logic, but fires when "Add another" is clicked
+               }}
+              {{autofocus}}
+              type="text"
+              placeholder="URL"
+              class="hds-form-text-input h-8 w-full rounded-b-none border-b-0 px-3 focus:z-10 focus:rounded-b-button-md"
+            />
+            {{! separator }}
+            <div class="h-px w-full bg-color-border-input" />
 
-              <input
-                type="text"
-                placeholder="URL"
-                class="h-8 w-full rounded-bl rounded-br px-3"
-              />
-            </div>
-
-            <div class="flex shrink-0">
-              <Hds::Button
-                @color="primary"
-                @icon=""
-                @isIconOnly={{false}}
-                @size="small"
-                @text="Add"
-              />
-              <Hds::Button
-                {{on "click" this.hideAndResetAddLinkForm}}
-                @color="secondary"
-                @icon=""
-                @isIconOnly={{false}}
-                @size="small"
-                @text="Cancel"
-              />
-            </div>
+            <input
+              type="text"
+              placeholder="Title"
+              class="hds-form-text-input h-8 w-full rounded-t-none border-t-0 px-3 focus:z-10"
+            />
           </div>
-        {{else}}
-
-          <Action class="px-3 py-2" {{on "click" this.showAddLinkForm}}>+ Add
-            link</Action>
-        {{/if}}
+        {{/each}}
       </div>
+
+      <Action
+        class="flex items-center gap-1.5 text-body-100 text-color-foreground-faint"
+        {{on "click" this.increaseLinkCount}}
+      >
+        <FlightIcon @name="plus-circle" class="flex" />
+        Add another
+      </Action>
 
     </form>
   </M.Body>
