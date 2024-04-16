@@ -33,7 +33,6 @@ Router.map(function () {
       this.route("product-area", { path: "/:product_area_id" });
     });
     this.route("admin", function () {
-      this.route("index", { path: "/" });
       this.route("product-areas", function () {
         this.route("product-area", { path: "/:product_area_id" });
         this.route("new");
