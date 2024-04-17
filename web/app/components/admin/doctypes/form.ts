@@ -9,6 +9,13 @@ interface AdminDoctypesFormSignature {
   Element: null;
   Args: {
     doctype?: HermesDocumentType;
+    onSave: (
+      longName: string,
+      name: string,
+      description: string,
+      templateID: string,
+      icon: string,
+    ) => void;
   };
   Blocks: {
     default: [];
@@ -180,7 +187,14 @@ export default class AdminDoctypesForm extends Component<AdminDoctypesFormSignat
    */
   @action protected submit(e: SubmitEvent): void {
     e.preventDefault();
-    // TODO
+    // TODO: Validate
+    this.args.onSave(
+      this.longName,
+      this.name,
+      this.description,
+      this.templateID,
+      this.icon,
+    );
   }
 }
 

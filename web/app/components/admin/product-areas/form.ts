@@ -3,7 +3,9 @@ import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { dropTask, timeout } from "ember-concurrency";
-import ProductAreasService from "hermes/services/product-areas";
+import ProductAreasService, {
+  HERMES_COLORS,
+} from "hermes/services/product-areas";
 
 const DEFAULT_ERROR = "This field is required";
 
@@ -11,6 +13,7 @@ interface AdminProductAreasFormSignature {
   Element: null;
   Args: {
     product?: any; // TODO: type this
+    onSave: (name: string, abbreviation: string, color: string | null) => void;
   };
   Blocks: {
     default: [];
@@ -20,9 +23,11 @@ interface AdminProductAreasFormSignature {
 export default class AdminProductAreasForm extends Component<AdminProductAreasFormSignature> {
   @service declare productAreas: ProductAreasService;
 
-  @tracked protected formIsValid = false;
+  protected colors = HERMES_COLORS;
 
-  @tracked protected formIsSubmitting = false;
+  @tracked protected color: string | null = null;
+
+  @tracked protected formIsValid = false;
 
   @tracked protected successStateIsShown = false;
 
@@ -85,6 +90,10 @@ export default class AdminProductAreasForm extends Component<AdminProductAreasFo
     // TODO: autofocus the name input
   }
 
+  @action protected setColor(_index: number, color: string | null) {
+    this.color = color;
+  }
+
   /**
    *
    */
@@ -137,22 +146,6 @@ export default class AdminProductAreasForm extends Component<AdminProductAreasFo
   /**
    *
    */
-  protected addProductArea = dropTask(async () => {
-    try {
-      this.formIsSubmitting = true;
-      await timeout(1000);
-      // show success state
-      this.successStateIsShown = true;
-    } catch {
-      // handle error
-    } finally {
-      this.formIsSubmitting = false;
-    }
-  });
-
-  /**
-   *
-   */
   @action protected setName(event: Event): void {
     this.name = (event.target as HTMLInputElement).value;
     this.checkForDuplicateName();
@@ -164,10 +157,8 @@ export default class AdminProductAreasForm extends Component<AdminProductAreasFo
   @action protected submit(e: SubmitEvent): void {
     e.preventDefault();
     this.validateForm();
-
     if (this.formIsValid) {
-      this.formIsSubmitting = true;
-      void this.addProductArea.perform();
+      this.args.onSave(this.name, this.abbreviation, this.color);
     }
   }
 }

@@ -1,75 +1,40 @@
-{{#if this.formIsSubmitting}}
-  <div class="grid">
-    <h1>
+<div class="mb-5 flex w-full items-center justify-between">
 
-      Creating product/area...
-    </h1>
-    <p>
-      This may take a few seconds.
-    </p>
-    <FlightIcon @name="running" @size="24" class="mt-8" />
-  </div>
-{{else if this.successStateIsShown}}
   <h1>
-    Done!
+    Product/areas
   </h1>
-  <p>
-    The product/area
-    <strong class="font-bold">
-
-      {{this.name}}
-    </strong>
-    has been created.
-  </p>
   <Hds::Button
-    {{on "click" this.resetState}}
-    @color="secondary"
-    @text="Add another product/area"
-    class="my-8"
+    @route="authenticated.admin.product-areas.new"
+    @text="+ New product/area"
   />
-{{else}}
-  <div class="mb-5 flex w-full items-center justify-between">
+</div>
 
-    <h1>
-      Product/areas
-    </h1>
-    <Hds::Button
-      @route="authenticated.admin.product-areas.new"
-      @text="+ New product/area"
-    />
-  </div>
-
-  {{! List existing }}
-  {{! should this just be a table }}
-  <table class="hds-table w-full">
-    <thead>
+<table class="hds-table w-full">
+  <thead>
+    <tr>
+      <th class="w-1/2">Name</th>
+      <th class="w-1/2">Abbreviation</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each-in this.productAreas.index as |p attrs|}}
       <tr>
-        <th class="w-6/12">Name</th>
-        <th class="w-6/12">Abbreviation</th>
+        <td>
+          <LinkTo
+            @route="authenticated.admin.product-areas.product-area"
+            @model={{p}}
+            class="inner flex items-center gap-2.5"
+          >
+            <Product::Avatar @product={{p}} />
+            {{p}}
+          </LinkTo>
+        </td>
+        <td>
+          <div class="inner">
+            {{attrs.abbreviation}}
+          </div>
+        </td>
       </tr>
-    </thead>
-    <tbody>
-
-      {{#each-in this.productAreas.index as |p attrs|}}
-        <tr class="">
-          <td class="w-1/2">
-            <LinkTo
-              @route="authenticated.admin.product-areas.product-area"
-              @model={{p}}
-              class="inner flex items-center gap-2.5"
-            >
-              <Product::Avatar @product={{p}} />
-              {{p}}
-            </LinkTo>
-          </td>
-          <td class="">
-            <div class="inner">
-              {{attrs.abbreviation}}
-            </div>
-          </td>
-        </tr>
-      {{/each-in}}
-    </tbody>
-  </table>
-{{/if}}
-{{! TODO: completed state }}
+    {{/each-in}}
+  </tbody>
+</table>

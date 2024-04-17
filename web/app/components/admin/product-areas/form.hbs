@@ -1,13 +1,18 @@
 <form {{on "submit" this.submit}}>
   <div class="mb-5 grid gap-5">
     <Hds::Form::TextInput::Field
+      {{autofocus}}
       {{on "input" this.setName}}
       @value={{this.name}}
+      @id="product-area-name"
+      name="product-area-name"
       disabled={{@product}}
       placeholder="E.g., Product Management"
+      {{! Tell password managers to ignore this input }}
+      data-1p-ignore
+      data-lpignore="true"
       as |F|
     >
-      {{! DO we need some logic for determining duplicates }}
       <F.Label>Name</F.Label>
       {{#if this.nameErrorIsShown}}
         <F.Error>{{this.nameErrorText}}</F.Error>
@@ -25,6 +30,65 @@
         <F.Error>{{this.abbreviationErrorText}}</F.Error>
       {{/if}}
     </Hds::Form::TextInput::Field>
+    <div>
+      {{! TODO: semantics }}
+      <label class="hermes-form-label mb-1.5 items-center">
+        Color
+        <div class="ml-1.5 font-regular text-color-foreground-faint">
+          (Optional)
+        </div>
+      </label>
+      <X::DropdownList
+        @items={{this.colors}}
+        @selected={{this.color}}
+        @onItemClick={{this.setColor}}
+        @inputIsShown={{false}}
+        @matchAnchorWidth={{true}}
+        class="theme--neutral"
+      >
+        <:anchor as |dd|>
+          <div class="flex gap-3">
+            <dd.ToggleSelect class="w-56">
+              <div class="flex items-center gap-2.5 font-mono">
+                {{#if this.color}}
+                  <span
+                    style={{concat "background-color:" this.color}}
+                    class="h-4 w-4 rounded-full"
+                  />
+                {{/if}}
+                {{or this.color "--"}}
+              </div>
+            </dd.ToggleSelect>
+            {{#if this.color}}
+              <Action
+                {{on "click" (fn this.setColor 0 null)}}
+                class="ml-0.5 flex items-center gap-1.5 text-color-foreground-faint"
+              >
+                <FlightIcon @name="x-circle" />
+                Clear
+              </Action>
+            {{/if}}
+          </div>
+        </:anchor>
+        <:item as |dd|>
+          <dd.Action class="py-[5px]">
+            <X::DropdownList::CheckableItem
+              @checkmarkPosition="trailing"
+              @isSelected={{eq this.color dd.attrs}}
+              class=""
+            >
+              <div class="flex items-center gap-2.5 font-mono">
+                <span
+                  style={{concat "background-color:" dd.attrs}}
+                  class="h-4 w-4 rounded-full"
+                />
+                {{dd.attrs}}
+              </div>
+            </X::DropdownList::CheckableItem>
+          </dd.Action>
+        </:item>
+      </X::DropdownList>
+    </div>
   </div>
   <Hds::Button
     @text={{if @product "Save changes" "Create product/area"}}

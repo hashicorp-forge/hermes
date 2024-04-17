@@ -58,6 +58,8 @@ const EXTENDED_COLORS = [
   "#d3fdeb",
 ];
 
+export const HERMES_COLORS = [...HDS_COLORS, ...EXTENDED_COLORS];
+
 export type ProductArea = {
   name: string;
   abbreviation: string;
@@ -95,7 +97,7 @@ export default class ProductAreasService extends Service {
       return;
     }
 
-    return hashValue(product, [...HDS_COLORS, ...EXTENDED_COLORS]);
+    return hashValue(product, HERMES_COLORS);
   }
 
   /**

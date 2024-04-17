@@ -1,5 +1,33 @@
-<div class="mb-5">
-  <h1>New doctype</h1>
-</div>
-
-<Admin::Doctypes::Form />
+{{#if this.formIsSubmitting}}
+  <div class="grid">
+    <h1 class="mb-1">
+      Creating doctype...
+    </h1>
+    <p>
+      This may take a few seconds.
+    </p>
+    <FlightIcon @name="running" @size="24" class="mt-8" />
+  </div>
+{{else if this.successStateIsShown}}
+  <h1 class="mb-1">
+    Done!
+  </h1>
+  <p>
+    The doctype
+    <strong class="font-bold">
+      {{this.name}}
+    </strong>
+    has been created.
+  </p>
+  <Hds::Button
+    {{on "click" this.resetState}}
+    @color="secondary"
+    @text="Add another"
+    class="my-8"
+  />
+{{else}}
+  <div class="mb-5">
+    <h1>New doctype</h1>
+  </div>
+  <Admin::Doctypes::Form @onSave={{this.createDoctype}} />
+{{/if}}
