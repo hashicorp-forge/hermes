@@ -37,6 +37,9 @@ type Config struct {
 
 	// Disabled disables Okta authorization.
 	Disabled bool `hcl:"disabled,optional"`
+
+	// JWTSigner is the trusted signer for the ALB JWT header.
+	JWTSigner string `hcl:"jwt_signer,optional"`
 }
 
 // New returns a new Okta authorizer.
@@ -72,6 +75,10 @@ func (oa *OktaAuthorizer) EnforceOktaAuth(next http.Handler) http.Handler {
 // verifyOIDCToken checks if the request is authorized and returns the user
 // identity.
 func (oa *OktaAuthorizer) verifyOIDCToken(r *http.Request) (string, error) {
+	if oa.cfg.JWTSigner == "" {
+		return "", fmt.Errorf("JWT signer not configured")
+	}
+
 	// Get the key ID from JWT headers (the kid field).
 	encodedJWT := r.Header.Get("x-amzn-oidc-data")
 	if encodedJWT == "" {
@@ -94,6 +101,15 @@ func (oa *OktaAuthorizer) verifyOIDCToken(r *http.Request) (string, error) {
 	kid, ok := decodedJSON["kid"].(string)
 	if !ok {
 		return "", fmt.Errorf("kid not found in decoded JSON")
+	}
+
+	// Validate signer.
+	signer, ok := decodedJSON["signer"].(string)
+	if !ok {
+		return "", fmt.Errorf("signer not found in decoded JSON")
+	}
+	if signer != oa.cfg.JWTSigner {
+		return "", fmt.Errorf("unexpected signer: %s", signer)
 	}
 
 	// Get the public key from the regional endpoint.
