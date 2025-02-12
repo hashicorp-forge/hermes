@@ -210,6 +210,9 @@ okta {
 
   // disabled disables Okta authorization.
   disabled = true
+
+  // jwt_signer is the trusted signer for the ALB JWT header.
+  jwt_signer = ""
 }
 
 // postgres configures PostgreSQL as the app database.

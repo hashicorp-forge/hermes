@@ -144,6 +144,9 @@ func (c *Command) Run(args []string) int {
 			cfg.Okta.Disabled = true
 		}
 	}
+	if val, ok := os.LookupEnv("HERMES_SERVER_OKTA_JWT_SIGNER"); ok {
+		cfg.Okta.JWTSigner = val
+	}
 	if c.flagOktaDisabled {
 		cfg.Okta.Disabled = true
 	}
@@ -191,6 +194,10 @@ func (c *Command) Run(args []string) int {
 		}
 		if cfg.Okta.ClientID == "" {
 			c.UI.Error("error initializing server: Okta client ID is required")
+			return 1
+		}
+		if cfg.Okta.JWTSigner == "" {
+			c.UI.Error("error initializing server: Okta JWT signer is required")
 			return 1
 		}
 	}
