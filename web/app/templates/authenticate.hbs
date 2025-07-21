@@ -19,10 +19,15 @@
       <p class="mb-8 text-display-300">
         Log in to browse, search, and manage documents
       </p>
+      <div class="mb-4 text-center">
+        <p class="text-display-200 mb-2">Click the button below to sign in with your Microsoft account</p>
+        <p class="text-display-100 mb-4 text-gray-500">This will redirect you to Microsoft for authentication</p>
+      </div>
       <Hds::Button
-        @text="Authenticate with Google"
+        @text="Authenticate with Microsoft"
         @size="large"
-        @icon="google"
+        @icon="microsoft"
+        @color="primary"
         {{on "click" (perform this.authenticate)}}
       />
 
