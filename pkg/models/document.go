@@ -17,6 +17,8 @@ type Document struct {
 	// GoogleFileID is the Google Drive file ID of the document.
 	GoogleFileID string `gorm:"index;not null;unique"`
 
+	SharePointFileID string `gorm:"uniqueIndex"` // Add this field
+
 	// Approvers is the list of users whose approval is requested for the
 	// document.
 	Approvers []*User `gorm:"many2many:document_reviews;"`

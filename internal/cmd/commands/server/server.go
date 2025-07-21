@@ -27,6 +27,7 @@ import (
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp-forge/hermes/pkg/links"
 	"github.com/hashicorp-forge/hermes/pkg/models"
+	"github.com/hashicorp-forge/hermes/pkg/sharepointhelper"
 	"github.com/hashicorp-forge/hermes/web"
 	"github.com/hashicorp/go-hclog"
 	httptrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/net/http"
@@ -108,6 +109,14 @@ func (c *Command) Run(args []string) int {
 				err, c.flagConfig))
 			return 1
 		}
+		// Dump the entire configuration to the console
+		cfgJSON, err := json.MarshalIndent(cfg, "", "  ")
+		if err != nil {
+			c.UI.Error(fmt.Sprintf("error marshaling config to JSON: %v", err))
+			return 1
+		}
+		fmt.Println("Loaded Configuration:")
+		fmt.Println(string(cfgJSON))
 	}
 
 	// Get configuration from environment variables if not set on the command
@@ -238,11 +247,47 @@ func (c *Command) Run(args []string) int {
 		}
 
 		goog = gw.NewFromConfig(cfg.GoogleWorkspace.Auth)
-	} else {
+	} else if cfg.GoogleWorkspace.OAuth2.ClientID != "" {
 		// Use OAuth if Google Workspace auth is not defined in the config.
 		goog = gw.New()
 	}
 
+	// Initialize SharePoint service.
+	var sharepointSvc *sharepointhelper.Service
+	if cfg.SharePoint != nil && !cfg.SharePoint.Disabled {
+		// Validate required SharePoint configuration.
+		if cfg.SharePoint.ClientID == "" {
+			c.UI.Error("error initializing server: SharePoint client ID is required")
+			return 1
+		}
+		if cfg.SharePoint.ClientSecret == "" {
+			c.UI.Error("error initializing server: SharePoint client secret is required")
+			return 1
+		}
+		if cfg.SharePoint.TenantID == "" {
+			c.UI.Error("error initializing server: SharePoint tenant ID is required")
+			return 1
+		}
+
+		// Initialize the SharePoint service.
+		sharepointSvc = &sharepointhelper.Service{
+			ClientID:     cfg.SharePoint.ClientID,
+			ClientSecret: cfg.SharePoint.ClientSecret,
+			TenantID:     cfg.SharePoint.TenantID,
+		}
+
+		// Get a valid SharePoint token.
+		token, err := sharepointSvc.GetToken()
+		if err != nil {
+			c.UI.Error(fmt.Sprintf("error initializing SharePoint service: %v", err))
+			return 1
+		}
+		sharepointSvc.AccessToken = token
+		c.Log.Info("Successfully initialized SharePoint service.")
+	}
+	c.Log.Info(fmt.Sprintf("Algolia Application ID: %s", cfg.Algolia.ApplicationID))
+	c.Log.Info(fmt.Sprintf("Algolia Search API Key: %s", cfg.Algolia.SearchAPIKey))
+	c.Log.Info(fmt.Sprintf("Algolia Write API Key: %s", cfg.Algolia.WriteAPIKey))
 	reqOpts := map[interface{}]string{
 		cfg.Algolia.ApplicationID:           "Algolia Application ID is required",
 		cfg.Algolia.SearchAPIKey:            "Algolia Search API Key is required",
@@ -344,6 +389,7 @@ func (c *Command) Run(args []string) int {
 		GWService:  goog,
 		Jira:       jiraSvc,
 		Logger:     c.Log,
+		SharePoint: sharepointSvc,
 	}
 
 	// Define handlers for authenticated endpoints.
@@ -427,7 +473,7 @@ func (c *Command) Run(args []string) int {
 	for _, e := range authenticatedEndpoints {
 		mux.Handle(
 			e.pattern,
-			auth.AuthenticateRequest(*cfg, goog, c.Log, e.handler),
+			auth.AuthenticateRequest(*cfg, goog, sharepointSvc, c.Log, e.handler),
 		)
 	}
 	for _, e := range unauthenticatedEndpoints {

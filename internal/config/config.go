@@ -9,6 +9,17 @@ import (
 	"github.com/hashicorp/hcl/v2/hclsimple"
 )
 
+type SharePointConfig struct {
+	Disabled     bool   `hcl:"disabled,optional"`
+	ClientID     string `hcl:"client_id"`
+	ClientSecret string `hcl:"client_secret"`
+	TenantID     string `hcl:"tenant_id"`
+	SiteID       string `hcl:"site_id"`
+	DriveID      string `hcl:"drive_id"`
+	DocsFolder   string `hcl:"docs_folder"`   // Folder for published documents
+	DraftsFolder string `hcl:"drafts_folder"` // Folder for draft documents
+}
+
 // Config contains the Hermes configuration.
 type Config struct {
 	// Algolia configures Hermes to work with Algolia.
@@ -34,6 +45,8 @@ type Config struct {
 
 	// GoogleWorkspace configures Hermes to work with Google Workspace.
 	GoogleWorkspace *GoogleWorkspace `hcl:"google_workspace,block"`
+
+	SharePoint *SharePointConfig `hcl:"sharepoint,block"`
 
 	// Indexer contains the configuration for the Hermes indexer.
 	Indexer *Indexer `hcl:"indexer,block"`
@@ -345,6 +358,7 @@ func NewConfig(filename string) (*Config, error) {
 		Indexer:         &Indexer{},
 		Okta:            &oktaalb.Config{},
 		Server:          &Server{},
+		SharePoint:      &SharePointConfig{}, // Initialize SharePoint config
 	}
 	err := hclsimple.DecodeFile(filename, nil, c)
 	if err != nil {
