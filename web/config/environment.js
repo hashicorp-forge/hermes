@@ -64,6 +64,12 @@ module.exports = function (environment) {
     skipGoogleAuth: getEnv("SKIP_GOOGLE_AUTH"),
 
     shortLinkBaseURL: getEnv("SHORT_LINK_BASE_URL"),
+    
+    microsoft: {
+      clientId: getEnv("MICROSOFT_OAUTH2_CLIENT_ID", ""),
+      tenantId: getEnv("MICROSOFT_OAUTH2_TENANT_ID", ""),
+      redirectUri: getEnv("MICROSOFT_OAUTH2_REDIRECT_URI", ""),
+    },
 
     torii: {
       sessionServiceName: "session",

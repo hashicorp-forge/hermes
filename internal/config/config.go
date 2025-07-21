@@ -47,6 +47,9 @@ type Config struct {
 	GoogleWorkspace *GoogleWorkspace `hcl:"google_workspace,block"`
 
 	SharePoint *SharePointConfig `hcl:"sharepoint,block"`
+	
+	// Microsoft configures authentication with Microsoft Azure AD.
+	Microsoft *MicrosoftAuth `hcl:"microsoft,block"`
 
 	// Indexer contains the configuration for the Hermes indexer.
 	Indexer *Indexer `hcl:"indexer,block"`
@@ -356,9 +359,10 @@ func NewConfig(filename string) (*Config, error) {
 		FeatureFlags:    &FeatureFlags{},
 		GoogleWorkspace: &GoogleWorkspace{},
 		Indexer:         &Indexer{},
+		Microsoft:       &MicrosoftAuth{},
 		Okta:            &oktaalb.Config{},
 		Server:          &Server{},
-		SharePoint:      &SharePointConfig{}, // Initialize SharePoint config
+		SharePoint:      &SharePointConfig{},
 	}
 	err := hclsimple.DecodeFile(filename, nil, c)
 	if err != nil {

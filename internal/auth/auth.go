@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/hashicorp-forge/hermes/internal/auth/google"
+	"github.com/hashicorp-forge/hermes/internal/auth/microsoft"
 	"github.com/hashicorp-forge/hermes/internal/auth/oktaalb"
 	"github.com/hashicorp-forge/hermes/internal/auth/sharepoint"
 	"github.com/hashicorp-forge/hermes/internal/config"
@@ -37,6 +38,17 @@ func AuthenticateRequest(
 				next.ServeHTTP(w, r)
 			}))
 	}
+	
+	// If Microsoft Auth is configured, use it
+	if cfg.Microsoft != nil {
+		fmt.Println("Microsoft authentication enabled:", cfg.Microsoft != nil)
+		return microsoft.AuthenticateRequest(*cfg.Microsoft, log,
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				validateUserEmail(w, r, log)
+				next.ServeHTTP(w, r)
+			}))
+	}
+	
 	fmt.Println("SharePoint authentication enabled:", cfg.SharePoint != nil && !cfg.SharePoint.Disabled)
 	// If SharePoint is enabled in the config, authenticate using SharePoint.
 	if cfg.SharePoint != nil && !cfg.SharePoint.Disabled {
