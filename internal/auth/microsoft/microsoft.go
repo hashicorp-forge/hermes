@@ -101,7 +101,12 @@ func AuthenticateRequest(cfg config.MicrosoftAuth, log hclog.Logger, next http.H
 				email, err := getUserEmailFromToken(token, cfg, log)
 				if err == nil && email != "" {
 					fmt.Println("Setting user email in context", "email", email)
+					fmt.Println("Setting Microsoft token in context for Graph API use", "token_length", len(token))
+
+					// Set both user email AND Microsoft token in context for downstream handlers
 					ctx := context.WithValue(r.Context(), "userEmail", email)
+					ctx = context.WithValue(ctx, "microsoftToken", token)
+
 					next.ServeHTTP(w, r.WithContext(ctx))
 					return
 				} else {

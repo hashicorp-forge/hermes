@@ -26,6 +26,7 @@ import (
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp-forge/hermes/pkg/links"
+	"github.com/hashicorp-forge/hermes/pkg/microsoftgraph"
 	"github.com/hashicorp-forge/hermes/pkg/models"
 	"github.com/hashicorp-forge/hermes/pkg/sharepointhelper"
 	"github.com/hashicorp-forge/hermes/web"
@@ -285,6 +286,15 @@ func (c *Command) Run(args []string) int {
 		sharepointSvc.AccessToken = token
 		c.Log.Info("Successfully initialized SharePoint service.")
 	}
+
+	// Initialize Microsoft Graph service.
+	var msGraphSvc *microsoftgraph.Service
+	if cfg.Microsoft != nil {
+		// For now, we'll create an empty service that will get its token from the request context
+		// In a production setup, you might want to use an app-only token or service principal
+		msGraphSvc = microsoftgraph.NewService("")
+		c.Log.Info("Successfully initialized Microsoft Graph service.")
+	}
 	c.Log.Info(fmt.Sprintf("Algolia Application ID: %s", cfg.Algolia.ApplicationID))
 	c.Log.Info(fmt.Sprintf("Algolia Search API Key: %s", cfg.Algolia.SearchAPIKey))
 	c.Log.Info(fmt.Sprintf("Algolia Write API Key: %s", cfg.Algolia.WriteAPIKey))
@@ -382,14 +392,15 @@ func (c *Command) Run(args []string) int {
 	}
 
 	srv := server.Server{
-		AlgoSearch: algoSearch,
-		AlgoWrite:  algoWrite,
-		Config:     cfg,
-		DB:         db,
-		GWService:  goog,
-		Jira:       jiraSvc,
-		Logger:     c.Log,
-		SharePoint: sharepointSvc,
+		AlgoSearch:     algoSearch,
+		AlgoWrite:      algoWrite,
+		Config:         cfg,
+		DB:             db,
+		GWService:      goog,
+		Jira:           jiraSvc,
+		Logger:         c.Log,
+		MSGraphService: msGraphSvc,
+		SharePoint:     sharepointSvc,
 	}
 
 	// Define handlers for authenticated endpoints.

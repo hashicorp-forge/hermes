@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp-forge/hermes/internal/jira"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
+	"github.com/hashicorp-forge/hermes/pkg/microsoftgraph"
 	"github.com/hashicorp-forge/hermes/pkg/sharepointhelper"
 	"github.com/hashicorp/go-hclog"
 	"gorm.io/gorm"
@@ -32,6 +33,9 @@ type Server struct {
 
 	// Logger is the logger for the server.
 	Logger hclog.Logger
+
+	// MSGraphService is the Microsoft Graph service for the server.
+	MSGraphService *microsoftgraph.Service
 
 	//Sharepoint
 	SharePoint *sharepointhelper.Service
