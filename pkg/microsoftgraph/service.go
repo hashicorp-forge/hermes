@@ -13,7 +13,7 @@ type Service struct {
 	HTTPClient  *http.Client
 }
 
-// Person represents a person from Microsoft Graph API
+// Person represents a person from Microsoft Graph API (internal)
 type Person struct {
 	ID                string   `json:"id"`
 	DisplayName       string   `json:"displayName"`
@@ -25,6 +25,58 @@ type Person struct {
 	OfficeLocation    string   `json:"officeLocation"`
 	BusinessPhones    []string `json:"businessPhones"`
 	MobilePhone       string   `json:"mobilePhone"`
+}
+
+// GooglePeoplePerson represents a person in Google People API format for frontend compatibility
+type GooglePeoplePerson struct {
+	EmailAddresses []EmailAddress `json:"emailAddresses"`
+	Etag           string         `json:"etag"`
+	Names          []Name         `json:"names"`
+	Photos         []Photo        `json:"photos"`
+	ResourceName   string         `json:"resourceName"`
+}
+
+type EmailAddress struct {
+	Metadata EmailMetadata `json:"metadata"`
+	Value    string        `json:"value"`
+}
+
+type EmailMetadata struct {
+	Primary       bool   `json:"primary"`
+	Source        Source `json:"source"`
+	SourcePrimary bool   `json:"sourcePrimary"`
+	Verified      bool   `json:"verified"`
+}
+
+type Name struct {
+	DisplayName          string       `json:"displayName"`
+	DisplayNameLastFirst string       `json:"displayNameLastFirst"`
+	FamilyName           string       `json:"familyName"`
+	GivenName            string       `json:"givenName"`
+	Metadata             NameMetadata `json:"metadata"`
+	UnstructuredName     string       `json:"unstructuredName"`
+}
+
+type NameMetadata struct {
+	Primary       bool   `json:"primary"`
+	Source        Source `json:"source"`
+	SourcePrimary bool   `json:"sourcePrimary"`
+}
+
+type Photo struct {
+	Default  bool          `json:"default"`
+	Metadata PhotoMetadata `json:"metadata"`
+	URL      string        `json:"url"`
+}
+
+type PhotoMetadata struct {
+	Primary bool   `json:"primary"`
+	Source  Source `json:"source"`
+}
+
+type Source struct {
+	ID   string `json:"id"`
+	Type string `json:"type"`
 }
 
 // SearchPeopleResponse represents the response from Microsoft Graph people search
@@ -40,8 +92,81 @@ func NewService(accessToken string) *Service {
 	}
 }
 
-// SearchPeople searches for people using Microsoft Graph API
-func (s *Service) SearchPeople(query string, top int) ([]Person, error) {
+// convertToGooglePeopleFormat converts Microsoft Graph Person to Google People API format
+func convertToGooglePeopleFormat(person Person) GooglePeoplePerson {
+	// Use primary email (mail field) or fallback to userPrincipalName
+	email := person.Mail
+	if email == "" {
+		email = person.UserPrincipalName
+	}
+
+	// Create display name variations
+	displayName := person.DisplayName
+	if displayName == "" {
+		displayName = person.GivenName + " " + person.Surname
+	}
+
+	displayNameLastFirst := person.Surname + ", " + person.GivenName
+	if person.Surname == "" || person.GivenName == "" {
+		displayNameLastFirst = displayName
+	}
+
+	// Generate a simple etag (could be more sophisticated)
+	etag := fmt.Sprintf("%%EggBAgMJLjc9PhoCAQc=%s", person.ID[:8])
+
+	return GooglePeoplePerson{
+		EmailAddresses: []EmailAddress{
+			{
+				Metadata: EmailMetadata{
+					Primary: true,
+					Source: Source{
+						ID:   person.ID,
+						Type: "DOMAIN_PROFILE",
+					},
+					SourcePrimary: true,
+					Verified:      true,
+				},
+				Value: email,
+			},
+		},
+		Etag: etag,
+		Names: []Name{
+			{
+				DisplayName:          displayName,
+				DisplayNameLastFirst: displayNameLastFirst,
+				FamilyName:           person.Surname,
+				GivenName:            person.GivenName,
+				Metadata: NameMetadata{
+					Primary: true,
+					Source: Source{
+						ID:   person.ID,
+						Type: "DOMAIN_PROFILE",
+					},
+					SourcePrimary: true,
+				},
+				UnstructuredName: displayName,
+			},
+		},
+		Photos: []Photo{
+			{
+				Default: true,
+				Metadata: PhotoMetadata{
+					Primary: true,
+					Source: Source{
+						ID:   person.ID,
+						Type: "PROFILE",
+					},
+				},
+				// Default Microsoft Graph photo URL - could be enhanced to fetch actual photo
+				URL: "https://graph.microsoft.com/v1.0/users/" + person.ID + "/photo/$value",
+			},
+		},
+		ResourceName: "people/" + person.ID,
+	}
+}
+
+// SearchPeople searches for people using Microsoft Graph API and returns Google People API format
+func (s *Service) SearchPeople(query string, top int) ([]GooglePeoplePerson, error) {
 	if top <= 0 {
 		top = 10 // Default limit
 	}
@@ -75,16 +200,22 @@ func (s *Service) SearchPeople(query string, top int) ([]Person, error) {
 		return nil, fmt.Errorf("error decoding response: %w", err)
 	}
 
-	return searchResp.Value, nil
+	// Convert to Google People API format
+	var googlePeople []GooglePeoplePerson
+	for _, person := range searchResp.Value {
+		googlePeople = append(googlePeople, convertToGooglePeopleFormat(person))
+	}
+
+	return googlePeople, nil
 }
 
-// GetPersonByEmail gets a specific person by their email address
-func (s *Service) GetPersonByEmail(email string) (*Person, error) {
+// GetPersonByEmail gets a specific person by their email address and returns Google People API format
+func (s *Service) GetPersonByEmail(email string) (*GooglePeoplePerson, error) {
 	var getUserURL string
 
 	// Special case for "me" to get current user
 	if email == "me" {
-		getUserURL = fmt.Sprintf("https://graph.microsoft.com/v1.0/me?$select=id,displayName,givenName,surname,userPrincipalName,mail,jobTitle,officeLocation,businessPhones,mobilePhone")
+		getUserURL = "https://graph.microsoft.com/v1.0/me?$select=id,displayName,givenName,surname,userPrincipalName,mail,jobTitle,officeLocation,businessPhones,mobilePhone"
 	} else {
 		getUserURL = fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s?$select=id,displayName,givenName,surname,userPrincipalName,mail,jobTitle,officeLocation,businessPhones,mobilePhone",
 			url.QueryEscape(email))
@@ -117,12 +248,14 @@ func (s *Service) GetPersonByEmail(email string) (*Person, error) {
 		return nil, fmt.Errorf("error decoding response: %w", err)
 	}
 
-	return &person, nil
+	// Convert to Google People API format
+	googlePerson := convertToGooglePeopleFormat(person)
+	return &googlePerson, nil
 }
 
-// GetPeopleByEmails gets multiple people by their email addresses
-func (s *Service) GetPeopleByEmails(emails []string) ([]Person, error) {
-	var people []Person
+// GetPeopleByEmails gets multiple people by their email addresses and returns Google People API format
+func (s *Service) GetPeopleByEmails(emails []string) ([]GooglePeoplePerson, error) {
+	var people []GooglePeoplePerson
 
 	for _, email := range emails {
 		person, err := s.GetPersonByEmail(email)

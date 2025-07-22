@@ -93,30 +93,72 @@ func MeHandler(srv server.Server) http.Handler {
 				)
 				// Fall back to mock data if Microsoft Graph fails
 				srv.Logger.Info("falling back to mock user data due to Microsoft Graph error")
-				profile = &microsoftgraph.Person{
-					ID:          "fallback-user-" + userEmail,
-					DisplayName: "Development User",
-					GivenName:   "Development",
-					Surname:     "User",
-					Mail:        userEmail,
+				profile = &microsoftgraph.GooglePeoplePerson{
+					ResourceName: "people/fallback-user-" + userEmail,
+					Names: []microsoftgraph.Name{
+						{
+							DisplayName: "Development User",
+							GivenName:   "Development",
+							FamilyName:  "User",
+							Metadata: microsoftgraph.NameMetadata{
+								Primary: true,
+							},
+						},
+					},
+					EmailAddresses: []microsoftgraph.EmailAddress{
+						{
+							Value: userEmail,
+							Metadata: microsoftgraph.EmailMetadata{
+								Primary:  true,
+								Verified: true,
+							},
+						},
+					},
 				}
 			}
 
-			// Convert Microsoft Graph profile to Google userinfo format
-			resp := MeGetResponse{
-				ID:            profile.ID,
-				Email:         profile.Mail,
-				VerifiedEmail: true, // Assume verified since authenticated via Microsoft
-				Name:          profile.DisplayName,
-				GivenName:     profile.GivenName,
-				FamilyName:    profile.Surname,
-				Picture:       "https://via.placeholder.com/150/0066cc/ffffff?text=" + string(profile.GivenName[0]),
-				Locale:        "en",
+			// Extract data from Google People API format
+			var userID, email, displayName, givenName, familyName string
+
+			// Get primary email
+			for _, emailAddr := range profile.EmailAddresses {
+				if emailAddr.Metadata.Primary {
+					email = emailAddr.Value
+					break
+				}
+			}
+			if email == "" && len(profile.EmailAddresses) > 0 {
+				email = profile.EmailAddresses[0].Value
 			}
 
-			// Use userPrincipalName if mail is empty
-			if resp.Email == "" {
-				resp.Email = profile.UserPrincipalName
+			// Get primary name
+			for _, name := range profile.Names {
+				if name.Metadata.Primary {
+					displayName = name.DisplayName
+					givenName = name.GivenName
+					familyName = name.FamilyName
+					break
+				}
+			}
+			if displayName == "" && len(profile.Names) > 0 {
+				displayName = profile.Names[0].DisplayName
+				givenName = profile.Names[0].GivenName
+				familyName = profile.Names[0].FamilyName
+			}
+
+			// Extract user ID from resource name (format: "people/ID")
+			userID = strings.TrimPrefix(profile.ResourceName, "people/")
+
+			// Convert Microsoft Graph profile to Google userinfo format
+			resp := MeGetResponse{
+				ID:            userID,
+				Email:         email,
+				VerifiedEmail: true, // Assume verified since authenticated via Microsoft
+				Name:          displayName,
+				GivenName:     givenName,
+				FamilyName:    familyName,
+				Picture:       "https://via.placeholder.com/150/0066cc/ffffff?text=" + string(givenName[0]),
+				Locale:        "en",
 			}
 
 			// Extract domain from email for HD field (hosted domain)
@@ -131,7 +173,6 @@ func MeHandler(srv server.Server) http.Handler {
 				"user_id", resp.ID,
 				"user_name", resp.Name,
 				"user_email", resp.Email,
-				"job_title", profile.JobTitle,
 			)
 
 			// Write response.
