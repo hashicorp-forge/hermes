@@ -13,53 +13,43 @@ export default class AuthenticatedRoute extends Route {
   @service declare productAreas: ProductAreasService;
 
   beforeModel(transition: any) {
-    /**
-     * If the user is dry-loading the results route with a query,
-     * we capture the query on our controller and pass it to the search input.
-     */
+    console.log("AuthenticatedRoute: Entering beforeModel");
+
     const { to } = transition;
     const query = to.queryParams["q"];
+    console.log("AuthenticatedRoute: Transitioning to route:", to.name, "with query:", query);
 
     if (query && to.name.includes("results")) {
+      console.log("AuthenticatedRoute: Setting query on controller");
       (this.controllerFor("authenticated") as AuthenticatedController).set(
         "query",
         query,
       );
     }
 
-    /**
-     * If using Google auth, check if the session is authenticated.
-     * If unauthenticated, it will redirect to the auth screen.
-     */
     if (!this.configSvc.config.skip_google_auth) {
+      console.log("AuthenticatedRoute: Checking session authentication");
       this.session.requireAuthentication(transition, "authenticate");
     }
   }
 
-  // Note: Only called if the session is authenticated in the front end
   async afterModel() {
-    /**
-     * Checks if the session is authenticated in the back end.
-     * If the `loadInfo` task returns a 401, it will bubble up to the
-     * application error method which invalidates the session
-     * and redirects to the auth screen.
-     */
-    const loadInfoPromise = this.authenticatedUser.loadInfo.perform();
+    console.log("AuthenticatedRoute: Entering afterModel");
 
-    /**
-     * Fetch the product areas for the ProductAvatar and
-     * ProductSelect components.
-     */
-    const loadProductAreasPromise = this.productAreas.fetch.perform();
+    try {
+      console.log("AuthenticatedRoute: Loading authenticated user info");
+      const loadInfoPromise = this.authenticatedUser.loadInfo.perform();
 
-    /**
-     * Wait for both promises to resolve.
-     */
-    await Promise.all([loadInfoPromise, loadProductAreasPromise]);
+      console.log("AuthenticatedRoute: Fetching product areas");
+      const loadProductAreasPromise = this.productAreas.fetch.perform();
 
-    /**
-     * Kick off the task to poll for expired auth.
-     */
-    void this.session.pollForExpiredAuth.perform();
+      await Promise.all([loadInfoPromise, loadProductAreasPromise]);
+      console.log("AuthenticatedRoute: Successfully loaded user info and product areas");
+
+      console.log("AuthenticatedRoute: Starting poll for expired auth");
+      void this.session.pollForExpiredAuth.perform();
+    } catch (error) {
+      console.error("AuthenticatedRoute: Error in afterModel", error);
+    }
   }
 }

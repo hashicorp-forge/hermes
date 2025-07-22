@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -28,7 +29,6 @@ func New(cfg config.MicrosoftAuth, log hclog.Logger) (*MicrosoftAuthenticator, e
 	}, nil
 }
 
-
 // from demo snippet
 func handleAuthenticate(w http.ResponseWriter, r *http.Request, cfg config.MicrosoftAuth, logger hclog.Logger) {
 	// Check if this is a callback from Microsoft with auth code
@@ -41,24 +41,31 @@ func handleAuthenticate(w http.ResponseWriter, r *http.Request, cfg config.Micro
 	initiateAuthFlow(w, r, cfg, logger)
 }
 
-
 // AuthenticateRequest is middleware that authenticates an HTTP request using Microsoft
 func AuthenticateRequest(cfg config.MicrosoftAuth, log hclog.Logger, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Microsoft AuthenticateRequest function called", 
-			"path", r.URL.Path, 
+		fmt.Println("Microsoft AuthenticateRequest function called",
+			"path", r.URL.Path,
 			"method", r.Method,
 			"client_id", cfg.ClientID,
 			"redirect_uri", cfg.RedirectURI)
-		
-		// For static assets and public paths, skip authentication
-		if strings.HasPrefix(r.URL.Path, "/assets/") || 
-		   strings.HasPrefix(r.URL.Path, "/public/") ||
-		   r.URL.Path == "/favicon.ico" {
-			next.ServeHTTP(w, r)
+		log.Info("AuthenticateRequest middleware triggered", "path", r.URL.Path)
+
+		// For static assets and public paths, skip authentication but set a default email
+		if strings.HasPrefix(r.URL.Path, "/assets/") ||
+			strings.HasPrefix(r.URL.Path, "/public/") ||
+			strings.HasPrefix(r.URL.Path, "/static/") ||
+			strings.HasPrefix(r.URL.Path, "/images") ||
+			strings.HasPrefix(r.URL.Path, "/.") ||
+			r.URL.Path == "/favicon.ico" {
+			fmt.Println("Skipping authentication for static asset or public path", "path", r.URL.Path)
+
+			// Set a default email in context to avoid errors downstream
+			ctx := context.WithValue(r.Context(), "userEmail", "anonymous@static-asset")
+			next.ServeHTTP(w, r.WithContext(ctx))
 			return
 		}
-		
+
 		// Special case for the authenticate page itself
 		if r.URL.Path == "/authenticate" {
 			// If code is present, this is the callback from Microsoft
@@ -83,7 +90,7 @@ func AuthenticateRequest(cfg config.MicrosoftAuth, log hclog.Logger, next http.H
 				return
 			}
 		}
-		
+
 		// Check for existing auth token in header or cookie
 		token := extractTokenFromRequest(r)
 		if token != "" {
@@ -106,27 +113,27 @@ func AuthenticateRequest(cfg config.MicrosoftAuth, log hclog.Logger, next http.H
 		} else {
 			fmt.Println("No token found in request")
 		}
-		
+
 		// If it's an API request or AJAX request, return 401 with JSON response
 		if strings.HasPrefix(r.URL.Path, "/api/") || r.Header.Get("X-Requested-With") == "XMLHttpRequest" {
 			fmt.Println("Unauthorized API request", "path", r.URL.Path)
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"error": "Unauthorized",
+				"error":    "Unauthorized",
 				"redirect": "/authenticate",
-				"message": "Please authenticate to access this resource",
+				"message":  "Please authenticate to access this resource",
 			})
 			return
 		}
-		
+
 		// For regular web pages, redirect to authenticate
 		if r.URL.Path != "/authenticate" {
 			fmt.Println("Redirecting to authenticate", "from_path", r.URL.Path)
 			http.Redirect(w, r, "/authenticate", http.StatusFound)
 			return
 		}
-		
+
 		// Allow the /authenticate page to be served
 		next.ServeHTTP(w, r)
 	})
@@ -134,33 +141,45 @@ func AuthenticateRequest(cfg config.MicrosoftAuth, log hclog.Logger, next http.H
 
 // extractTokenFromRequest extracts the token from the request
 func extractTokenFromRequest(r *http.Request) string {
+	fmt.Println("==== Extracting token from request ====")
+
 	// Check Authorization header
 	authHeader := r.Header.Get("Authorization")
 	if authHeader != "" && strings.HasPrefix(authHeader, "Bearer ") {
+		fmt.Println("Found token in Authorization header")
 		return strings.TrimPrefix(authHeader, "Bearer ")
 	}
-	
+
+	// Log all cookies for debugging
+	fmt.Println("All cookies in request:")
+	for _, c := range r.Cookies() {
+		fmt.Printf("  %s: %s (length: %d)\n", c.Name, c.Value[:min(10, len(c.Value))], len(c.Value))
+	}
+
 	// Check Cookie - check both microsoft_token and the standard token cookie name
 	cookie, err := r.Cookie("microsoft_token")
 	if err == nil && cookie != nil && cookie.Value != "" {
+		fmt.Println("Found token in microsoft_token cookie, length:", len(cookie.Value))
 		return cookie.Value
+	} else {
+		fmt.Println("microsoft_token cookie not found or empty")
 	}
-	
+
 	// Check for alternative cookie names
 	cookie, err = r.Cookie("token")
 	if err == nil && cookie != nil && cookie.Value != "" {
 		return cookie.Value
 	}
-	
+
 	// Check for auth_token cookie
 	cookie, err = r.Cookie("auth_token")
 	if err == nil && cookie != nil && cookie.Value != "" {
 		return cookie.Value
 	}
-	
+
 	// If we have a user_email cookie, that indicates a successful login happened
 	// and we should check for any available cookies
-	cookie, err = r.Cookie("user_email") 
+	cookie, err = r.Cookie("user_email")
 	if err == nil && cookie != nil && cookie.Value != "" {
 		// Loop through all cookies to find any that might be the token
 		for _, c := range r.Cookies() {
@@ -169,8 +188,16 @@ func extractTokenFromRequest(r *http.Request) string {
 			}
 		}
 	}
-	
+
 	return ""
+}
+
+// Helper function for string length check
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
 
 // isValidToken validates the token with Microsoft
@@ -182,16 +209,16 @@ func isValidToken(token string, cfg config.MicrosoftAuth, log hclog.Logger) bool
 		fmt.Println("Error creating request to Microsoft Graph", "error", err)
 		return false
 	}
-	
+
 	req.Header.Add("Authorization", "Bearer "+token)
-	
+
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("Error calling Microsoft Graph API", "error", err)
 		return false
 	}
 	defer resp.Body.Close()
-	
+
 	return resp.StatusCode == http.StatusOK
 }
 
@@ -204,39 +231,39 @@ func getUserEmailFromToken(token string, cfg config.MicrosoftAuth, log hclog.Log
 		fmt.Println("Error creating request to Microsoft Graph", "error", err)
 		return "", err
 	}
-	
+
 	req.Header.Add("Authorization", "Bearer "+token)
-	
+
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("Error calling Microsoft Graph API", "error", err)
 		return "", err
 	}
 	defer resp.Body.Close()
-	
+
 	if resp.StatusCode != http.StatusOK {
 		fmt.Println("Microsoft Graph API returned non-200 status", "status", resp.StatusCode)
 		return "", fmt.Errorf("Microsoft Graph API returned status %d", resp.StatusCode)
 	}
-	
+
 	// Parse the response body
 	var data struct {
-		Mail                 string `json:"mail"`
-		UserPrincipalName    string `json:"userPrincipalName"`
-		DisplayName          string `json:"displayName"`
+		Mail              string `json:"mail"`
+		UserPrincipalName string `json:"userPrincipalName"`
+		DisplayName       string `json:"displayName"`
 	}
-	
+
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		fmt.Println("Error decoding Microsoft Graph API response", "error", err)
 		return "", err
 	}
-	
+
 	// Use mail if available, otherwise use userPrincipalName
 	email := data.Mail
 	if email == "" {
 		email = data.UserPrincipalName
 	}
-	
+
 	fmt.Println("Got user email from Microsoft Graph API", "email", email)
 	return email, nil
 }
@@ -251,17 +278,17 @@ func getUserEmailFromToken(token string, cfg config.MicrosoftAuth, log hclog.Log
 // 		Endpoint:     microsoft.AzureADEndpoint(cfg.TenantID),
 // 		Scopes:       []string{"openid", "profile", "email", "User.Read"},
 // 	}
-	
+
 // 	// Generate authorization URL with a random state for security
 // 	state := fmt.Sprintf("%d", time.Now().UnixNano())
 // 	url := oauth2Config.AuthCodeURL(state, oauth2.AccessTypeOffline)
-	
-// 	fmt.Println("Redirecting to Microsoft login", 
+
+// 	fmt.Println("Redirecting to Microsoft login",
 // 		"url", url,
 // 		"client_id", cfg.ClientID,
 // 		"tenant_id", cfg.TenantID,
 // 		"redirect_uri", cfg.RedirectURI)
-	
+
 // 	// Set a cookie to indicate auth is in progress (helps debugging)
 // 	http.SetCookie(w, &http.Cookie{
 // 		Name:     "auth_in_progress",
@@ -271,14 +298,16 @@ func getUserEmailFromToken(token string, cfg config.MicrosoftAuth, log hclog.Log
 // 		MaxAge:   600, // 10 minutes
 // 		SameSite: http.SameSiteLaxMode,
 // 	})
-	
+
 // 	// Redirect to Microsoft login
 // 	http.Redirect(w, r, url, http.StatusFound)
 // }
 
-
 // from demo snippet
 func initiateAuthFlow(w http.ResponseWriter, r *http.Request, cfg config.MicrosoftAuth, logger hclog.Logger) {
+	// Add direct console output for debugging
+	fmt.Println("===== INITIATING MICROSOFT AUTH FLOW =====")
+
 	// Create OAuth2 config for Microsoft
 	oauth2Config := &oauth2.Config{
 		ClientID:     cfg.ClientID,
@@ -292,6 +321,11 @@ func initiateAuthFlow(w http.ResponseWriter, r *http.Request, cfg config.Microso
 	state := fmt.Sprintf("%d", time.Now().UnixNano())
 	url := oauth2Config.AuthCodeURL(state, oauth2.AccessTypeOffline)
 
+	// Log to both logger and stdout
+	fmt.Printf("Redirecting to Microsoft login: %s\n", url)
+	fmt.Printf("ClientID: %s, TenantID: %s, RedirectURI: %s\n",
+		cfg.ClientID, cfg.TenantID, cfg.RedirectURI)
+	os.Stdout.Sync()
 	logger.Info("Redirecting to Microsoft login",
 		"url", url,
 		"client_id", cfg.ClientID,
@@ -308,10 +342,11 @@ func initiateAuthFlow(w http.ResponseWriter, r *http.Request, cfg config.Microso
 		SameSite: http.SameSiteLaxMode,
 	})
 
+	fmt.Println("Auth cookie set, redirecting to Microsoft login page")
+
 	// Redirect to Microsoft login page
 	http.Redirect(w, r, url, http.StatusFound)
 }
-
 
 // handleAuthCallback handles the redirect callback from Microsoft
 // func handleAuthCallback(w http.ResponseWriter, r *http.Request, cfg config.MicrosoftAuth, log hclog.Logger) {
@@ -321,9 +356,9 @@ func initiateAuthFlow(w http.ResponseWriter, r *http.Request, cfg config.Microso
 // 		http.Error(w, "No authorization code received", http.StatusBadRequest)
 // 		return
 // 	}
-	
+
 // 	fmt.Println("Received authorization code from Microsoft", "code_length", len(code))
-	
+
 // 	// Create OAuth2 config for Microsoft
 // 	oauth2Config := &oauth2.Config{
 // 		ClientID:     cfg.ClientID,
@@ -332,7 +367,7 @@ func initiateAuthFlow(w http.ResponseWriter, r *http.Request, cfg config.Microso
 // 		Endpoint:     microsoft.AzureADEndpoint(cfg.TenantID),
 // 		Scopes:       []string{"openid", "profile", "email", "User.Read"},
 // 	}
-	
+
 // 	// Exchange authorization code for token
 // 	token, err := oauth2Config.Exchange(context.Background(), code)
 // 	if err != nil {
@@ -340,9 +375,9 @@ func initiateAuthFlow(w http.ResponseWriter, r *http.Request, cfg config.Microso
 // 		http.Error(w, "Failed to authenticate: "+err.Error(), http.StatusInternalServerError)
 // 		return
 // 	}
-	
+
 // 	fmt.Println("Successfully exchanged code for token", "token_type", token.TokenType, "expires", token.Expiry)
-	
+
 // 	// Get user email from Microsoft Graph
 // 	client := oauth2Config.Client(context.Background(), token)
 // 	resp, err := client.Get("https://graph.microsoft.com/v1.0/me")
@@ -352,33 +387,33 @@ func initiateAuthFlow(w http.ResponseWriter, r *http.Request, cfg config.Microso
 // 		return
 // 	}
 // 	defer resp.Body.Close()
-	
+
 // 	var data struct {
 // 		Mail              string `json:"mail"`
-// 		UserPrincipalName string `json:"userPrincipalName"`
+// 		UserPrincipalName `json:"userPrincipalName"`
 // 		DisplayName       string `json:"displayName"`
 // 	}
-	
+
 // 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 // 		fmt.Println("Error decoding Microsoft Graph API response", "error", err)
 // 		http.Error(w, "Failed to parse user info: "+err.Error(), http.StatusInternalServerError)
 // 		return
 // 	}
-	
+
 // 	// Use mail if available, otherwise use userPrincipalName
 // 	email := data.Mail
 // 	if email == "" {
 // 		email = data.UserPrincipalName
 // 	}
-	
+
 // 	if email == "" {
 // 		fmt.Println("No email found in Microsoft Graph API response")
 // 		http.Error(w, "Failed to get user email", http.StatusInternalServerError)
 // 		return
 // 	}
-	
+
 // 	fmt.Println("Got user email from Microsoft Graph API", "email", email, "name", data.DisplayName)
-	
+
 // 	// Set token in cookie - secured, httpOnly
 // 	http.SetCookie(w, &http.Cookie{
 // 		Name:     "microsoft_token",
@@ -390,7 +425,7 @@ func initiateAuthFlow(w http.ResponseWriter, r *http.Request, cfg config.Microso
 // 		MaxAge:   int(token.Expiry.Sub(time.Now()).Seconds()),
 // 		SameSite: http.SameSiteLaxMode,
 // 	})
-	
+
 // 	// Also set email in a separate cookie for easy access
 // 	http.SetCookie(w, &http.Cookie{
 // 		Name:     "user_email",
@@ -412,26 +447,29 @@ func initiateAuthFlow(w http.ResponseWriter, r *http.Request, cfg config.Microso
 // 		MaxAge:   600, // 10 minutes
 // 		SameSite: http.SameSiteLaxMode,
 // 	})
-	
+
 // 	// Log success before redirect
-// 	fmt.Println("Authentication successful, redirecting to home page", 
-// 		"email", email, 
+// 	fmt.Println("Authentication successful, redirecting to home page",
+// 		"email", email,
 // 		"token_length", len(token.AccessToken))
 
 // 	// Redirect to the application root
 // 	http.Redirect(w, r, "/", http.StatusFound)
 // }
 
-
 // from demo snippet
 func handleAuthCallback(w http.ResponseWriter, r *http.Request, cfg config.MicrosoftAuth, logger hclog.Logger) {
+	// Log the start of the callback handling
+	logger.Info("Handling Microsoft auth callback", "path", r.URL.Path)
+
 	// Get authorization code from query parameters
 	code := r.URL.Query().Get("code")
 	if code == "" {
-		logger.Error("No authorization code provided")
+		logger.Error("No authorization code provided in callback")
 		http.Error(w, "No authorization code provided", http.StatusBadRequest)
 		return
 	}
+	logger.Info("Authorization code received", "code_length", len(code))
 
 	// Create OAuth2 config for Microsoft
 	oauth2Config := &oauth2.Config{
@@ -443,16 +481,17 @@ func handleAuthCallback(w http.ResponseWriter, r *http.Request, cfg config.Micro
 	}
 
 	// Exchange authorization code for token
+	logger.Info("Exchanging authorization code for token")
 	token, err := oauth2Config.Exchange(context.Background(), code)
 	if err != nil {
 		logger.Error("Error exchanging code for token", "error", err)
 		http.Error(w, "Failed to authenticate: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	logger.Info("Successfully exchanged code for token", "token_type", token.TokenType, "expires", token.Expiry)
 
 	// Get user email from Microsoft Graph
+	logger.Info("Fetching user email from Microsoft Graph API")
 	client := oauth2Config.Client(context.Background(), token)
 	resp, err := client.Get("https://graph.microsoft.com/v1.0/me")
 	if err != nil {
@@ -462,12 +501,18 @@ func handleAuthCallback(w http.ResponseWriter, r *http.Request, cfg config.Micro
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		logger.Error("Microsoft Graph API returned non-200 status", "status", resp.StatusCode)
+		http.Error(w, "Failed to get user info", http.StatusInternalServerError)
+		return
+	}
+
+	// Parse the response body
 	var data struct {
 		Mail              string `json:"mail"`
 		UserPrincipalName string `json:"userPrincipalName"`
 		DisplayName       string `json:"displayName"`
 	}
-
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		logger.Error("Error decoding Microsoft Graph API response", "error", err)
 		http.Error(w, "Failed to parse user info: "+err.Error(), http.StatusInternalServerError)
@@ -479,8 +524,12 @@ func handleAuthCallback(w http.ResponseWriter, r *http.Request, cfg config.Micro
 	if email == "" {
 		email = data.UserPrincipalName
 	}
-
-	logger.Info("User authenticated", "email", email, "name", data.DisplayName)
+	if email == "" {
+		logger.Error("No email found in Microsoft Graph API response")
+		http.Error(w, "Failed to get user email", http.StatusInternalServerError)
+		return
+	}
+	logger.Info("User authenticated successfully", "email", email, "name", data.DisplayName)
 
 	// Set cookies with authentication information
 	http.SetCookie(w, &http.Cookie{
@@ -493,16 +542,20 @@ func handleAuthCallback(w http.ResponseWriter, r *http.Request, cfg config.Micro
 	})
 
 	// Store token as a cookie (in production, you would use a more secure method)
-	tokenBytes, _ := json.Marshal(token)
+	//tokenBytes, _ := json.Marshal(token)
+	// Change this section
 	http.SetCookie(w, &http.Cookie{
 		Name:     "microsoft_token",
-		Value:    string(tokenBytes),
+		Value:    token.AccessToken, // Store just the token string
 		Path:     "/",
-		HttpOnly: true, // Prevent JavaScript access
-		MaxAge:   3600, // 1 hour
+		HttpOnly: true,
+		MaxAge:   int(token.Expiry.Sub(time.Now()).Seconds()),
 		SameSite: http.SameSiteLaxMode,
 	})
 
+	// Log success before redirect
+	logger.Info("Authentication successful, redirecting to home page", "email", email)
+
 	// Redirect back to home page
-	http.Redirect(w, r, "/", http.StatusFound)
+	http.Redirect(w, r, "/dashboard", http.StatusFound)
 }

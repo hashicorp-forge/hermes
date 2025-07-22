@@ -194,7 +194,7 @@ func (s *Service) FetchDocuments(driveID, folderID string, after, before time.Ti
 	// Log the constructed URL
 	fmt.Printf("Request URL: %s\n", url)
 
-	// Create the HTTP request
+	// Create the HTTP request	ALTER TABLE indexer_folders ALTER COLUMN google_drive_id DROP NOT NULL;
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)

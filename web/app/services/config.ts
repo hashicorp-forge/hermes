@@ -1,5 +1,13 @@
 import Service from "@ember/service";
 import config, { HermesConfig } from "hermes/config/environment";
+import ENV from "hermes/config/environment";
+
+interface MicrosoftConfig {
+  clientId: string;
+  clientSecret: string;
+  tenantId: string;
+  redirectUri: string;
+}
 
 export default class ConfigService extends Service {
   config = {
@@ -19,6 +27,7 @@ export default class ConfigService extends Service {
     version: config.version,
     short_revision: config.shortRevision,
     group_approvals: config.groupApprovals,
+    microsoft: ENV.microsoft,
   };
 
   setConfig(param: HermesConfig) {

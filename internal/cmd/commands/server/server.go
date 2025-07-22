@@ -452,8 +452,10 @@ func (c *Command) Run(args []string) int {
 	}
 
 	// Web endpoints are conditionally authenticated based on if Okta is enabled.
-	webEndpoints := []endpoint{
+	webEndpoints1 := []endpoint{
 		{"/", web.Handler()},
+	}
+	webEndpoints2 := []endpoint{
 		{"/api/v1/web/config", web.ConfigHandler(cfg, algoSearch, c.Log)},
 		{"/api/v2/web/config", web.ConfigHandler(cfg, algoSearch, c.Log)},
 		{"/l/", links.RedirectHandler(algoSearch, cfg.Algolia, c.Log)},
@@ -461,13 +463,9 @@ func (c *Command) Run(args []string) int {
 
 	// If Okta is enabled, add the web endpoints for the single page app as
 	// authenticated endpoints.
-	if cfg.Okta != nil && !cfg.Okta.Disabled {
-		authenticatedEndpoints = append(authenticatedEndpoints, webEndpoints...)
-	} else {
-		// If Okta is disabled, we need to add the web endpoints for the SPA as
-		// unauthenticated endpoints so the application will load.
-		unauthenticatedEndpoints = append(unauthenticatedEndpoints, webEndpoints...)
-	}
+	//if cfg.Okta != nil && cfg.Okta.Disabled {
+	authenticatedEndpoints = append(authenticatedEndpoints, webEndpoints1...)
+	unauthenticatedEndpoints = append(unauthenticatedEndpoints, webEndpoints2...)
 
 	// Register handlers.
 	for _, e := range authenticatedEndpoints {

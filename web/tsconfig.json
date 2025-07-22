@@ -3,6 +3,7 @@
   "compilerOptions": {
     "skipLibCheck": true,
     "experimentalDecorators": true,
+    "typeRoots": ["./node_modules/@types", "./app/types"],
 
     // The combination of `baseUrl` with `paths` allows Ember's classic package
     // layout, which is not resolvable with the Node resolution algorithm, to

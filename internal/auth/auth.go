@@ -18,7 +18,7 @@ import (
 func AuthenticateRequest(
 	cfg config.Config, gwSvc *gw.Service, spSvc *sp.Service, log hclog.Logger, next http.Handler,
 ) http.Handler {
-	fmt.Printf("AuthenticateRequest called with config:%+v\n", cfg)
+	//fmt.Printf("AuthenticateRequest called with config:%+v\n", cfg)
 	// If Okta isn't disabled, authenticate using Okta.
 	if cfg.Okta != nil && !cfg.Okta.Disabled {
 		// Create Okta authorizer.
@@ -38,7 +38,7 @@ func AuthenticateRequest(
 				next.ServeHTTP(w, r)
 			}))
 	}
-	
+
 	// If Microsoft Auth is configured, use it
 	if cfg.Microsoft != nil {
 		fmt.Println("Microsoft authentication enabled:", cfg.Microsoft != nil)
@@ -48,7 +48,7 @@ func AuthenticateRequest(
 				next.ServeHTTP(w, r)
 			}))
 	}
-	
+
 	fmt.Println("SharePoint authentication enabled:", cfg.SharePoint != nil && !cfg.SharePoint.Disabled)
 	// If SharePoint is enabled in the config, authenticate using SharePoint.
 	if cfg.SharePoint != nil && !cfg.SharePoint.Disabled {

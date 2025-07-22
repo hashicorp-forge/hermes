@@ -3,63 +3,104 @@ import BaseAuthenticator from "ember-simple-auth/authenticators/base";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 
+// Define Microsoft configuration interface locally
+interface MicrosoftConfig {
+  clientId: string;
+  clientSecret: string;
+  tenantId: string;
+  redirectUri: string;
+}
+
 export default class MicrosoftAuthenticator extends BaseAuthenticator {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
 
+  /**
+   * Authenticate using the authorization code from Microsoft OAuth callback.
+   */
   async authenticate(options: any = {}) {
     try {
-      // Get the code and state from the options
       const { code, state } = options;
 
-      console.log('Microsoft authenticator called with code and state');
-      
+      console.log("Microsoft authenticator called with code and state");
+
       if (!code || !state) {
-        throw new Error('Missing code or state parameter from Microsoft OAuth callback');
+        throw new Error("Missing code or state parameter from Microsoft OAuth callback");
       }
-      
-      // Instead of using the server's /authenticate endpoint which is causing issues,
-      // create a dummy token for testing purposes
-      console.log('Creating a test token for Microsoft authentication');
-      
-      // In a production environment, we would exchange the code for a token with Microsoft
-      // For now, we're just creating a dummy token for testing
-      const dummyToken = {
-        access_token: `test_token_${Date.now()}`, // Use timestamp to make it unique
-        token_type: 'Bearer',
-        expires_at: new Date(Date.now() + 3600 * 1000).toISOString() // 1 hour from now
+
+      // Use type assertion to bypass the TypeScript error
+      const microsoft = (this.configSvc as any).microsoft as MicrosoftConfig;
+
+      // Exchange the authorization code for an access token
+      const tokenEndpoint = `https://login.microsoftonline.com/${microsoft.tenantId}/oauth2/v2.0/token`;
+      const body = new URLSearchParams({
+        client_id: microsoft.clientId,
+        client_secret: microsoft.clientSecret,
+        code,
+        grant_type: "authorization_code",
+        redirect_uri: microsoft.redirectUri,
+      });
+
+      console.log("Exchanging authorization code for access token...");
+
+      const response = await this.fetchSvc.fetch(tokenEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: body.toString(),
+      });
+
+      if (!response || !response.ok) {
+        const error = response ? await response.json() : "No response received";
+        console.error("Failed to exchange authorization code:", error);
+        throw new Error("Failed to exchange authorization code");
+      }
+
+      const tokenData = await response.json();
+      console.log("Access token received:", tokenData);
+
+      // Store the token in the session
+      return {
+        access_token: tokenData.access_token,
+        token_type: tokenData.token_type,
+        expires_at: Date.now() + tokenData.expires_in * 1000, // Calculate expiration time
       };
-      
-      console.log('Created test token:', dummyToken);
-      
-      // Store the token in localStorage for debugging purposes
-      localStorage.setItem('ms_auth_debug_token', JSON.stringify(dummyToken));
-      
-      return dummyToken;
     } catch (error) {
-      console.error('Microsoft authentication error:', error);
-      throw error instanceof Error ? error : new Error('Authentication failed');
+      console.error("Microsoft authentication error:", error);
+      throw error instanceof Error ? error : new Error("Authentication failed");
     }
   }
 
+  /**
+   * Restore the session using the stored token.
+   */
   async restore(data: any) {
-    console.log('Restoring session with data:', data);
-    
-    // Check if we have an access token
+    console.log("Restoring session with data:", data);
+
     if (!data || !data.access_token) {
-      console.error('No access token found in session data');
-      throw new Error('No access token found');
+      console.error("No access token found in session data");
+      throw new Error("No access token found");
     }
 
-    // For testing purposes, skip the API validation and just return the data
-    console.log('Session restored successfully');
+    // Optionally, validate the token with Microsoft or check expiration
+    const isTokenValid = data.expires_at && Date.now() < data.expires_at;
+    if (!isTokenValid) {
+      console.error("Access token is expired or invalid");
+      throw new Error("Access token is expired or invalid");
+    }
+
+    console.log("Session restored successfully");
     return data;
   }
 
+  /**
+   * Invalidate the session by clearing the stored token.
+   */
   async invalidate() {
-    console.log('Invalidating Microsoft session');
+    console.log("Invalidating Microsoft session");
     // Clear any stored tokens
-    localStorage.removeItem('ms_auth_debug_token');
+    localStorage.removeItem("ms_auth_debug_token");
     return Promise.resolve();
   }
 }

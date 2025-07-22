@@ -14,7 +14,11 @@ func Main(args []string) int {
 	cliName := args[0]
 
 	log := hclog.New(&hclog.LoggerOptions{
-		Name: cliName,
+		Name:       cliName,
+		Level:      hclog.Debug,     // Lower level to see more logs
+		Output:     os.Stdout,       // Use stdout instead of stderr
+		Color:      hclog.AutoColor, // Colorize logs for better readability
+		JSONFormat: false,           // Human-readable instead of JSON
 	})
 
 	if len(args) == 2 &&

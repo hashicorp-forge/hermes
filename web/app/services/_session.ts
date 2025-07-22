@@ -227,4 +227,40 @@ export default class SessionService extends EmberSimpleAuthSessionService {
       window.localStorage.removeItem(REDIRECT_STORAGE_KEY);
     });
   }
+
+  isAuthenticated() {
+    // Check if authenticated in Ember Simple Auth
+    if (this.get('isAuthenticated')) {
+      return true;
+    }
+    
+    // Check for Microsoft token if ESA is not authenticated
+    const microsoftToken = this.getMicrosoftTokenFromCookie();
+    return !!microsoftToken;
+  }
+
+  getMicrosoftTokenFromCookie() {
+    return document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("microsoft_token="))
+      ?.split("=")[1];
+  }
+
+  // Override the prohibitAuthentication method
+  prohibitAuthentication(routeOrCallback: string | ((...args: unknown[]) => void)): boolean {
+    console.log("SessionService: Checking if authenticated with Microsoft or Google");
+
+    if (this.isAuthenticated()) {
+      console.log("SessionService: User is authenticated, redirecting to", routeOrCallback);
+      if (typeof routeOrCallback === "string") {
+        this.router.replaceWith(routeOrCallback);
+      } else if (typeof routeOrCallback === "function") {
+        routeOrCallback();
+      }
+      return true;
+    } else {
+      console.log("SessionService: User is not authenticated");
+      return false;
+    }
+  }
 }

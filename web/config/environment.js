@@ -66,9 +66,9 @@ module.exports = function (environment) {
     shortLinkBaseURL: getEnv("SHORT_LINK_BASE_URL"),
     
     microsoft: {
-      clientId: getEnv("MICROSOFT_OAUTH2_CLIENT_ID", ""),
-      tenantId: getEnv("MICROSOFT_OAUTH2_TENANT_ID", ""),
-      redirectUri: getEnv("MICROSOFT_OAUTH2_REDIRECT_URI", ""),
+      clientId: getEnv("MICROSOFT_OAUTH2_CLIENT_ID", "f03c8916-e241-40dd-bd70-6191a9434edd"),
+      tenantId: getEnv("MICROSOFT_OAUTH2_TENANT_ID", "2acc6675-9338-4073-8192-61027f371098"),
+      redirectUri: getEnv("MICROSOFT_OAUTH2_REDIRECT_URI", "http://localhost:8000/authenticate"),
     },
 
     torii: {
