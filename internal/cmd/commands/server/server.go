@@ -289,11 +289,17 @@ func (c *Command) Run(args []string) int {
 
 	// Initialize Microsoft Graph service.
 	var msGraphSvc *microsoftgraph.Service
-	if cfg.Microsoft != nil {
-		// For now, we'll create an empty service that will get its token from the request context
-		// In a production setup, you might want to use an app-only token or service principal
-		msGraphSvc = microsoftgraph.NewService("")
-		c.Log.Info("Successfully initialized Microsoft Graph service.")
+	if cfg.Microsoft != nil && cfg.MicrosoftGraph != nil {
+		// Create service with SharePoint site and drive info from config
+		msGraphSvc = microsoftgraph.NewServiceWithSiteAndDrive(
+			"",  // Token will be set from request context
+			nil, // HTTP client will be created per request
+			cfg.MicrosoftGraph.SiteID,
+			cfg.MicrosoftGraph.DriveID,
+		)
+		c.Log.Info("Successfully initialized Microsoft Graph service with SharePoint integration.",
+			"site_id", cfg.MicrosoftGraph.SiteID,
+			"drive_id", cfg.MicrosoftGraph.DriveID)
 	}
 	c.Log.Info(fmt.Sprintf("Algolia Application ID: %s", cfg.Algolia.ApplicationID))
 	c.Log.Info(fmt.Sprintf("Algolia Search API Key: %s", cfg.Algolia.SearchAPIKey))

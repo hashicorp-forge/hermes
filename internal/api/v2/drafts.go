@@ -107,7 +107,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 
 			// Get doc type template.
 			template := getDocTypeTemplate(
-				srv.Config.DocumentTypes.DocumentType, req.DocType)
+				srv.Config.DocumentTypes.DocumentType, req.DocType, srv.MSGraphService != nil)
 			if template == "" {
 				srv.Logger.Error("Bad request: no template configured for doc type",
 					"method", r.Method,
@@ -200,20 +200,53 @@ func DraftsHandler(srv server.Server) http.Handler {
 					return
 				}
 			} else {
-				// Copy template to new draft file as service user.
-				f, err = srv.GWService.CopyFile(
-					template, title, srv.Config.GoogleWorkspace.DraftsFolder)
-				if err != nil {
-					srv.Logger.Error("error creating draft",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"template", template,
-						"drafts_folder", srv.Config.GoogleWorkspace.DraftsFolder,
-					)
-					http.Error(w, "Error creating document draft",
-						http.StatusInternalServerError)
-					return
+				// Check if we should use Microsoft Graph API instead of Google Workspace
+				if srv.MSGraphService != nil {
+					// Use Microsoft Graph API
+					fmt.Printf("template %s \n", template)
+					fmt.Printf("title %s \n", title)
+					fmt.Printf("srv.Config.MicrosoftGraph.DraftsFolder %s \n", srv.Config.MicrosoftGraph.DraftsFolder)
+					fmt.Printf("srv.MSGraphService.AccessToken = %s\n", srv.MSGraphService.AccessToken)
+					fmt.Printf("-------------------------- \n")
+
+					msGraphDriveItem, err := srv.MSGraphService.CopyFile(template, title, srv.Config.MicrosoftGraph.DraftsFolder)
+					if err != nil {
+						srv.Logger.Error("error creating draft with Microsoft Graph",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"template", template,
+							"drafts_folder", srv.Config.MicrosoftGraph.DraftsFolder,
+						)
+						http.Error(w, "Error creating document draft",
+							http.StatusInternalServerError)
+						return
+					}
+
+					// Convert Microsoft Graph DriveItem to Google Drive File format for compatibility
+					f = &drive.File{
+						Id:           msGraphDriveItem.ID,
+						Name:         msGraphDriveItem.Name,
+						CreatedTime:  msGraphDriveItem.CreatedDateTime,
+						ModifiedTime: msGraphDriveItem.LastModifiedDateTime,
+						WebViewLink:  msGraphDriveItem.WebURL,
+					}
+				} else {
+					// Copy template to new draft file as service user using Google Workspace
+					f, err = srv.GWService.CopyFile(
+						template, title, srv.Config.GoogleWorkspace.DraftsFolder)
+					if err != nil {
+						srv.Logger.Error("error creating draft",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"template", template,
+							"drafts_folder", srv.Config.GoogleWorkspace.DraftsFolder,
+						)
+						http.Error(w, "Error creating document draft",
+							http.StatusInternalServerError)
+						return
+					}
 				}
 			}
 
@@ -1621,12 +1654,18 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 func getDocTypeTemplate(
 	docTypes []*config.DocumentType,
 	docType string,
+	useMicrosoftGraph bool,
 ) string {
 	template := ""
 
 	for _, t := range docTypes {
 		if t.Name == docType {
-			template = t.Template
+			// Use Microsoft template if MSTemplate is set and we're using Microsoft Graph
+			if useMicrosoftGraph && t.MSTemplate != "" {
+				template = t.MSTemplate
+			} else {
+				template = t.Template
+			}
 			break
 		}
 	}

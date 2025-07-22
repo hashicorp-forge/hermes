@@ -47,9 +47,12 @@ type Config struct {
 	GoogleWorkspace *GoogleWorkspace `hcl:"google_workspace,block"`
 
 	SharePoint *SharePointConfig `hcl:"sharepoint,block"`
-	
+
 	// Microsoft configures authentication with Microsoft Azure AD.
 	Microsoft *MicrosoftAuth `hcl:"microsoft,block"`
+
+	// MicrosoftGraph configures Hermes to work with Microsoft Graph API.
+	MicrosoftGraph *MicrosoftGraphConfig `hcl:"microsoft_graph,block"`
 
 	// Indexer contains the configuration for the Hermes indexer.
 	Indexer *Indexer `hcl:"indexer,block"`
@@ -123,6 +126,10 @@ type DocumentType struct {
 	// Template is the Google file ID for the document template used for this
 	// document type.
 	Template string `hcl:"template"`
+
+	// MSTemplate is the Microsoft file path or ID for the document template used for this
+	// document type.
+	MSTemplate string `hcl:"ms_template,optional"`
 
 	// MoreInfoLink defines a link to more info for the document type.
 	// Example: "When should I create an RFC?"

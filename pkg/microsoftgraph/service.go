@@ -11,6 +11,9 @@ import (
 type Service struct {
 	AccessToken string
 	HTTPClient  *http.Client
+	BaseURL     string
+	SiteID      string // SharePoint site ID
+	DriveID     string // SharePoint drive ID
 }
 
 // Person represents a person from Microsoft Graph API (internal)
@@ -89,6 +92,21 @@ func NewService(accessToken string) *Service {
 	return &Service{
 		AccessToken: accessToken,
 		HTTPClient:  &http.Client{},
+		BaseURL:     "https://graph.microsoft.com",
+	}
+}
+
+// NewServiceWithSiteAndDrive creates a new Microsoft Graph service with SharePoint site and drive info
+func NewServiceWithSiteAndDrive(accessToken string, httpClient *http.Client, siteID, driveID string) *Service {
+	if httpClient == nil {
+		httpClient = &http.Client{}
+	}
+	return &Service{
+		AccessToken: accessToken,
+		HTTPClient:  httpClient,
+		BaseURL:     "https://graph.microsoft.com",
+		SiteID:      siteID,
+		DriveID:     driveID,
 	}
 }
 

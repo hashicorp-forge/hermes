@@ -14,6 +14,7 @@ import (
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/opt"
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/search"
 	"github.com/hashicorp-forge/hermes/internal/config"
+	"github.com/hashicorp-forge/hermes/internal/server"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	"github.com/hashicorp-forge/hermes/pkg/document"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
@@ -112,7 +113,12 @@ func DraftsHandler(
 			}
 
 			// Get doc type template.
-			template := getDocTypeTemplate(cfg.DocumentTypes.DocumentType, req.DocType)
+			// Check if we're using Microsoft Graph (if it's available in the server)
+			useMicrosoftGraph := false
+			if srv, ok := interface{}(s).(*server.Server); ok {
+				useMicrosoftGraph = srv.MSGraphService != nil
+			}
+			template := getDocTypeTemplate(cfg.DocumentTypes.DocumentType, req.DocType, useMicrosoftGraph)
 			if template == "" {
 				l.Error("Bad request: no template configured for doc type", "doc_type", req.DocType)
 				http.Error(w,
@@ -175,6 +181,7 @@ func DraftsHandler(
 						"drafts_folder", cfg.GoogleWorkspace.DraftsFolder,
 						"temporary_drafts_folder", cfg.GoogleWorkspace.
 							TemporaryDraftsFolder,
+						"user", userEmail,
 					)
 					http.Error(w, "Error creating document draft",
 						http.StatusInternalServerError)
@@ -190,7 +197,7 @@ func DraftsHandler(
 						"error", err,
 						"method", r.Method,
 						"path", r.URL.Path,
-						"doc_id", f.Id,
+						"template", template,
 						"drafts_folder", cfg.GoogleWorkspace.DraftsFolder,
 						"temporary_drafts_folder", cfg.GoogleWorkspace.
 							TemporaryDraftsFolder,
@@ -199,21 +206,68 @@ func DraftsHandler(
 						http.StatusInternalServerError)
 					return
 				}
+			}
+
+			// Move draft file to drafts folder using service user.
+			_, err = s.MoveFile(
+				f.Id, cfg.GoogleWorkspace.DraftsFolder)
+			if err != nil {
+				l.Error(
+					"error moving draft file to drafts folder",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", f.Id,
+					"drafts_folder", cfg.GoogleWorkspace.DraftsFolder,
+					"temporary_drafts_folder", cfg.GoogleWorkspace.
+						TemporaryDraftsFolder,
+				)
+				http.Error(w, "Error creating document draft",
+					http.StatusInternalServerError)
+				return
 			} else {
-				// Copy template to new draft file as service user.
-				f, err = s.CopyFile(
-					template, title, cfg.GoogleWorkspace.DraftsFolder)
-				if err != nil {
-					l.Error("error creating draft",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"template", template,
-						"drafts_folder", cfg.GoogleWorkspace.DraftsFolder,
-					)
-					http.Error(w, "Error creating document draft",
-						http.StatusInternalServerError)
-					return
+				// Check if we should use Microsoft Graph API instead of Google Workspace
+				if srv, ok := interface{}(s).(*server.Server); ok && srv.MSGraphService != nil {
+					// Use Microsoft Graph API
+					msGraphDriveItem, err := srv.MSGraphService.CopyFile(
+						template, title, srv.Config.MicrosoftGraph.DraftsFolder)
+					if err != nil {
+						l.Error("error creating draft with Microsoft Graph",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"template", template,
+							"drafts_folder", srv.Config.MicrosoftGraph.DraftsFolder,
+						)
+						http.Error(w, "Error creating document draft",
+							http.StatusInternalServerError)
+						return
+					}
+
+					// Convert Microsoft Graph DriveItem to Google Drive File format for compatibility
+					f = &drive.File{
+						Id:           msGraphDriveItem.ID,
+						Name:         msGraphDriveItem.Name,
+						CreatedTime:  msGraphDriveItem.CreatedDateTime,
+						ModifiedTime: msGraphDriveItem.LastModifiedDateTime,
+						WebViewLink:  msGraphDriveItem.WebURL,
+					}
+				} else {
+					// Copy template to new draft file as service user using Google Workspace
+					f, err = s.CopyFile(
+						template, title, cfg.GoogleWorkspace.DraftsFolder)
+					if err != nil {
+						l.Error("error creating draft",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"template", template,
+							"drafts_folder", cfg.GoogleWorkspace.DraftsFolder,
+						)
+						http.Error(w, "Error creating document draft",
+							http.StatusInternalServerError)
+						return
+					}
 				}
 			}
 
@@ -1392,12 +1446,18 @@ func parseURLPath(path, prefix string) (string, error) {
 func getDocTypeTemplate(
 	docTypes []*config.DocumentType,
 	docType string,
+	useMicrosoftGraph bool,
 ) string {
 	template := ""
 
 	for _, t := range docTypes {
 		if t.Name == docType {
-			template = t.Template
+			// Use Microsoft template if MSTemplate is set and we're using Microsoft Graph
+			if useMicrosoftGraph && t.MSTemplate != "" {
+				template = t.MSTemplate
+			} else {
+				template = t.Template
+			}
 			break
 		}
 	}
