@@ -2,8 +2,9 @@ package api
 
 import (
 	"encoding/json"
-	// "fmt"
+	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/hashicorp-forge/hermes/internal/server"
@@ -149,6 +150,9 @@ func MeHandler(srv server.Server) http.Handler {
 			// Extract user ID from resource name (format: "people/ID")
 			userID = strings.TrimPrefix(profile.ResourceName, "people/")
 
+			// Set the profile picture URL to use our backend API v2
+			pictureURL := fmt.Sprintf("/api/v2/people?photo=%s", url.QueryEscape(userID))
+
 			// Convert Microsoft Graph profile to Google userinfo format
 			resp := MeGetResponse{
 				ID:            userID,
@@ -157,7 +161,7 @@ func MeHandler(srv server.Server) http.Handler {
 				Name:          displayName,
 				GivenName:     givenName,
 				FamilyName:    familyName,
-				Picture:       profile.Photos[0].URL, 
+				Picture:       pictureURL,
 				Locale:        "en",
 			}
 
