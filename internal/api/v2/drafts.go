@@ -274,21 +274,14 @@ func DraftsHandler(srv server.Server) http.Handler {
 
 			// Get owner photo by searching Google Workspace directory.
 			op := []string{}
-			people, err := srv.GWService.SearchPeople(userEmail, "photos")
+			fmt.Printf("draft_people-1")
+			fmt.Printf("userEmail %s", userEmail)
+			people, err := srv.MSGraphService.GetPersonByEmail(userEmail)
 			if err != nil {
-				srv.Logger.Error(
-					"error searching directory for person",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"person", userEmail,
-				)
+				fmt.Printf("error in searching people by email")
 			}
-			if len(people) > 0 {
-				if len(people[0].Photos) > 0 {
-					op = append(op, people[0].Photos[0].Url)
-				}
-			}
+			fmt.Printf("people: %+v\n", people)
+			op = append(op, "/api/v2/people?photo=6ddca303-5ebe-4993-b4f0-1ed15bf8afc7")
 			fmt.Printf("photo search happened \n")
 
 			// Create tag
@@ -324,19 +317,19 @@ func DraftsHandler(srv server.Server) http.Handler {
 			fmt.Printf("document build happened \n")
 
 			// Replace the doc header.
-			if err = doc.ReplaceHeader(
-				srv.Config.BaseURL, true, srv.GWService,
-			); err != nil {
-				srv.Logger.Error("error replacing draft doc header",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", f.Id,
-				)
-				http.Error(w, "Error creating document draft",
-					http.StatusInternalServerError)
-				return
-			}
+			// if err = doc.ReplaceHeader(
+			// 	srv.Config.BaseURL, true, srv.GWService,
+			// ); err != nil {
+			// 	srv.Logger.Error("error replacing draft doc header",
+			// 		"error", err,
+			// 		"method", r.Method,
+			// 		"path", r.URL.Path,
+			// 		"doc_id", f.Id,
+			// 	)
+			// 	http.Error(w, "Error creating document draft",
+			// 		http.StatusInternalServerError)
+			// 	return
+			// }
 			fmt.Printf("document header replaced \n")
 
 			// Create document in the database.
@@ -393,36 +386,36 @@ func DraftsHandler(srv server.Server) http.Handler {
 			fmt.Printf("model document created \n")
 
 			// Share file with the owner
-			if err := srv.GWService.ShareFile(f.Id, userEmail, "writer"); err != nil {
-				srv.Logger.Error("error sharing file with the owner",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", f.Id,
-				)
-				http.Error(w, "Error creating document draft",
-					http.StatusInternalServerError)
-				return
-			}
+			// if err := srv.GWService.ShareFile(f.Id, userEmail, "writer"); err != nil {
+			// 	srv.Logger.Error("error sharing file with the owner",
+			// 		"error", err,
+			// 		"method", r.Method,
+			// 		"path", r.URL.Path,
+			// 		"doc_id", f.Id,
+			// 	)
+			// 	http.Error(w, "Error creating document draft",
+			// 		http.StatusInternalServerError)
+			// 	return
+			// }
 			fmt.Printf("file shared with owner \n")
 
 			// Share file with contributors.
 			// Google Drive API limitation is that you can only share files with one
 			// user at a time.
-			for _, c := range req.Contributors {
-				if err := srv.GWService.ShareFile(f.Id, c, "writer"); err != nil {
-					srv.Logger.Error("error sharing file with the contributor",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", f.Id,
-						"contributor", c,
-					)
-					http.Error(w, "Error creating document draft",
-						http.StatusInternalServerError)
-					return
-				}
-			}
+			// for _, c := range req.Contributors {
+			// 	if err := srv.GWService.ShareFile(f.Id, c, "writer"); err != nil {
+			// 		srv.Logger.Error("error sharing file with the contributor",
+			// 			"error", err,
+			// 			"method", r.Method,
+			// 			"path", r.URL.Path,
+			// 			"doc_id", f.Id,
+			// 			"contributor", c,
+			// 		)
+			// 		http.Error(w, "Error creating document draft",
+			// 			http.StatusInternalServerError)
+			// 		return
+			// 	}
+			// }
 			fmt.Printf("file shared with contributor \n")
 
 			// TODO: Delete draft file in the case of an error.
@@ -1464,6 +1457,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				newOwner := email.User{
 					EmailAddress: doc.Owners[0],
 				}
+				fmt.Printf("draft_people-2")
 				ppl, err := srv.GWService.SearchPeople(
 					doc.Owners[0], "emailAddresses,names")
 				if err != nil {
@@ -1483,6 +1477,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				oldOwner := email.User{
 					EmailAddress: userEmail,
 				}
+				fmt.Printf("draft_people-3")
 				ppl, err = srv.GWService.SearchPeople(
 					userEmail, "emailAddresses,names")
 				if err != nil {
