@@ -157,7 +157,7 @@ func MeHandler(srv server.Server) http.Handler {
 				Name:          displayName,
 				GivenName:     givenName,
 				FamilyName:    familyName,
-				Picture:       "https://via.placeholder.com/150/0066cc/ffffff?text=" + string(givenName[0]),
+				Picture:       profile.Photos[0].URL, 
 				Locale:        "en",
 			}
 
