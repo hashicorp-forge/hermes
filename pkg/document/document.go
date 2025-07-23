@@ -257,7 +257,7 @@ func NewFromDatabaseModel(
 	doc.DocNumber = fmt.Sprintf(
 		"%s-%03d", model.Product.Abbreviation, model.DocumentNumber)
 	if model.DocumentNumber == 0 {
-		doc.DocNumber = fmt.Sprintf("%s-???", model.Product.Abbreviation)
+		doc.DocNumber = fmt.Sprintf("%s-xxx", model.Product.Abbreviation)
 	}
 
 	// AppCreated.

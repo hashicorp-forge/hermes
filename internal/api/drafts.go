@@ -131,7 +131,7 @@ func DraftsHandler(
 			if req.ProductAbbreviation == "" {
 				req.ProductAbbreviation = "TODO"
 			}
-			title := fmt.Sprintf("[%s-???] %s", req.ProductAbbreviation, req.Title)
+			title := fmt.Sprintf("[%s-xxx] %s.docx", req.ProductAbbreviation, req.Title)
 
 			var (
 				err error
@@ -316,7 +316,7 @@ func DraftsHandler(
 				Contributors: req.Contributors,
 				Created:      cd,
 				CreatedTime:  ct.Unix(),
-				DocNumber:    fmt.Sprintf("%s-???", req.ProductAbbreviation),
+				DocNumber:    fmt.Sprintf("%s-xxx", req.ProductAbbreviation),
 				DocType:      req.DocType,
 				MetaTags:     metaTags,
 				ModifiedTime: ct.Unix(),
@@ -1237,7 +1237,7 @@ func DraftsDocumentHandler(
 				model.ProductID = 0
 
 				// Update doc number in document.
-				doc.DocNumber = fmt.Sprintf("%s-???", productAbbreviation)
+				doc.DocNumber = fmt.Sprintf("%s-xxx", productAbbreviation)
 			}
 
 			// Summary.

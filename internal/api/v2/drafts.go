@@ -124,7 +124,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 			if req.ProductAbbreviation == "" {
 				req.ProductAbbreviation = "TODO"
 			}
-			title := fmt.Sprintf("[%s-???] %s", req.ProductAbbreviation, req.Title)
+			title := fmt.Sprintf("[%s-xxx] %s.docx", req.ProductAbbreviation, req.Title)
 
 			var (
 				err error
@@ -210,7 +210,9 @@ func DraftsHandler(srv server.Server) http.Handler {
 					fmt.Printf("-------------------------- \n")
 
 					msGraphDriveItem, err := srv.MSGraphService.CopyFile(template, title, srv.Config.MicrosoftGraph.DraftsFolder)
+					fmt.Printf("copy completed\n")
 					if err != nil {
+						fmt.Printf("copy error\n")
 						srv.Logger.Error("error creating draft with Microsoft Graph",
 							"error", err,
 							"method", r.Method,
@@ -221,8 +223,11 @@ func DraftsHandler(srv server.Server) http.Handler {
 						http.Error(w, "Error creating document draft",
 							http.StatusInternalServerError)
 						return
+					} else {
+						fmt.Printf("copy happened-1\n")
 					}
 
+					fmt.Printf("copy happened-2\n")
 					// Convert Microsoft Graph DriveItem to Google Drive File format for compatibility
 					f = &drive.File{
 						Id:           msGraphDriveItem.ID,
@@ -231,6 +236,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 						ModifiedTime: msGraphDriveItem.LastModifiedDateTime,
 						WebViewLink:  msGraphDriveItem.WebURL,
 					}
+					fmt.Printf("copy happened \n")
 				} else {
 					// Copy template to new draft file as service user using Google Workspace
 					f, err = srv.GWService.CopyFile(
@@ -264,6 +270,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 				return
 			}
 			cd := ct.Format("Jan 2, 2006")
+			fmt.Printf("created data happened \n")
 
 			// Get owner photo by searching Google Workspace directory.
 			op := []string{}
@@ -282,6 +289,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 					op = append(op, people[0].Photos[0].Url)
 				}
 			}
+			fmt.Printf("photo search happened \n")
 
 			// Create tag
 			// Note: The o_id tag may be empty for environments such as development.
@@ -302,7 +310,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 				Contributors: req.Contributors,
 				Created:      cd,
 				CreatedTime:  ct.Unix(),
-				DocNumber:    fmt.Sprintf("%s-???", req.ProductAbbreviation),
+				DocNumber:    fmt.Sprintf("%s-xxx", req.ProductAbbreviation),
 				DocType:      req.DocType,
 				MetaTags:     metaTags,
 				ModifiedTime: ct.Unix(),
@@ -313,6 +321,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 				Summary:      req.Summary,
 				// Tags:         req.Tags,
 			}
+			fmt.Printf("document build happened \n")
 
 			// Replace the doc header.
 			if err = doc.ReplaceHeader(
@@ -328,6 +337,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 					http.StatusInternalServerError)
 				return
 			}
+			fmt.Printf("document header replaced \n")
 
 			// Create document in the database.
 			var contributors []*models.User
@@ -336,6 +346,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 					EmailAddress: c,
 				})
 			}
+			fmt.Printf("document created in db \n")
 			createdTime, err := time.Parse(time.RFC3339Nano, f.CreatedTime)
 			if err != nil {
 				srv.Logger.Error("error parsing document created time",
@@ -348,6 +359,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 					http.StatusInternalServerError)
 				return
 			}
+			fmt.Printf("model document start \n")
 			model := models.Document{
 				GoogleFileID:       f.Id,
 				Contributors:       contributors,
@@ -366,6 +378,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 				Summary: &req.Summary,
 				Title:   req.Title,
 			}
+			fmt.Printf("model document end \n")
 			if err := model.Create(srv.DB); err != nil {
 				srv.Logger.Error("error creating document in database",
 					"error", err,
@@ -377,6 +390,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 					http.StatusInternalServerError)
 				return
 			}
+			fmt.Printf("model document created \n")
 
 			// Share file with the owner
 			if err := srv.GWService.ShareFile(f.Id, userEmail, "writer"); err != nil {
@@ -390,6 +404,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 					http.StatusInternalServerError)
 				return
 			}
+			fmt.Printf("file shared with owner \n")
 
 			// Share file with contributors.
 			// Google Drive API limitation is that you can only share files with one
@@ -408,6 +423,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 					return
 				}
 			}
+			fmt.Printf("file shared with contributor \n")
 
 			// TODO: Delete draft file in the case of an error.
 
@@ -1412,7 +1428,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				model.ProductID = 0
 
 				// Update doc number in document.
-				doc.DocNumber = fmt.Sprintf("%s-???", productAbbreviation)
+				doc.DocNumber = fmt.Sprintf("%s-xxx", productAbbreviation)
 			}
 
 			// Summary.

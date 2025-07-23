@@ -95,6 +95,7 @@ func (s *Service) CopyFile(fileID, name, destFolderID string) (*DriveItem, error
 		return nil, fmt.Errorf("error making request to microsoft graph: %w", err)
 	}
 	defer resp.Body.Close()
+	fmt.Printf("copy-req executed\n")
 
 	// Check the response status
 	if resp.StatusCode != http.StatusAccepted && resp.StatusCode != http.StatusOK {
@@ -112,6 +113,7 @@ func (s *Service) CopyFile(fileID, name, destFolderID string) (*DriveItem, error
 				} `json:"innerError"`
 			} `json:"error"`
 		}
+		fmt.Printf("status code checked\n")
 
 		_ = json.Unmarshal(bodyBytes, &errorResp)
 
@@ -120,6 +122,7 @@ func (s *Service) CopyFile(fileID, name, destFolderID string) (*DriveItem, error
 				errorResp.Error.Code, errorResp.Error.Message,
 				errorResp.Error.InnerError.RequestID, string(bodyBytes))
 		}
+		fmt.Printf("resp error code\n")
 
 		return nil, fmt.Errorf("microsoft graph api returned status %d: %s", resp.StatusCode, string(bodyBytes))
 	}
@@ -127,21 +130,36 @@ func (s *Service) CopyFile(fileID, name, destFolderID string) (*DriveItem, error
 	// For asynchronous operations, Microsoft Graph returns a monitor URL
 	// in the Location header that we need to poll to get the result
 	if resp.StatusCode == http.StatusAccepted {
-		monitorURL := resp.Header.Get("Location")
+		fmt.Printf("monitor URL code block\n")
+		itemID := resp.Header.Get("Location")
+		// Remove query parameters if any exist
+		if queryIndex := strings.Index(itemID, "?"); queryIndex != -1 {
+			itemID = itemID[:queryIndex]
+		}
+		// Extract the last path segment (after the last slash)
+		if lastSlashIndex := strings.LastIndex(itemID, "/"); lastSlashIndex != -1 {
+			itemID = itemID[lastSlashIndex+1:]
+		}
+		fmt.Printf("itemID is this %s\n", itemID)
+		var monitorURL = fmt.Sprintf("https://graph.microsoft.com/v1.0/sites/%s/drives/%s/items/%s",
+			url.PathEscape(s.SiteID), url.PathEscape(s.DriveID), url.PathEscape(itemID))
 		if monitorURL == "" {
 			return nil, fmt.Errorf("no monitor URL returned for async operation")
 		}
 
 		// Poll the monitor URL until the operation completes
+		fmt.Printf("polling started \n")
 		driveItem, err := s.pollOperationStatus(monitorURL)
 		if err != nil {
+			fmt.Printf("polling error \n")
 			return nil, fmt.Errorf("error monitoring copy operation: %w", err)
 		}
-
+		fmt.Printf("polling ended \n")
 		return driveItem, nil
 	}
 
 	// If the operation completed synchronously, parse the response directly
+	fmt.Printf("parse directly flow\n")
 	var driveItem DriveItem
 	if err := json.NewDecoder(resp.Body).Decode(&driveItem); err != nil {
 		return nil, fmt.Errorf("error decoding response: %w", err)
@@ -153,7 +171,7 @@ func (s *Service) CopyFile(fileID, name, destFolderID string) (*DriveItem, error
 // pollOperationStatus polls a monitor URL until an operation completes
 func (s *Service) pollOperationStatus(monitorURL string) (*DriveItem, error) {
 	maxRetries := 10
-	retryDelay := 2 * time.Second
+	retryDelay := 1 * time.Second
 
 	for i := 0; i < maxRetries; i++ {
 		// Wait before polling
@@ -165,12 +183,19 @@ func (s *Service) pollOperationStatus(monitorURL string) (*DriveItem, error) {
 			return nil, fmt.Errorf("error creating monitor request: %w", err)
 		}
 		req.Header.Set("Authorization", "Bearer "+s.AccessToken)
+		fmt.Printf("header set \n")
+
+		fmt.Printf("-------------------")
+		fmt.Printf("monitorURL = %s \n", monitorURL)
+		fmt.Printf("s.AccessToken = %s \n", s.AccessToken)
+		fmt.Printf("-------------------")
 
 		// Execute the request
 		resp, err := s.HTTPClient.Do(req)
 		if err != nil {
 			return nil, fmt.Errorf("error making monitor request: %w", err)
 		}
+		fmt.Printf("request executed \n")
 
 		// Read the response body
 		bodyBytes, err := io.ReadAll(resp.Body)
@@ -178,6 +203,7 @@ func (s *Service) pollOperationStatus(monitorURL string) (*DriveItem, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error reading monitor response: %w", err)
 		}
+		fmt.Printf("response body read \n")
 
 		// Check for completion
 		if resp.StatusCode == http.StatusOK {
@@ -185,8 +211,10 @@ func (s *Service) pollOperationStatus(monitorURL string) (*DriveItem, error) {
 			if err := json.Unmarshal(bodyBytes, &driveItem); err != nil {
 				return nil, fmt.Errorf("error parsing completed operation response: %w", err)
 			}
+			fmt.Printf("comp ret \n")
 			return &driveItem, nil
 		}
+		fmt.Printf("comp check \n")
 
 		// If still in progress, parse the monitor response
 		var monitorResponse struct {
@@ -196,20 +224,26 @@ func (s *Service) pollOperationStatus(monitorURL string) (*DriveItem, error) {
 			ErrorCode    string `json:"errorCode"`
 			ErrorMessage string `json:"errorMessage"`
 		}
+		fmt.Printf("parse done \n")
 
 		if err := json.Unmarshal(bodyBytes, &monitorResponse); err != nil {
 			return nil, fmt.Errorf("error parsing monitor response: %w", err)
 		}
 
 		// Check for errors or completion
-		if monitorResponse.Status == "completed" {
+		fmt.Printf("monitorResponse.Status= %s \n", monitorResponse.Status)
+		fmt.Printf("bodyBytes= %s \n", bodyBytes)
+		switch monitorResponse.Status {
+		case "completed":
+			fmt.Printf("monitor completed \n")
 			// If completed, make one more request to get the item details
 			if monitorResponse.ResourceID != "" {
 				itemURL := fmt.Sprintf("https://graph.microsoft.com/v1.0/sites/%s/drives/%s/items/%s",
 					url.PathEscape(s.SiteID), url.PathEscape(s.DriveID), monitorResponse.ResourceID)
 				return s.getDriveItem(itemURL)
 			}
-		} else if monitorResponse.Status == "failed" {
+		case "failed":
+			fmt.Printf("monitor failed \n")
 			return nil, fmt.Errorf("operation failed: %s - %s", monitorResponse.ErrorCode, monitorResponse.ErrorMessage)
 		}
 

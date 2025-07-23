@@ -255,10 +255,10 @@ func TestCompareAlgoliaAndDatabaseDocument(t *testing.T) {
 			shouldErr: false,
 		},
 
-		"good draft doc number (test 'ABC-???')": {
+		"good draft doc number (test 'ABC-123')": {
 			algoDoc: map[string]any{
 				"appCreated": true,
-				"docNumber":  "ABC-???",
+				"docNumber":  "ABC-123",
 				"docType":    "RFC",
 				"createdTime": float64(time.Date(
 					2023, time.April, 5, 1, 0, 0, 0, time.UTC).Unix()),

@@ -822,7 +822,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     this.server.create("document", {
       objectID: 1,
       docType: "PRD",
-      docNumber: "LAB-???",
+      docNumber: "LAB-xxx",
     });
 
     await visit("/document/1?draft=true");
@@ -903,7 +903,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
   test("the title attribute saves", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
     let title = "Test Document";
-    let docNumber = "HCP-???";
+    let docNumber = "HCP-xxx";
 
     this.server.create("document", {
       objectID: 1,

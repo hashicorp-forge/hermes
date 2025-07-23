@@ -193,8 +193,8 @@ func ReviewsHandler(srv server.Server) http.Handler {
 			// Replace the doc header.
 			err = doc.ReplaceHeader(srv.Config.BaseURL, false, srv.GWService)
 			revertFuncs = append(revertFuncs, func() error {
-				// Change back document number to "ABC-???" and status to "WIP".
-				doc.DocNumber = fmt.Sprintf("%s-???", product.Abbreviation)
+				// Change back document number to "ABC-xxx" and status to "WIP".
+				doc.DocNumber = fmt.Sprintf("%s-xxx", product.Abbreviation)
 				doc.Status = "WIP"
 
 				if err = doc.ReplaceHeader(

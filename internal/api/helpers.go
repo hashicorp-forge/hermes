@@ -185,10 +185,10 @@ func compareAlgoliaAndDatabaseDocument(
 		result = multierror.Append(
 			result, fmt.Errorf("error getting docNumber value: %w", err))
 	} else {
-		// Replace "-???" (how draft doc numbers are defined in Algolia) with a
+		// Replace "-xxx.docx" (how draft doc numbers are defined in Algolia) with a
 		// zero.
-		re := regexp.MustCompile(`-\?\?\?$`)
-		algoDocNumber = re.ReplaceAllString(algoDocNumber, "-000")
+		re := regexp.MustCompile(`-xxx.docx$`)
+		algoDocNumber = re.ReplaceAllString(algoDocNumber, "-000.docx")
 
 		var dbDocNumber string
 		// If document number in Algolia isn't empty, build the database document
