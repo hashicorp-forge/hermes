@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"reflect"
 	"strconv"
 	"strings"
@@ -260,7 +261,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 			// Use Microsoft Graph API if available (for SharePoint integration)
 			if srv.MSGraphService != nil {
 				// Get the access token from the SharePoint service we just used
-				if sharepointSvc != nil && sharepointSvc.AccessToken != "" {
+				if sharepointSvc.AccessToken != "" {
 					// Use the same token for Microsoft Graph API
 					srv.MSGraphService.AccessToken = sharepointSvc.AccessToken
 					
@@ -340,15 +341,28 @@ func DraftsHandler(srv server.Server) http.Handler {
 				"CreatedDate":  createdTime.Format("2006-01-02"),
 			}
 			
-			if err = sharepointSvc.ReplaceDocumentHeader(fileID, headerProps); err != nil {
-				srv.Logger.Error("error replacing document header in SharePoint",
+			// First attempt to update with content modification (download, modify, upload)
+			err = sharepointSvc.ReplaceDocumentHeaderWithContentUpdate(fileID, headerProps)
+			if err != nil {
+				srv.Logger.Error("error replacing document header with content update in SharePoint",
 					"error", err,
 					"method", r.Method,
 					"path", r.URL.Path,
 					"doc_id", fileID,
 				)
-				// Continue even if header replacement fails
-				srv.Logger.Warn("continuing document creation despite header replacement failure")
+				// Fall back to just updating properties if content update fails
+				srv.Logger.Warn("falling back to metadata-only header update")
+				
+				if err = sharepointSvc.ReplaceDocumentHeader(fileID, headerProps); err != nil {
+					srv.Logger.Error("error replacing document header properties in SharePoint",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", fileID,
+					)
+					// Continue even if header replacement fails
+					srv.Logger.Warn("continuing document creation despite header replacement failure")
+				}
 			}
 			
 			// Create document in the database.
@@ -360,7 +374,8 @@ func DraftsHandler(srv server.Server) http.Handler {
 			}
 			
 			model := models.Document{
-				GoogleFileID:       fileID, // We're reusing this field for SharePoint IDs too
+				GoogleFileID:       fileID, // Using GoogleFileID field for compatibility
+				SharePointFileID:   fileID, // Also populate SharePointFileID for SharePoint documents
 				Contributors:       contributors,
 				DocumentCreatedAt:  createdTime,
 				DocumentModifiedAt: createdTime,
@@ -399,11 +414,23 @@ func DraftsHandler(srv server.Server) http.Handler {
 					"owner", userEmail,
 				)
 				// Continue despite sharing error
-				srv.Logger.Warn("continuing document creation despite sharing failure")
+				srv.Logger.Warn("continuing document creation despite sharing failure with owner")
+			} else {
+				srv.Logger.Info("successfully shared document with owner",
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", fileID,
+					"owner", userEmail,
+				)
 			}
 			
 			// Share the document with contributors
 			for _, contributor := range req.Contributors {
+				if contributor == userEmail {
+					// Skip if contributor is the owner (already shared)
+					continue
+				}
+				
 				if err := sharepointSvc.ShareFile(fileID, contributor, "writer"); err != nil {
 					srv.Logger.Error("error sharing SharePoint file with contributor",
 						"error", err,
@@ -413,7 +440,14 @@ func DraftsHandler(srv server.Server) http.Handler {
 						"contributor", contributor,
 					)
 					// Continue despite sharing error
-					srv.Logger.Warn("continuing document creation despite sharing failure")
+					srv.Logger.Warn("continuing document creation despite sharing failure with contributor")
+				} else {
+					srv.Logger.Info("successfully shared document with contributor",
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", fileID,
+						"contributor", contributor,
+					)
 				}
 			}
 
@@ -774,33 +808,157 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 		case "GET":
 			now := time.Now()
 
-			// Get file from Google Drive so we can return the latest modified time.
-			file, err := srv.GWService.GetFile(docID)
-			if err != nil {
-				srv.Logger.Error("error getting document file from Google",
-					"error", err,
-					"path", r.URL.Path,
-					"method", r.Method,
-					"doc_id", docID,
-				)
-				http.Error(w,
-					"Error requesting document draft", http.StatusInternalServerError)
-				return
+			var modifiedTime time.Time
+			var webUrl string
+			var err error
+
+			// Check if this is a SharePoint document by looking at the SharePointFileID field
+			if model.SharePointFileID != "" {
+				// This is a SharePoint document, get file details from SharePoint
+				if srv.Config.SharePoint == nil {
+					srv.Logger.Error("SharePoint configuration is missing for SharePoint document",
+						"path", r.URL.Path,
+						"method", r.Method,
+						"doc_id", docID,
+					)
+					http.Error(w,
+						"Error requesting document draft", http.StatusInternalServerError)
+					return
+				}
+
+				sharepointSvc := &sharepointhelper.Service{
+					ClientID:     srv.Config.SharePoint.ClientID,
+					ClientSecret: srv.Config.SharePoint.ClientSecret,
+					TenantID:     srv.Config.SharePoint.TenantID,
+					SiteID:       srv.Config.SharePoint.SiteID,
+					DriveID:      srv.Config.SharePoint.DriveID,
+				}
+				
+				// Get SharePoint token
+				token, err := sharepointSvc.GetToken()
+				if err != nil {
+					srv.Logger.Error("error getting SharePoint token for file details",
+						"error", err,
+						"path", r.URL.Path,
+						"method", r.Method,
+						"doc_id", docID,
+					)
+					http.Error(w,
+						"Error requesting document draft", http.StatusInternalServerError)
+					return
+				}
+				sharepointSvc.AccessToken = token
+
+				// Get file details from SharePoint with preview/embedding info
+				fileDetails, err := sharepointSvc.GetFileDetails(docID)
+				if err != nil {
+					srv.Logger.Error("error getting document file from SharePoint",
+						"error", err,
+						"path", r.URL.Path,
+						"method", r.Method,
+						"doc_id", docID,
+					)
+					http.Error(w,
+						"Error requesting document draft", http.StatusInternalServerError)
+					return
+				}
+
+				// Try to get embedding URL from Microsoft Graph API
+				embedURL, err := sharepointSvc.GetEmbedURL(docID)
+				if err != nil {
+					srv.Logger.Warn("failed to get embed URL from Graph API, using fallback",
+						"error", err,
+						"doc_id", docID,
+					)
+					embedURL = ""
+				}
+
+				// Parse modified time from SharePoint
+				modifiedTime, err = time.Parse(time.RFC3339, fileDetails.LastModified)
+				if err != nil {
+					srv.Logger.Error("error parsing SharePoint modified time",
+						"error", err,
+						"path", r.URL.Path,
+						"method", r.Method,
+						"doc_id", docID,
+					)
+					// Use current time as fallback
+					modifiedTime = time.Now()
+				}
+				
+				// Set webUrl based on available embedding options
+				if embedURL != "" {
+					webUrl = embedURL
+					srv.Logger.Info("using Graph API embed URL",
+						"embed_url", embedURL,
+						"doc_id", docID,
+					)
+				} else {
+					// Fallback to constructed Office Online URLs
+					if strings.Contains(fileDetails.WebURL, "sharepoint.com") {
+						// Try multiple embedding URL formats
+						baseURL := fileDetails.WebURL
+						
+						// Remove any existing query parameters
+						if idx := strings.Index(baseURL, "?"); idx != -1 {
+							baseURL = baseURL[:idx]
+						}
+						
+						// Extract domain and construct Office Online URL
+						parts := strings.Split(baseURL, "/")
+						if len(parts) >= 3 {
+							// Use Office Web Apps live.com service for embedding SharePoint documents
+							webUrl = fmt.Sprintf("https://view.officeapps.live.com/op/embed.aspx?src=%s", 
+								url.QueryEscape(fmt.Sprintf("https://graph.microsoft.com/v1.0/sites/%s/drives/%s/items/%s/content", 
+									srv.Config.SharePoint.SiteID, srv.Config.SharePoint.DriveID, docID)))
+							
+							srv.Logger.Info("constructed Office Online embedding URL",
+								"original_url", fileDetails.WebURL,
+								"office_online_url", webUrl,
+								"doc_id", docID,
+							)
+						} else {
+							// Final fallback
+							webUrl = fileDetails.WebURL
+						}
+					} else {
+						webUrl = fileDetails.WebURL
+					}
+				}
+			} else {
+				// This is a Google Drive document, get file from Google Drive
+				file, err := srv.GWService.GetFile(docID)
+				if err != nil {
+					srv.Logger.Error("error getting document file from Google",
+						"error", err,
+						"path", r.URL.Path,
+						"method", r.Method,
+						"doc_id", docID,
+					)
+					http.Error(w,
+						"Error requesting document draft", http.StatusInternalServerError)
+					return
+				}
+
+				// Parse modified time from Google Drive
+				modifiedTime, err = time.Parse(time.RFC3339Nano, file.ModifiedTime)
+				if err != nil {
+					srv.Logger.Error("error parsing modified time",
+						"error", err,
+						"path", r.URL.Path,
+						"method", r.Method,
+						"doc_id", docID,
+					)
+					http.Error(w,
+						"Error requesting document draft", http.StatusInternalServerError)
+					return
+				}
+				
+				// Set Google Docs webUrl for editing
+				webUrl = fmt.Sprintf("https://docs.google.com/document/d/%s/edit", docID)
 			}
 
-			// Parse and set modified time.
-			modifiedTime, err := time.Parse(time.RFC3339Nano, file.ModifiedTime)
-			if err != nil {
-				srv.Logger.Error("error parsing modified time",
-					"error", err,
-					"path", r.URL.Path,
-					"method", r.Method,
-					"doc_id", docID,
-				)
-				http.Error(w,
-					"Error requesting document draft", http.StatusInternalServerError)
-				return
-			}
+			// Set modified time in document
 			doc.ModifiedTime = modifiedTime.Unix()
 
 			// Convert document to Algolia object because this is how it is expected
@@ -817,6 +975,9 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 					http.StatusInternalServerError)
 				return
 			}
+
+			// Add webUrl for editor integration
+			docObj["webUrl"] = webUrl
 
 			// Write response.
 			w.Header().Set("Content-Type", "application/json")

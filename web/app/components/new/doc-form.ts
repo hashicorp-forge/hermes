@@ -192,25 +192,13 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
    * On error, show a flashMessage and allow users to try again.
    */
   private createDoc = task(async () => {
-    // Prevent multiple submissions
-    if (this.docIsBeingCreated) {
-      console.log('Document creation already in progress, preventing duplicate submission');
-      return;
-    }
-    
     this.docIsBeingCreated = true;
 
     try {
-      // Generate a unique client request ID to help identify duplicate requests
-      const clientRequestId = `doc-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
-      
       const doc = await this.fetchSvc
         .fetch(`/api/${this.configSvc.config.api_version}/drafts`, {
           method: "POST",
-          headers: { 
-            "Content-Type": "application/json",
-            "X-Client-Request-ID": clientRequestId
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             contributors: this.contributors,
             docType: this.args.docType,

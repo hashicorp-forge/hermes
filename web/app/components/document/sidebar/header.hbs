@@ -30,10 +30,10 @@
       />
     {{/if}}
     <ExternalLink
-      data-test-sidebar-google-docs-link
+      data-test-sidebar-external-link
       class="quarternary-button"
-      href="https://docs.google.com/document/d/{{@document.objectID}}"
-      {{tooltip "Open in Google" placement=(if @isCollapsed "right" "bottom")}}
+      href="{{if @document.webUrl @document.webUrl (concat "https://docs.google.com/document/d/" @document.objectID)}}"
+      {{tooltip (if @document.webUrl "Open in SharePoint" "Open in Google") placement=(if @isCollapsed "right" "bottom")}}
     >
       <FlightIcon @name="external-link" />
     </ExternalLink>

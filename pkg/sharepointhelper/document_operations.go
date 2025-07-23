@@ -287,6 +287,39 @@ func (s *Service) GetFileDetails(fileID string) (*CopyFileResponse, error) {
 	return &fileDetails, nil
 }
 
+// GetEmbedURL attempts to get an embeddable URL for the file using Microsoft Graph API
+func (s *Service) GetEmbedURL(fileID string) (string, error) {
+	// Try to get the preview URL from Microsoft Graph
+	previewURL := fmt.Sprintf("https://graph.microsoft.com/v1.0/sites/%s/drives/%s/items/%s/preview", 
+		s.SiteID, s.DriveID, fileID)
+	
+	req, err := http.NewRequest("POST", previewURL, nil)
+	if err != nil {
+		return "", fmt.Errorf("error creating preview request: %w", err)
+	}
+	req.Header.Set("Authorization", "Bearer "+s.AccessToken)
+	req.Header.Set("Content-Type", "application/json")
+	
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("error getting preview URL: %w", err)
+	}
+	defer resp.Body.Close()
+	
+	if resp.StatusCode == http.StatusOK {
+		var previewResponse struct {
+			GetURL string `json:"getUrl"`
+		}
+		if err := json.NewDecoder(resp.Body).Decode(&previewResponse); err == nil && previewResponse.GetURL != "" {
+			return previewResponse.GetURL, nil
+		}
+	}
+	
+	// If preview API fails, try to construct Office Online URL
+	return "", fmt.Errorf("preview API not available for file %s", fileID)
+}
+
 // ShareFile shares a file with a user with the specified role
 func (s *Service) ShareFile(fileID, userEmail, role string) error {
 	// Construct the Microsoft Graph API URL for sharing a file
@@ -408,48 +441,10 @@ func (s *Service) DeletePermission(fileID, permissionID string) error {
 }
 
 // ReplaceDocumentHeader replaces the header in a SharePoint document
-// This is a simplified version that updates document properties
-// In a real implementation, you would need to update the actual document content
+// This downloads the DOCX file, updates the document.xml content, and re-uploads it
 func (s *Service) ReplaceDocumentHeader(fileID string, properties map[string]string) error {
-	// For SharePoint, we can use the Update Document Properties API to update some metadata
-	url := fmt.Sprintf("https://graph.microsoft.com/v1.0/sites/%s/drives/%s/items/%s", 
-		s.SiteID, s.DriveID, fileID)
-	
-	// Convert properties to SharePoint fields
-	fields := make(map[string]interface{})
-	for k, v := range properties {
-		fields[k] = v
-	}
-	
-	body := map[string]interface{}{
-		"fields": fields,
-	}
-	
-	jsonBody, err := json.Marshal(body)
-	if err != nil {
-		return fmt.Errorf("error marshaling request body: %w", err)
-	}
-	
-	req, err := http.NewRequest("PATCH", url, bytes.NewBuffer(jsonBody))
-	if err != nil {
-		return fmt.Errorf("error creating request: %w", err)
-	}
-	req.Header.Set("Authorization", "Bearer "+s.AccessToken)
-	req.Header.Set("Content-Type", "application/json")
-	
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return fmt.Errorf("error updating document properties: %w", err)
-	}
-	defer resp.Body.Close()
-	
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("failed to update document properties: %s, %s", resp.Status, string(body))
-	}
-	
-	return nil
+	// Use the DOCX operations to download, modify, and upload the document
+	return s.ReplaceDocumentHeaderWithContentUpdate(fileID, properties)
 }
 
 // MoveFile moves a file to a new folder

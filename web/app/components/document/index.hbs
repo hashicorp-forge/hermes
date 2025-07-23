@@ -31,14 +31,140 @@
           so that any SRC changes don't add history entries,
           which would cause the back button to break.
         }}
-        <iframe
-          title="Google Doc"
-          height="100%"
-          width="100%"
-          class="border-0"
-          src="https://docs.google.com/document/d/{{@document.objectID}}/edit?embedded=true"
-        >
+        {{#if @document.webUrl}}
+          {{! SharePoint document - try embedding with Office Online }}
+                  <iframe 
+          id="doc-frame" 
+          width="100%" 
+          height="100%" 
+          src={{this.webUrl}} 
+          sandbox="allow-scripts allow-same-origin allow-top-navigation allow-popups allow-forms"
+          style="border: none;"
+          onload={{this.onFrameLoad}}
+          onerror={{this.onFrameError}}>
         </iframe>
+        
+        {{!-- Fallback content if iframe fails to load --}}
+        <div id="iframe-fallback" style="display: none; padding: 20px; text-align: center;">
+          <h3>Document Viewer</h3>
+          <p>Unable to embed document. <a href={{this.webUrl}} target="_blank" rel="noopener noreferrer">Open in new tab</a></p>
+          
+          {{!-- Additional Office Online fallback options --}}
+          {{#if this.isSharePointDocument}}
+            <div style="margin-top: 15px;">
+              <p>Alternative viewing options:</p>
+              <div style="margin: 10px 0;">
+                <button type="button" onclick="window.tryOfficeOnlineEmbed('{{this.docId}}')" 
+                        style="margin: 5px; padding: 10px 15px; background: #0078d4; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                  Try Office Online
+                </button>
+                <button type="button" onclick="window.trySharePointDirect('{{this.webUrl}}')" 
+                        style="margin: 5px; padding: 10px 15px; background: #107c10; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                  Open in SharePoint
+                </button>
+              </div>
+            </div>
+          {{/if}}
+        </div>
+
+        <script>
+          (function() {
+            const iframe = document.getElementById('doc-frame');
+            const fallback = document.getElementById('iframe-fallback');
+            let fallbackShown = false;
+            
+            // Set up fallback timer
+            const fallbackTimer = setTimeout(() => {
+              if (!fallbackShown) {
+                console.log('Document iframe load timeout - showing fallback');
+                iframe.style.display = 'none';
+                fallback.style.display = 'block';
+                fallbackShown = true;
+              }
+            }, 15000); // 15 second timeout
+            
+            // Handle successful load
+            iframe.onload = function() {
+              console.log('Document iframe loaded successfully');
+              clearTimeout(fallbackTimer);
+              
+              // Check if iframe content is accessible (not blocked by CORS)
+              try {
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                if (!iframeDoc || iframeDoc.body.innerHTML.trim() === '') {
+                  throw new Error('Empty iframe content');
+                }
+                console.log('Document content verified');
+              } catch (e) {
+                console.warn('Document iframe may be blocked by CORS:', e.message);
+                // Don't show fallback immediately for CORS issues, 
+                // as the document might still be loading properly
+              }
+            };
+            
+            // Handle load errors
+            iframe.onerror = function() {
+              console.error('Document iframe failed to load');
+              clearTimeout(fallbackTimer);
+              if (!fallbackShown) {
+                iframe.style.display = 'none';
+                fallback.style.display = 'block';
+                fallbackShown = true;
+              }
+            };
+            
+            // Global helper functions for fallback buttons
+            window.tryOfficeOnlineEmbed = function(docId) {
+              const officeUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent('{{this.sharepointDirectUrl}}')}`;
+              iframe.src = officeUrl;
+              iframe.style.display = 'block';
+              fallback.style.display = 'none';
+              fallbackShown = false;
+              console.log('Trying Office Online embed:', officeUrl);
+            };
+            
+            window.trySharePointDirect = function(webUrl) {
+              window.open(webUrl, '_blank', 'noopener,noreferrer');
+            };
+          })();
+        </script>
+          <script>
+            (function() {
+              const iframe = document.getElementById('sharepoint-iframe-{{@document.objectID}}');
+              const fallback = document.getElementById('sharepoint-fallback-{{@document.objectID}}');
+              let loadTimeout;
+              
+              const showFallback = () => {
+                iframe.style.display = 'none';
+                fallback.style.display = 'flex';
+              };
+              
+              const showIframe = () => {
+                iframe.style.opacity = '1';
+                clearTimeout(loadTimeout);
+              };
+              
+              // Set a timeout to show fallback if iframe doesn't load
+              loadTimeout = setTimeout(showFallback, 10000); // 10 seconds
+              
+              iframe.onload = showIframe;
+              iframe.onerror = showFallback;
+              
+              // Also check for blocked content
+              iframe.onabort = showFallback;
+            })();
+          </script>
+        {{else}}
+          {{! Google Drive document - show iframe }}
+          <iframe
+            title="Google Doc"
+            height="100%"
+            width="100%"
+            class="border-0"
+            src="https://docs.google.com/document/d/{{@document.objectID}}/edit?embedded=true"
+          >
+          </iframe>
+        {{/if}}
       {{/unless}}
     </Hds::Card::Container>
   </div>
