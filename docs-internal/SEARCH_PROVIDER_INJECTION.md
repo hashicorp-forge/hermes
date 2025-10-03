@@ -303,22 +303,158 @@ func TestMyEndpoint_Unit(t *testing.T) {
 }
 ```
 
+## Test Results
+
+### Summary (7 Tests Total)
+
+**Passing Tests: 3/7** ✅
+- `TestV2Products_MethodNotAllowed` - HTTP method validation
+- `TestV2Products_Unauthorized` - Auth failure handling  
+- `TestV2Drafts_Unauthorized` - Auth failure handling
+
+**Failing Tests: 4/7** ❌
+- `TestV2Products_Get` - Nil pointer: `srv.AlgoSearch.Internal.GetObject()`
+- `TestV2Drafts_List` - 500 error from nil dependencies
+- `TestV2Drafts_GetSingle` - Nil pointer: `srv.GWService.GetFile()`
+- `TestV2Drafts_Patch` - (not tested due to early failure)
+
+### Key Findings
+
+**Infrastructure: ✅ WORKING**
+- Docker containers spin up in ~2 seconds (postgres, meilisearch)
+- SearchProvider properly injected into server struct
+- Mock auth works correctly
+- Tests compile and run without build errors
+
+**Handler Layer: ❌ NEEDS REFACTORING**
+- Handlers still use direct Algolia calls: `srv.AlgoSearch.*.GetObject()`
+- Handlers still use direct Google Workspace calls: `srv.GWService.GetFile()`
+- These fields are empty/nil in test environment
+- Handlers need updating to use `srv.SearchProvider` instead
+
+### Passing Test Pattern
+
+Tests that succeed return early before reaching problematic code:
+
+```go
+// TestV2Products_MethodNotAllowed - PASSES ✅
+// Returns 405 before calling Algolia
+handler := pkgauth.Middleware(mockAuth, log)(apiv2.ProductsHandler(*srv))
+req := httptest.NewRequest("POST", "/api/v2/products", nil)
+// Handler checks method, returns 405, never reaches Algolia code
+```
+
+### Failing Test Pattern
+
+Tests that invoke full handler logic hit nil pointers:
+
+```go
+// TestV2Products_Get - FAILS ❌
+// Handler execution path:
+// 1. ProductsHandler() called
+// 2. getProductsData(srv.AlgoSearch) called  
+// 3. srv.AlgoSearch.Internal.GetObject() called
+// 4. PANIC: AlgoSearch.Internal is nil
+//
+// Stack trace: products.go:54
+// Error: invalid memory address or nil pointer dereference
+
+// TestV2Drafts_GetSingle - FAILS ❌  
+// Handler execution path:
+// 1. DraftsDocumentHandler() called
+// 2. srv.GWService.GetFile() called
+// 3. PANIC: GWService is nil
+//
+// Stack trace: drafts.go:738 → drive_helpers.go:114
+// Error: invalid memory address or nil pointer dereference
+```
+
+### Test Output Details
+
+#### TestV2Products_MethodNotAllowed ✅
+```
+=== RUN   TestV2Products_MethodNotAllowed
+=== RUN   TestV2Products_MethodNotAllowed/POST
+=== RUN   TestV2Products_MethodNotAllowed/PUT
+=== RUN   TestV2Products_MethodNotAllowed/PATCH
+=== RUN   TestV2Products_MethodNotAllowed/DELETE
+--- PASS: TestV2Products_MethodNotAllowed (1.71s)
+    --- PASS: TestV2Products_MethodNotAllowed/POST (0.00s)
+    --- PASS: TestV2Products_MethodNotAllowed/PUT (0.00s)
+    --- PASS: TestV2Products_MethodNotAllowed/PATCH (0.00s)
+    --- PASS: TestV2Products_MethodNotAllowed/DELETE (0.00s)
+```
+
+#### TestV2Products_Get ❌
+```
+panic: runtime error: invalid memory address or nil pointer dereference
+[signal SIGSEGV: segmentation violation code=0x2 addr=0x10]
+
+Stack trace shows:
+- algolia/search.(*Index).GetObject at index.go:118
+- api/v2.getProductsData at products.go:54
+  Code: srv.AlgoSearch.Internal.GetObject("products", &p)
+```
+
+#### TestV2Drafts_GetSingle ❌
+```
+panic: runtime error: invalid memory address or nil pointer dereference
+[signal SIGSEGV: segmentation violation code=0x2 addr=0x68]
+
+Stack trace shows:
+- google.(*Service).GetFile at drive_helpers.go:114
+- api/v2.DraftsDocumentHandler at drafts.go:738
+  Code: srv.GWService.GetFile(...)
+```
+
+### Root Causes
+
+1. **Products Handler** (`internal/api/v2/products.go:54`):
+   - Uses: `srv.AlgoSearch.Internal.GetObject("products", &p)`
+   - Problem: `AlgoSearch` is empty struct, `Internal` field is nil
+   - Solution: Use `srv.SearchProvider` or fetch from database
+
+2. **Drafts Handlers** (`internal/api/v2/drafts.go` - multiple locations):
+   - Uses: `srv.GWService.GetFile()` at line 738
+   - Uses: `srv.AlgoSearch.Drafts.GetObject()` at multiple lines
+   - Problem: Both `GWService` and `AlgoSearch` are nil/empty
+   - Solution: Use `srv.SearchProvider` and create mock workspace adapter
+
+3. **Multiple Algolia Calls in Drafts**:
+   - Lines with direct Algolia: 413, 441, 563, 565, 725, 729, 827, 907, 1536, 1560
+   - All need refactoring to use `srv.SearchProvider`
+
 ## Summary
 
-✅ **Completed:**
-- Added SearchProvider dependency injection to Server
-- Updated all test infrastructure to use SearchProvider
-- Refactored v2 API tests to use real Meilisearch
-- Maintained backward compatibility with Algolia clients
-- All tests passing with Docker containers
+✅ **Infrastructure Phase: COMPLETE**
+- Added SearchProvider dependency injection to Server struct
+- Updated all test infrastructure to inject SearchProvider
+- Docker containers working perfectly (postgres, meilisearch)
+- Mock auth system fully functional
+- 3 tests passing (method validation, auth failures)
 
-🎯 **Value Delivered:**
-- **Better Test Coverage**: Tests now validate real search behavior
-- **Flexibility**: Easy to swap search backends (Algolia ↔ Meilisearch)
-- **Migration Path**: Gradual refactoring without breaking changes
-- **Developer Experience**: Cleaner test setup, faster feedback
+❌ **Handler Migration Phase: NOT STARTED**
+- 20+ direct Algolia calls in drafts.go need refactoring
+- Products handler uses special Algolia.Internal index
+- GWService still required for Google Drive operations
+- 4 tests failing due to nil pointer dereferences
 
-🚀 **Ready For:**
-- Handler refactoring to use search abstraction
-- Meilisearch as alternative to Algolia in production
-- Enhanced search testing and validation
+🎯 **Testing Status: 3/7 Passing (43%)**
+- **Passing**: Tests that don't invoke full handler logic
+- **Failing**: Tests that reach Algolia/GWService code
+- **Expected**: Infrastructure works, handlers need updates
+
+🚀 **Next Steps:**
+1. **Option A**: Mock GWService for drafts tests (quick fix)
+2. **Option B**: Refactor products handler to use database (no Algolia needed)
+3. **Option C**: Refactor drafts handlers to use SearchProvider (proper fix)
+4. **Option D**: Add ProductIndex interface to search abstraction
+
+**Migration Path**: This is the expected outcome of dependency injection refactoring:
+1. ✅ Create abstraction layer (search.Provider)
+2. ✅ Update infrastructure (Server struct, test setup)
+3. 🔄 Gradually migrate handlers to use abstraction
+4. ⏳ Remove legacy direct calls
+5. ⏳ Delete deprecated fields
+
+The infrastructure is solid and ready. Handler refactoring can now proceed incrementally without breaking production code.
