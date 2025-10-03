@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"testing"
+	"time"
 
 	hermessearch "github.com/hashicorp-forge/hermes/pkg/search"
 )
@@ -233,7 +234,8 @@ func TestIntegration_IndexAndSearch(t *testing.T) {
 		t.Skipf("Could not connect to Meilisearch: %v", err)
 	}
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
 	// Check health
 	if err := adapter.Healthy(ctx); err != nil {
@@ -265,18 +267,33 @@ func TestIntegration_IndexAndSearch(t *testing.T) {
 		t.Fatalf("Failed to index document: %v", err)
 	}
 
-	// Search for the document
-	results, err := docIndex.Search(ctx, &hermessearch.SearchQuery{
-		Query:   "test",
-		Page:    0,
-		PerPage: 10,
-	})
-	if err != nil {
-		t.Fatalf("Search failed: %v", err)
+	// Wait for indexing to complete with intelligent polling (max 5 seconds)
+	var results *hermessearch.SearchResult
+	start := time.Now()
+	for i := 0; i < 10; i++ {
+		if ctx.Err() != nil {
+			t.Fatal("Context timed out waiting for indexing")
+		}
+
+		results, err = docIndex.Search(ctx, &hermessearch.SearchQuery{
+			Query:   "test",
+			Page:    0,
+			PerPage: 10,
+		})
+		if err != nil {
+			t.Fatalf("Search failed: %v", err)
+		}
+
+		if results.TotalHits > 0 {
+			t.Logf("✓ Document indexed and searchable in %v", time.Since(start))
+			break
+		}
+
+		time.Sleep(500 * time.Millisecond)
 	}
 
 	if results.TotalHits == 0 {
-		t.Error("Expected at least 1 hit, got 0")
+		t.Error("Expected at least 1 hit after waiting, got 0")
 	}
 
 	// Clean up after test
