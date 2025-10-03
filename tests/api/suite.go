@@ -251,14 +251,15 @@ func (s *Suite) setupServer() error {
 	// Create mock Google Workspace service
 	gwService := &gw.Service{}
 
-	// Create server
+	// Create server with SearchProvider support
 	srv := &server.Server{
-		AlgoSearch: algoSearch,
-		AlgoWrite:  algoWrite,
-		Config:     s.Config,
-		DB:         s.DB,
-		GWService:  gwService,
-		Logger:     hclog.NewNullLogger(),
+		AlgoSearch:     algoSearch,
+		AlgoWrite:      algoWrite,
+		SearchProvider: s.SearchProvider, // Use the search provider from suite (Meilisearch or mock)
+		Config:         s.Config,
+		DB:             s.DB,
+		GWService:      gwService,
+		Logger:         hclog.NewNullLogger(),
 	}
 
 	// Create mux and register endpoints (mimicking internal/cmd/commands/server/server.go)

@@ -63,12 +63,13 @@ func TestV2Drafts_List(t *testing.T) {
 	log := hclog.NewNullLogger()
 
 	srv := &server.Server{
-		AlgoSearch: &algolia.Client{},
-		AlgoWrite:  &algolia.Client{},
-		Config:     suite.Config,
-		DB:         suite.DB,
-		GWService:  &gw.Service{},
-		Logger:     log,
+		AlgoSearch:     &algolia.Client{},
+		AlgoWrite:      &algolia.Client{},
+		SearchProvider: suite.SearchProvider,
+		Config:         suite.Config,
+		DB:             suite.DB,
+		GWService:      &gw.Service{},
+		Logger:         log,
 	}
 
 	handler := pkgauth.Middleware(mockAuth, log)(apiv2.DraftsHandler(*srv))
@@ -127,12 +128,13 @@ func TestV2Drafts_GetSingle(t *testing.T) {
 	log := hclog.NewNullLogger()
 
 	srv := &server.Server{
-		AlgoSearch: &algolia.Client{},
-		AlgoWrite:  &algolia.Client{},
-		Config:     suite.Config,
-		DB:         suite.DB,
-		GWService:  &gw.Service{},
-		Logger:     log,
+		AlgoSearch:     &algolia.Client{},
+		AlgoWrite:      &algolia.Client{},
+		SearchProvider: suite.SearchProvider,
+		Config:         suite.Config,
+		DB:             suite.DB,
+		GWService:      &gw.Service{},
+		Logger:         log,
 	}
 
 	handler := pkgauth.Middleware(mockAuth, log)(apiv2.DraftsDocumentHandler(*srv))
@@ -183,12 +185,13 @@ func TestV2Drafts_Patch(t *testing.T) {
 	log := hclog.NewNullLogger()
 
 	srv := &server.Server{
-		AlgoSearch: &algolia.Client{},
-		AlgoWrite:  &algolia.Client{},
-		Config:     suite.Config,
-		DB:         suite.DB,
-		GWService:  &gw.Service{},
-		Logger:     log,
+		AlgoSearch:     &algolia.Client{},
+		AlgoWrite:      &algolia.Client{},
+		SearchProvider: suite.SearchProvider,
+		Config:         suite.Config,
+		DB:             suite.DB,
+		GWService:      &gw.Service{},
+		Logger:         log,
 	}
 
 	handler := pkgauth.Middleware(mockAuth, log)(apiv2.DraftsDocumentHandler(*srv))
@@ -245,12 +248,13 @@ func TestV2Drafts_Unauthorized(t *testing.T) {
 	log := hclog.NewNullLogger()
 
 	srv := &server.Server{
-		AlgoSearch: &algolia.Client{},
-		AlgoWrite:  &algolia.Client{},
-		Config:     suite.Config,
-		DB:         suite.DB,
-		GWService:  &gw.Service{},
-		Logger:     log,
+		AlgoSearch:     &algolia.Client{},
+		AlgoWrite:      &algolia.Client{},
+		SearchProvider: suite.SearchProvider,
+		Config:         suite.Config,
+		DB:             suite.DB,
+		GWService:      &gw.Service{},
+		Logger:         log,
 	}
 
 	handler := pkgauth.Middleware(mockAuth, log)(apiv2.DraftsDocumentHandler(*srv))

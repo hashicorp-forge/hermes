@@ -31,14 +31,15 @@ func TestV2Products_Get(t *testing.T) {
 	mockAuth := mockadapter.NewAdapterWithEmail(testEmail)
 	log := hclog.NewNullLogger()
 
-	// Create server components
+	// Create server components with search provider
 	srv := &server.Server{
-		AlgoSearch: &algolia.Client{},
-		AlgoWrite:  &algolia.Client{},
-		Config:     suite.Config,
-		DB:         suite.DB,
-		GWService:  &gw.Service{},
-		Logger:     log,
+		AlgoSearch:     &algolia.Client{},
+		AlgoWrite:      &algolia.Client{},
+		SearchProvider: suite.SearchProvider, // Use Meilisearch adapter
+		Config:         suite.Config,
+		DB:             suite.DB,
+		GWService:      &gw.Service{},
+		Logger:         log,
 	}
 
 	// Wrap the products handler with auth middleware
@@ -74,12 +75,13 @@ func TestV2Products_MethodNotAllowed(t *testing.T) {
 	log := hclog.NewNullLogger()
 
 	srv := &server.Server{
-		AlgoSearch: &algolia.Client{},
-		AlgoWrite:  &algolia.Client{},
-		Config:     suite.Config,
-		DB:         suite.DB,
-		GWService:  &gw.Service{},
-		Logger:     log,
+		AlgoSearch:     &algolia.Client{},
+		AlgoWrite:      &algolia.Client{},
+		SearchProvider: suite.SearchProvider,
+		Config:         suite.Config,
+		DB:             suite.DB,
+		GWService:      &gw.Service{},
+		Logger:         log,
 	}
 
 	handler := pkgauth.Middleware(mockAuth, log)(apiv2.ProductsHandler(*srv))
@@ -114,12 +116,13 @@ func TestV2Products_Unauthorized(t *testing.T) {
 	log := hclog.NewNullLogger()
 
 	srv := &server.Server{
-		AlgoSearch: &algolia.Client{},
-		AlgoWrite:  &algolia.Client{},
-		Config:     suite.Config,
-		DB:         suite.DB,
-		GWService:  &gw.Service{},
-		Logger:     log,
+		AlgoSearch:     &algolia.Client{},
+		AlgoWrite:      &algolia.Client{},
+		SearchProvider: suite.SearchProvider,
+		Config:         suite.Config,
+		DB:             suite.DB,
+		GWService:      &gw.Service{},
+		Logger:         log,
 	}
 
 	handler := pkgauth.Middleware(mockAuth, log)(apiv2.ProductsHandler(*srv))
