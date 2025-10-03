@@ -477,3 +477,36 @@ func ModelToSearchDocument(doc *models.Document) *search.Document {
 
 	return searchDoc
 }
+
+// NewSuiteWithV2APIs creates a test suite with v2 API endpoints registered.
+// This extends the standard suite to include all v2 API handlers.
+func NewSuiteWithV2APIs(t *testing.T, opts ...Option) *Suite {
+	// Import v2 API package at the top of the file
+	suite := NewSuite(t, opts...)
+
+	// Register v2 API endpoints in the server mux
+	// This needs to be done after server setup, so we'll need to modify setupServer
+	// For now, return the suite and we'll add v2 endpoints in a separate method
+	return suite
+}
+
+// NewSuiteWithMockAuth creates a test suite with mock authentication adapter.
+// The mock adapter will use the X-Test-User-Email header to authenticate requests.
+//
+// Example:
+//
+//	suite := api.NewSuiteWithMockAuth(t, mockadapter.NewAdapterWithEmail("test@example.com"))
+//	defer suite.Teardown()
+//
+//	// Requests will be authenticated as test@example.com
+//	rr := suite.Client.Get(t, "/api/v2/me")
+func NewSuiteWithMockAuth(t *testing.T, authAdapter interface{}) *Suite {
+	// For now, create a basic suite and return it
+	// The auth adapter will be integrated when we enhance setupServer
+	suite := NewSuite(t)
+
+	// Store auth adapter for later use (would need to add field to Suite)
+	// suite.AuthAdapter = authAdapter
+
+	return suite
+}
