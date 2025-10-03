@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp-forge/hermes/internal/server"
+	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
 	admin "google.golang.org/api/admin/directory/v1"
 )
 
@@ -39,8 +40,8 @@ func GroupsHandler(srv server.Server) http.Handler {
 		}
 
 		// Authorize request.
-		userEmail := r.Context().Value("userEmail").(string)
-		if userEmail == "" {
+		userEmail, ok := pkgauth.GetUserEmail(r.Context())
+		if !ok || userEmail == "" {
 			srv.Logger.Error("user email not found in request context", logArgs...)
 			http.Error(
 				w, "No authorization information in request", http.StatusUnauthorized)

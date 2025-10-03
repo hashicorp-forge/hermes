@@ -3,8 +3,8 @@ package config
 import (
 	"fmt"
 
-	"github.com/hashicorp-forge/hermes/internal/auth/oktaalb"
-	"github.com/hashicorp-forge/hermes/pkg/algolia"
+	oktaadapter "github.com/hashicorp-forge/hermes/pkg/auth/adapters/okta"
+	algoliaadapter "github.com/hashicorp-forge/hermes/pkg/search/adapters/algolia"
 	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
 	"github.com/hashicorp/hcl/v2/hclsimple"
 )
@@ -12,7 +12,7 @@ import (
 // Config contains the Hermes configuration.
 type Config struct {
 	// Algolia configures Hermes to work with Algolia.
-	Algolia *algolia.Config `hcl:"algolia,block"`
+	Algolia *algoliaadapter.Config `hcl:"algolia,block"`
 
 	// BaseURL is the base URL used for building links.
 	BaseURL string `hcl:"base_url,optional"`
@@ -46,7 +46,7 @@ type Config struct {
 	LogFormat string `hcl:"log_format,optional"`
 
 	// Okta configures Hermes to work with Okta.
-	Okta *oktaalb.Config `hcl:"okta,block"`
+	Okta *oktaadapter.Config `hcl:"okta,block"`
 
 	// Products contain available products.
 	Products *Products `hcl:"products,block"`
@@ -338,12 +338,12 @@ type Server struct {
 // NewConfig parses an HCL configuration file and returns the Hermes config.
 func NewConfig(filename string) (*Config, error) {
 	c := &Config{
-		Algolia:         &algolia.Config{},
+		Algolia:         &algoliaadapter.Config{},
 		Email:           &Email{},
 		FeatureFlags:    &FeatureFlags{},
 		GoogleWorkspace: &GoogleWorkspace{},
 		Indexer:         &Indexer{},
-		Okta:            &oktaalb.Config{},
+		Okta:            &oktaadapter.Config{},
 		Server:          &Server{},
 	}
 	err := hclsimple.DecodeFile(filename, nil, c)

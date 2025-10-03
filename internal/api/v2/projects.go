@@ -13,6 +13,7 @@ import (
 
 	"github.com/hashicorp-forge/hermes/internal/server"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
+	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
 	"github.com/hashicorp-forge/hermes/pkg/models"
 	"gorm.io/gorm"
 )
@@ -68,7 +69,7 @@ func ProjectsHandler(srv server.Server) http.Handler {
 		}
 
 		// Authorize request.
-		userEmail := r.Context().Value("userEmail").(string)
+		userEmail := pkgauth.MustGetUserEmail(r.Context())
 		if userEmail == "" {
 			srv.Logger.Error("user email not found in request context", logArgs...)
 			http.Error(
@@ -306,7 +307,7 @@ func ProjectHandler(srv server.Server) http.Handler {
 		}
 
 		// Authorize request.
-		userEmail := r.Context().Value("userEmail").(string)
+		userEmail := pkgauth.MustGetUserEmail(r.Context())
 		if userEmail == "" {
 			srv.Logger.Error("user email not found in request context", logArgs...)
 			http.Error(

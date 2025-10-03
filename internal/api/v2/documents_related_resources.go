@@ -1,6 +1,7 @@
 package api
 
 import (
+pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
 	"encoding/json"
 	"net/http"
 
@@ -175,7 +176,7 @@ func documentsResourceRelatedResourcesHandler(
 	case "PUT":
 		// Authorize request (only the document owner can replace related
 		// resources).
-		userEmail := r.Context().Value("userEmail").(string)
+		userEmail := pkgauth.MustGetUserEmail(r.Context())
 		if doc.Owners[0] != userEmail {
 			http.Error(w, "Not a document owner", http.StatusUnauthorized)
 			return

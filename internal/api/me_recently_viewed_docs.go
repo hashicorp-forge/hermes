@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
 	"errors"
 	"net/http"
 
@@ -30,7 +31,7 @@ func MeRecentlyViewedDocsHandler(
 		}
 
 		// Authorize request.
-		userEmail := r.Context().Value("userEmail").(string)
+		userEmail := pkgauth.MustGetUserEmail(r.Context())
 		if userEmail == "" {
 			errResp(
 				http.StatusUnauthorized,

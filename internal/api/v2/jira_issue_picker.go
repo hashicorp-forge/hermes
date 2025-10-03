@@ -12,6 +12,7 @@ import (
 
 	"github.com/hashicorp-forge/hermes/internal/jira"
 	"github.com/hashicorp-forge/hermes/internal/server"
+	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
 )
 
 type JiraIssuePickerGetResponse []JiraIssuePickerGetResponseIssue
@@ -32,8 +33,8 @@ func JiraIssuePickerHandler(srv server.Server) http.Handler {
 		}
 
 		// Authorize request.
-		userEmail := r.Context().Value("userEmail").(string)
-		if userEmail == "" {
+		userEmail, ok := pkgauth.GetUserEmail(r.Context())
+		if !ok || userEmail == "" {
 			log.Error("user email not found in request context", logArgs...)
 			http.Error(
 				w, "No authorization information for request", http.StatusUnauthorized)

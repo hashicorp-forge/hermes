@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp-forge/hermes/internal/email"
 	"github.com/hashicorp-forge/hermes/internal/helpers"
 	"github.com/hashicorp-forge/hermes/internal/server"
+	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
 	"github.com/hashicorp-forge/hermes/pkg/document"
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp-forge/hermes/pkg/models"
@@ -257,7 +258,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 				// document metadata.
 				if r.Header.Get("Add-To-Recently-Viewed") != "" {
 					// Get authenticated user's email address.
-					email := r.Context().Value("userEmail").(string)
+					email := pkgauth.MustGetUserEmail(r.Context())
 
 					if err := updateRecentlyViewedDocs(
 						email, docID, srv.DB, now,
@@ -341,7 +342,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 			}
 
 			// Authorize request.
-			userEmail := r.Context().Value("userEmail").(string)
+			userEmail := pkgauth.MustGetUserEmail(r.Context())
 			if err := authorizeDocumentPatchRequest(
 				userEmail, *doc, req,
 			); err != nil {

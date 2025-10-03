@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
 	"errors"
 	"fmt"
 	"net/http"
@@ -225,7 +226,7 @@ func DocumentHandler(
 			// document metadata.
 			if r.Header.Get("Add-To-Recently-Viewed") != "" {
 				// Get authenticated user's email address.
-				email := r.Context().Value("userEmail").(string)
+				email := pkgauth.MustGetUserEmail(r.Context())
 
 				if err := updateRecentlyViewedDocs(email, docID, db, now); err != nil {
 					// If we get an error, log it but don't return an error response
@@ -297,7 +298,7 @@ func DocumentHandler(
 
 		case "PATCH":
 			// Authorize request (only the owner can PATCH the doc).
-			userEmail := r.Context().Value("userEmail").(string)
+			userEmail := pkgauth.MustGetUserEmail(r.Context())
 			if doc.Owners[0] != userEmail {
 				http.Error(w, "Not a document owner", http.StatusUnauthorized)
 				return

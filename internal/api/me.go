@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
 	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
 	"github.com/hashicorp/go-hclog"
 )
@@ -39,8 +40,8 @@ func MeHandler(
 		}
 
 		// Authorize request.
-		userEmail := r.Context().Value("userEmail").(string)
-		if userEmail == "" {
+		userEmail, ok := pkgauth.GetUserEmail(r.Context())
+		if !ok || userEmail == "" {
 			errResp(
 				http.StatusUnauthorized,
 				"No authorization information for request",

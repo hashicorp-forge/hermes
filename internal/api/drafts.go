@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -72,7 +73,7 @@ func DraftsHandler(
 		}
 
 		// Authorize request.
-		userEmail := r.Context().Value("userEmail").(string)
+		userEmail := pkgauth.MustGetUserEmail(r.Context())
 		if userEmail == "" {
 			errResp(
 				http.StatusUnauthorized,
@@ -610,7 +611,7 @@ func DraftsDocumentHandler(
 		// Authorize request (only allow owners or contributors to get past this
 		// point in the handler). We further authorize some methods later that
 		// require owner access only.
-		userEmail := r.Context().Value("userEmail").(string)
+		userEmail := pkgauth.MustGetUserEmail(r.Context())
 		var isOwner, isContributor bool
 		if doc.Owners[0] == userEmail {
 			isOwner = true
