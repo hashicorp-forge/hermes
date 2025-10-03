@@ -1,0 +1,1012 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>api: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/hashicorp-forge/hermes/tests/api/client.go (2.4%)</option>
+				
+				<option value="file1">github.com/hashicorp-forge/hermes/tests/api/helpers.go (0.0%)</option>
+				
+				<option value="file2">github.com/hashicorp-forge/hermes/tests/api/suite.go (22.1%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">no coverage</span>
+				<span class="cov1">low coverage</span>
+				<span class="cov2">*</span>
+				<span class="cov3">*</span>
+				<span class="cov4">*</span>
+				<span class="cov5">*</span>
+				<span class="cov6">*</span>
+				<span class="cov7">*</span>
+				<span class="cov8">*</span>
+				<span class="cov9">*</span>
+				<span class="cov10">high coverage</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package api
+
+import (
+        "bytes"
+        "encoding/json"
+        "fmt"
+        "io"
+        "net/http"
+        "net/url"
+        "testing"
+)
+
+// Client wraps http.Client with test-friendly methods.
+type Client struct {
+        BaseURL string
+        client  *http.Client
+        auth    string
+        t       *testing.T
+}
+
+// NewClient creates a new test client.
+func NewClient(baseURL string, t *testing.T) *Client <span class="cov10" title="7">{
+        return &amp;Client{
+                BaseURL: baseURL,
+                client:  &amp;http.Client{},
+                t:       t,
+        }
+}</span>
+
+// SetAuth sets the authentication email for requests.
+// In tests, this is typically the user's email address.
+func (c *Client) SetAuth(email string) <span class="cov4" title="2">{
+        c.auth = email
+}</span>
+
+// Get performs a GET request and returns a Response with assertions.
+func (c *Client) Get(path string) *Response <span class="cov0" title="0">{
+        return c.request("GET", path, nil)
+}</span>
+
+// Post performs a POST request with JSON body.
+func (c *Client) Post(path string, body interface{}) *Response <span class="cov0" title="0">{
+        return c.request("POST", path, body)
+}</span>
+
+// Put performs a PUT request with JSON body.
+func (c *Client) Put(path string, body interface{}) *Response <span class="cov0" title="0">{
+        return c.request("PUT", path, body)
+}</span>
+
+// Patch performs a PATCH request with JSON body.
+func (c *Client) Patch(path string, body interface{}) *Response <span class="cov0" title="0">{
+        return c.request("PATCH", path, body)
+}</span>
+
+// Delete performs a DELETE request.
+func (c *Client) Delete(path string) *Response <span class="cov0" title="0">{
+        return c.request("DELETE", path, nil)
+}</span>
+
+// request is the internal method for making HTTP requests.
+func (c *Client) request(method, path string, body interface{}) *Response <span class="cov0" title="0">{
+        var reqBody io.Reader
+
+        if body != nil </span><span class="cov0" title="0">{
+                jsonBody, err := json.Marshal(body)
+                if err != nil </span><span class="cov0" title="0">{
+                        c.t.Fatalf("Failed to marshal request body: %v", err)
+                }</span>
+                <span class="cov0" title="0">reqBody = bytes.NewReader(jsonBody)</span>
+        }
+
+        <span class="cov0" title="0">fullURL := c.BaseURL + path
+        req, err := http.NewRequest(method, fullURL, reqBody)
+        if err != nil </span><span class="cov0" title="0">{
+                c.t.Fatalf("Failed to create request: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">if body != nil </span><span class="cov0" title="0">{
+                req.Header.Set("Content-Type", "application/json")
+        }</span>
+
+        // Set authentication header (simplified for tests)
+        <span class="cov0" title="0">if c.auth != "" </span><span class="cov0" title="0">{
+                req.Header.Set("X-Test-User-Email", c.auth)
+        }</span>
+
+        <span class="cov0" title="0">resp, err := c.client.Do(req)
+        if err != nil </span><span class="cov0" title="0">{
+                c.t.Fatalf("Request failed: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">return &amp;Response{
+                Response: resp,
+                t:        c.t,
+        }</span>
+}
+
+// GetWithQuery performs a GET request with query parameters.
+func (c *Client) GetWithQuery(path string, params map[string]string) *Response <span class="cov0" title="0">{
+        u, err := url.Parse(c.BaseURL + path)
+        if err != nil </span><span class="cov0" title="0">{
+                c.t.Fatalf("Failed to parse URL: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">q := u.Query()
+        for k, v := range params </span><span class="cov0" title="0">{
+                q.Set(k, v)
+        }</span>
+        <span class="cov0" title="0">u.RawQuery = q.Encode()
+
+        req, err := http.NewRequest("GET", u.String(), nil)
+        if err != nil </span><span class="cov0" title="0">{
+                c.t.Fatalf("Failed to create request: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">if c.auth != "" </span><span class="cov0" title="0">{
+                req.Header.Set("X-Test-User-Email", c.auth)
+        }</span>
+
+        <span class="cov0" title="0">resp, err := c.client.Do(req)
+        if err != nil </span><span class="cov0" title="0">{
+                c.t.Fatalf("Request failed: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">return &amp;Response{
+                Response: resp,
+                t:        c.t,
+        }</span>
+}
+
+// Response wraps http.Response with test assertions.
+type Response struct {
+        *http.Response
+        t *testing.T
+}
+
+// AssertStatus asserts the response status code.
+// Returns the Response for method chaining.
+func (r *Response) AssertStatus(expected int) *Response <span class="cov0" title="0">{
+        if r.StatusCode != expected </span><span class="cov0" title="0">{
+                body, _ := io.ReadAll(r.Body)
+                r.t.Fatalf("Expected status %d, got %d. Body: %s", expected, r.StatusCode, string(body))
+        }</span>
+        <span class="cov0" title="0">return r</span>
+}
+
+// AssertStatusOK asserts the response is 200 OK.
+func (r *Response) AssertStatusOK() *Response <span class="cov0" title="0">{
+        return r.AssertStatus(http.StatusOK)
+}</span>
+
+// AssertStatusCreated asserts the response is 201 Created.
+func (r *Response) AssertStatusCreated() *Response <span class="cov0" title="0">{
+        return r.AssertStatus(http.StatusCreated)
+}</span>
+
+// AssertStatusNoContent asserts the response is 204 No Content.
+func (r *Response) AssertStatusNoContent() *Response <span class="cov0" title="0">{
+        return r.AssertStatus(http.StatusNoContent)
+}</span>
+
+// AssertStatusBadRequest asserts the response is 400 Bad Request.
+func (r *Response) AssertStatusBadRequest() *Response <span class="cov0" title="0">{
+        return r.AssertStatus(http.StatusBadRequest)
+}</span>
+
+// AssertStatusUnauthorized asserts the response is 401 Unauthorized.
+func (r *Response) AssertStatusUnauthorized() *Response <span class="cov0" title="0">{
+        return r.AssertStatus(http.StatusUnauthorized)
+}</span>
+
+// AssertStatusForbidden asserts the response is 403 Forbidden.
+func (r *Response) AssertStatusForbidden() *Response <span class="cov0" title="0">{
+        return r.AssertStatus(http.StatusForbidden)
+}</span>
+
+// AssertStatusNotFound asserts the response is 404 Not Found.
+func (r *Response) AssertStatusNotFound() *Response <span class="cov0" title="0">{
+        return r.AssertStatus(http.StatusNotFound)
+}</span>
+
+// AssertStatusInternalServerError asserts the response is 500 Internal Server Error.
+func (r *Response) AssertStatusInternalServerError() *Response <span class="cov0" title="0">{
+        return r.AssertStatus(http.StatusInternalServerError)
+}</span>
+
+// DecodeJSON decodes the response body as JSON into the provided value.
+// Returns the Response for method chaining.
+func (r *Response) DecodeJSON(v interface{}) *Response <span class="cov0" title="0">{
+        body, err := io.ReadAll(r.Body)
+        if err != nil </span><span class="cov0" title="0">{
+                r.t.Fatalf("Failed to read response body: %v", err)
+        }</span>
+        <span class="cov0" title="0">r.Body.Close()
+
+        if err := json.Unmarshal(body, v); err != nil </span><span class="cov0" title="0">{
+                r.t.Fatalf("Failed to decode JSON response. Body: %s, Error: %v", string(body), err)
+        }</span>
+        <span class="cov0" title="0">return r</span>
+}
+
+// AssertJSONContains asserts that the JSON response contains a specific key-value pair.
+func (r *Response) AssertJSONContains(key string, expectedValue interface{}) *Response <span class="cov0" title="0">{
+        body, err := io.ReadAll(r.Body)
+        if err != nil </span><span class="cov0" title="0">{
+                r.t.Fatalf("Failed to read response body: %v", err)
+        }</span>
+        <span class="cov0" title="0">r.Body.Close()
+
+        var data map[string]interface{}
+        if err := json.Unmarshal(body, &amp;data); err != nil </span><span class="cov0" title="0">{
+                r.t.Fatalf("Failed to decode JSON response: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">actualValue, ok := data[key]
+        if !ok </span><span class="cov0" title="0">{
+                r.t.Fatalf("Expected key %q not found in response", key)
+        }</span>
+
+        <span class="cov0" title="0">if fmt.Sprint(actualValue) != fmt.Sprint(expectedValue) </span><span class="cov0" title="0">{
+                r.t.Fatalf("Expected %q to be %v, got %v", key, expectedValue, actualValue)
+        }</span>
+
+        <span class="cov0" title="0">return r</span>
+}
+
+// GetBody returns the response body as a string.
+func (r *Response) GetBody() string <span class="cov0" title="0">{
+        body, err := io.ReadAll(r.Body)
+        if err != nil </span><span class="cov0" title="0">{
+                r.t.Fatalf("Failed to read response body: %v", err)
+        }</span>
+        <span class="cov0" title="0">r.Body.Close()
+        return string(body)</span>
+}
+
+// AssertBodyContains asserts that the response body contains a substring.
+func (r *Response) AssertBodyContains(substr string) *Response <span class="cov0" title="0">{
+        body := r.GetBody()
+        if !contains(body, substr) </span><span class="cov0" title="0">{
+                r.t.Fatalf("Expected response body to contain %q, but it didn't. Body: %s", substr, body)
+        }</span>
+        <span class="cov0" title="0">return r</span>
+}
+
+// contains is a simple helper to check if a string contains a substring.
+func contains(s, substr string) bool <span class="cov0" title="0">{
+        return len(s) &gt;= len(substr) &amp;&amp; (s == substr || len(substr) == 0 ||
+                (len(s) &gt; 0 &amp;&amp; (s[:len(substr)] == substr || contains(s[1:], substr))))
+}</span>
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package api
+
+import (
+        "fmt"
+        "testing"
+
+        "github.com/hashicorp-forge/hermes/tests/api/fixtures"
+        "github.com/stretchr/testify/assert"
+        "gorm.io/gorm"
+)
+
+// WithTransaction runs a test function within a database transaction.
+// The transaction is automatically rolled back after the test completes,
+// ensuring test isolation without the overhead of creating/dropping databases.
+//
+// Example usage:
+//
+//        func TestMyFeature(t *testing.T) {
+//            suite := NewSuite(t)
+//            defer suite.Cleanup()
+//
+//            t.Run("CreateDocument", func(t *testing.T) {
+//                WithTransaction(t, suite.DB, func(t *testing.T, tx *gorm.DB) {
+//                    doc := fixtures.NewDocument().Create(t, tx)
+//                    assert.NotZero(t, doc.ID)
+//                })
+//            })
+//        }
+//
+// This approach provides:
+// - Test isolation (each test has clean state)
+// - Fast execution (~10-50ms vs 60s)
+// - No manual cleanup needed
+// - Panic safety (rollback on panic)
+func WithTransaction(t *testing.T, db *gorm.DB, fn func(*testing.T, *gorm.DB)) <span class="cov0" title="0">{
+        t.Helper()
+
+        tx := db.Begin()
+        if tx.Error != nil </span><span class="cov0" title="0">{
+                t.Fatalf("Failed to begin transaction: %v", tx.Error)
+        }</span>
+
+        <span class="cov0" title="0">defer func() </span><span class="cov0" title="0">{
+                if r := recover(); r != nil </span><span class="cov0" title="0">{
+                        tx.Rollback()
+                        t.Fatalf("Test panicked: %v", r)
+                }</span>
+                // Always rollback, even on success
+                // This ensures test isolation
+                <span class="cov0" title="0">if err := tx.Rollback().Error; err != nil </span><span class="cov0" title="0">{
+                        t.Logf("Warning: Failed to rollback transaction: %v", err)
+                }</span>
+        }()
+
+        <span class="cov0" title="0">fn(t, tx)</span>
+}
+
+// WithSubTest is a helper that combines subtests with transactions.
+// This is the recommended way to write fast, isolated tests.
+//
+// Example usage:
+//
+//        func TestDocumentCRUD(t *testing.T) {
+//            suite := NewSuite(t)
+//            defer suite.Cleanup()
+//
+//            WithSubTest(t, suite.DB, "Create", func(t *testing.T, tx *gorm.DB) {
+//                doc := fixtures.NewDocument().Create(t, tx)
+//                assert.NotZero(t, doc.ID)
+//            })
+//
+//            WithSubTest(t, suite.DB, "Update", func(t *testing.T, tx *gorm.DB) {
+//                // ...
+//            })
+//        }
+func WithSubTest(t *testing.T, db *gorm.DB, name string, fn func(*testing.T, *gorm.DB)) <span class="cov0" title="0">{
+        t.Helper()
+        t.Run(name, func(t *testing.T) </span><span class="cov0" title="0">{
+                WithTransaction(t, db, fn)
+        }</span>)
+}
+
+// ParallelWithTransaction runs a test function in parallel within a transaction.
+// Use this for tests that can safely run concurrently.
+//
+// Example usage:
+//
+//        func TestParallelOperations(t *testing.T) {
+//            suite := NewSuite(t)
+//            defer suite.Cleanup()
+//
+//            for i := 0; i &lt; 10; i++ {
+//                i := i
+//                name := fmt.Sprintf("test_%d", i)
+//                ParallelWithTransaction(t, suite.DB, name, func(t *testing.T, tx *gorm.DB) {
+//                    doc := fixtures.NewDocument().
+//                        WithGoogleFileID(fmt.Sprintf("doc-%d", i)).
+//                        Create(t, tx)
+//                    assert.NotZero(t, doc.ID)
+//                })
+//            }
+//        }
+func ParallelWithTransaction(t *testing.T, db *gorm.DB, name string, fn func(*testing.T, *gorm.DB)) <span class="cov0" title="0">{
+        t.Helper()
+        t.Run(name, func(t *testing.T) </span><span class="cov0" title="0">{
+                t.Parallel()
+                WithTransaction(t, db, fn)
+        }</span>)
+}
+
+// TestHelpers_WithTransaction demonstrates the transaction helper.
+func TestHelpers_WithTransaction(t *testing.T) <span class="cov0" title="0">{
+        if testing.Short() </span><span class="cov0" title="0">{
+                t.Skip("Skipping in short mode")
+        }</span>
+
+        <span class="cov0" title="0">suite := NewSuite(t)
+        defer suite.Cleanup()
+
+        // Example 1: Simple transaction test
+        WithTransaction(t, suite.DB, func(t *testing.T, tx *gorm.DB) </span><span class="cov0" title="0">{
+                doc := fixtures.NewDocument().
+                        WithGoogleFileID("tx-helper-1").
+                        Create(t, tx)
+                assert.NotZero(t, doc.ID)
+        }</span>)
+
+        // Example 2: Multiple subtests with transactions
+        <span class="cov0" title="0">WithSubTest(t, suite.DB, "FirstTest", func(t *testing.T, tx *gorm.DB) </span><span class="cov0" title="0">{
+                doc := fixtures.NewDocument().
+                        WithGoogleFileID("tx-helper-2").
+                        Create(t, tx)
+                assert.Equal(t, "tx-helper-2", doc.GoogleFileID)
+        }</span>)
+
+        <span class="cov0" title="0">WithSubTest(t, suite.DB, "SecondTest", func(t *testing.T, tx *gorm.DB) </span><span class="cov0" title="0">{
+                // This test won't see data from FirstTest (transaction isolation)
+                doc := fixtures.NewDocument().
+                        WithGoogleFileID("tx-helper-3").
+                        Create(t, tx)
+                assert.Equal(t, "tx-helper-3", doc.GoogleFileID)
+        }</span>)
+}
+
+// TestHelpers_ParallelWithTransaction demonstrates parallel transaction tests.
+func TestHelpers_ParallelWithTransaction(t *testing.T) <span class="cov0" title="0">{
+        if testing.Short() </span><span class="cov0" title="0">{
+                t.Skip("Skipping in short mode")
+        }</span>
+
+        <span class="cov0" title="0">suite := NewSuite(t)
+        defer suite.Cleanup()
+
+        // Run 5 tests in parallel
+        for i := 0; i &lt; 5; i++ </span><span class="cov0" title="0">{
+                i := i // capture loop variable
+                name := fmt.Sprintf("parallel_%d", i)
+                ParallelWithTransaction(t, suite.DB, name, func(t *testing.T, tx *gorm.DB) </span><span class="cov0" title="0">{
+                        doc := fixtures.NewDocument().
+                                WithGoogleFileID(fmt.Sprintf("parallel-doc-%d", i)).
+                                Create(t, tx)
+                        assert.NotZero(t, doc.ID)
+                }</span>)
+        }
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">// Package api provides a comprehensive test suite framework for the Hermes API.
+//
+// This package includes:
+//   - Test suite setup and teardown
+//   - HTTP test client with fluent assertions
+//   - Database fixture builders
+//   - Mock and real storage provider support
+//   - Authentication helpers
+package api
+
+import (
+        "context"
+        "fmt"
+        "net/http"
+        "net/http/httptest"
+        "os"
+        "testing"
+        "time"
+
+        "github.com/hashicorp-forge/hermes/internal/api"
+        "github.com/hashicorp-forge/hermes/internal/config"
+        "github.com/hashicorp-forge/hermes/internal/server"
+        "github.com/hashicorp-forge/hermes/internal/test"
+        "github.com/hashicorp-forge/hermes/pkg/algolia"
+        "github.com/hashicorp-forge/hermes/pkg/models"
+        "github.com/hashicorp-forge/hermes/pkg/search"
+        "github.com/hashicorp-forge/hermes/pkg/search/adapters/meilisearch"
+        gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
+        "github.com/hashicorp/go-hclog"
+        "gorm.io/gorm"
+)
+
+// Suite provides a complete test environment for API tests.
+type Suite struct {
+        // Server is the test HTTP server
+        Server *httptest.Server
+
+        // Client is the HTTP test client
+        Client *Client
+
+        // DB is the test database connection
+        DB *gorm.DB
+
+        // DBName is the name of the test database
+        DBName string
+
+        // SearchProvider is the search backend (Meilisearch or mock)
+        SearchProvider search.Provider
+
+        // Config is the server configuration
+        Config *config.Config
+
+        // Ctx is the context for operations
+        Ctx context.Context
+
+        // T is the testing context
+        T *testing.T
+
+        // cleanup functions to run on teardown
+        cleanupFuncs []func()
+}
+
+// Option configures the test suite.
+type Option func(*Suite) error
+
+// NewSuite creates a new test suite with a fresh database and configured backends.
+//
+// By default, it uses:
+//   - PostgreSQL test database (created fresh for each test)
+//   - Meilisearch for search (requires docker-compose)
+//   - Mock Google Workspace
+//
+// Example:
+//
+//        suite := api.NewSuite(t,
+//                api.WithAuthenticatedUser("test@example.com"),
+//        )
+//        defer suite.Cleanup()
+func NewSuite(t *testing.T, opts ...Option) *Suite <span class="cov0" title="0">{
+        suite := &amp;Suite{
+                T:            t,
+                Ctx:          context.Background(),
+                cleanupFuncs: make([]func(), 0),
+        }
+
+        // Create test database
+        if err := suite.setupDatabase(); err != nil </span><span class="cov0" title="0">{
+                t.Fatalf("Failed to setup database: %v", err)
+        }</span>
+
+        // Create search provider (Meilisearch by default)
+        <span class="cov0" title="0">if err := suite.setupSearch(); err != nil </span><span class="cov0" title="0">{
+                t.Fatalf("Failed to setup search: %v", err)
+        }</span>
+
+        // Create test configuration
+        <span class="cov0" title="0">suite.Config = suite.createTestConfig()
+
+        // Apply options before server creation
+        for _, opt := range opts </span><span class="cov0" title="0">{
+                if err := opt(suite); err != nil </span><span class="cov0" title="0">{
+                        suite.Cleanup()
+                        t.Fatalf("Failed to apply option: %v", err)
+                }</span>
+        }
+
+        // Create test server
+        <span class="cov0" title="0">if err := suite.setupServer(); err != nil </span><span class="cov0" title="0">{
+                suite.Cleanup()
+                t.Fatalf("Failed to setup server: %v", err)
+        }</span>
+
+        // Create test client
+        <span class="cov0" title="0">suite.Client = NewClient(suite.Server.URL, suite.T)
+
+        return suite</span>
+}
+
+// setupDatabase creates a fresh PostgreSQL database for testing.
+func (s *Suite) setupDatabase() error <span class="cov0" title="0">{
+        dsn := os.Getenv("HERMES_TEST_POSTGRESQL_DSN")
+        if dsn == "" </span><span class="cov0" title="0">{
+                dsn = "host=localhost user=postgres password=postgres port=5432 sslmode=disable"
+        }</span>
+
+        <span class="cov0" title="0">db, dbName, err := test.CreateTestDatabase(s.T, dsn)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to create test database: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">s.DB = db
+        s.DBName = dbName
+
+        // Auto-migrate models
+        if err := db.AutoMigrate(models.ModelsToAutoMigrate()...); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to auto-migrate: %w", err)
+        }</span>
+
+        // Seed database with essential data
+        <span class="cov0" title="0">if err := s.seedDatabase(db); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to seed database: %w", err)
+        }</span>
+
+        // Add cleanup function
+        <span class="cov0" title="0">s.cleanupFuncs = append(s.cleanupFuncs, func() </span><span class="cov0" title="0">{
+                test.DropTestDatabase(dsn, dbName)
+        }</span>)
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// setupSearch creates a Meilisearch search provider.
+func (s *Suite) setupSearch() error <span class="cov0" title="0">{
+        meilisearchHost := os.Getenv("HERMES_TEST_MEILISEARCH_HOST")
+        if meilisearchHost == "" </span><span class="cov0" title="0">{
+                meilisearchHost = "http://localhost:7700"
+        }</span>
+
+        <span class="cov0" title="0">adapter, err := meilisearch.NewAdapter(&amp;meilisearch.Config{
+                Host:            meilisearchHost,
+                APIKey:          "masterKey123",
+                DocsIndexName:   fmt.Sprintf("test-docs-%d", time.Now().UnixNano()),
+                DraftsIndexName: fmt.Sprintf("test-drafts-%d", time.Now().UnixNano()),
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to create meilisearch adapter: %w", err)
+        }</span>
+
+        // Verify Meilisearch is healthy
+        <span class="cov0" title="0">ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+        defer cancel()
+
+        if err := adapter.Healthy(ctx); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("meilisearch not available: %w (make sure to run 'make docker/dev/start')", err)
+        }</span>
+
+        <span class="cov0" title="0">s.SearchProvider = adapter
+
+        // Add cleanup to clear indexes
+        s.cleanupFuncs = append(s.cleanupFuncs, func() </span><span class="cov0" title="0">{
+                ctx := context.Background()
+                adapter.DocumentIndex().Clear(ctx)
+                adapter.DraftIndex().Clear(ctx)
+        }</span>)
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// createTestConfig creates a test configuration.
+func (s *Suite) createTestConfig() *config.Config <span class="cov0" title="0">{
+        return &amp;config.Config{
+                BaseURL: "http://localhost:8000",
+                Algolia: &amp;algolia.Config{
+                        ApplicationID:   "test-app-id",
+                        DocsIndexName:   "test-docs",
+                        DraftsIndexName: "test-drafts",
+                },
+                DocumentTypes: &amp;config.DocumentTypes{
+                        DocumentType: []*config.DocumentType{
+                                {
+                                        Name:     "RFC",
+                                        LongName: "Request for Comments",
+                                        Template: "test-template-id",
+                                },
+                                {
+                                        Name:     "PRD",
+                                        LongName: "Product Requirements Document",
+                                        Template: "test-template-id",
+                                },
+                        },
+                },
+        }
+}</span>
+
+// seedDatabase inserts essential test data.
+func (s *Suite) seedDatabase(db *gorm.DB) error <span class="cov0" title="0">{
+        // Create document types
+        docTypes := []models.DocumentType{
+                {Name: "RFC", LongName: "Request for Comments"},
+                {Name: "PRD", LongName: "Product Requirements Document"},
+                {Name: "FRD", LongName: "Feature Requirements Document"},
+        }
+        for _, dt := range docTypes </span><span class="cov0" title="0">{
+                if err := db.Create(&amp;dt).Error; err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("failed to create document type %s: %w", dt.Name, err)
+                }</span>
+        }
+
+        // Create default product
+        <span class="cov0" title="0">product := models.Product{
+                Name:         "Test Product",
+                Abbreviation: "TEST",
+        }
+        if err := db.Create(&amp;product).Error; err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to create product: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// setupServer creates the test HTTP server.
+func (s *Suite) setupServer() error <span class="cov0" title="0">{
+        // Create empty Algolia clients (handlers will use database/search provider instead)
+        // These are kept as empty structs to satisfy the API handler signatures
+        algoSearch := &amp;algolia.Client{}
+        algoWrite := &amp;algolia.Client{}
+
+        // Create mock Google Workspace service
+        gwService := &amp;gw.Service{}
+
+        // Create server
+        srv := &amp;server.Server{
+                AlgoSearch: algoSearch,
+                AlgoWrite:  algoWrite,
+                Config:     s.Config,
+                DB:         s.DB,
+                GWService:  gwService,
+                Logger:     hclog.NewNullLogger(),
+        }
+
+        // Create mux and register endpoints (mimicking internal/cmd/commands/server/server.go)
+        mux := http.NewServeMux()
+
+        // Register key API v1 endpoints (add more as needed for tests)
+        mux.Handle("/api/v1/documents/",
+                api.DocumentHandler(s.Config, srv.Logger, algoSearch, algoWrite, gwService, s.DB))
+        mux.Handle("/api/v1/drafts",
+                api.DraftsHandler(s.Config, srv.Logger, algoSearch, algoWrite, gwService, s.DB))
+        mux.Handle("/api/v1/drafts/",
+                api.DraftsDocumentHandler(s.Config, srv.Logger, algoSearch, algoWrite, gwService, s.DB))
+        mux.Handle("/api/v1/products",
+                api.ProductsHandler(s.Config, algoSearch, srv.Logger))
+        mux.Handle("/api/v1/reviews/",
+                api.ReviewHandler(s.Config, srv.Logger, algoSearch, algoWrite, gwService, s.DB))
+
+        // Create test server
+        s.Server = httptest.NewServer(mux)
+
+        // Add cleanup
+        s.cleanupFuncs = append(s.cleanupFuncs, func() </span><span class="cov0" title="0">{
+                s.Server.Close()
+        }</span>)
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// Cleanup tears down the test environment.
+func (s *Suite) Cleanup() <span class="cov0" title="0">{
+        // Run cleanup functions in reverse order
+        for i := len(s.cleanupFuncs) - 1; i &gt;= 0; i-- </span><span class="cov0" title="0">{
+                s.cleanupFuncs[i]()
+        }</span>
+}
+
+// WithAuthenticatedUser sets up an authenticated user for tests.
+func WithAuthenticatedUser(email string) Option <span class="cov0" title="0">{
+        return func(s *Suite) error </span><span class="cov0" title="0">{
+                s.Client.SetAuth(email)
+                return nil
+        }</span>
+}
+
+// WithMockSearch uses a mock search provider instead of real Meilisearch.
+func WithMockSearch() Option <span class="cov0" title="0">{
+        return func(s *Suite) error </span><span class="cov0" title="0">{
+                s.SearchProvider = &amp;mockSearchProvider{}
+                return nil
+        }</span>
+}
+
+// mockSearchProvider is a simple mock for search.Provider.
+type mockSearchProvider struct{}
+
+func (m *mockSearchProvider) DocumentIndex() search.DocumentIndex <span class="cov0" title="0">{
+        return &amp;mockDocumentIndex{}
+}</span>
+
+func (m *mockSearchProvider) DraftIndex() search.DraftIndex <span class="cov0" title="0">{
+        return &amp;mockDraftIndex{}
+}</span>
+
+func (m *mockSearchProvider) Name() string <span class="cov0" title="0">{
+        return "mock"
+}</span>
+
+func (m *mockSearchProvider) Healthy(ctx context.Context) error <span class="cov0" title="0">{
+        return nil
+}</span>
+
+type mockDocumentIndex struct{}
+
+func (m *mockDocumentIndex) Index(ctx context.Context, doc *search.Document) error <span class="cov0" title="0">{
+        return nil
+}</span>
+
+func (m *mockDocumentIndex) IndexBatch(ctx context.Context, docs []*search.Document) error <span class="cov0" title="0">{
+        return nil
+}</span>
+
+func (m *mockDocumentIndex) Delete(ctx context.Context, docID string) error <span class="cov0" title="0">{
+        return nil
+}</span>
+
+func (m *mockDocumentIndex) DeleteBatch(ctx context.Context, docIDs []string) error <span class="cov0" title="0">{
+        return nil
+}</span>
+
+func (m *mockDocumentIndex) Search(ctx context.Context, query *search.SearchQuery) (*search.SearchResult, error) <span class="cov0" title="0">{
+        return &amp;search.SearchResult{
+                Hits:       []*search.Document{},
+                TotalHits:  0,
+                Page:       query.Page,
+                PerPage:    query.PerPage,
+                TotalPages: 0,
+                Facets:     &amp;search.Facets{},
+                QueryTime:  0,
+        }, nil
+}</span>
+
+func (m *mockDocumentIndex) GetFacets(ctx context.Context, facetNames []string) (*search.Facets, error) <span class="cov0" title="0">{
+        return &amp;search.Facets{}, nil
+}</span>
+
+func (m *mockDocumentIndex) Clear(ctx context.Context) error <span class="cov0" title="0">{
+        return nil
+}</span>
+
+type mockDraftIndex struct{}
+
+func (m *mockDraftIndex) Index(ctx context.Context, doc *search.Document) error <span class="cov0" title="0">{
+        return nil
+}</span>
+
+func (m *mockDraftIndex) IndexBatch(ctx context.Context, docs []*search.Document) error <span class="cov0" title="0">{
+        return nil
+}</span>
+
+func (m *mockDraftIndex) Delete(ctx context.Context, docID string) error <span class="cov0" title="0">{
+        return nil
+}</span>
+
+func (m *mockDraftIndex) DeleteBatch(ctx context.Context, docIDs []string) error <span class="cov0" title="0">{
+        return nil
+}</span>
+
+func (m *mockDraftIndex) Search(ctx context.Context, query *search.SearchQuery) (*search.SearchResult, error) <span class="cov0" title="0">{
+        return &amp;search.SearchResult{
+                Hits:       []*search.Document{},
+                TotalHits:  0,
+                Page:       query.Page,
+                PerPage:    query.PerPage,
+                TotalPages: 0,
+                Facets:     &amp;search.Facets{},
+                QueryTime:  0,
+        }, nil
+}</span>
+
+func (m *mockDraftIndex) GetFacets(ctx context.Context, facetNames []string) (*search.Facets, error) <span class="cov0" title="0">{
+        return &amp;search.Facets{}, nil
+}</span>
+
+func (m *mockDraftIndex) Clear(ctx context.Context) error <span class="cov0" title="0">{
+        return nil
+}</span>
+
+// ModelToSearchDocument converts a models.Document to a search.Document.
+// This is a helper for tests to index database documents in the search backend.
+func ModelToSearchDocument(doc *models.Document) *search.Document <span class="cov10" title="24">{
+        // Convert status enum to string
+        var status string
+        switch doc.Status </span>{
+        case models.ApprovedDocumentStatus:<span class="cov2" title="2">
+                status = "Approved"</span>
+        case models.InReviewDocumentStatus:<span class="cov1" title="1">
+                status = "In-Review"</span>
+        case models.ObsoleteDocumentStatus:<span class="cov1" title="1">
+                status = "Obsolete"</span>
+        case models.WIPDocumentStatus:<span class="cov1" title="1">
+                status = "WIP"</span>
+        default:<span class="cov9" title="19">
+                status = "WIP"</span>
+        }
+
+        <span class="cov10" title="24">searchDoc := &amp;search.Document{
+                ObjectID:     doc.GoogleFileID,
+                DocID:        doc.GoogleFileID,
+                Title:        doc.Title,
+                DocNumber:    fmt.Sprintf("%d", doc.DocumentNumber),
+                DocType:      doc.DocumentType.Name,
+                Status:       status,
+                CustomFields: make(map[string]interface{}),
+        }
+
+        // Set product if present
+        if doc.Product.Name != "" </span><span class="cov1" title="1">{
+                searchDoc.Product = doc.Product.Name
+        }</span>
+
+        // Set summary if present
+        <span class="cov10" title="24">if doc.Summary != nil </span><span class="cov1" title="1">{
+                searchDoc.Summary = *doc.Summary
+        }</span>
+
+        // Set owner
+        <span class="cov10" title="24">if doc.Owner != nil </span><span class="cov1" title="1">{
+                searchDoc.Owners = []string{doc.Owner.EmailAddress}
+        }</span>
+
+        // Set contributors
+        <span class="cov10" title="24">for _, c := range doc.Contributors </span><span class="cov5" title="5">{
+                if c != nil </span><span class="cov4" title="4">{
+                        searchDoc.Contributors = append(searchDoc.Contributors, c.EmailAddress)
+                }</span>
+        }
+
+        // Set approvers
+        <span class="cov10" title="24">for _, a := range doc.Approvers </span><span class="cov4" title="3">{
+                if a != nil </span><span class="cov2" title="2">{
+                        searchDoc.Approvers = append(searchDoc.Approvers, a.EmailAddress)
+                }</span>
+        }
+
+        // Set timestamps
+        <span class="cov10" title="24">searchDoc.CreatedTime = doc.DocumentCreatedAt.Unix()
+        searchDoc.ModifiedTime = doc.DocumentModifiedAt.Unix()
+        searchDoc.IndexedAt = time.Now()
+
+        // Set custom fields
+        for _, cf := range doc.CustomFields </span><span class="cov4" title="3">{
+                if cf != nil </span><span class="cov2" title="2">{
+                        searchDoc.CustomFields[cf.DocumentTypeCustomField.Name] = cf.Value
+                }</span>
+        }
+
+        <span class="cov10" title="24">return searchDoc</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
