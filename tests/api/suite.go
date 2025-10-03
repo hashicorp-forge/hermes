@@ -24,6 +24,7 @@ import (
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	"github.com/hashicorp-forge/hermes/pkg/models"
 	"github.com/hashicorp-forge/hermes/pkg/search"
+	algoliaadapter "github.com/hashicorp-forge/hermes/pkg/search/adapters/algolia"
 	"github.com/hashicorp-forge/hermes/pkg/search/adapters/meilisearch"
 	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
 	"github.com/hashicorp/go-hclog"
@@ -190,8 +191,10 @@ func (s *Suite) setupSearch() error {
 func (s *Suite) createTestConfig() *config.Config {
 	return &config.Config{
 		BaseURL: "http://localhost:8000",
-		Algolia: &algolia.Config{
-			ApplicationID:   "test-app-id",
+		Algolia: &algoliaadapter.Config{
+			AppID:           "test-app-id",
+			SearchAPIKey:    "test-search-key",
+			WriteAPIKey:     "test-write-key",
 			DocsIndexName:   "test-docs",
 			DraftsIndexName: "test-drafts",
 		},
