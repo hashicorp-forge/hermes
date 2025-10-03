@@ -69,8 +69,8 @@ make docker/postgres/stop && make docker/postgres/start
 - **`internal/server/`**: HTTP server setup
 - **`internal/db/`**: PostgreSQL/GORM database layer
 - **`pkg/models/`**: GORM models with extensive tests
-- **`pkg/googleworkspace/`**: Google Drive/Docs/Gmail integration
-- **`pkg/algolia/`**: Search indexing client
+- **`pkg/workspace/`**: Workspace management, adapters for Google and Local
+- **`pkg/search/`**: Search abstraction, Algolia and Meilisearch adapters
 - **`pkg/hashicorpdocs/`**: Document type handlers (RFC, PRD, FRD)
 
 ### Frontend Structure (`web/`)
