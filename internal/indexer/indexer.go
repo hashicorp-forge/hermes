@@ -12,9 +12,9 @@ import (
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	"github.com/hashicorp-forge/hermes/pkg/document"
-	gw "github.com/hashicorp-forge/hermes/pkg/storage/adapters/google"
 	"github.com/hashicorp-forge/hermes/pkg/links"
 	"github.com/hashicorp-forge/hermes/pkg/models"
+	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
 	"github.com/hashicorp/go-hclog"
 	"gorm.io/gorm"
 )

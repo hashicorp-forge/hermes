@@ -10,7 +10,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/hashicorp-forge/hermes/internal/helpers"
-	gw "github.com/hashicorp-forge/hermes/pkg/storage/adapters/google"
+	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
 	"google.golang.org/api/docs/v1"
 )
 

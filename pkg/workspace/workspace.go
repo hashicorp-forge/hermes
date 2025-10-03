@@ -1,5 +1,5 @@
-// Package storage provides storage abstraction interfaces for document management.
-package storage
+// Package workspace provides storage abstraction interfaces for document management.
+package workspace
 
 import (
 	"context"

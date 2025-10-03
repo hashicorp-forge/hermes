@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp-forge/hermes/pkg/models"
-	google "github.com/hashicorp-forge/hermes/pkg/storage/adapters/google"
+	google "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
 	"github.com/hashicorp/go-hclog"
 	"google.golang.org/api/docs/v1"
 	"gorm.io/gorm"

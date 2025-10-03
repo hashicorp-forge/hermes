@@ -7,7 +7,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	gw "github.com/hashicorp-forge/hermes/pkg/storage/adapters/google"
+	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
 	"google.golang.org/api/docs/v1"
 )
 

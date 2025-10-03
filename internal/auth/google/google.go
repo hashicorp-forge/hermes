@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	gw "github.com/hashicorp-forge/hermes/pkg/storage/adapters/google"
+	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
 	"github.com/hashicorp/go-hclog"
 )
 

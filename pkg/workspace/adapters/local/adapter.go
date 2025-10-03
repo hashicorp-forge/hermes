@@ -1,5 +1,5 @@
 // Package localworkspace provides a local workspace storage adapter.
-package localworkspace
+package local
 
 import (
 	"context"
@@ -12,10 +12,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp-forge/hermes/pkg/storage"
+	"github.com/hashicorp-forge/hermes/pkg/workspace"
 )
 
-// Adapter provides local local workspace document storage.
+// Adapter provides local local workspace document workspace.
 type Adapter struct {
 	basePath      string
 	docsPath      string
@@ -26,7 +26,7 @@ type Adapter struct {
 
 // Config contains filesystem adapter configuration.
 type Config struct {
-	// BasePath is the root directory for all storage.
+	// BasePath is the root directory for all workspace.
 	BasePath string
 
 	// DocsPath is the directory for published documents.
@@ -42,7 +42,7 @@ type Config struct {
 // NewAdapter creates a new filesystem adapter.
 func NewAdapter(cfg *Config) (*Adapter, error) {
 	if cfg.BasePath == "" {
-		return nil, storage.InvalidInputError("BasePath", "cannot be empty")
+		return nil, workspace.InvalidInputError("BasePath", "cannot be empty")
 	}
 
 	// Set defaults if not provided
@@ -79,22 +79,22 @@ func NewAdapter(cfg *Config) (*Adapter, error) {
 }
 
 // DocumentStorage returns the document storage implementation.
-func (a *Adapter) DocumentStorage() storage.DocumentStorage {
+func (a *Adapter) DocumentStorage() workspace.DocumentStorage {
 	return &documentStorage{adapter: a}
 }
 
 // PeopleService returns the people service implementation.
-func (a *Adapter) PeopleService() storage.PeopleService {
+func (a *Adapter) PeopleService() workspace.PeopleService {
 	return &peopleService{adapter: a}
 }
 
 // NotificationService returns the notification service implementation.
-func (a *Adapter) NotificationService() storage.NotificationService {
+func (a *Adapter) NotificationService() workspace.NotificationService {
 	return &notificationService{adapter: a}
 }
 
 // AuthService returns the auth service implementation.
-func (a *Adapter) AuthService() storage.AuthService {
+func (a *Adapter) AuthService() workspace.AuthService {
 	return &authService{adapter: a}
 }
 
@@ -119,17 +119,17 @@ func (a *Adapter) getFolderPath(id string) string {
 	return filepath.Join(a.foldersPath, id+".json")
 }
 
-// documentStorage implements storage.DocumentStorage.
+// documentStorage implements workspace.DocumentStorage.
 type documentStorage struct {
 	adapter *Adapter
 }
 
 // GetDocument retrieves a document by ID.
-func (ds *documentStorage) GetDocument(ctx context.Context, id string) (*storage.Document, error) {
+func (ds *documentStorage) GetDocument(ctx context.Context, id string) (*workspace.Document, error) {
 	// Try to load metadata
 	meta, err := ds.adapter.metadataStore.Get(id)
 	if err != nil {
-		return nil, storage.NotFoundError("document", id)
+		return nil, workspace.NotFoundError("document", id)
 	}
 
 	// Determine if it's a draft
@@ -140,12 +140,12 @@ func (ds *documentStorage) GetDocument(ctx context.Context, id string) (*storage
 	content, err := os.ReadFile(docPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return nil, storage.NotFoundError("document", id)
+			return nil, workspace.NotFoundError("document", id)
 		}
 		return nil, fmt.Errorf("failed to read document: %w", err)
 	}
 
-	return &storage.Document{
+	return &workspace.Document{
 		ID:             id,
 		Name:           meta.Name,
 		Content:        string(content),
@@ -161,9 +161,9 @@ func (ds *documentStorage) GetDocument(ctx context.Context, id string) (*storage
 }
 
 // CreateDocument creates a new document.
-func (ds *documentStorage) CreateDocument(ctx context.Context, doc *storage.DocumentCreate) (*storage.Document, error) {
+func (ds *documentStorage) CreateDocument(ctx context.Context, doc *workspace.DocumentCreate) (*workspace.Document, error) {
 	if doc.Name == "" {
-		return nil, storage.InvalidInputError("Name", "cannot be empty")
+		return nil, workspace.InvalidInputError("Name", "cannot be empty")
 	}
 
 	// Generate unique ID
@@ -199,13 +199,13 @@ func (ds *documentStorage) CreateDocument(ctx context.Context, doc *storage.Docu
 		Metadata:       doc.Metadata,
 	}
 
-	if err := ds.adapter.metadataStore.Set(id, meta); err != nil {
+	if err := ds.adapter.metadataStore.Set(docPath, meta, content); err != nil {
 		// Clean up document file on metadata failure
 		os.Remove(docPath)
 		return nil, fmt.Errorf("failed to store metadata: %w", err)
 	}
 
-	return &storage.Document{
+	return &workspace.Document{
 		ID:             id,
 		Name:           doc.Name,
 		Content:        content,
@@ -219,10 +219,10 @@ func (ds *documentStorage) CreateDocument(ctx context.Context, doc *storage.Docu
 }
 
 // UpdateDocument updates an existing document.
-func (ds *documentStorage) UpdateDocument(ctx context.Context, id string, updates *storage.DocumentUpdate) (*storage.Document, error) {
+func (ds *documentStorage) UpdateDocument(ctx context.Context, id string, updates *workspace.DocumentUpdate) (*workspace.Document, error) {
 	meta, err := ds.adapter.metadataStore.Get(id)
 	if err != nil {
-		return nil, storage.NotFoundError("document", id)
+		return nil, workspace.NotFoundError("document", id)
 	}
 
 	isDraft := meta.ParentFolderID == "drafts" || strings.Contains(meta.ParentFolderID, "draft")
@@ -263,9 +263,16 @@ func (ds *documentStorage) UpdateDocument(ctx context.Context, id string, update
 
 	meta.ModifiedTime = time.Now()
 
-	if err := ds.adapter.metadataStore.Set(id, meta); err != nil {
-		return nil, fmt.Errorf("failed to update metadata: %w", err)
-	}
+// TODO: Frontmatter integration - need to read current content and rewrite with new metadata
+docPath := ds.adapter.getDocumentPath(id, isDraft)
+contentBytes, err := os.ReadFile(docPath)
+if err != nil {
+return nil, fmt.Errorf("failed to read document content: %w", err)
+}
+
+if err := ds.adapter.metadataStore.Set(docPath, meta, string(contentBytes)); err != nil {
+return nil, fmt.Errorf("failed to update metadata: %w", err)
+}
 
 	// Reload full document
 	return ds.GetDocument(ctx, id)
@@ -275,7 +282,7 @@ func (ds *documentStorage) UpdateDocument(ctx context.Context, id string, update
 func (ds *documentStorage) DeleteDocument(ctx context.Context, id string) error {
 	meta, err := ds.adapter.metadataStore.Get(id)
 	if err != nil {
-		return storage.NotFoundError("document", id)
+		return workspace.NotFoundError("document", id)
 	}
 
 	isDraft := meta.ParentFolderID == "drafts" || strings.Contains(meta.ParentFolderID, "draft")
@@ -295,13 +302,13 @@ func (ds *documentStorage) DeleteDocument(ctx context.Context, id string) error 
 }
 
 // ListDocuments lists documents in a folder.
-func (ds *documentStorage) ListDocuments(ctx context.Context, folderID string, opts *storage.ListOptions) ([]*storage.Document, error) {
-	allMeta, err := ds.adapter.metadataStore.List()
+func (ds *documentStorage) ListDocuments(ctx context.Context, folderID string, opts *workspace.ListOptions) ([]*workspace.Document, error) {
+	allMeta, err := ds.adapter.metadataStore.List(ds.adapter.docsPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list metadata: %w", err)
 	}
 
-	var docs []*storage.Document
+	var docs []*workspace.Document
 	for _, meta := range allMeta {
 		// Filter by folder
 		if meta.ParentFolderID != folderID {
@@ -318,7 +325,7 @@ func (ds *documentStorage) ListDocuments(ctx context.Context, folderID string, o
 			continue
 		}
 
-		doc := &storage.Document{
+		doc := &workspace.Document{
 			ID:             meta.ID,
 			Name:           meta.Name,
 			MimeType:       "text/markdown",
@@ -353,7 +360,7 @@ func (ds *documentStorage) GetDocumentContent(ctx context.Context, id string) (s
 
 // UpdateDocumentContent updates the content of a document.
 func (ds *documentStorage) UpdateDocumentContent(ctx context.Context, id string, content string) error {
-	_, err := ds.UpdateDocument(ctx, id, &storage.DocumentUpdate{
+	_, err := ds.UpdateDocument(ctx, id, &workspace.DocumentUpdate{
 		Content: &content,
 	})
 	return err
@@ -376,13 +383,13 @@ func (ds *documentStorage) ReplaceTextInDocument(ctx context.Context, id string,
 }
 
 // CopyDocument copies a document to a destination folder.
-func (ds *documentStorage) CopyDocument(ctx context.Context, sourceID, destFolderID, name string) (*storage.Document, error) {
+func (ds *documentStorage) CopyDocument(ctx context.Context, sourceID, destFolderID, name string) (*workspace.Document, error) {
 	source, err := ds.GetDocument(ctx, sourceID)
 	if err != nil {
 		return nil, err
 	}
 
-	return ds.CreateDocument(ctx, &storage.DocumentCreate{
+	return ds.CreateDocument(ctx, &workspace.DocumentCreate{
 		Name:           name,
 		ParentFolderID: destFolderID,
 		Content:        source.Content,
@@ -393,22 +400,22 @@ func (ds *documentStorage) CopyDocument(ctx context.Context, sourceID, destFolde
 
 // MoveDocument moves a document to a destination folder.
 func (ds *documentStorage) MoveDocument(ctx context.Context, docID, destFolderID string) error {
-	_, err := ds.UpdateDocument(ctx, docID, &storage.DocumentUpdate{
+	_, err := ds.UpdateDocument(ctx, docID, &workspace.DocumentUpdate{
 		ParentFolderID: &destFolderID,
 	})
 	return err
 }
 
 // CreateFolder creates a new folder.
-func (ds *documentStorage) CreateFolder(ctx context.Context, name, parentID string) (*storage.Folder, error) {
+func (ds *documentStorage) CreateFolder(ctx context.Context, name, parentID string) (*workspace.Folder, error) {
 	if name == "" {
-		return nil, storage.InvalidInputError("name", "cannot be empty")
+		return nil, workspace.InvalidInputError("name", "cannot be empty")
 	}
 
 	id := generateID()
 	now := time.Now()
 
-	folder := &storage.Folder{
+	folder := &workspace.Folder{
 		ID:           id,
 		Name:         name,
 		ParentID:     parentID,
@@ -432,17 +439,17 @@ func (ds *documentStorage) CreateFolder(ctx context.Context, name, parentID stri
 }
 
 // GetFolder retrieves folder information.
-func (ds *documentStorage) GetFolder(ctx context.Context, id string) (*storage.Folder, error) {
+func (ds *documentStorage) GetFolder(ctx context.Context, id string) (*workspace.Folder, error) {
 	folderPath := ds.adapter.getFolderPath(id)
 	data, err := os.ReadFile(folderPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return nil, storage.NotFoundError("folder", id)
+			return nil, workspace.NotFoundError("folder", id)
 		}
 		return nil, fmt.Errorf("failed to read folder: %w", err)
 	}
 
-	var folder storage.Folder
+	var folder workspace.Folder
 	if err := json.Unmarshal(data, &folder); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal folder: %w", err)
 	}
@@ -451,13 +458,13 @@ func (ds *documentStorage) GetFolder(ctx context.Context, id string) (*storage.F
 }
 
 // ListFolders lists subfolders in a parent folder.
-func (ds *documentStorage) ListFolders(ctx context.Context, parentID string) ([]*storage.Folder, error) {
+func (ds *documentStorage) ListFolders(ctx context.Context, parentID string) ([]*workspace.Folder, error) {
 	files, err := os.ReadDir(ds.adapter.foldersPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read folders directory: %w", err)
 	}
 
-	var folders []*storage.Folder
+	var folders []*workspace.Folder
 	for _, file := range files {
 		if file.IsDir() || !strings.HasSuffix(file.Name(), ".json") {
 			continue
@@ -478,7 +485,7 @@ func (ds *documentStorage) ListFolders(ctx context.Context, parentID string) ([]
 }
 
 // GetSubfolder gets a subfolder by name within a parent folder.
-func (ds *documentStorage) GetSubfolder(ctx context.Context, parentID, name string) (*storage.Folder, error) {
+func (ds *documentStorage) GetSubfolder(ctx context.Context, parentID, name string) (*workspace.Folder, error) {
 	folders, err := ds.ListFolders(ctx, parentID)
 	if err != nil {
 		return nil, err
@@ -494,26 +501,26 @@ func (ds *documentStorage) GetSubfolder(ctx context.Context, parentID, name stri
 }
 
 // ListRevisions lists document revisions/versions.
-func (ds *documentStorage) ListRevisions(ctx context.Context, docID string) ([]*storage.Revision, error) {
+func (ds *documentStorage) ListRevisions(ctx context.Context, docID string) ([]*workspace.Revision, error) {
 	// Filesystem adapter doesn't support revisions by default
 	// This would require additional implementation (e.g., git backend)
-	return nil, storage.ErrNotImplemented
+	return nil, workspace.ErrNotImplemented
 }
 
 // GetRevision retrieves a specific revision.
-func (ds *documentStorage) GetRevision(ctx context.Context, docID, revisionID string) (*storage.Revision, error) {
-	return nil, storage.ErrNotImplemented
+func (ds *documentStorage) GetRevision(ctx context.Context, docID, revisionID string) (*workspace.Revision, error) {
+	return nil, workspace.ErrNotImplemented
 }
 
 // GetLatestRevision retrieves the latest revision.
-func (ds *documentStorage) GetLatestRevision(ctx context.Context, docID string) (*storage.Revision, error) {
+func (ds *documentStorage) GetLatestRevision(ctx context.Context, docID string) (*workspace.Revision, error) {
 	// Return pseudo-revision with current document state
 	doc, err := ds.GetDocument(ctx, docID)
 	if err != nil {
 		return nil, err
 	}
 
-	return &storage.Revision{
+	return &workspace.Revision{
 		ID:           "latest",
 		DocumentID:   docID,
 		ModifiedTime: doc.ModifiedTime,

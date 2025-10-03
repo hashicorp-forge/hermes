@@ -7,7 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/hashicorp-forge/hermes/pkg/storage"
+	"github.com/hashicorp-forge/hermes/pkg/workspace"
+	"github.com/hashicorp-forge/hermes/pkg/workspace/adapters/local"
 )
 
 func main() {
@@ -21,7 +22,7 @@ func main() {
 	fmt.Printf("Using storage directory: %s\n\n", storageDir)
 
 	// Create filesystem adapter
-	adapter, err := localworkspace.NewAdapter(&localworkspace.Config{
+	adapter, err := local.NewAdapter(&local.Config{
 		BasePath: storageDir,
 	})
 	if err != nil {
@@ -34,7 +35,7 @@ func main() {
 
 	// Example 1: Create a document from scratch
 	fmt.Println("=== Example 1: Create Document ===")
-	doc1, err := docStorage.CreateDocument(ctx, &storage.DocumentCreate{
+	doc1, err := docStorage.CreateDocument(ctx, &workspace.DocumentCreate{
 		Name:           "RFC-001: Storage Abstraction",
 		ParentFolderID: "docs",
 		Content: `# RFC-001: Storage Abstraction Layer
@@ -60,7 +61,7 @@ This RFC proposes a storage abstraction layer for Hermes.
 	fmt.Println("\n=== Example 2: Create Draft from Template ===")
 
 	// First create a template
-	template, err := docStorage.CreateDocument(ctx, &storage.DocumentCreate{
+	template, err := docStorage.CreateDocument(ctx, &workspace.DocumentCreate{
 		Name:           "RFC Template",
 		ParentFolderID: "templates",
 		Content: `# {{docType}}-{{number}}: {{title}}
@@ -124,7 +125,7 @@ This RFC proposes a versioning strategy for our REST API.
 ## Design
 We will use URL-based versioning: /api/v1, /api/v2, etc.`
 
-	updated, err := docStorage.UpdateDocument(ctx, draft.ID, &storage.DocumentUpdate{
+	updated, err := docStorage.UpdateDocument(ctx, draft.ID, &workspace.DocumentUpdate{
 		Content: &newContent,
 	})
 	if err != nil {
@@ -148,7 +149,7 @@ We will use URL-based versioning: /api/v1, /api/v2, etc.`
 
 	// Example 5: List documents
 	fmt.Println("\n=== Example 5: List Documents ===")
-	docs, err := docStorage.ListDocuments(ctx, "docs", &storage.ListOptions{
+	docs, err := docStorage.ListDocuments(ctx, "docs", &workspace.ListOptions{
 		PageSize: 10,
 	})
 	if err != nil {

@@ -1,15 +1,15 @@
-package localworkspace
+package local
 
 import (
-"bufio"
-"bytes"
-"fmt"
-"os"
-"path/filepath"
-"strconv"
-"strings"
-"sync"
-"time"
+	"bufio"
+	"bytes"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"sync"
+	"time"
 )
 
 // DocumentMetadata stores metadata about a document.
@@ -25,7 +25,7 @@ type DocumentMetadata struct {
 	Trashed        bool           `yaml:"trashed"`
 }
 
-// MetadataStore manages document metadata storage.
+// MetadataStore manages document metadata workspace.
 // Metadata is stored as YAML frontmatter in the document files themselves.
 type MetadataStore struct {
 	basePath string
@@ -41,23 +41,23 @@ func NewMetadataStore(basePath string) (*MetadataStore, error) {
 
 // Get retrieves metadata from a document file's frontmatter.
 func (ms *MetadataStore) Get(docPath string) (*DocumentMetadata, error) {
-ms.mu.RLock()
-defer ms.mu.RUnlock()
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
 
-data, err := os.ReadFile(docPath)
-if err != nil {
-if os.IsNotExist(err) {
-return nil, fmt.Errorf("document not found: %q", docPath)
-}
-return nil, fmt.Errorf("failed to read document: %w", err)
-}
+	data, err := os.ReadFile(docPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, fmt.Errorf("document not found: %q", docPath)
+		}
+		return nil, fmt.Errorf("failed to read document: %w", err)
+	}
 
-meta, _, err := parseFrontmatter(data)
-if err != nil {
-return nil, fmt.Errorf("failed to parse frontmatter: %w", err)
-}
+	meta, _, err := parseFrontmatter(data)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse frontmatter: %w", err)
+	}
 
-return meta, nil
+	return meta, nil
 }
 
 // Set updates metadata in a document file's frontmatter.
@@ -123,7 +123,7 @@ func (ms *MetadataStore) List(dirPath string) ([]*DocumentMetadata, error) {
 // Format: ---\n<yaml>\n---\n<content>
 func parseFrontmatter(data []byte) (*DocumentMetadata, string, error) {
 	scanner := bufio.NewScanner(bytes.NewReader(data))
-	
+
 	// Check for opening ---
 	if !scanner.Scan() || scanner.Text() != "---" {
 		return nil, "", fmt.Errorf("missing frontmatter opening '---'")
@@ -133,26 +133,26 @@ func parseFrontmatter(data []byte) (*DocumentMetadata, string, error) {
 	meta := &DocumentMetadata{
 		Metadata: make(map[string]any),
 	}
-	
+
 	for scanner.Scan() {
 		line := scanner.Text()
 		if line == "---" {
 			// End of frontmatter
 			break
 		}
-		
+
 		// Parse YAML key-value pairs
 		parts := strings.SplitN(line, ":", 2)
 		if len(parts) != 2 {
 			continue
 		}
-		
+
 		key := strings.TrimSpace(parts[0])
 		value := strings.TrimSpace(parts[1])
-		
+
 		// Remove quotes if present
 		value = strings.Trim(value, `"'`)
-		
+
 		switch key {
 		case "id":
 			meta.ID = value
@@ -190,14 +190,14 @@ func parseFrontmatter(data []byte) (*DocumentMetadata, string, error) {
 	}
 
 	content := strings.TrimSpace(contentBuf.String())
-	
+
 	return meta, content, nil
 }
 
 // serializeFrontmatter creates a document with YAML frontmatter.
 func serializeFrontmatter(meta *DocumentMetadata, content string) []byte {
 	var buf bytes.Buffer
-	
+
 	buf.WriteString("---\n")
 	buf.WriteString(fmt.Sprintf("id: %s\n", meta.ID))
 	buf.WriteString(fmt.Sprintf("name: %s\n", meta.Name))
@@ -205,20 +205,20 @@ func serializeFrontmatter(meta *DocumentMetadata, content string) []byte {
 	buf.WriteString(fmt.Sprintf("created_time: %s\n", meta.CreatedTime.Format(time.RFC3339)))
 	buf.WriteString(fmt.Sprintf("modified_time: %s\n", meta.ModifiedTime.Format(time.RFC3339)))
 	buf.WriteString(fmt.Sprintf("owner: %s\n", meta.Owner))
-	
+
 	if meta.ThumbnailURL != "" {
 		buf.WriteString(fmt.Sprintf("thumbnail_url: %s\n", meta.ThumbnailURL))
 	}
-	
+
 	buf.WriteString(fmt.Sprintf("trashed: %v\n", meta.Trashed))
-	
+
 	// Write custom metadata
 	for key, value := range meta.Metadata {
 		buf.WriteString(fmt.Sprintf("%s: %v\n", key, value))
 	}
-	
+
 	buf.WriteString("---\n\n")
 	buf.WriteString(content)
-	
+
 	return buf.Bytes()
 }

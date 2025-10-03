@@ -1,4 +1,4 @@
-package localworkspace_test
+package local_test
 
 import (
 	"context"
@@ -7,7 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp-forge/hermes/pkg/storage"
+	"github.com/hashicorp-forge/hermes/pkg/workspace"
+	"github.com/hashicorp-forge/hermes/pkg/workspace/adapters/local"
 )
 
 func TestFilesystemAdapter(t *testing.T) {
@@ -15,7 +16,7 @@ func TestFilesystemAdapter(t *testing.T) {
 	tempDir := t.TempDir()
 
 	// Create adapter
-	adapter, err := localworkspace.NewAdapter(&localworkspace.Config{
+	adapter, err := local.NewAdapter(&local.Config{
 		BasePath: tempDir,
 	})
 	if err != nil {
@@ -26,7 +27,7 @@ func TestFilesystemAdapter(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("CreateDocument", func(t *testing.T) {
-		doc, err := docStorage.CreateDocument(ctx, &storage.DocumentCreate{
+		doc, err := docStorage.CreateDocument(ctx, &workspace.DocumentCreate{
 			Name:           "Test RFC",
 			ParentFolderID: "docs",
 			Content:        "# RFC-001\n\nThis is a test RFC.",
@@ -54,7 +55,7 @@ func TestFilesystemAdapter(t *testing.T) {
 
 	t.Run("GetDocument", func(t *testing.T) {
 		// Create a document first
-		created, err := docStorage.CreateDocument(ctx, &storage.DocumentCreate{
+		created, err := docStorage.CreateDocument(ctx, &workspace.DocumentCreate{
 			Name:           "Get Test Doc",
 			ParentFolderID: "docs",
 			Content:        "Test content for retrieval",
@@ -81,7 +82,7 @@ func TestFilesystemAdapter(t *testing.T) {
 
 	t.Run("UpdateDocument", func(t *testing.T) {
 		// Create a document
-		created, err := docStorage.CreateDocument(ctx, &storage.DocumentCreate{
+		created, err := docStorage.CreateDocument(ctx, &workspace.DocumentCreate{
 			Name:           "Update Test",
 			ParentFolderID: "docs",
 			Content:        "Original content",
@@ -94,7 +95,7 @@ func TestFilesystemAdapter(t *testing.T) {
 		// Update it
 		newName := "Updated Test"
 		newContent := "Updated content"
-		updated, err := docStorage.UpdateDocument(ctx, created.ID, &storage.DocumentUpdate{
+		updated, err := docStorage.UpdateDocument(ctx, created.ID, &workspace.DocumentUpdate{
 			Name:    &newName,
 			Content: &newContent,
 		})
@@ -113,7 +114,7 @@ func TestFilesystemAdapter(t *testing.T) {
 
 	t.Run("ReplaceTextInDocument", func(t *testing.T) {
 		// Create document with template placeholders
-		doc, err := docStorage.CreateDocument(ctx, &storage.DocumentCreate{
+		doc, err := docStorage.CreateDocument(ctx, &workspace.DocumentCreate{
 			Name:           "Template Doc",
 			ParentFolderID: "docs",
 			Content:        "Product: {{product}}\nVersion: {{version}}",
@@ -146,7 +147,7 @@ func TestFilesystemAdapter(t *testing.T) {
 
 	t.Run("CopyDocument", func(t *testing.T) {
 		// Create source document
-		source, err := docStorage.CreateDocument(ctx, &storage.DocumentCreate{
+		source, err := docStorage.CreateDocument(ctx, &workspace.DocumentCreate{
 			Name:           "Source Doc",
 			ParentFolderID: "docs",
 			Content:        "Content to copy",
@@ -182,7 +183,7 @@ func TestFilesystemAdapter(t *testing.T) {
 	t.Run("ListDocuments", func(t *testing.T) {
 		// Create multiple documents
 		for i := 0; i < 3; i++ {
-			_, err := docStorage.CreateDocument(ctx, &storage.DocumentCreate{
+			_, err := docStorage.CreateDocument(ctx, &workspace.DocumentCreate{
 				Name:           "List Test Doc",
 				ParentFolderID: "docs",
 				Content:        "Test content",
@@ -194,7 +195,7 @@ func TestFilesystemAdapter(t *testing.T) {
 		}
 
 		// List them
-		docs, err := docStorage.ListDocuments(ctx, "docs", &storage.ListOptions{})
+		docs, err := docStorage.ListDocuments(ctx, "docs", &workspace.ListOptions{})
 		if err != nil {
 			t.Fatalf("Failed to list documents: %v", err)
 		}
@@ -210,7 +211,7 @@ func TestFilesystemAdapter(t *testing.T) {
 		filterTime := time.Now()
 		time.Sleep(100 * time.Millisecond)
 
-		_, err := docStorage.CreateDocument(ctx, &storage.DocumentCreate{
+		_, err := docStorage.CreateDocument(ctx, &workspace.DocumentCreate{
 			Name:           "Recent Doc",
 			ParentFolderID: "docs",
 			Content:        "Recent content",
@@ -221,7 +222,7 @@ func TestFilesystemAdapter(t *testing.T) {
 		}
 
 		// List with time filter
-		docs, err := docStorage.ListDocuments(ctx, "docs", &storage.ListOptions{
+		docs, err := docStorage.ListDocuments(ctx, "docs", &workspace.ListOptions{
 			ModifiedAfter: &filterTime,
 		})
 		if err != nil {
@@ -235,7 +236,7 @@ func TestFilesystemAdapter(t *testing.T) {
 
 	t.Run("DeleteDocument", func(t *testing.T) {
 		// Create document
-		doc, err := docStorage.CreateDocument(ctx, &storage.DocumentCreate{
+		doc, err := docStorage.CreateDocument(ctx, &workspace.DocumentCreate{
 			Name:           "Delete Test",
 			ParentFolderID: "docs",
 			Content:        "To be deleted",
@@ -311,7 +312,7 @@ func TestFilesystemAdapter(t *testing.T) {
 func TestFilesystemAdapterErrors(t *testing.T) {
 	tempDir := t.TempDir()
 
-	adapter, err := localworkspace.NewAdapter(&localworkspace.Config{
+	adapter, err := local.NewAdapter(&local.Config{
 		BasePath: tempDir,
 	})
 	if err != nil {
@@ -336,7 +337,7 @@ func TestFilesystemAdapterErrors(t *testing.T) {
 	})
 
 	t.Run("CreateDocumentWithEmptyName", func(t *testing.T) {
-		_, err := docStorage.CreateDocument(ctx, &storage.DocumentCreate{
+		_, err := docStorage.CreateDocument(ctx, &workspace.DocumentCreate{
 			Name:           "",
 			ParentFolderID: "docs",
 			Content:        "Content",

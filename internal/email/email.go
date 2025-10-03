@@ -9,7 +9,7 @@ import (
 	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	gw "github.com/hashicorp-forge/hermes/pkg/storage/adapters/google"
+	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
 )
 
 //go:embed templates/*

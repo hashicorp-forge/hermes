@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp-forge/hermes/internal/config"
-	gw "github.com/hashicorp-forge/hermes/pkg/storage/adapters/google"
+	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
 	"github.com/hashicorp/go-hclog"
 	"google.golang.org/api/people/v1"
 )

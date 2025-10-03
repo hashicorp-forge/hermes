@@ -1,4 +1,4 @@
-package localworkspace
+package local
 
 import (
 	"context"
@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/hashicorp-forge/hermes/pkg/storage"
+	"github.com/hashicorp-forge/hermes/pkg/workspace"
 )
 
-// authService implements storage.AuthService.
+// authService implements workspace.AuthService.
 type authService struct {
 	adapter *Adapter
 }
@@ -18,12 +18,12 @@ type authService struct {
 // ValidateToken validates an authentication token.
 // For filesystem adapter, this is a simple file-based token store.
 // In production, you'd integrate with an actual auth system.
-func (as *authService) ValidateToken(ctx context.Context, token string) (*storage.AuthInfo, error) {
+func (as *authService) ValidateToken(ctx context.Context, token string) (*workspace.AuthInfo, error) {
 	tokensPath := filepath.Join(as.adapter.basePath, "tokens.json")
 	data, err := os.ReadFile(tokensPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return &storage.AuthInfo{Valid: false}, nil
+			return &workspace.AuthInfo{Valid: false}, nil
 		}
 		return nil, err
 	}
@@ -35,15 +35,15 @@ func (as *authService) ValidateToken(ctx context.Context, token string) (*storag
 
 	info, ok := tokens[token]
 	if !ok {
-		return &storage.AuthInfo{Valid: false}, nil
+		return &workspace.AuthInfo{Valid: false}, nil
 	}
 
 	// Check if token is expired
 	if time.Now().After(info.ExpiresAt) {
-		return &storage.AuthInfo{Valid: false}, nil
+		return &workspace.AuthInfo{Valid: false}, nil
 	}
 
-	return &storage.AuthInfo{
+	return &workspace.AuthInfo{
 		Valid:     true,
 		Email:     info.Email,
 		ExpiresAt: info.ExpiresAt,
@@ -51,14 +51,14 @@ func (as *authService) ValidateToken(ctx context.Context, token string) (*storag
 }
 
 // GetUserInfo retrieves user information from a token.
-func (as *authService) GetUserInfo(ctx context.Context, token string) (*storage.UserInfo, error) {
+func (as *authService) GetUserInfo(ctx context.Context, token string) (*workspace.UserInfo, error) {
 	authInfo, err := as.ValidateToken(ctx, token)
 	if err != nil {
 		return nil, err
 	}
 
 	if !authInfo.Valid {
-		return nil, storage.PermissionDeniedError("get", "user info with invalid token")
+		return nil, workspace.PermissionDeniedError("get", "user info with invalid token")
 	}
 
 	// Load user info from users database
@@ -68,17 +68,17 @@ func (as *authService) GetUserInfo(ctx context.Context, token string) (*storage.
 		return nil, err
 	}
 
-	var users map[string]*storage.User
+	var users map[string]*workspace.User
 	if err := json.Unmarshal(data, &users); err != nil {
 		return nil, err
 	}
 
 	user, ok := users[authInfo.Email]
 	if !ok {
-		return nil, storage.NotFoundError("user", authInfo.Email)
+		return nil, workspace.NotFoundError("user", authInfo.Email)
 	}
 
-	return &storage.UserInfo{
+	return &workspace.UserInfo{
 		ID:            user.Email,
 		Email:         user.Email,
 		Name:          user.Name,

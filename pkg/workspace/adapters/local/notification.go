@@ -1,4 +1,4 @@
-package localworkspace
+package local
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"net/smtp"
 )
 
-// notificationService implements storage.NotificationService.
+// notificationService implements workspace.NotificationService.
 type notificationService struct {
 	adapter *Adapter
 }
