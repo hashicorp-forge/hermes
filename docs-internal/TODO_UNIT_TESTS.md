@@ -1,13 +1,25 @@
 # TODO: Additional Unit Test Coverage
 
-**Status**: Planned  
+**Status**: In Progress (tests/api/ @ 11.8%)  
 **Priority**: Medium  
 **Effort**: Medium (2-3 weeks)  
 **Dependencies**: None
 
+## 🤖 Agent Workflow Available
+
+**NEW**: Systematic workflow for AI agents to improve test coverage iteratively.
+
+- **Quick Start**: See `AGENT_QUICK_REFERENCE.md` (one-page guide)
+- **Full Workflow**: See `AGENT_WORKFLOW_TEST_COVERAGE.md` (comprehensive process)
+- **Current Targets**: See `COVERAGE_OPPORTUNITIES.md` (prioritized list)
+
+These documents provide copy-paste ready commands, decision trees, and prompts for AI agents to continue coverage improvements autonomously.
+
 ## Overview
 
 Expand unit test coverage across the codebase to improve reliability, catch regressions early, and support refactoring efforts. Current coverage is good for models but sparse in business logic and utilities.
+
+**Progress**: `tests/api/` unit coverage improved from 8.5% → 11.8%, ModelToSearchDocument at 100%.
 
 ## Current State
 
