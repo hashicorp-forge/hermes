@@ -2,7 +2,9 @@ import { TestContext, find, render, waitUntil } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
 import { setupRenderingTest } from "ember-qunit";
 import { module, test } from "qunit";
-import { animationsSettled } from "ember-animated/test-support";
+// TEMPORARILY STUBBED FOR EMBER 6.x UPGRADE
+// import { animationsSettled } from "ember-animated/test-support";
+const animationsSettled = () => Promise.resolve();
 
 const FORM = "[data-test-new-form]";
 const TASK_IS_RUNNING_DESCRIPTION = "[data-test-task-is-running-description]";

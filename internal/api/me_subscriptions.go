@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/hashicorp-forge/hermes/internal/config"
-	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
+	gw "github.com/hashicorp-forge/hermes/pkg/storage/adapters/google"
 	"github.com/hashicorp-forge/hermes/pkg/models"
 	"github.com/hashicorp/go-hclog"
 	"gorm.io/gorm"

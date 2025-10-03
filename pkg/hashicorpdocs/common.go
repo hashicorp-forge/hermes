@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
+	gw "github.com/hashicorp-forge/hermes/pkg/storage/adapters/google"
 	"google.golang.org/api/drive/v3"
 )
 

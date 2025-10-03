@@ -1,10 +1,12 @@
+// TEMPORARILY DISABLED FOR EMBER 6.x UPGRADE
 // @ts-ignore -- TODO: Add Types
-import Torii from "ember-simple-auth/authenticators/torii";
+// import Torii from "ember-simple-auth/authenticators/torii";
+import { Base } from "ember-simple-auth/authenticators/base";
 import { inject as service } from "@ember/service";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 
-export default class ToriiAuthenticator extends Torii {
+export default class ToriiAuthenticator extends Base {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
 

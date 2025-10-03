@@ -1,4 +1,4 @@
-package googleworkspace
+package google
 
 import (
 	"fmt"

@@ -1,10 +1,7 @@
 import Component from "@glimmer/component";
 import Ember from "ember";
-import { TransitionContext } from "ember-animated/.";
-import move from "ember-animated/motions/move";
-import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
-import { Resize } from "ember-animated/motions/resize";
-import { easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated/easings";
+// TEMPORARILY USING STUBS FOR EMBER 6.x UPGRADE
+import { TransitionContext, move, fadeIn, fadeOut, Resize, easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated-stubs";
 
 const FORM_RESIZE_DURATION = Ember.testing ? 0 : 1250;
 

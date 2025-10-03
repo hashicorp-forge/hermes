@@ -106,7 +106,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
     assert.equal(
       document.activeElement,
-      this.element.querySelector(FILTER_INPUT_SELECTOR),
+      find(FILTER_INPUT_SELECTOR),
       "the input is autofocused",
     );
   });

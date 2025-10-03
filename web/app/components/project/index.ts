@@ -21,12 +21,9 @@ import HermesFlashMessagesService from "hermes/services/flash-messages";
 import { FLASH_MESSAGES_LONG_TIMEOUT } from "hermes/utils/ember-cli-flash/timeouts";
 import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
 import Ember from "ember";
-import { TransitionContext, wait } from "ember-animated/.";
-import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
+// TEMPORARILY USING STUBS FOR EMBER 6.x UPGRADE
+import { TransitionContext, wait, fadeIn, fadeOut, move, Resize, easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated-stubs";
 import { emptyTransition } from "hermes/utils/ember-animated/empty-transition";
-import move from "ember-animated/motions/move";
-import { Resize } from "ember-animated/motions/resize";
-import { easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated/easings";
 import animateTransform from "hermes/utils/ember-animated/animate-transform";
 import RouterService from "@ember/routing/router-service";
 import StoreService from "hermes/services/store";

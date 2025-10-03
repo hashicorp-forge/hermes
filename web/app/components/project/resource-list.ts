@@ -1,16 +1,13 @@
 import Component from "@glimmer/component";
 import { RelatedResource } from "../related-resources";
 import { action } from "@ember/object";
-import { TransitionRules } from "ember-animated/transition-rules";
+// TEMPORARILY USING STUBS FOR EMBER 6.x UPGRADE  
+import { TransitionRules, TransitionContext, wait, move, fadeIn, fadeOut, easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated-stubs";
 import { emptyTransition } from "hermes/utils/ember-animated/empty-transition";
-import { TransitionContext, wait } from "ember-animated/.";
-import move from "ember-animated/motions/move";
-import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
-import { easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated/easings";
+import highlightElement from "hermes/utils/ember-animated/highlight-element";
 import Ember from "ember";
 import { inject as service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
-import highlightElement from "hermes/utils/ember-animated/highlight-element";
 import scrollIntoViewIfNeeded from "hermes/utils/scroll-into-view-if-needed";
 
 interface ProjectResourceListComponentSignature {

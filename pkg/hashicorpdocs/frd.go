@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/araddon/dateparse"
-	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
+	gw "github.com/hashicorp-forge/hermes/pkg/storage/adapters/google"
 	"google.golang.org/api/docs/v1"
 	"google.golang.org/api/drive/v3"
 )

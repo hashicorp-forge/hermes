@@ -1,4 +1,4 @@
-package googleworkspace
+package google
 
 import (
 	"google.golang.org/api/oauth2/v2"

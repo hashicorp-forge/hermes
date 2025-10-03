@@ -3,8 +3,8 @@ package hashicorpdocs
 import (
 	"fmt"
 
-	"github.com/hashicorp-forge/hermes/pkg/googleworkspace"
 	"github.com/hashicorp-forge/hermes/pkg/models"
+	google "github.com/hashicorp-forge/hermes/pkg/storage/adapters/google"
 	"github.com/hashicorp/go-hclog"
 	"google.golang.org/api/docs/v1"
 	"gorm.io/gorm"
@@ -15,7 +15,7 @@ import (
 func IsLocked(
 	fileID string,
 	db *gorm.DB,
-	goog *googleworkspace.Service,
+	goog *google.Service,
 	log hclog.Logger,
 ) (bool, error) {
 

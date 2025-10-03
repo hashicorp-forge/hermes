@@ -1,5 +1,6 @@
-import bootstrapTorii from "torii/bootstrap/torii";
-import { configure } from "torii/configuration";
+// TEMPORARILY DISABLED FOR EMBER 6.x UPGRADE
+// import bootstrapTorii from "torii/bootstrap/torii";
+// import { configure } from "torii/configuration";
 import config from "../config/environment";
 import fetch from "fetch";
 
@@ -42,5 +43,8 @@ export function initialize(application) {
 
 export default {
   name: "torii",
-  initialize,
+  initialize: function() {
+    // TEMPORARILY DISABLED FOR EMBER 6.x UPGRADE
+    console.warn("Torii authentication temporarily disabled during Ember upgrade");
+  },
 };

@@ -11,7 +11,8 @@ import FetchService from "hermes/services/fetch";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
 import cleanString from "hermes/utils/clean-string";
 import { JiraPickerResult } from "hermes/types/project";
-import { timeout } from "ember-animated/-private/ember-scheduler";
+// TEMPORARILY USING STUBS FOR EMBER 6.x UPGRADE
+import { timeout } from "hermes/utils/ember-animated-stubs";
 import Ember from "ember";
 
 const TIMEOUT = Ember.testing ? 0 : 2000;

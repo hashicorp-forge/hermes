@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
+	gw "github.com/hashicorp-forge/hermes/pkg/storage/adapters/google"
 	"github.com/hashicorp/go-hclog"
 )
 
