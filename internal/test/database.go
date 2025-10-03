@@ -40,6 +40,12 @@ func CreateTestDatabase(t *testing.T, dsn string) (
 		return
 	}
 
+	// Enable citext extension for case-insensitive text columns
+	if err = db.Exec("CREATE EXTENSION IF NOT EXISTS citext;").Error; err != nil {
+		err = fmt.Errorf("error creating citext extension: %w", err)
+		return
+	}
+
 	return
 }
 
@@ -57,4 +63,24 @@ func DropTestDatabase(dsn, dbName string) error {
 	}
 
 	return nil
+}
+
+// CreateTestDatabaseWithDSN creates a test database connection using an existing DSN.
+// This is useful for testcontainers where the database is already created.
+func CreateTestDatabaseWithDSN(t *testing.T, dsn string) (*gorm.DB, error) {
+	t.Logf("%s: connecting to database with DSN: %s", t.Name(), dsn)
+
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Silent),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error connecting to database: %w", err)
+	}
+
+	// Enable citext extension for case-insensitive text columns
+	if err = db.Exec("CREATE EXTENSION IF NOT EXISTS citext;").Error; err != nil {
+		return nil, fmt.Errorf("error creating citext extension: %w", err)
+	}
+
+	return db, nil
 }
