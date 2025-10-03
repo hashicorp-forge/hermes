@@ -172,8 +172,19 @@ func (di *documentIndex) Index(ctx context.Context, doc *hermessearch.Document) 
 		}
 	}
 
-	// Wait for indexing to complete (with timeout)
-	_, err = di.client.WaitForTaskWithContext(ctx, task.TaskUID, 5000*time.Millisecond)
+	// Wait for indexing to complete
+	// Use minimum of: 2s default OR remaining context time
+	waitTimeout := 2000 * time.Millisecond
+	if deadline, ok := ctx.Deadline(); ok {
+		remaining := time.Until(deadline)
+		if remaining < waitTimeout {
+			waitTimeout = remaining
+		}
+		if waitTimeout < 0 {
+			waitTimeout = 0 // Context already expired
+		}
+	}
+	_, err = di.client.WaitForTaskWithContext(ctx, task.TaskUID, waitTimeout)
 	if err != nil {
 		return &hermessearch.Error{
 			Op:  "Index",
@@ -205,7 +216,19 @@ func (di *documentIndex) IndexBatch(ctx context.Context, docs []*hermessearch.Do
 	}
 
 	// Wait for batch indexing to complete
-	_, err = di.client.WaitForTaskWithContext(ctx, task.TaskUID, 30000*time.Millisecond)
+	// Use minimum of: 5s default OR remaining context time
+	// This ensures we respect context cancellation while not waiting unnecessarily long
+	waitTimeout := 5000 * time.Millisecond
+	if deadline, ok := ctx.Deadline(); ok {
+		remaining := time.Until(deadline)
+		if remaining < waitTimeout {
+			waitTimeout = remaining
+		}
+		if waitTimeout < 0 {
+			waitTimeout = 0 // Context already expired
+		}
+	}
+	_, err = di.client.WaitForTaskWithContext(ctx, task.TaskUID, waitTimeout)
 	if err != nil {
 		return &hermessearch.Error{
 			Op:  "IndexBatch",
@@ -230,7 +253,18 @@ func (di *documentIndex) Delete(ctx context.Context, docID string) error {
 	}
 
 	// Wait for deletion to complete
-	_, err = di.client.WaitForTaskWithContext(ctx, task.TaskUID, 5000*time.Millisecond)
+	// Use minimum of: 2s default OR remaining context time
+	waitTimeout := 2000 * time.Millisecond
+	if deadline, ok := ctx.Deadline(); ok {
+		remaining := time.Until(deadline)
+		if remaining < waitTimeout {
+			waitTimeout = remaining
+		}
+		if waitTimeout < 0 {
+			waitTimeout = 0 // Context already expired
+		}
+	}
+	_, err = di.client.WaitForTaskWithContext(ctx, task.TaskUID, waitTimeout)
 	if err != nil {
 		return &hermessearch.Error{
 			Op:  "Delete",
@@ -255,7 +289,18 @@ func (di *documentIndex) DeleteBatch(ctx context.Context, docIDs []string) error
 	}
 
 	// Wait for batch deletion to complete
-	_, err = di.client.WaitForTaskWithContext(ctx, task.TaskUID, 10000*time.Millisecond)
+	// Use minimum of: 5s default OR remaining context time
+	waitTimeout := 5000 * time.Millisecond
+	if deadline, ok := ctx.Deadline(); ok {
+		remaining := time.Until(deadline)
+		if remaining < waitTimeout {
+			waitTimeout = remaining
+		}
+		if waitTimeout < 0 {
+			waitTimeout = 0 // Context already expired
+		}
+	}
+	_, err = di.client.WaitForTaskWithContext(ctx, task.TaskUID, waitTimeout)
 	if err != nil {
 		return &hermessearch.Error{
 			Op:  "DeleteBatch",
@@ -391,7 +436,18 @@ func (di *documentIndex) Clear(ctx context.Context) error {
 	}
 
 	// Wait for clearing to complete
-	_, err = di.client.WaitForTaskWithContext(ctx, task.TaskUID, 30000*time.Millisecond)
+	// Use minimum of: 5s default OR remaining context time
+	waitTimeout := 5000 * time.Millisecond
+	if deadline, ok := ctx.Deadline(); ok {
+		remaining := time.Until(deadline)
+		if remaining < waitTimeout {
+			waitTimeout = remaining
+		}
+		if waitTimeout < 0 {
+			waitTimeout = 0 // Context already expired
+		}
+	}
+	_, err = di.client.WaitForTaskWithContext(ctx, task.TaskUID, waitTimeout)
 	if err != nil {
 		return &hermessearch.Error{
 			Op:  "Clear",
