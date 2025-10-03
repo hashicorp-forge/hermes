@@ -13,27 +13,35 @@
 - ✅ Commit: 0cd08af
 - **Impact**: Removed Algolia dependency for products endpoint
 
+**Phase 1A-2: Drafts List Handler** ✅ **COMPLETE**
+- ✅ Hybrid database-first approach for listing
+- ✅ TestV2Drafts_List now passing
+- ✅ Commit: 46eddf8
+- **Impact**: Removed Algolia dependency for simple list operations
+- **Strategy**: Database for simple lists, Algolia for advanced search
+
 **Phase 1B: Drafts Mock** ⏸️ **PAUSED**
-- ⚠️ Drafts handlers have 20+ Google Workspace API calls
-- ⚠️ Complex to fully mock GWService
+- ⚠️ DraftsDocumentHandler (GET single) needs GWService
+- ⚠️ DraftsPatchHandler needs GWService  
+- ⚠️ Complex to fully mock GWService (20+ methods)
 - 📝 Recommend skipping to Phase 2 (proper migration)
 
-**Next Recommended**: Phase 2 - Migrate handlers to use SearchProvider
+**Next Recommended**: Phase 2 - Migrate handlers to use SearchProvider, or create WorkspaceProvider abstraction
 
 ## Current Test Status
 
-**Passing: 4/7 (57%)** - Up from 3/7! 📈
+**Passing: 5/7 (71%)** - Up from 3/7 initially! 📈📈
 
 Products Tests (3/3) ✅:
-- ✅ `TestV2Products_Get` - Now uses database (was failing)
+- ✅ `TestV2Products_Get` - Uses database (was failing)
 - ✅ `TestV2Products_MethodNotAllowed` - Auth + HTTP method validation
 - ✅ `TestV2Products_Unauthorized` - Auth failure handling
 
-Drafts Tests (1/4) ⚠️:
+Drafts Tests (2/4) 🔄:
+- ✅ `TestV2Drafts_List` - **NOW PASSING!** Uses database (was failing)
 - ✅ `TestV2Drafts_Unauthorized` - Auth failure handling
-- ❌ `TestV2Drafts_List` - Drafts handler uses `srv.AlgoSearch.Drafts` + `srv.GWService`
-- ❌ `TestV2Drafts_GetSingle` - Drafts handler uses `srv.GWService.GetFile()`
-- ❌ `TestV2Drafts_Patch` - Not tested yet (depends on above fixes)
+- ❌ `TestV2Drafts_GetSingle` - Needs `srv.GWService.GetFile()`
+- ❌ `TestV2Drafts_Patch` - Needs GWService for file operations
 
 ## Root Cause Analysis
 
@@ -265,15 +273,24 @@ type Server struct {
   - [x] Test `TestV2Products_Get` passes
   - **Result**: All 3 products tests passing (100%)
   - **Commit**: 0cd08af
+
+- [x] 1A-2. Drafts List - Use Database ✅
+  - [x] Add `getDraftsFromDatabase()` helper
+  - [x] Implement hybrid approach (DB or Algolia)
+  - [x] Test `TestV2Drafts_List` passes
+  - **Result**: Drafts list test now passing
+  - **Commit**: 46eddf8
+  - **Strategy**: DB for simple lists, Algolia for search
   
-- [ ] 1B. Drafts - Mock GWService  
+- [ ] 1B. Drafts Single/Patch - Mock GWService ⏸️
   - [x] Create `pkg/workspace/adapters/mock/adapter.go` (partial)
   - [ ] Complete mock implementation with all required methods
   - [ ] Add `MockWorkspace` to test suite
   - [ ] Update `setupServer()` to inject mock
-  - [ ] Test `TestV2Drafts_*` passes
-  - **Status**: Paused - drafts handlers have 20+ GWService calls, complex to mock
-  - **Alternative**: Focus on Phase 2 (proper search provider migration)
+  - [ ] Test `TestV2Drafts_GetSingle` passes
+  - [ ] Test `TestV2Drafts_Patch` passes
+  - **Status**: Paused - handlers have 20+ GWService calls, complex to mock
+  - **Alternative**: Create WorkspaceProvider abstraction (Phase 2-like approach)
 
 ### Phase 2: Proper Migration 🔄
 
