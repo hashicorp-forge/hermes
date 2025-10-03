@@ -1,0 +1,2 @@
+# This file ensures the build directory is tracked in git
+# All other contents of this directory are ignored

@@ -1,6 +1,10 @@
 /config.hcl
 /hermes
 
+# Build artifacts
+/build/*
+!/build/.gitkeep
+
 # Google OAuth 2.0
 /credentials.json
 /token.json
@@ -23,6 +27,13 @@ node_modules
 /web/.yarn/*
 /web/.eslintcache
 /web/dist
+
+# Test artifacts
+*.test
+*.out
+coverage*.html
+coverage*.out
+test-output.log
 
 # Terraform related
 .terraform

@@ -1,18 +1,29 @@
+# Build configuration
+BUILD_DIR := build
+BIN_DIR := $(BUILD_DIR)/bin
+COVERAGE_DIR := $(BUILD_DIR)/coverage
+TEST_DIR := $(BUILD_DIR)/test
+
 .PHONY: default
 default: help
 
 .PHONY: build
 build: web/build
-	rm -f ./hermes
-	CGO_ENABLED=0 go build -o ./hermes ./cmd/hermes
+	@mkdir -p $(BIN_DIR)
+	rm -f $(BIN_DIR)/hermes
+	CGO_ENABLED=0 go build -o $(BIN_DIR)/hermes ./cmd/hermes
+	@ln -sf $(BIN_DIR)/hermes ./hermes || true
 
 .PHONY: bin
 bin:
-	CGO_ENABLED=0 go build -o ./hermes ./cmd/hermes
+	@mkdir -p $(BIN_DIR)
+	CGO_ENABLED=0 go build -o $(BIN_DIR)/hermes ./cmd/hermes
+	@ln -sf $(BIN_DIR)/hermes ./hermes || true
 
 .PHONY: bin/linux
 bin/linux: # bin creates hermes binary for linux
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./hermes ./cmd/hermes
+	@mkdir -p $(BIN_DIR)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o $(BIN_DIR)/hermes-linux ./cmd/hermes
 
 .PHONY: dev
 dev: ## One command to start a dev environment
@@ -60,13 +71,43 @@ docker/dev/start: ## Start full development environment (PostgreSQL + Meilisearc
 docker/dev/stop: ## Stop development environment
 	docker-compose down
 
+.PHONY: clean
+clean: ## Clean build artifacts
+	@echo "Cleaning build artifacts..."
+	rm -rf $(BIN_DIR) $(COVERAGE_DIR) $(TEST_DIR)
+	rm -f ./hermes
+	@echo "✓ Build artifacts cleaned"
+
+.PHONY: coverage
+coverage: ## Generate and open HTML coverage report
+	@if [ -f "$(COVERAGE_DIR)/coverage.out" ]; then \
+		go tool cover -html=$(COVERAGE_DIR)/coverage.out -o $(COVERAGE_DIR)/coverage.html; \
+		echo "✓ Coverage report generated: $(COVERAGE_DIR)/coverage.html"; \
+		open $(COVERAGE_DIR)/coverage.html 2>/dev/null || xdg-open $(COVERAGE_DIR)/coverage.html 2>/dev/null || echo "Open manually: $(COVERAGE_DIR)/coverage.html"; \
+	else \
+		echo "⚠️  No coverage data found. Run 'make go/test' first."; \
+	fi
+
+.PHONY: coverage/api
+coverage/api: ## Generate and open HTML coverage report for API tests
+	@if [ -f "$(COVERAGE_DIR)/api_unit.out" ]; then \
+		go tool cover -html=$(COVERAGE_DIR)/api_unit.out -o $(COVERAGE_DIR)/api_unit.html; \
+		echo "✓ API unit coverage: $(COVERAGE_DIR)/api_unit.html"; \
+		open $(COVERAGE_DIR)/api_unit.html 2>/dev/null || xdg-open $(COVERAGE_DIR)/api_unit.html 2>/dev/null || echo "Open manually: $(COVERAGE_DIR)/api_unit.html"; \
+	else \
+		echo "⚠️  No API unit coverage data. Run 'make test/api/unit' first."; \
+	fi
+
 .PHONY: go/build
 go/build: ## Run Go build
-	CGO_ENABLED=0 go build -o ./hermes ./cmd/hermes
+	@mkdir -p $(BIN_DIR)
+	CGO_ENABLED=0 go build -o $(BIN_DIR)/hermes ./cmd/hermes
+	@ln -sf $(BIN_DIR)/hermes ./hermes || true
 
 .PHONY: go/test
 go/test: ## Run Go test
-	go test ./...
+	@mkdir -p $(COVERAGE_DIR)
+	go test -coverprofile=$(COVERAGE_DIR)/coverage.out ./...
 
 .PHONY: go/test/with-docker-postgres
 go/test/with-docker-postgres: docker/postgres/start
@@ -76,12 +117,19 @@ go/test/with-docker-postgres: docker/postgres/start
 .PHONY: test/api/unit
 test/api/unit: ## Run API unit tests (no external dependencies)
 	@echo "Running API unit tests..."
-	cd tests/api && go test -v -short -run "TestFixtures|TestModel|TestClient|TestWith|TestHelpers|TestDocument" ./...
+	@mkdir -p $(COVERAGE_DIR)
+	cd tests/api && go test -v -short -coverprofile=../../$(COVERAGE_DIR)/api_unit.out \
+		-run "TestFixtures|TestModel|TestClient|TestWith|TestHelpers|TestDocument" ./...
+	@echo "✓ Coverage report: $(COVERAGE_DIR)/api_unit.out"
 
 .PHONY: test/api/integration
 test/api/integration: ## Run API integration tests with testcontainers (requires Docker)
 	@echo "Running API integration tests with testcontainers..."
-	cd tests/api && go test -v -tags=integration -timeout 15m ./...
+	@mkdir -p $(COVERAGE_DIR) $(TEST_DIR)
+	cd tests/api && go test -v -tags=integration -timeout 15m \
+		-coverprofile=../../$(COVERAGE_DIR)/api_integration.out ./... 2>&1 | tee ../../$(TEST_DIR)/api_integration.log
+	@echo "✓ Coverage report: $(COVERAGE_DIR)/api_integration.out"
+	@echo "✓ Test log: $(TEST_DIR)/api_integration.log"
 
 .PHONY: test/api/integration/local
 test/api/integration/local: ## Run API integration tests with local containers (requires docker/dev/start)
@@ -99,7 +147,8 @@ test/api: test/api/unit test/api/integration
 .PHONY: test/api/quick
 test/api/quick: ## Run quick API unit tests
 	@echo "Running quick API unit tests..."
-	cd tests/api && go test -v -short -run TestFixtures_DocumentBuilder -timeout 30s
+	@mkdir -p $(TEST_DIR)
+	cd tests/api && go test -v -short -run TestFixtures_DocumentBuilder -timeout 30s 2>&1 | tee ../../$(TEST_DIR)/api_quick.log
 
 .PHONY: help
 help: ## Print this help
@@ -115,14 +164,19 @@ run:
 .PHONY: test/unit
 test/unit: ## Run all unit tests (no external dependencies)
 	@echo "Running all unit tests..."
-	go test -short ./...
+	@mkdir -p $(COVERAGE_DIR)
+	go test -short -coverprofile=$(COVERAGE_DIR)/unit.out ./...
+	@echo "✓ Coverage report: $(COVERAGE_DIR)/unit.out"
 
 .PHONY: test/integration
 test/integration: ## Run all integration tests with testcontainers (requires Docker)
 	@echo "Running all integration tests with testcontainers..."
 	@echo "⏱️  Global timeout: 5 minutes per test package"
 	@echo "⏱️  Individual tests should timeout after 2 minutes"
-	go test -tags=integration -timeout 5m -v ./...
+	@mkdir -p $(COVERAGE_DIR) $(TEST_DIR)
+	go test -tags=integration -timeout 5m -v -coverprofile=$(COVERAGE_DIR)/integration.out ./... 2>&1 | tee $(TEST_DIR)/integration.log
+	@echo "✓ Coverage report: $(COVERAGE_DIR)/integration.out"
+	@echo "✓ Test log: $(TEST_DIR)/integration.log"
 
 .PHONY: test
 test: ## Run all tests (unit + integration)
