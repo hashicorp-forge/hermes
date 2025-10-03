@@ -6,7 +6,8 @@ import (
 
 	"github.com/hashicorp-forge/hermes/internal/server"
 	"github.com/hashicorp-forge/hermes/internal/structs"
-	"github.com/hashicorp-forge/hermes/pkg/algolia"
+	"github.com/hashicorp-forge/hermes/pkg/models"
+	"gorm.io/gorm"
 )
 
 // ProductsHandler returns the product mappings to the Hermes frontend.
@@ -18,10 +19,10 @@ func ProductsHandler(srv server.Server) http.Handler {
 			return
 		}
 
-		// Get products and associated data from Algolia
-		products, err := getProductsData(srv.AlgoSearch)
+		// Get products from database
+		products, err := getProductsData(srv.DB)
 		if err != nil {
-			srv.Logger.Error("error getting products from algolia", "error", err)
+			srv.Logger.Error("error getting products from database", "error", err)
 			http.Error(w, "Error getting product mappings",
 				http.StatusInternalServerError)
 			return
@@ -41,20 +42,27 @@ func ProductsHandler(srv server.Server) http.Handler {
 	})
 }
 
-// getProducts gets the product or area name and their associated
-// data from Algolia
-func getProductsData(a *algolia.Client) (
+// getProductsData gets the product or area name and their associated
+// data from the database.
+func getProductsData(db *gorm.DB) (
 	map[string]structs.ProductData, error,
 ) {
-	p := structs.Products{
-		ObjectID: "products",
-		Data:     make(map[string]structs.ProductData, 0),
-	}
-
-	err := a.Internal.GetObject("products", &p)
-	if err != nil {
+	var products []models.Product
+	if err := db.Find(&products).Error; err != nil {
 		return nil, err
 	}
 
-	return p.Data, nil
+	// Convert database products to API response format
+	result := make(map[string]structs.ProductData)
+	for _, p := range products {
+		result[p.Name] = structs.ProductData{
+			Abbreviation: p.Abbreviation,
+			// PerDocTypeData is not currently stored in the database.
+			// For now, return an empty map. If needed, this can be populated
+			// from the database in a future enhancement.
+			PerDocTypeData: make(map[string]structs.ProductDocTypeData),
+		}
+	}
+
+	return result, nil
 }
