@@ -120,7 +120,9 @@ test/unit: ## Run all unit tests (no external dependencies)
 .PHONY: test/integration
 test/integration: ## Run all integration tests with testcontainers (requires Docker)
 	@echo "Running all integration tests with testcontainers..."
-	go test -tags=integration -timeout 15m ./...
+	@echo "⏱️  Global timeout: 5 minutes per test package"
+	@echo "⏱️  Individual tests should timeout after 2 minutes"
+	go test -tags=integration -timeout 5m -v ./...
 
 .PHONY: test
 test: ## Run all tests (unit + integration)

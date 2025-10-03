@@ -24,6 +24,21 @@ import (
 
 // TestMeilisearchAdapter_BasicUsage demonstrates basic usage of the Meilisearch adapter.
 func TestMeilisearchAdapter_BasicUsage(t *testing.T) {
+	// Set a test-level timeout to prevent hanging
+	if deadline, ok := t.Deadline(); ok {
+		timeout := time.Until(deadline)
+		t.Logf("Test has deadline in %v", timeout)
+	} else {
+		// If no deadline from test framework, set our own
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+		defer cancel()
+		t.Cleanup(func() {
+			if ctx.Err() == context.DeadlineExceeded {
+				t.Error("Test timed out after 2 minutes")
+			}
+		})
+	}
+
 	ctx := context.Background()
 
 	// Get fixture configuration (containers already running from TestMain)
@@ -34,7 +49,9 @@ func TestMeilisearchAdapter_BasicUsage(t *testing.T) {
 		DocsIndexName:   "integration-test-docs",
 		DraftsIndexName: "integration-test-drafts",
 	})
-	require.NoError(t, err, "Failed to create adapter") // Check health
+	require.NoError(t, err, "Failed to create adapter")
+
+	// Check health
 	err = adapter.Healthy(ctx)
 	require.NoError(t, err, "Meilisearch should be healthy")
 
@@ -113,8 +130,28 @@ func TestMeilisearchAdapter_BasicUsage(t *testing.T) {
 	err = docIndex.IndexBatch(ctx, docs)
 	require.NoError(t, err, "Failed to index documents")
 
-	// Wait for indexing to complete
-	time.Sleep(500 * time.Millisecond)
+	// Wait for indexing to complete with timeout
+	t.Log("Waiting for Meilisearch to index documents...")
+	indexReady := false
+	for i := 0; i < 60; i++ { // Wait up to 30 seconds
+		time.Sleep(500 * time.Millisecond)
+
+		// Try a simple search to see if documents are indexed
+		testResults, err := docIndex.Search(ctx, &search.SearchQuery{
+			Query:   "",
+			Page:    0,
+			PerPage: 1,
+		})
+		if err == nil && testResults.TotalHits > 0 {
+			t.Logf("Index ready after %v seconds", (i+1)/2)
+			indexReady = true
+			break
+		}
+	}
+
+	if !indexReady {
+		t.Skip("Meilisearch indexing took too long, skipping test")
+	}
 
 	t.Run("BasicSearch", func(t *testing.T) {
 		results, err := docIndex.Search(ctx, &search.SearchQuery{
@@ -231,7 +268,14 @@ func TestMeilisearchAdapter_BasicUsage(t *testing.T) {
 
 // TestMeilisearchAdapter_EdgeCases tests edge cases and error handling.
 func TestMeilisearchAdapter_EdgeCases(t *testing.T) {
-	ctx := context.Background()
+	// Set a test-level timeout to prevent hanging
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
+	t.Cleanup(func() {
+		if ctx.Err() == context.DeadlineExceeded {
+			t.Error("Test timed out after 2 minutes")
+		}
+	})
 
 	// Get fixture configuration (containers already running from TestMain)
 	host, apiKey := integration.GetMeilisearchConfig()

@@ -60,6 +60,27 @@ func (ms *MetadataStore) Get(docPath string) (*DocumentMetadata, error) {
 	return meta, nil
 }
 
+// GetWithContent retrieves both metadata and content from a document file.
+func (ms *MetadataStore) GetWithContent(docPath string) (*DocumentMetadata, string, error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+
+	data, err := os.ReadFile(docPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, "", fmt.Errorf("document not found: %q", docPath)
+		}
+		return nil, "", fmt.Errorf("failed to read document: %w", err)
+	}
+
+	meta, content, err := parseFrontmatter(data)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to parse frontmatter: %w", err)
+	}
+
+	return meta, content, nil
+}
+
 // Set updates metadata in a document file's frontmatter.
 func (ms *MetadataStore) Set(docPath string, meta *DocumentMetadata, content string) error {
 	ms.mu.Lock()
@@ -161,11 +182,15 @@ func parseFrontmatter(data []byte) (*DocumentMetadata, string, error) {
 		case "parent_folder_id":
 			meta.ParentFolderID = value
 		case "created_time":
-			if t, err := time.Parse(time.RFC3339, value); err == nil {
+			if t, err := time.Parse(time.RFC3339Nano, value); err == nil {
+				meta.CreatedTime = t
+			} else if t, err := time.Parse(time.RFC3339, value); err == nil {
 				meta.CreatedTime = t
 			}
 		case "modified_time":
-			if t, err := time.Parse(time.RFC3339, value); err == nil {
+			if t, err := time.Parse(time.RFC3339Nano, value); err == nil {
+				meta.ModifiedTime = t
+			} else if t, err := time.Parse(time.RFC3339, value); err == nil {
 				meta.ModifiedTime = t
 			}
 		case "owner":
@@ -202,8 +227,8 @@ func serializeFrontmatter(meta *DocumentMetadata, content string) []byte {
 	buf.WriteString(fmt.Sprintf("id: %s\n", meta.ID))
 	buf.WriteString(fmt.Sprintf("name: %s\n", meta.Name))
 	buf.WriteString(fmt.Sprintf("parent_folder_id: %s\n", meta.ParentFolderID))
-	buf.WriteString(fmt.Sprintf("created_time: %s\n", meta.CreatedTime.Format(time.RFC3339)))
-	buf.WriteString(fmt.Sprintf("modified_time: %s\n", meta.ModifiedTime.Format(time.RFC3339)))
+	buf.WriteString(fmt.Sprintf("created_time: %s\n", meta.CreatedTime.Format(time.RFC3339Nano)))
+	buf.WriteString(fmt.Sprintf("modified_time: %s\n", meta.ModifiedTime.Format(time.RFC3339Nano)))
 	buf.WriteString(fmt.Sprintf("owner: %s\n", meta.Owner))
 
 	if meta.ThumbnailURL != "" {

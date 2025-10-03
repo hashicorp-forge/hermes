@@ -207,11 +207,11 @@ func TestFilesystemAdapter(t *testing.T) {
 
 	t.Run("ListDocumentsWithFilter", func(t *testing.T) {
 		// Create document with known time
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(200 * time.Millisecond)
 		filterTime := time.Now()
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(200 * time.Millisecond)
 
-		_, err := docStorage.CreateDocument(ctx, &workspace.DocumentCreate{
+		created, err := docStorage.CreateDocument(ctx, &workspace.DocumentCreate{
 			Name:           "Recent Doc",
 			ParentFolderID: "docs",
 			Content:        "Recent content",
@@ -219,6 +219,11 @@ func TestFilesystemAdapter(t *testing.T) {
 		})
 		if err != nil {
 			t.Fatalf("Failed to create document: %v", err)
+		}
+
+		// Verify the document was created after filter time
+		if !created.ModifiedTime.After(filterTime) {
+			t.Fatalf("Document modified time %v is not after filter time %v", created.ModifiedTime, filterTime)
 		}
 
 		// List with time filter
@@ -229,8 +234,18 @@ func TestFilesystemAdapter(t *testing.T) {
 			t.Fatalf("Failed to list documents: %v", err)
 		}
 
-		if len(docs) < 1 {
-			t.Error("Expected at least 1 recent document")
+		// Find our document
+		found := false
+		for _, doc := range docs {
+			if doc.ID == created.ID {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			t.Errorf("Expected to find document %s (created at %v) in list after filter time %v, but got %d documents",
+				created.ID, created.ModifiedTime, filterTime, len(docs))
 		}
 	})
 

@@ -114,6 +114,24 @@ func (a *Adapter) getDocumentPath(id string, isDraft bool) string {
 	return filepath.Join(basePath, id+".md")
 }
 
+// findDocumentPath searches for a document in both docs and drafts directories.
+// Returns the path and whether it's a draft, or an error if not found.
+func (a *Adapter) findDocumentPath(id string) (string, bool, error) {
+	// Try docs first
+	docPath := a.getDocumentPath(id, false)
+	if _, err := os.Stat(docPath); err == nil {
+		return docPath, false, nil
+	}
+
+	// Try drafts
+	draftPath := a.getDocumentPath(id, true)
+	if _, err := os.Stat(draftPath); err == nil {
+		return draftPath, true, nil
+	}
+
+	return "", false, workspace.NotFoundError("document", id)
+}
+
 // getFolderPath returns the filesystem path for folder metadata.
 func (a *Adapter) getFolderPath(id string) string {
 	return filepath.Join(a.foldersPath, id+".json")
@@ -126,29 +144,32 @@ type documentStorage struct {
 
 // GetDocument retrieves a document by ID.
 func (ds *documentStorage) GetDocument(ctx context.Context, id string) (*workspace.Document, error) {
-	// Try to load metadata
-	meta, err := ds.adapter.metadataStore.Get(id)
-	if err != nil {
-		return nil, workspace.NotFoundError("document", id)
+	// Try both docs and drafts paths since we don't know which it is yet
+	paths := []string{
+		ds.adapter.getDocumentPath(id, false), // docs
+		ds.adapter.getDocumentPath(id, true),  // drafts
 	}
 
-	// Determine if it's a draft
-	isDraft := meta.ParentFolderID == "drafts" || strings.Contains(meta.ParentFolderID, "draft")
+	var meta *DocumentMetadata
+	var content string
+	var err error
 
-	// Load content
-	docPath := ds.adapter.getDocumentPath(id, isDraft)
-	content, err := os.ReadFile(docPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, workspace.NotFoundError("document", id)
+	for _, path := range paths {
+		// Load metadata and content from the file
+		meta, content, err = ds.adapter.metadataStore.GetWithContent(path)
+		if err == nil {
+			break
 		}
-		return nil, fmt.Errorf("failed to read document: %w", err)
+	}
+
+	if meta == nil {
+		return nil, workspace.NotFoundError("document", id)
 	}
 
 	return &workspace.Document{
 		ID:             id,
 		Name:           meta.Name,
-		Content:        string(content),
+		Content:        content,
 		MimeType:       "text/markdown",
 		ParentFolderID: meta.ParentFolderID,
 		CreatedTime:    meta.CreatedTime,
@@ -220,12 +241,17 @@ func (ds *documentStorage) CreateDocument(ctx context.Context, doc *workspace.Do
 
 // UpdateDocument updates an existing document.
 func (ds *documentStorage) UpdateDocument(ctx context.Context, id string, updates *workspace.DocumentUpdate) (*workspace.Document, error) {
-	meta, err := ds.adapter.metadataStore.Get(id)
+	// Find the document
+	docPath, isDraft, err := ds.adapter.findDocumentPath(id)
+	if err != nil {
+		return nil, err
+	}
+
+	// Load metadata
+	meta, err := ds.adapter.metadataStore.Get(docPath)
 	if err != nil {
 		return nil, workspace.NotFoundError("document", id)
 	}
-
-	isDraft := meta.ParentFolderID == "drafts" || strings.Contains(meta.ParentFolderID, "draft")
 
 	// Update fields
 	if updates.Name != nil {
@@ -247,10 +273,11 @@ func (ds *documentStorage) UpdateDocument(ctx context.Context, id string, update
 		isDraft = newIsDraft
 	}
 	if updates.Content != nil {
-		docPath := ds.adapter.getDocumentPath(id, isDraft)
-		if err := os.WriteFile(docPath, []byte(*updates.Content), 0644); err != nil {
+		currentPath := ds.adapter.getDocumentPath(id, isDraft)
+		if err := os.WriteFile(currentPath, []byte(*updates.Content), 0644); err != nil {
 			return nil, fmt.Errorf("failed to update document content: %w", err)
 		}
+		docPath = currentPath // Update docPath in case it moved
 	}
 	if updates.Metadata != nil {
 		if meta.Metadata == nil {
@@ -263,16 +290,17 @@ func (ds *documentStorage) UpdateDocument(ctx context.Context, id string, update
 
 	meta.ModifiedTime = time.Now()
 
-// TODO: Frontmatter integration - need to read current content and rewrite with new metadata
-docPath := ds.adapter.getDocumentPath(id, isDraft)
-contentBytes, err := os.ReadFile(docPath)
-if err != nil {
-return nil, fmt.Errorf("failed to read document content: %w", err)
-}
+	// Read current content to preserve it when updating metadata
+	finalPath := ds.adapter.getDocumentPath(id, isDraft)
+	contentBytes, err := os.ReadFile(finalPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read document content: %w", err)
+	}
+	docPath = finalPath
 
-if err := ds.adapter.metadataStore.Set(docPath, meta, string(contentBytes)); err != nil {
-return nil, fmt.Errorf("failed to update metadata: %w", err)
-}
+	if err := ds.adapter.metadataStore.Set(docPath, meta, string(contentBytes)); err != nil {
+		return nil, fmt.Errorf("failed to update metadata: %w", err)
+	}
 
 	// Reload full document
 	return ds.GetDocument(ctx, id)
@@ -280,22 +308,15 @@ return nil, fmt.Errorf("failed to update metadata: %w", err)
 
 // DeleteDocument deletes a document.
 func (ds *documentStorage) DeleteDocument(ctx context.Context, id string) error {
-	meta, err := ds.adapter.metadataStore.Get(id)
+	// Find the document
+	docPath, _, err := ds.adapter.findDocumentPath(id)
 	if err != nil {
-		return workspace.NotFoundError("document", id)
+		return err
 	}
 
-	isDraft := meta.ParentFolderID == "drafts" || strings.Contains(meta.ParentFolderID, "draft")
-	docPath := ds.adapter.getDocumentPath(id, isDraft)
-
-	// Delete document file
+	// Delete document file (metadata is stored in the file itself)
 	if err := os.Remove(docPath); err != nil && !os.IsNotExist(err) {
 		return fmt.Errorf("failed to delete document file: %w", err)
-	}
-
-	// Delete metadata
-	if err := ds.adapter.metadataStore.Delete(id); err != nil {
-		return fmt.Errorf("failed to delete metadata: %w", err)
 	}
 
 	return nil
@@ -316,12 +337,12 @@ func (ds *documentStorage) ListDocuments(ctx context.Context, folderID string, o
 		}
 
 		// Filter by trashed
-		if !opts.IncludeTrashed && meta.Trashed {
+		if opts != nil && !opts.IncludeTrashed && meta.Trashed {
 			continue
 		}
 
 		// Filter by modified time
-		if opts.ModifiedAfter != nil && meta.ModifiedTime.Before(*opts.ModifiedAfter) {
+		if opts != nil && opts.ModifiedAfter != nil && !meta.ModifiedTime.After(*opts.ModifiedAfter) {
 			continue
 		}
 
