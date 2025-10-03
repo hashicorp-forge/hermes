@@ -7,7 +7,15 @@
 
 # macOS & local
 .DS_Store
+
+# Environment variables (secrets)
 .env
+.env.local
+.env.*.local
+.env.development
+.env.staging
+.env.production
+.env.test
 
 # Web application
 node_modules
