@@ -492,11 +492,54 @@ func DraftsHandler(srv server.Server) http.Handler {
 			}()
 
 		case "GET":
+			// Try database-first approach for better testability
+			// If query parameters are provided, fall back to Algolia search
+			q := r.URL.Query()
+
+			// Check if this is a simple list request (no search params)
+			hasSearchParams := q.Get("facetFilters") != "" || q.Get("facets") != "" || q.Get("hitsPerPage") != ""
+
+			if !hasSearchParams && srv.DB != nil {
+				// Simple database query for drafts owned by or contributed to by user
+				drafts, err := getDraftsFromDatabase(srv.DB, userEmail)
+				if err != nil {
+					srv.Logger.Error("error retrieving drafts from database",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+					)
+					http.Error(w, "Error retrieving document drafts",
+						http.StatusInternalServerError)
+					return
+				}
+
+				// Write response
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
+
+				enc := json.NewEncoder(w)
+				if err := enc.Encode(drafts); err != nil {
+					srv.Logger.Error("error encoding drafts",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+					)
+					return
+				}
+
+				srv.Logger.Info("retrieved drafts from database",
+					"method", r.Method,
+					"path", r.URL.Path,
+					"count", len(drafts),
+				)
+				return
+			}
+
+			// Legacy Algolia search path (for production use with search parameters)
 			// Get OIDC ID
 			id := r.Header.Get("x-amzn-oidc-identity")
 
 			// Parse query
-			q := r.URL.Query()
 			facetFiltersStr := q.Get("facetFilters")
 			facetsStr := q.Get("facets")
 			hitsPerPageStr := q.Get("hitsPerPage")
@@ -1663,4 +1706,68 @@ func removeSharing(s *gw.Service, docID, email string) error {
 		}
 	}
 	return nil
+}
+
+// getDraftsFromDatabase retrieves drafts from the database for a given user.
+// Returns drafts where the user is either an owner or contributor.
+func getDraftsFromDatabase(db *gorm.DB, userEmail string) ([]map[string]interface{}, error) {
+	var documents []models.Document
+
+	// Find documents where user is owner or contributor and status is WIP (draft)
+	err := db.
+		Preload("Owner").
+		Preload("Contributors").
+		Preload("Approvers").
+		Preload("Product").
+		Preload("DocumentType").
+		Joins("LEFT JOIN document_contributors ON documents.id = document_contributors.document_id").
+		Joins("LEFT JOIN users AS contributors ON document_contributors.user_id = contributors.id").
+		Joins("LEFT JOIN users AS owners ON documents.owner_id = owners.id").
+		Where("documents.status = ?", models.WIPDocumentStatus).
+		Where("owners.email_address = ? OR contributors.email_address = ?", userEmail, userEmail).
+		Group("documents.id").
+		Find(&documents).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert to response format
+	result := make([]map[string]interface{}, len(documents))
+	for i, doc := range documents {
+		result[i] = map[string]interface{}{
+			"id":           doc.GoogleFileID,
+			"title":        doc.Title,
+			"status":       doc.Status,
+			"product":      doc.Product.Name,
+			"documentType": doc.DocumentType.Name,
+			"createdTime":  doc.DocumentCreatedAt,
+			"modifiedTime": doc.DocumentModifiedAt,
+		}
+
+		// Add owner if present
+		if doc.Owner != nil {
+			result[i]["owners"] = []string{doc.Owner.EmailAddress}
+		}
+
+		// Add contributors if present
+		if len(doc.Contributors) > 0 {
+			contributors := make([]string, len(doc.Contributors))
+			for j, c := range doc.Contributors {
+				contributors[j] = c.EmailAddress
+			}
+			result[i]["contributors"] = contributors
+		}
+
+		// Add approvers if present
+		if len(doc.Approvers) > 0 {
+			approvers := make([]string, len(doc.Approvers))
+			for j, a := range doc.Approvers {
+				approvers[j] = a.EmailAddress
+			}
+			result[i]["approvers"] = approvers
+		}
+	}
+
+	return result, nil
 }
