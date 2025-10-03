@@ -1,10 +1,8 @@
 package meilisearch
 
 import (
-	"context"
 	"encoding/json"
 	"testing"
-	"time"
 
 	hermessearch "github.com/hashicorp-forge/hermes/pkg/search"
 )
@@ -218,84 +216,9 @@ func TestAdapterInterfaces(t *testing.T) {
 	var _ hermessearch.DraftIndex = (*draftIndex)(nil)
 }
 
-// Integration test - requires Meilisearch running
-func TestIntegration_IndexAndSearch(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping integration test")
-	}
-
-	adapter, err := NewAdapter(&Config{
-		Host:            "http://localhost:7700",
-		APIKey:          "masterKey123",
-		DocsIndexName:   "test-docs-integration",
-		DraftsIndexName: "test-drafts-integration",
-	})
-	if err != nil {
-		t.Skipf("Could not connect to Meilisearch: %v", err)
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	// Check health
-	if err := adapter.Healthy(ctx); err != nil {
-		t.Skipf("Meilisearch not healthy: %v", err)
-	}
-
-	// Clean up before test
-	docIndex := adapter.DocumentIndex()
-	_ = docIndex.Clear(ctx)
-
-	// Index a test document
-	testDoc := &hermessearch.Document{
-		ObjectID:     "test-doc-1",
-		DocID:        "TEST-001",
-		Title:        "Test Document",
-		DocNumber:    "TEST-001",
-		DocType:      "RFC",
-		Product:      "terraform",
-		Status:       "approved",
-		Owners:       []string{"user1"},
-		Contributors: []string{"user2"},
-		Summary:      "This is a test document",
-		Content:      "Full content of the test document",
-		CreatedTime:  1234567890,
-		ModifiedTime: 1234567890,
-	}
-
-	if err := docIndex.Index(ctx, testDoc); err != nil {
-		t.Fatalf("Failed to index document: %v", err)
-	}
-
-	// Wait for indexing to complete with intelligent polling (max 5 seconds)
-	var results *hermessearch.SearchResult
-	start := time.Now()
-	for i := 0; i < 10; i++ {
-		if ctx.Err() != nil {
-			t.Fatal("Context timed out waiting for indexing")
-		}
-
-		results, err = docIndex.Search(ctx, &hermessearch.SearchQuery{
-			Query:   "test",
-			Page:    0,
-			PerPage: 10,
-		})
-		if err != nil {
-			t.Fatalf("Search failed: %v", err)
-		}
-
-		if results.TotalHits > 0 {
-			t.Logf("✓ Document indexed and searchable in %v", time.Since(start))
-			break
-		}
-
-		time.Sleep(500 * time.Millisecond)
-	}
-
-	if results.TotalHits == 0 {
-		t.Error("Expected at least 1 hit after waiting, got 0")
-	}
-
-	// Clean up after test
-	_ = docIndex.Clear(ctx)
-}
+// Note: Integration tests that require a running Meilisearch instance
+// have been moved to tests/integration/search/meilisearch_adapter_test.go
+// Those tests use testcontainers-go to automatically start Meilisearch.
+//
+// To run integration tests:
+//   go test -tags=integration ./tests/integration/search/...
