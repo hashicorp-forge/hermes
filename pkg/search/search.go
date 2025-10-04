@@ -13,6 +13,12 @@ type Provider interface {
 	// DraftIndex returns the draft document search interface.
 	DraftIndex() DraftIndex
 
+	// ProjectIndex returns the project search interface.
+	ProjectIndex() ProjectIndex
+
+	// LinksIndex returns the links/redirect search interface.
+	LinksIndex() LinksIndex
+
 	// Name returns the provider name.
 	Name() string
 
@@ -36,6 +42,10 @@ type DocumentIndex interface {
 
 	// Search performs a search query.
 	Search(ctx context.Context, query *SearchQuery) (*SearchResult, error)
+
+	// GetObject retrieves a single document by ID from the search index.
+	// This is used for data consistency checks between database and search index.
+	GetObject(ctx context.Context, docID string) (*Document, error)
 
 	// GetFacets retrieves available facets for filtering.
 	GetFacets(ctx context.Context, facetNames []string) (*Facets, error)
@@ -61,10 +71,50 @@ type DraftIndex interface {
 	// Search performs a search query on drafts.
 	Search(ctx context.Context, query *SearchQuery) (*SearchResult, error)
 
+	// GetObject retrieves a single draft document by ID from the search index.
+	// This is used for data consistency checks between database and search index.
+	GetObject(ctx context.Context, docID string) (*Document, error)
+
 	// GetFacets retrieves available facets for filtering drafts.
 	GetFacets(ctx context.Context, facetNames []string) (*Facets, error)
 
 	// Clear removes all draft documents from the index (use with caution).
+	Clear(ctx context.Context) error
+}
+
+// ProjectIndex handles project search operations.
+type ProjectIndex interface {
+	// Index adds or updates a project in the search index.
+	// The project map should contain fields like: objectID, title, description,
+	// status, creator, createdTime, modifiedTime, jiraIssueID, etc.
+	Index(ctx context.Context, project map[string]any) error
+
+	// Delete removes a project from the search index.
+	Delete(ctx context.Context, projectID string) error
+
+	// Search performs a search query on projects.
+	Search(ctx context.Context, query *SearchQuery) (*SearchResult, error)
+
+	// GetObject retrieves a single project by ID from the search index.
+	GetObject(ctx context.Context, projectID string) (map[string]any, error)
+
+	// Clear removes all projects from the index (use with caution).
+	Clear(ctx context.Context) error
+}
+
+// LinksIndex handles document redirect/short-link operations.
+type LinksIndex interface {
+	// SaveLink saves a document redirect link.
+	// The link map should contain: objectID (e.g., "/rfc/lab-001") and documentID (Google Drive file ID).
+	SaveLink(ctx context.Context, link map[string]string) error
+
+	// DeleteLink removes a document redirect link.
+	DeleteLink(ctx context.Context, objectID string) error
+
+	// GetLink retrieves a redirect link by its objectID.
+	GetLink(ctx context.Context, objectID string) (map[string]string, error)
+
+	// Clear removes all links from the index (use with caution).
 	Clear(ctx context.Context) error
 }
 
