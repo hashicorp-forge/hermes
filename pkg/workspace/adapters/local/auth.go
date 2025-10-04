@@ -3,11 +3,11 @@ package local
 import (
 	"context"
 	"encoding/json"
-	"os"
 	"path/filepath"
 	"time"
 
 	"github.com/hashicorp-forge/hermes/pkg/workspace"
+	"github.com/spf13/afero"
 )
 
 // authService implements workspace.AuthService.
@@ -20,9 +20,10 @@ type authService struct {
 // In production, you'd integrate with an actual auth system.
 func (as *authService) ValidateToken(ctx context.Context, token string) (*workspace.AuthInfo, error) {
 	tokensPath := filepath.Join(as.adapter.basePath, "tokens.json")
-	data, err := os.ReadFile(tokensPath)
+	data, err := afero.ReadFile(as.adapter.fs, tokensPath)
 	if err != nil {
-		if os.IsNotExist(err) {
+		// Check if file doesn't exist using filesystem Stat
+		if _, statErr := as.adapter.fs.Stat(tokensPath); statErr != nil {
 			return &workspace.AuthInfo{Valid: false}, nil
 		}
 		return nil, err
@@ -63,7 +64,7 @@ func (as *authService) GetUserInfo(ctx context.Context, token string) (*workspac
 
 	// Load user info from users database
 	usersPath := filepath.Join(as.adapter.basePath, "users.json")
-	data, err := os.ReadFile(usersPath)
+	data, err := afero.ReadFile(as.adapter.fs, usersPath)
 	if err != nil {
 		return nil, err
 	}

@@ -4,12 +4,13 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/spf13/afero"
 )
 
 // DocumentMetadata stores metadata about a document.
@@ -25,17 +26,19 @@ type DocumentMetadata struct {
 	Trashed        bool           `yaml:"trashed"`
 }
 
-// MetadataStore manages document metadata workspace.
+// MetadataStore manages document metadata storage.
 // Metadata is stored as YAML frontmatter in the document files themselves.
 type MetadataStore struct {
 	basePath string
+	fs       FileSystem
 	mu       sync.RWMutex
 }
 
 // NewMetadataStore creates a new metadata store.
-func NewMetadataStore(basePath string) (*MetadataStore, error) {
+func NewMetadataStore(basePath string, fs FileSystem) (*MetadataStore, error) {
 	return &MetadataStore{
 		basePath: basePath,
+		fs:       fs,
 	}, nil
 }
 
@@ -44,9 +47,9 @@ func (ms *MetadataStore) Get(docPath string) (*DocumentMetadata, error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 
-	data, err := os.ReadFile(docPath)
+	data, err := afero.ReadFile(ms.fs, docPath)
 	if err != nil {
-		if os.IsNotExist(err) {
+		if _, statErr := ms.fs.Stat(docPath); statErr != nil {
 			return nil, fmt.Errorf("document not found: %q", docPath)
 		}
 		return nil, fmt.Errorf("failed to read document: %w", err)
@@ -65,9 +68,9 @@ func (ms *MetadataStore) GetWithContent(docPath string) (*DocumentMetadata, stri
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 
-	data, err := os.ReadFile(docPath)
+	data, err := afero.ReadFile(ms.fs, docPath)
 	if err != nil {
-		if os.IsNotExist(err) {
+		if _, statErr := ms.fs.Stat(docPath); statErr != nil {
 			return nil, "", fmt.Errorf("document not found: %q", docPath)
 		}
 		return nil, "", fmt.Errorf("failed to read document: %w", err)
@@ -88,7 +91,7 @@ func (ms *MetadataStore) Set(docPath string, meta *DocumentMetadata, content str
 
 	data := serializeFrontmatter(meta, content)
 
-	if err := os.WriteFile(docPath, data, 0644); err != nil {
+	if err := afero.WriteFile(ms.fs, docPath, data, 0644); err != nil {
 		return fmt.Errorf("failed to write document: %w", err)
 	}
 
@@ -100,8 +103,12 @@ func (ms *MetadataStore) Delete(docPath string) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 
-	if err := os.Remove(docPath); err != nil && !os.IsNotExist(err) {
-		return fmt.Errorf("failed to delete document: %w", err)
+	if err := ms.fs.Remove(docPath); err != nil {
+		// Check if file exists before treating as error
+		if _, statErr := ms.fs.Stat(docPath); statErr == nil {
+			return fmt.Errorf("failed to delete document: %w", err)
+		}
+		// File doesn't exist, that's okay
 	}
 
 	return nil
@@ -112,7 +119,7 @@ func (ms *MetadataStore) List(dirPath string) ([]*DocumentMetadata, error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 
-	files, err := os.ReadDir(dirPath)
+	files, err := afero.ReadDir(ms.fs, dirPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read directory: %w", err)
 	}
@@ -124,7 +131,7 @@ func (ms *MetadataStore) List(dirPath string) ([]*DocumentMetadata, error) {
 		}
 
 		docPath := filepath.Join(dirPath, file.Name())
-		data, err := os.ReadFile(docPath)
+		data, err := afero.ReadFile(ms.fs, docPath)
 		if err != nil {
 			continue
 		}

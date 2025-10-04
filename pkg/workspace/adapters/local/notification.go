@@ -47,15 +47,6 @@ func (ns *notificationService) logEmail(to []string, from, subject, body string,
 	return nil
 }
 
-// SMTPConfig contains SMTP configuration for sending emails.
-type SMTPConfig struct {
-	Host     string
-	Port     int
-	Username string
-	Password string
-	From     string
-}
-
 // SendViaSMTP sends an email via SMTP (example implementation).
 func SendViaSMTP(cfg *SMTPConfig, to []string, subject, body string, isHTML bool) error {
 	auth := smtp.PlainAuth("", cfg.Username, cfg.Password, cfg.Host)

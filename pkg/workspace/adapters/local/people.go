@@ -3,10 +3,10 @@ package local
 import (
 	"context"
 	"encoding/json"
-	"os"
 	"path/filepath"
 
 	"github.com/hashicorp-forge/hermes/pkg/workspace"
+	"github.com/spf13/afero"
 )
 
 // peopleService implements workspace.PeopleService.
@@ -18,9 +18,10 @@ type peopleService struct {
 func (ps *peopleService) GetUser(ctx context.Context, email string) (*workspace.User, error) {
 	// Load from local user database (simple JSON file implementation)
 	usersPath := filepath.Join(ps.adapter.basePath, "users.json")
-	data, err := os.ReadFile(usersPath)
+	data, err := afero.ReadFile(ps.adapter.fs, usersPath)
 	if err != nil {
-		if os.IsNotExist(err) {
+		// Check if file doesn't exist using filesystem Stat
+		if _, statErr := ps.adapter.fs.Stat(usersPath); statErr != nil {
 			return nil, workspace.NotFoundError("user", email)
 		}
 		return nil, err
@@ -43,9 +44,10 @@ func (ps *peopleService) GetUser(ctx context.Context, email string) (*workspace.
 func (ps *peopleService) SearchUsers(ctx context.Context, query string, fields []string) ([]*workspace.User, error) {
 	// Simple implementation: load all users and filter by email/name
 	usersPath := filepath.Join(ps.adapter.basePath, "users.json")
-	data, err := os.ReadFile(usersPath)
+	data, err := afero.ReadFile(ps.adapter.fs, usersPath)
 	if err != nil {
-		if os.IsNotExist(err) {
+		// Check if file doesn't exist using filesystem Stat
+		if _, statErr := ps.adapter.fs.Stat(usersPath); statErr != nil {
 			return []*workspace.User{}, nil
 		}
 		return nil, err
