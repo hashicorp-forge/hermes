@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp-forge/hermes/pkg/workspace"
 	"github.com/hashicorp-forge/hermes/pkg/workspace/adapters/local"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFilesystemAdapter(t *testing.T) {
@@ -325,8 +326,60 @@ func TestFilesystemAdapter(t *testing.T) {
 }
 
 func TestFilesystemAdapterErrors(t *testing.T) {
+	tests := []struct {
+		name    string
+		test    func(*testing.T, *local.Adapter)
+		wantErr bool
+	}{
+		{
+			name: "GetNonexistentDocument",
+			test: func(t *testing.T, adapter *local.Adapter) {
+				doc, err := adapter.DocumentStorage().GetDocument(context.Background(), "nonexistent-id")
+				assert.Error(t, err)
+				assert.Nil(t, doc)
+			},
+		},
+		{
+			name: "DeleteNonexistentDocument",
+			test: func(t *testing.T, adapter *local.Adapter) {
+				err := adapter.DocumentStorage().DeleteDocument(context.Background(), "nonexistent-id")
+				assert.Error(t, err)
+			},
+		},
+		{
+			name: "CreateDocumentWithEmptyName",
+			test: func(t *testing.T, adapter *local.Adapter) {
+				doc, err := adapter.DocumentStorage().CreateDocument(context.Background(), &workspace.DocumentCreate{
+					Name: "", // Empty name
+				})
+				assert.Error(t, err)
+				assert.Nil(t, doc)
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Create temporary directory for testing
+			tempDir := t.TempDir()
+
+			// Create adapter
+			adapter, err := local.NewAdapter(&local.Config{
+				BasePath: tempDir,
+			})
+			if err != nil {
+				t.Fatalf("Failed to create adapter: %v", err)
+			}
+			tt.test(t, adapter)
+		})
+	}
+}
+
+func TestAdapterServiceGetters(t *testing.T) {
+	// Create temporary directory for testing
 	tempDir := t.TempDir()
 
+	// Create adapter
 	adapter, err := local.NewAdapter(&local.Config{
 		BasePath: tempDir,
 	})
@@ -334,31 +387,24 @@ func TestFilesystemAdapterErrors(t *testing.T) {
 		t.Fatalf("Failed to create adapter: %v", err)
 	}
 
-	docStorage := adapter.DocumentStorage()
-	ctx := context.Background()
-
-	t.Run("GetNonexistentDocument", func(t *testing.T) {
-		_, err := docStorage.GetDocument(ctx, "nonexistent-id")
-		if err == nil {
-			t.Error("Expected error for nonexistent document")
-		}
+	// Test that service getters return non-nil implementations
+	t.Run("DocumentStorage", func(t *testing.T) {
+		svc := adapter.DocumentStorage()
+		assert.NotNil(t, svc)
 	})
 
-	t.Run("DeleteNonexistentDocument", func(t *testing.T) {
-		err := docStorage.DeleteDocument(ctx, "nonexistent-id")
-		if err == nil {
-			t.Error("Expected error when deleting nonexistent document")
-		}
+	t.Run("PeopleService", func(t *testing.T) {
+		svc := adapter.PeopleService()
+		assert.NotNil(t, svc)
 	})
 
-	t.Run("CreateDocumentWithEmptyName", func(t *testing.T) {
-		_, err := docStorage.CreateDocument(ctx, &workspace.DocumentCreate{
-			Name:           "",
-			ParentFolderID: "docs",
-			Content:        "Content",
-		})
-		if err == nil {
-			t.Error("Expected error for empty document name")
-		}
+	t.Run("NotificationService", func(t *testing.T) {
+		svc := adapter.NotificationService()
+		assert.NotNil(t, svc)
+	})
+
+	t.Run("AuthService", func(t *testing.T) {
+		svc := adapter.AuthService()
+		assert.NotNil(t, svc)
 	})
 }
