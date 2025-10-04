@@ -14,7 +14,9 @@ import (
 	"github.com/hashicorp-forge/hermes/internal/email"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	"github.com/hashicorp-forge/hermes/pkg/document"
-	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
+	hcd "github.com/hashicorp-f		// Create go-link.
+		if err := links.SaveDocumentRedirectDetailsLegacy(
+			aw, docID, doc.DocType, doc.DocNumber); err != nil {e/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp-forge/hermes/pkg/links"
 	"github.com/hashicorp-forge/hermes/pkg/models"
 	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
@@ -49,7 +51,8 @@ func ReviewHandler(
 			}
 
 			// Check if document is locked.
-			locked, err := hcd.IsLocked(docID, db, s, l)
+			provider := gw.NewAdapter(s)
+			locked, err := hcd.IsLocked(docID, db, provider, l)
 			if err != nil {
 				l.Error("error checking document locked status",
 					"error", err,
@@ -145,7 +148,8 @@ func ReviewHandler(
 			doc.Status = "In-Review"
 
 			// Replace the doc header.
-			if err = doc.ReplaceHeader(cfg.BaseURL, false, s); err != nil {
+			provider = gw.NewAdapter(s)
+			if err = doc.ReplaceHeader(cfg.BaseURL, false, provider); err != nil {
 				l.Error("error replacing doc header",
 					"error", err, "doc_id", docID)
 				http.Error(w, "Error creating review",
@@ -476,6 +480,7 @@ func ReviewHandler(
 					// TODO: use an asynchronous method for sending emails because we
 					// can't currently recover gracefully from a failure here.
 					for _, approverEmail := range doc.Approvers {
+						provider = gw.NewAdapter(s)
 						err := email.SendReviewRequestedEmail(
 							email.ReviewRequestedEmailData{
 								BaseURL:           cfg.BaseURL,
@@ -486,7 +491,7 @@ func ReviewHandler(
 							},
 							[]string{approverEmail},
 							cfg.Email.FromAddress,
-							s,
+							provider,
 						)
 						if err != nil {
 							l.Error("error sending approver email",
@@ -712,7 +717,7 @@ func revertReviewCreation(
 	var result error
 
 	// Delete go-link if it exists.
-	if err := links.DeleteDocumentRedirectDetails(
+	if err := links.DeleteDocumentRedirectDetailsLegacy(
 		a, doc.ObjectID, doc.DocType, doc.DocNumber,
 	); err != nil {
 		result = multierror.Append(
@@ -740,8 +745,9 @@ func revertReviewCreation(
 	doc.Status = "WIP"
 
 	// Replace the doc header.
+	provider := gw.NewAdapter(s)
 	if err := doc.ReplaceHeader(
-		cfg.BaseURL, true, s); err != nil {
+		cfg.BaseURL, true, provider); err != nil {
 
 		result = multierror.Append(
 			result, fmt.Errorf("error replacing the doc header: %w", err))
