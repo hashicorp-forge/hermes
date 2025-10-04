@@ -14,17 +14,21 @@ import (
 
 // Adapter implements search.Provider for Meilisearch.
 type Adapter struct {
-	client      meilisearch.ServiceManager
-	docsIndex   string
-	draftsIndex string
+	client        meilisearch.ServiceManager
+	docsIndex     string
+	draftsIndex   string
+	projectsIndex string
+	linksIndex    string
 }
 
 // Config contains Meilisearch configuration.
 type Config struct {
-	Host            string // e.g., "http://localhost:7700"
-	APIKey          string // Master key
-	DocsIndexName   string
-	DraftsIndexName string
+	Host              string // e.g., "http://localhost:7700"
+	APIKey            string // Master key
+	DocsIndexName     string
+	DraftsIndexName   string
+	ProjectsIndexName string
+	LinksIndexName    string
 }
 
 // NewAdapter creates a new Meilisearch search adapter.
@@ -36,9 +40,11 @@ func NewAdapter(cfg *Config) (*Adapter, error) {
 	client := meilisearch.New(cfg.Host, meilisearch.WithAPIKey(cfg.APIKey))
 
 	adapter := &Adapter{
-		client:      client,
-		docsIndex:   cfg.DocsIndexName,
-		draftsIndex: cfg.DraftsIndexName,
+		client:        client,
+		docsIndex:     cfg.DocsIndexName,
+		draftsIndex:   cfg.DraftsIndexName,
+		projectsIndex: cfg.ProjectsIndexName,
+		linksIndex:    cfg.LinksIndexName,
 	}
 
 	// Initialize indexes with settings
@@ -125,6 +131,22 @@ func (a *Adapter) DraftIndex() hermessearch.DraftIndex {
 	return &draftIndex{
 		client: a.client,
 		index:  a.draftsIndex,
+	}
+}
+
+// ProjectIndex returns the project search interface.
+func (a *Adapter) ProjectIndex() hermessearch.ProjectIndex {
+	return &projectIndex{
+		client: a.client,
+		index:  a.projectsIndex,
+	}
+}
+
+// LinksIndex returns the links/redirect search interface.
+func (a *Adapter) LinksIndex() hermessearch.LinksIndex {
+	return &linksIndex{
+		client: a.client,
+		index:  a.linksIndex,
 	}
 }
 
@@ -395,6 +417,31 @@ func (di *documentIndex) Search(ctx context.Context, query *hermessearch.SearchQ
 	return result, nil
 }
 
+func (di *documentIndex) GetObject(ctx context.Context, docID string) (*hermessearch.Document, error) {
+	idx := di.client.Index(di.index)
+
+	var rawDoc meilisearch.Hit
+	err := idx.GetDocumentWithContext(ctx, docID, nil, &rawDoc)
+	if err != nil {
+		return nil, &hermessearch.Error{
+			Op:  "GetObject",
+			Err: hermessearch.ErrNotFound,
+			Msg: err.Error(),
+		}
+	}
+
+	doc, err := convertMeilisearchHit(rawDoc)
+	if err != nil {
+		return nil, &hermessearch.Error{
+			Op:  "GetObject",
+			Err: err,
+			Msg: "failed to convert document",
+		}
+	}
+
+	return doc, nil
+}
+
 func (di *documentIndex) GetFacets(ctx context.Context, facetNames []string) (*hermessearch.Facets, error) {
 	idx := di.client.Index(di.index)
 
@@ -491,6 +538,11 @@ func (di *draftIndex) Search(ctx context.Context, query *hermessearch.SearchQuer
 	return docIdx.Search(ctx, query)
 }
 
+func (di *draftIndex) GetObject(ctx context.Context, docID string) (*hermessearch.Document, error) {
+	docIdx := &documentIndex{client: di.client, index: di.index}
+	return docIdx.GetObject(ctx, docID)
+}
+
 func (di *draftIndex) GetFacets(ctx context.Context, facetNames []string) (*hermessearch.Facets, error) {
 	docIdx := &documentIndex{client: di.client, index: di.index}
 	return docIdx.GetFacets(ctx, facetNames)
@@ -581,4 +633,143 @@ func convertMeilisearchFacets(facetDistRaw json.RawMessage) (*hermessearch.Facet
 	}
 
 	return facets, nil
+}
+
+// projectIndex implements search.ProjectIndex.
+type projectIndex struct {
+	client meilisearch.ServiceManager
+	index  string
+}
+
+func (pi *projectIndex) Index(ctx context.Context, project map[string]any) error {
+	idx := pi.client.Index(pi.index)
+	primaryKey := "objectID"
+	_, err := idx.AddDocuments([]map[string]any{project}, &primaryKey)
+	if err != nil {
+		return &hermessearch.Error{
+			Op:  "Index",
+			Err: hermessearch.ErrIndexingFailed,
+			Msg: err.Error(),
+		}
+	}
+	return nil
+}
+
+func (pi *projectIndex) Delete(ctx context.Context, projectID string) error {
+	idx := pi.client.Index(pi.index)
+	_, err := idx.DeleteDocument(projectID)
+	if err != nil {
+		return &hermessearch.Error{
+			Op:  "Delete",
+			Err: hermessearch.ErrNotFound,
+			Msg: err.Error(),
+		}
+	}
+	return nil
+}
+
+func (pi *projectIndex) Search(ctx context.Context, query *hermessearch.SearchQuery) (*hermessearch.SearchResult, error) {
+	// TODO: Implement full search with query parameters
+	return nil, fmt.Errorf("Search not yet implemented for projects")
+}
+
+func (pi *projectIndex) GetObject(ctx context.Context, projectID string) (map[string]any, error) {
+	idx := pi.client.Index(pi.index)
+	var project map[string]any
+	err := idx.GetDocument(projectID, nil, &project)
+	if err != nil {
+		return nil, &hermessearch.Error{
+			Op:  "GetObject",
+			Err: hermessearch.ErrNotFound,
+			Msg: err.Error(),
+		}
+	}
+	return project, nil
+}
+
+func (pi *projectIndex) Clear(ctx context.Context) error {
+	idx := pi.client.Index(pi.index)
+	_, err := idx.DeleteAllDocuments()
+	if err != nil {
+		return &hermessearch.Error{
+			Op:  "Clear",
+			Err: hermessearch.ErrIndexingFailed,
+			Msg: err.Error(),
+		}
+	}
+	return nil
+}
+
+// linksIndex implements search.LinksIndex.
+type linksIndex struct {
+	client meilisearch.ServiceManager
+	index  string
+}
+
+func (li *linksIndex) SaveLink(ctx context.Context, link map[string]string) error {
+	idx := li.client.Index(li.index)
+	// Convert to []map[string]any for Meilisearch API
+	linkAny := make(map[string]any)
+	for k, v := range link {
+		linkAny[k] = v
+	}
+	primaryKey := "objectID"
+	_, err := idx.AddDocuments([]map[string]any{linkAny}, &primaryKey)
+	if err != nil {
+		return &hermessearch.Error{
+			Op:  "SaveLink",
+			Err: hermessearch.ErrIndexingFailed,
+			Msg: err.Error(),
+		}
+	}
+	return nil
+}
+
+func (li *linksIndex) DeleteLink(ctx context.Context, objectID string) error {
+	idx := li.client.Index(li.index)
+	_, err := idx.DeleteDocument(objectID)
+	if err != nil {
+		return &hermessearch.Error{
+			Op:  "DeleteLink",
+			Err: hermessearch.ErrNotFound,
+			Msg: err.Error(),
+		}
+	}
+	return nil
+}
+
+func (li *linksIndex) GetLink(ctx context.Context, objectID string) (map[string]string, error) {
+	idx := li.client.Index(li.index)
+	var linkAny map[string]any
+	err := idx.GetDocument(objectID, nil, &linkAny)
+	if err != nil {
+		return nil, &hermessearch.Error{
+			Op:  "GetLink",
+			Err: hermessearch.ErrNotFound,
+			Msg: err.Error(),
+		}
+	}
+
+	// Convert back to map[string]string
+	link := make(map[string]string)
+	for k, v := range linkAny {
+		if str, ok := v.(string); ok {
+			link[k] = str
+		}
+	}
+
+	return link, nil
+}
+
+func (li *linksIndex) Clear(ctx context.Context) error {
+	idx := li.client.Index(li.index)
+	_, err := idx.DeleteAllDocuments()
+	if err != nil {
+		return &hermessearch.Error{
+			Op:  "Clear",
+			Err: hermessearch.ErrIndexingFailed,
+			Msg: err.Error(),
+		}
+	}
+	return nil
 }
