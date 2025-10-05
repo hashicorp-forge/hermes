@@ -9,16 +9,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp-forge/hermes/internal/test"
-	"github.com/hashicorp-forge/hermes/pkg/models"
 	"github.com/hashicorp-forge/hermes/pkg/search/adapters/meilisearch"
+	mock "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/mock"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
-	"github.com/testcontainers/testcontainers-go/wait"
 )
 
-// TestContainersContext holds the testcontainers infrastructure for integration tests.
+// TestContainersContext is DEPRECATED - use GetSharedContainers() instead.
+// This type is kept for backwards compatibility but containers field in IntegrationSuite is now nil.
+//
+// Deprecated: Containers are now managed by TestMain and shared across all tests.
+// Use GetSharedContainers() if you need direct access to container information.
 type TestContainersContext struct {
 	PostgresContainer    *postgres.PostgresContainer
 	MeilisearchContainer testcontainers.Container
@@ -27,76 +29,19 @@ type TestContainersContext struct {
 	ctx                  context.Context
 }
 
-// SetupTestContainers starts PostgreSQL and Meilisearch using testcontainers.
+// SetupTestContainers is DEPRECATED - containers are now started once in TestMain.
+// This function is no longer needed and will be removed in a future version.
+//
+// Deprecated: Use NewIntegrationSuite() which automatically uses shared containers.
 func SetupTestContainers(t *testing.T) *TestContainersContext {
-	ctx := context.Background()
-
-	// Start PostgreSQL container
-	postgresContainer, err := postgres.Run(ctx,
-		"postgres:17.1-alpine",
-		postgres.WithDatabase("hermes_test"),
-		postgres.WithUsername("postgres"),
-		postgres.WithPassword("postgres"),
-		testcontainers.WithWaitStrategy(
-			wait.ForLog("database system is ready to accept connections").
-				WithOccurrence(2).
-				WithStartupTimeout(60*time.Second)),
-	)
-	require.NoError(t, err, "Failed to start PostgreSQL container")
-
-	// Get PostgreSQL connection string
-	postgresDSN, err := postgresContainer.ConnectionString(ctx, "sslmode=disable")
-	require.NoError(t, err, "Failed to get PostgreSQL connection string")
-
-	// Start Meilisearch container
-	meilisearchReq := testcontainers.ContainerRequest{
-		Image:        "getmeili/meilisearch:v1.10",
-		ExposedPorts: []string{"7700/tcp"},
-		Env: map[string]string{
-			"MEILI_MASTER_KEY": "masterKey123",
-			"MEILI_ENV":        "development",
-		},
-		WaitingFor: wait.ForHTTP("/health").
-			WithPort("7700/tcp").
-			WithStartupTimeout(60 * time.Second),
-	}
-
-	meilisearchContainer, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
-		ContainerRequest: meilisearchReq,
-		Started:          true,
-	})
-	require.NoError(t, err, "Failed to start Meilisearch container")
-
-	// Get Meilisearch host
-	meilisearchHost, err := meilisearchContainer.Host(ctx)
-	require.NoError(t, err, "Failed to get Meilisearch host")
-
-	meilisearchPort, err := meilisearchContainer.MappedPort(ctx, "7700")
-	require.NoError(t, err, "Failed to get Meilisearch port")
-
-	meilisearchURL := fmt.Sprintf("http://%s:%s", meilisearchHost, meilisearchPort.Port())
-
-	return &TestContainersContext{
-		PostgresContainer:    postgresContainer,
-		MeilisearchContainer: meilisearchContainer,
-		PostgresDSN:          postgresDSN,
-		MeilisearchHost:      meilisearchURL,
-		ctx:                  ctx,
-	}
+	panic("SetupTestContainers is deprecated - containers are now managed by TestMain. Use NewIntegrationSuite() instead.")
 }
 
-// Cleanup terminates all containers.
+// Cleanup is DEPRECATED - containers are cleaned up by TestMain, not per-test.
+//
+// Deprecated: No longer needed as containers are shared and cleaned up by TestMain.
 func (tc *TestContainersContext) Cleanup(t *testing.T) {
-	if tc.PostgresContainer != nil {
-		if err := tc.PostgresContainer.Terminate(tc.ctx); err != nil {
-			t.Logf("Failed to terminate PostgreSQL container: %v", err)
-		}
-	}
-	if tc.MeilisearchContainer != nil {
-		if err := tc.MeilisearchContainer.Terminate(tc.ctx); err != nil {
-			t.Logf("Failed to terminate Meilisearch container: %v", err)
-		}
-	}
+	// No-op: containers are managed by TestMain
 }
 
 // IntegrationSuite wraps Suite with testcontainers for integration testing.
@@ -105,22 +50,23 @@ type IntegrationSuite struct {
 	Containers *TestContainersContext
 }
 
-// NewIntegrationSuite creates a new integration test suite with testcontainers.
+// NewIntegrationSuite creates a new integration test suite using shared containers.
+// This is much faster than SetupTestContainers because containers are started once
+// in TestMain and reused across all tests. Each test gets its own PostgreSQL schema
+// for isolation, so tests can run safely in parallel.
 func NewIntegrationSuite(t *testing.T, opts ...Option) *IntegrationSuite {
-	containers := SetupTestContainers(t)
+	// Get shared containers (started once in TestMain)
+	containers := GetSharedContainers()
 
-	// Create database connection
-	db, err := test.CreateTestDatabaseWithDSN(t, containers.PostgresDSN)
-	require.NoError(t, err, "Failed to create test database")
+	// Create database connection with isolated schema for this test
+	db, schemaName := CreateTestDatabaseForTest(t)
 
-	// Auto-migrate models
-	err = db.AutoMigrate(models.ModelsToAutoMigrate()...)
-	require.NoError(t, err, "Failed to auto-migrate models")
+	// Note: Auto-migration is handled by CreateTestDatabaseForTest
 
-	// Create Meilisearch adapter
+	// Create Meilisearch adapter using shared container
 	searchAdapter, err := meilisearch.NewAdapter(&meilisearch.Config{
 		Host:            containers.MeilisearchHost,
-		APIKey:          "masterKey123",
+		APIKey:          containers.MeilisearchAPIKey,
 		DocsIndexName:   fmt.Sprintf("test-docs-%d", time.Now().UnixNano()),
 		DraftsIndexName: fmt.Sprintf("test-drafts-%d", time.Now().UnixNano()),
 	})
@@ -136,11 +82,17 @@ func NewIntegrationSuite(t *testing.T, opts ...Option) *IntegrationSuite {
 	suite := &Suite{
 		T:              t,
 		DB:             db,
-		DBName:         "hermes_test",
+		DBName:         schemaName, // Use schema name for clarity
 		SearchProvider: searchAdapter,
 		Ctx:            context.Background(),
 		cleanupFuncs:   make([]func(), 0),
 	}
+
+	// Create mock workspace provider
+	suite.WorkspaceProvider = mock.NewAdapter()
+
+	// Create test configuration
+	suite.Config = suite.createTestConfig()
 
 	// Seed database
 	err = suite.seedDatabase(db)
@@ -149,7 +101,6 @@ func NewIntegrationSuite(t *testing.T, opts ...Option) *IntegrationSuite {
 	// Apply options
 	for _, opt := range opts {
 		if err := opt(suite); err != nil {
-			containers.Cleanup(t)
 			t.Fatalf("Failed to apply option: %v", err)
 		}
 	}
@@ -162,13 +113,15 @@ func NewIntegrationSuite(t *testing.T, opts ...Option) *IntegrationSuite {
 	suite.Client = NewClient(suite.Server.URL, t)
 
 	return &IntegrationSuite{
-		Suite:      suite,
-		Containers: containers,
+		Suite: suite,
+		// Note: Containers field is deprecated - we use shared containers now
+		Containers: nil,
 	}
 }
 
-// Cleanup tears down the integration suite and containers.
+// Cleanup tears down the integration suite but NOT the containers.
+// Containers are managed by TestMain and shared across all tests.
 func (is *IntegrationSuite) Cleanup() {
 	is.Suite.Cleanup()
-	is.Containers.Cleanup(is.T)
+	// Don't cleanup containers - they're shared and managed by TestMain
 }
