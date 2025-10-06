@@ -383,10 +383,10 @@ func (c *Command) Run(args []string) int {
 
 		// API v1.
 		{"/api/v1/approvals/",
-			api.ApprovalHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
+			api.ApprovalHandler(cfg, c.Log, srv.SearchProvider, srv.WorkspaceProvider, db)},
 		{"/api/v1/document-types", api.DocumentTypesHandler(*cfg, c.Log)},
 		{"/api/v1/documents/",
-			api.DocumentHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
+			api.DocumentHandler(cfg, c.Log, srv.SearchProvider, srv.WorkspaceProvider, db)},
 		{"/api/v1/drafts",
 			api.DraftsHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
 		{"/api/v1/drafts/",
@@ -403,7 +403,7 @@ func (c *Command) Run(args []string) int {
 		{"/api/v1/projects", apiv2.ProjectsHandler(srv)},
 		{"/api/v1/projects/", apiv2.ProjectHandler(srv)},
 		{"/api/v1/reviews/",
-			api.ReviewHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
+			api.ReviewHandler(cfg, c.Log, algoWrite, srv.SearchProvider, srv.WorkspaceProvider, db)},
 		{"/api/v1/web/analytics", api.AnalyticsHandler(c.Log)},
 
 		// API v2.

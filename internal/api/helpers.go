@@ -11,11 +11,44 @@ import (
 
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/pkg/models"
+	"github.com/hashicorp-forge/hermes/pkg/search"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-multierror"
 	"github.com/iancoleman/strcase"
 	"github.com/stretchr/testify/assert"
 )
+
+// mapToSearchDocument converts a map[string]any to a search.Document via JSON round-trip.
+// This is used to convert Algolia-style document objects to the search provider interface.
+func mapToSearchDocument(m map[string]any) (*search.Document, error) {
+	data, err := json.Marshal(m)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal map: %w", err)
+	}
+
+	var doc search.Document
+	if err := json.Unmarshal(data, &doc); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal to search.Document: %w", err)
+	}
+
+	return &doc, nil
+}
+
+// searchDocumentToMap converts a search.Document to a map[string]any via JSON round-trip.
+// This is used to convert search provider documents to Algolia-style objects for compatibility.
+func searchDocumentToMap(doc *search.Document) (map[string]any, error) {
+	data, err := json.Marshal(doc)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal search document: %w", err)
+	}
+
+	var m map[string]any
+	if err := json.Unmarshal(data, &m); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal to map: %w", err)
+	}
+
+	return m, nil
+}
 
 // contains returns true if a string is present in a slice of strings.
 func contains(values []string, s string) bool {
@@ -603,7 +636,7 @@ func getStringValue(in map[string]any, key string) (string, error) {
 func getStringSliceValue(in map[string]any, key string) ([]string, error) {
 	result := []string{}
 
-	if v, ok := in[key]; ok {
+	if v, ok := in[key]; ok && v != nil {
 		if reflect.TypeOf(v).Kind() == reflect.Slice {
 			for _, vv := range v.([]any) {
 				if vv, ok := vv.(string); ok {

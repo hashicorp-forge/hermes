@@ -2,11 +2,12 @@ package api
 
 import (
 	"encoding/json"
-	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
 	"net/http"
 
+	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
+	"github.com/hashicorp-forge/hermes/pkg/search"
+
 	"github.com/hashicorp-forge/hermes/internal/config"
-	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	"github.com/hashicorp-forge/hermes/pkg/document"
 	"github.com/hashicorp-forge/hermes/pkg/models"
 	"github.com/hashicorp/go-hclog"
@@ -59,9 +60,10 @@ func documentsResourceRelatedResourcesHandler(
 	doc document.Document,
 	cfg *config.Config,
 	l hclog.Logger,
-	algoRead *algolia.Client,
+	searchProvider search.Provider,
 	db *gorm.DB,
 ) {
+	ctx := r.Context()
 	switch r.Method {
 	case "GET":
 		d := models.Document{
@@ -121,11 +123,10 @@ func documentsResourceRelatedResourcesHandler(
 		}
 		// Add Hermes document related resources.
 		for _, hdrr := range hdrrs {
-			// Get document object from Algolia.
-			var algoObj map[string]any
-			err = algoRead.Docs.GetObject(hdrr.Document.GoogleFileID, &algoObj)
+			// Get document object from search index.
+			searchDoc, err := searchProvider.DocumentIndex().GetObject(ctx, hdrr.Document.GoogleFileID)
 			if err != nil {
-				l.Error("error getting related resource document from Algolia",
+				l.Error("error getting related resource document from search index",
 					"error", err,
 					"path", r.URL.Path,
 					"method", r.Method,
@@ -137,7 +138,12 @@ func documentsResourceRelatedResourcesHandler(
 				return
 			}
 
-			// Convert Algolia object to a document.
+			// Convert search document to map for compatibility
+			searchDocBytes, _ := json.Marshal(searchDoc)
+			var algoObj map[string]any
+			_ = json.Unmarshal(searchDocBytes, &algoObj)
+
+			// Convert object to a document.
 			doc, err := document.NewFromAlgoliaObject(
 				algoObj, cfg.DocumentTypes.DocumentType)
 			if err != nil {

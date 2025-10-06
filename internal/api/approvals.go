@@ -1,19 +1,19 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
 	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
 
-	"github.com/algolia/algoliasearch-client-go/v3/algolia/errs"
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/internal/helpers"
-	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	"github.com/hashicorp-forge/hermes/pkg/document"
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp-forge/hermes/pkg/models"
-	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
+	"github.com/hashicorp-forge/hermes/pkg/search"
+	"github.com/hashicorp-forge/hermes/pkg/workspace"
 	"github.com/hashicorp/go-hclog"
 	"gorm.io/gorm"
 )
@@ -21,12 +21,12 @@ import (
 func ApprovalHandler(
 	cfg *config.Config,
 	l hclog.Logger,
-	ar *algolia.Client,
-	aw *algolia.Client,
-	s *gw.Service,
+	searchProvider search.Provider,
+	workspaceProvider workspace.Provider,
 	db *gorm.DB) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 		switch r.Method {
 		case "DELETE":
 			// Validate request.
@@ -42,8 +42,7 @@ func ApprovalHandler(
 			}
 
 			// Check if document is locked.
-			provider := gw.NewAdapter(s)
-			locked, err := hcd.IsLocked(docID, db, provider, l)
+			locked, err := hcd.IsLocked(docID, db, workspaceProvider, l)
 			if err != nil {
 				l.Error("error checking document locked status",
 					"error", err,
@@ -60,13 +59,12 @@ func ApprovalHandler(
 				return
 			}
 
-			// Get document object from Algolia.
-			var algoObj map[string]any
-			err = ar.Docs.GetObject(docID, &algoObj)
+			// Get document object from search index.
+			searchDoc, err := searchProvider.DocumentIndex().GetObject(ctx, docID)
 			if err != nil {
-				// Handle 404 from Algolia and only log a warning.
-				if _, is404 := errs.IsAlgoliaErrWithCode(err, 404); is404 {
-					l.Warn("document object not found in Algolia",
+				// Handle 404 from search index and only log a warning.
+				if errors.Is(err, search.ErrNotFound) {
+					l.Warn("document object not found in search index",
 						"error", err,
 						"path", r.URL.Path,
 						"method", r.Method,
@@ -75,7 +73,7 @@ func ApprovalHandler(
 					http.Error(w, "Document not found", http.StatusNotFound)
 					return
 				} else {
-					l.Error("error requesting document from Algolia",
+					l.Error("error requesting document from search index",
 						"error", err,
 						"doc_id", docID,
 					)
@@ -83,6 +81,18 @@ func ApprovalHandler(
 						http.StatusInternalServerError)
 					return
 				}
+			}
+
+			// Convert search document to Algolia-compatible map.
+			algoObj, err := searchDocumentToMap(searchDoc)
+			if err != nil {
+				l.Error("error converting search document",
+					"error", err,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error accessing document",
+					http.StatusInternalServerError)
+				return
 			}
 
 			// Convert Algolia object to a document.
@@ -131,7 +141,7 @@ func ApprovalHandler(
 			doc.ApprovedBy = newApprovedBy
 
 			// Get latest Google Drive file revision.
-			latestRev, err := s.GetLatestRevision(docID)
+			latestRev, err := workspaceProvider.GetLatestRevision(docID)
 			if err != nil {
 				l.Error("error getting latest revision",
 					"error", err,
@@ -144,7 +154,7 @@ func ApprovalHandler(
 			}
 
 			// Mark latest revision to be kept forever.
-			_, err = s.KeepRevisionForever(docID, latestRev.Id)
+			_, err = workspaceProvider.KeepRevisionForever(docID, latestRev.Id)
 			if err != nil {
 				l.Error("error marking revision to keep forever",
 					"error", err,
@@ -175,10 +185,10 @@ func ApprovalHandler(
 				return
 			}
 
-			// Save new modified doc object in Algolia.
-			res, err := aw.Docs.SaveObject(docObj)
+			// Convert to search document and save in search index.
+			searchDocUpdate, err := mapToSearchDocument(docObj)
 			if err != nil {
-				l.Error("error saving approved document in Algolia",
+				l.Error("error converting to search document",
 					"error", err,
 					"method", r.Method,
 					"path", r.URL.Path,
@@ -187,9 +197,10 @@ func ApprovalHandler(
 					http.StatusInternalServerError)
 				return
 			}
-			err = res.Wait()
+
+			err = searchProvider.DocumentIndex().Index(ctx, searchDocUpdate)
 			if err != nil {
-				l.Error("error saving patched document in Algolia",
+				l.Error("error saving approved document in search index",
 					"error", err,
 					"method", r.Method,
 					"path", r.URL.Path,
@@ -200,8 +211,7 @@ func ApprovalHandler(
 			}
 
 			// Replace the doc header.
-			provider = gw.NewAdapter(s)
-			if err := doc.ReplaceHeader(cfg.BaseURL, false, provider); err != nil {
+			if err := doc.ReplaceHeader(cfg.BaseURL, false, workspaceProvider); err != nil {
 				l.Error("error replacing doc header",
 					"error", err,
 					"doc_id", docID,
@@ -235,12 +245,22 @@ func ApprovalHandler(
 				"path", r.URL.Path,
 			)
 
-			// Compare Algolia and database documents to find data inconsistencies.
-			// Get document object from Algolia.
-			var algoDoc map[string]any
-			err = ar.Docs.GetObject(docID, &algoDoc)
+			// Compare search index and database documents to find data inconsistencies.
+			// Get document object from search index.
+			searchDocComp, err := searchProvider.DocumentIndex().GetObject(ctx, docID)
 			if err != nil {
-				l.Error("error getting Algolia object for data comparison",
+				l.Error("error getting search document for data comparison",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docID,
+				)
+				return
+			}
+			// Convert to map for comparison function
+			algoDoc, err := searchDocumentToMap(searchDocComp)
+			if err != nil {
+				l.Error("error converting search document for comparison",
 					"error", err,
 					"method", r.Method,
 					"path", r.URL.Path,
@@ -301,8 +321,7 @@ func ApprovalHandler(
 			}
 
 			// Check if document is locked.
-			provider := gw.NewAdapter(s)
-			locked, err := hcd.IsLocked(docID, db, provider, l)
+			locked, err := hcd.IsLocked(docID, db, workspaceProvider, l)
 			if err != nil {
 				l.Error("error checking document locked status",
 					"error", err,
@@ -319,13 +338,12 @@ func ApprovalHandler(
 				return
 			}
 
-			// Get document object from Algolia.
-			var algoObj map[string]any
-			err = ar.Docs.GetObject(docID, &algoObj)
+			// Get document object from search index.
+			searchDoc, err := searchProvider.DocumentIndex().GetObject(ctx, docID)
 			if err != nil {
-				// Handle 404 from Algolia and only log a warning.
-				if _, is404 := errs.IsAlgoliaErrWithCode(err, 404); is404 {
-					l.Warn("document object not found in Algolia",
+				// Handle 404 from search index and only log a warning.
+				if errors.Is(err, search.ErrNotFound) {
+					l.Warn("document object not found in search index",
 						"error", err,
 						"path", r.URL.Path,
 						"method", r.Method,
@@ -334,7 +352,7 @@ func ApprovalHandler(
 					http.Error(w, "Document not found", http.StatusNotFound)
 					return
 				} else {
-					l.Error("error requesting document from Algolia",
+					l.Error("error requesting document from search index",
 						"error", err,
 						"doc_id", docID,
 					)
@@ -342,6 +360,18 @@ func ApprovalHandler(
 						http.StatusInternalServerError)
 					return
 				}
+			}
+
+			// Convert search document to Algolia-compatible map.
+			algoObj, err := searchDocumentToMap(searchDoc)
+			if err != nil {
+				l.Error("error converting search document",
+					"error", err,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error accessing document",
+					http.StatusInternalServerError)
+				return
 			}
 
 			// Convert Algolia object to a document.
@@ -392,7 +422,7 @@ func ApprovalHandler(
 			doc.ChangesRequestedBy = newChangesRequestedBy
 
 			// Get latest Google Drive file revision.
-			latestRev, err := s.GetLatestRevision(docID)
+			latestRev, err := workspaceProvider.GetLatestRevision(docID)
 			if err != nil {
 				l.Error("error getting latest revision",
 					"error", err,
@@ -405,7 +435,7 @@ func ApprovalHandler(
 			}
 
 			// Mark latest revision to be kept forever.
-			_, err = s.KeepRevisionForever(docID, latestRev.Id)
+			_, err = workspaceProvider.KeepRevisionForever(docID, latestRev.Id)
 			if err != nil {
 				l.Error("error marking revision to keep forever",
 					"error", err,
@@ -436,10 +466,10 @@ func ApprovalHandler(
 				return
 			}
 
-			// Save new modified doc object in Algolia.
-			res, err := aw.Docs.SaveObject(docObj)
+			// Convert to search document and save in search index.
+			searchDocUpdate, err := mapToSearchDocument(docObj)
 			if err != nil {
-				l.Error("error saving approved document in Algolia",
+				l.Error("error converting to search document",
 					"error", err,
 					"method", r.Method,
 					"path", r.URL.Path,
@@ -448,9 +478,10 @@ func ApprovalHandler(
 					http.StatusInternalServerError)
 				return
 			}
-			err = res.Wait()
+
+			err = searchProvider.DocumentIndex().Index(ctx, searchDocUpdate)
 			if err != nil {
-				l.Error("error saving approved document in Algolia",
+				l.Error("error saving approved document in search index",
 					"error", err,
 					"method", r.Method,
 					"path", r.URL.Path,
@@ -461,8 +492,7 @@ func ApprovalHandler(
 			}
 
 			// Replace the doc header.
-			provider = gw.NewAdapter(s)
-			err = doc.ReplaceHeader(cfg.BaseURL, false, provider)
+			err = doc.ReplaceHeader(cfg.BaseURL, false, workspaceProvider)
 			if err != nil {
 				l.Error("error replacing doc header",
 					"error", err,
@@ -497,12 +527,22 @@ func ApprovalHandler(
 				"path", r.URL.Path,
 			)
 
-			// Compare Algolia and database documents to find data inconsistencies.
-			// Get document object from Algolia.
-			var algoDoc map[string]any
-			err = ar.Docs.GetObject(docID, &algoDoc)
+			// Compare search index and database documents to find data inconsistencies.
+			// Get document object from search index.
+			searchDocComp2, err := searchProvider.DocumentIndex().GetObject(ctx, docID)
 			if err != nil {
-				l.Error("error getting Algolia object for data comparison",
+				l.Error("error getting search document for data comparison",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docID,
+				)
+				return
+			}
+			// Convert to map for comparison function
+			algoDoc, err := searchDocumentToMap(searchDocComp2)
+			if err != nil {
+				l.Error("error converting search document for comparison",
 					"error", err,
 					"method", r.Method,
 					"path", r.URL.Path,

@@ -28,7 +28,6 @@ import (
 	algoliaadapter "github.com/hashicorp-forge/hermes/pkg/search/adapters/algolia"
 	"github.com/hashicorp-forge/hermes/pkg/search/adapters/meilisearch"
 	"github.com/hashicorp-forge/hermes/pkg/workspace"
-	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
 	mock "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/mock"
 	"github.com/hashicorp/go-hclog"
 	"gorm.io/gorm"
@@ -261,10 +260,7 @@ func (s *Suite) setupServer() error {
 	//FIXME: v1 API handlers still use Algolia and GWService directly - need to migrate them
 	// Create empty Algolia clients for v1 handlers that haven't been migrated yet
 	algoSearch := &algolia.Client{}
-	algoWrite := &algolia.Client{}
-
-	// Create mock Google Workspace service for v1 handlers
-	gwService := &gw.Service{}
+	// algoWrite := &algolia.Client{}  // TODO: Remove when all handlers migrated
 
 	// Create server with SearchProvider and WorkspaceProvider support (v2 API uses these)
 	srv := &server.Server{
@@ -280,15 +276,17 @@ func (s *Suite) setupServer() error {
 
 	// Register key API v1 endpoints (add more as needed for tests)
 	mux.Handle("/api/v1/documents/",
-		api.DocumentHandler(s.Config, srv.Logger, algoSearch, algoWrite, gwService, s.DB))
-	mux.Handle("/api/v1/drafts",
-		api.DraftsHandler(s.Config, srv.Logger, algoSearch, algoWrite, gwService, s.DB))
-	mux.Handle("/api/v1/drafts/",
-		api.DraftsDocumentHandler(s.Config, srv.Logger, algoSearch, algoWrite, gwService, s.DB))
+		api.DocumentHandler(s.Config, srv.Logger, s.SearchProvider, s.WorkspaceProvider, s.DB))
+	// TODO: Refactor drafts handlers to use search.Provider instead of algolia.Client
+	// mux.Handle("/api/v1/drafts",
+	// 	api.DraftsHandler(s.Config, srv.Logger, algoSearch, algoWrite, gwService, s.DB))
+	// mux.Handle("/api/v1/drafts/",
+	// 	api.DraftsDocumentHandler(s.Config, srv.Logger, algoSearch, algoWrite, gwService, s.DB))
 	mux.Handle("/api/v1/products",
 		api.ProductsHandler(s.Config, algoSearch, srv.Logger))
-	mux.Handle("/api/v1/reviews/",
-		api.ReviewHandler(s.Config, srv.Logger, algoSearch, algoWrite, gwService, s.DB))
+	// TODO: Refactor reviews handler to use search.Provider instead of algolia.Client
+	// mux.Handle("/api/v1/reviews/",
+	// 	api.ReviewHandler(s.Config, srv.Logger, algoSearch, algoWrite, gwService, s.DB))
 
 	// Register API v2 endpoints (use server.Server abstraction)
 	mux.Handle("/api/v2/documents/", apiv2.DocumentHandler(*srv))
