@@ -11,10 +11,8 @@ import (
 	apiv2 "github.com/hashicorp-forge/hermes/internal/api/v2"
 	"github.com/hashicorp-forge/hermes/internal/server"
 	"github.com/hashicorp-forge/hermes/internal/structs"
-	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
 	mockadapter "github.com/hashicorp-forge/hermes/pkg/auth/adapters/mock"
-	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
 	"github.com/hashicorp/go-hclog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -33,12 +31,12 @@ func TestV2Products_Get(t *testing.T) {
 
 	// Create server components with search provider
 	srv := &server.Server{
-		AlgoSearch:     &algolia.Client{},
-		AlgoWrite:      &algolia.Client{},
+		// AlgoSearch removed:     &algolia.Client{},
+		// AlgoWrite removed:      &algolia.Client{},
 		SearchProvider: suite.SearchProvider, // Use Meilisearch adapter
 		Config:         suite.Config,
 		DB:             suite.DB,
-		GWService:      &gw.Service{},
+		// GWService removed:      &gw.Service{},
 		Logger:         log,
 	}
 
@@ -75,12 +73,12 @@ func TestV2Products_MethodNotAllowed(t *testing.T) {
 	log := hclog.NewNullLogger()
 
 	srv := &server.Server{
-		AlgoSearch:     &algolia.Client{},
-		AlgoWrite:      &algolia.Client{},
+		// AlgoSearch removed:     &algolia.Client{},
+		// AlgoWrite removed:      &algolia.Client{},
 		SearchProvider: suite.SearchProvider,
 		Config:         suite.Config,
 		DB:             suite.DB,
-		GWService:      &gw.Service{},
+		// GWService removed:      &gw.Service{},
 		Logger:         log,
 	}
 
@@ -116,12 +114,12 @@ func TestV2Products_Unauthorized(t *testing.T) {
 	log := hclog.NewNullLogger()
 
 	srv := &server.Server{
-		AlgoSearch:     &algolia.Client{},
-		AlgoWrite:      &algolia.Client{},
+		// AlgoSearch removed:     &algolia.Client{},
+		// AlgoWrite removed:      &algolia.Client{},
 		SearchProvider: suite.SearchProvider,
 		Config:         suite.Config,
 		DB:             suite.DB,
-		GWService:      &gw.Service{},
+		// GWService removed:      &gw.Service{},
 		Logger:         log,
 	}
 

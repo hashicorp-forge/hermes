@@ -12,15 +12,15 @@ import (
 
 	apiv2 "github.com/hashicorp-forge/hermes/internal/api/v2"
 	"github.com/hashicorp-forge/hermes/internal/server"
-	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
 	mockadapter "github.com/hashicorp-forge/hermes/pkg/auth/adapters/mock"
 	"github.com/hashicorp-forge/hermes/pkg/models"
-	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
+	mock "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/mock"
 	"github.com/hashicorp-forge/hermes/tests/api/fixtures"
 	"github.com/hashicorp/go-hclog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/api/docs/v1"
 )
 
 // TestV2Drafts_List tests listing drafts with mock auth.
@@ -63,13 +63,13 @@ func TestV2Drafts_List(t *testing.T) {
 	log := hclog.NewNullLogger()
 
 	srv := &server.Server{
-		AlgoSearch:     &algolia.Client{},
-		AlgoWrite:      &algolia.Client{},
+		// AlgoSearch removed:     &algolia.Client{},
+		// AlgoWrite removed:      &algolia.Client{},
 		SearchProvider: suite.SearchProvider,
 		Config:         suite.Config,
 		DB:             suite.DB,
-		GWService:      &gw.Service{},
-		Logger:         log,
+		// GWService removed:      &gw.Service{},
+		Logger: log,
 	}
 
 	handler := pkgauth.Middleware(mockAuth, log)(apiv2.DraftsHandler(*srv))
@@ -123,18 +123,28 @@ func TestV2Drafts_GetSingle(t *testing.T) {
 		WithStatus(models.WIPDocumentStatus).
 		Create(t, suite.DB)
 
+	// Setup mock workspace with the file and document
+	mockWorkspace := mock.NewAdapter().
+		WithFile(draft.GoogleFileID, "[TEST-???] Test Draft", "application/vnd.google-apps.document").
+		WithDocument(draft.GoogleFileID, &docs.Document{
+			DocumentId: draft.GoogleFileID,
+			Title:      "[TEST-???] Test Draft",
+			Body:       &docs.Body{Content: []*docs.StructuralElement{}},
+		})
+
 	// Create mock auth adapter as owner
 	mockAuth := mockadapter.NewAdapterWithEmail(ownerEmail)
 	log := hclog.NewNullLogger()
 
 	srv := &server.Server{
-		AlgoSearch:     &algolia.Client{},
-		AlgoWrite:      &algolia.Client{},
-		SearchProvider: suite.SearchProvider,
-		Config:         suite.Config,
-		DB:             suite.DB,
-		GWService:      &gw.Service{},
-		Logger:         log,
+		// AlgoSearch removed:        &algolia.Client{},
+		// AlgoWrite removed:         &algolia.Client{},
+		SearchProvider:    suite.SearchProvider,
+		WorkspaceProvider: mockWorkspace,
+		Config:            suite.Config,
+		DB:                suite.DB,
+		// GWService removed:         &gw.Service{},
+		Logger: log,
 	}
 
 	handler := pkgauth.Middleware(mockAuth, log)(apiv2.DraftsDocumentHandler(*srv))
@@ -152,8 +162,8 @@ func TestV2Drafts_GetSingle(t *testing.T) {
 	err := json.NewDecoder(rr.Body).Decode(&response)
 	require.NoError(t, err)
 
-	// Verify draft data
-	assert.Equal(t, draft.GoogleFileID, response["id"])
+	// Verify draft data - Document uses objectID, not id
+	assert.Equal(t, draft.GoogleFileID, response["objectID"])
 	assert.Equal(t, draft.Title, response["title"])
 
 	t.Logf("Retrieved draft: %+v", response)
@@ -180,18 +190,28 @@ func TestV2Drafts_Patch(t *testing.T) {
 		WithStatus(models.WIPDocumentStatus).
 		Create(t, suite.DB)
 
+	// Setup mock workspace with the file and document
+	mockWorkspace := mock.NewAdapter().
+		WithFile(draft.GoogleFileID, "[TEST-???] Original Title", "application/vnd.google-apps.document").
+		WithDocument(draft.GoogleFileID, &docs.Document{
+			DocumentId: draft.GoogleFileID,
+			Title:      "[TEST-???] Original Title",
+			Body:       &docs.Body{Content: []*docs.StructuralElement{}},
+		})
+
 	// Create mock auth adapter as owner
 	mockAuth := mockadapter.NewAdapterWithEmail(ownerEmail)
 	log := hclog.NewNullLogger()
 
 	srv := &server.Server{
-		AlgoSearch:     &algolia.Client{},
-		AlgoWrite:      &algolia.Client{},
-		SearchProvider: suite.SearchProvider,
-		Config:         suite.Config,
-		DB:             suite.DB,
-		GWService:      &gw.Service{},
-		Logger:         log,
+		// AlgoSearch removed:     &algolia.Client{},
+		// AlgoWrite removed:      &algolia.Client{},
+		SearchProvider:    suite.SearchProvider,
+		WorkspaceProvider: mockWorkspace,
+		Config:            suite.Config,
+		DB:                suite.DB,
+		// GWService removed:      &gw.Service{},
+		Logger: log,
 	}
 
 	handler := pkgauth.Middleware(mockAuth, log)(apiv2.DraftsDocumentHandler(*srv))
@@ -248,13 +268,13 @@ func TestV2Drafts_Unauthorized(t *testing.T) {
 	log := hclog.NewNullLogger()
 
 	srv := &server.Server{
-		AlgoSearch:     &algolia.Client{},
-		AlgoWrite:      &algolia.Client{},
+		// AlgoSearch removed:     &algolia.Client{},
+		// AlgoWrite removed:      &algolia.Client{},
 		SearchProvider: suite.SearchProvider,
 		Config:         suite.Config,
 		DB:             suite.DB,
-		GWService:      &gw.Service{},
-		Logger:         log,
+		// GWService removed:      &gw.Service{},
+		Logger: log,
 	}
 
 	handler := pkgauth.Middleware(mockAuth, log)(apiv2.DraftsDocumentHandler(*srv))
