@@ -105,9 +105,9 @@ go/build: ## Run Go build
 	@ln -sf $(BIN_DIR)/hermes ./hermes || true
 
 .PHONY: go/test
-go/test: ## Run Go test
+go/test: ## Run Go test with parallel execution
 	@mkdir -p $(COVERAGE_DIR)
-	go test -coverprofile=$(COVERAGE_DIR)/coverage.out ./...
+	go test -parallel 4 -timeout 5m -coverprofile=$(COVERAGE_DIR)/coverage.out ./...
 
 .PHONY: go/test/with-docker-postgres
 go/test/with-docker-postgres: docker/postgres/start
@@ -124,9 +124,10 @@ test/api/unit: ## Run API unit tests (no external dependencies)
 
 .PHONY: test/api/integration
 test/api/integration: ## Run API integration tests with testcontainers (requires Docker)
-	@echo "Running API integration tests with testcontainers..."
+	@echo "Running API integration tests with testcontainers (parallel execution)..."
+	@echo "⚡ Running up to 8 tests in parallel"
 	@mkdir -p $(COVERAGE_DIR) $(TEST_DIR)
-	cd tests/api && go test -v -tags=integration -timeout 15m \
+	cd tests/api && go test -parallel 8 -v -tags=integration -timeout 15m \
 		-coverprofile=../../$(COVERAGE_DIR)/api_integration.out ./... 2>&1 | tee ../../$(TEST_DIR)/api_integration.log
 	@echo "✓ Coverage report: $(COVERAGE_DIR)/api_integration.out"
 	@echo "✓ Test log: $(TEST_DIR)/api_integration.log"
@@ -170,11 +171,11 @@ test/unit: ## Run all unit tests (no external dependencies)
 
 .PHONY: test/integration
 test/integration: ## Run all integration tests with testcontainers (requires Docker)
-	@echo "Running all integration tests with testcontainers..."
-	@echo "⏱️  Global timeout: 5 minutes per test package"
-	@echo "⏱️  Individual tests should timeout after 2 minutes"
+	@echo "Running all integration tests with testcontainers (parallel execution)..."
+	@echo "⏱️  Global timeout: 10 minutes per test package"
+	@echo "⚡ Running up to 8 tests in parallel"
 	@mkdir -p $(COVERAGE_DIR) $(TEST_DIR)
-	go test -tags=integration -timeout 5m -v -coverprofile=$(COVERAGE_DIR)/integration.out ./... 2>&1 | tee $(TEST_DIR)/integration.log
+	go test -parallel 8 -tags=integration -timeout 10m -v -coverprofile=$(COVERAGE_DIR)/integration.out ./... 2>&1 | tee $(TEST_DIR)/integration.log
 	@echo "✓ Coverage report: $(COVERAGE_DIR)/integration.out"
 	@echo "✓ Test log: $(TEST_DIR)/integration.log"
 
