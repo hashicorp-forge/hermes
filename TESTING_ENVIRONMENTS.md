@@ -275,26 +275,60 @@ hermes/
 
 ---
 
+## Current Status
+
+### ✅ Working
+- **Local Development Environment**: Fully functional
+  - PostgreSQL and Meilisearch services run in Docker
+  - Hermes binary runs locally with hot reload
+  - Web dev server with live updates
+  - Canary test validates end-to-end functionality
+
+### 🚧 In Progress
+- **Containerized Testing Environment**: Build infrastructure complete, runtime blocked
+  - ✅ Docker builds complete successfully (11.5s)
+  - ✅ PostgreSQL container starts and passes health checks
+  - ✅ Meilisearch container starts and passes health checks
+  - ✅ Web container builds with pre-built assets
+  - ❌ Hermes container fails at runtime (Algolia dependency)
+
+### 🔴 Known Issues
+
+**Hermes Server Requires Algolia Connection**
+
+The Hermes server command currently requires a working Algolia connection even in test/development mode. This blocks the containerized testing environment from starting.
+
+**Error**: `error initializing Algolia write client: all hosts have been contacted unsuccessfully`
+
+**Root Cause**: Server initialization unconditionally connects to Algolia for search indexing, unlike the canary command which supports `-search-backend` flag.
+
+**Workarounds**:
+1. **Use Local Development** (recommended): Run hermes locally with local/meilisearch adapter
+2. **Mock Algolia**: Set up mock Algolia service in docker-compose
+3. **Code Change**: Add `-search-backend` flag to server command (like canary has)
+
 ## Next Steps
 
-1. **For Development**: Start with local dev environment
+1. **For Development** (✅ RECOMMENDED): Use local dev environment
    ```bash
    docker-compose up -d
    make bin
    make canary
    ```
 
-2. **For Testing**: Use containerized environment
+2. **For Testing** (🚧 BLOCKED): Containerized environment needs fix
    ```bash
+   # Blocked: Requires Algolia or search backend abstraction
    cd testing
-   ./quick-test.sh
+   ./quick-test.sh  # Will fail at hermes startup
    ```
 
-3. **For CI/CD**: Integrate `testing/` environment
-   - Fast startup (~30 seconds)
-   - Isolated from other tests
-   - Clean teardown
+3. **For Contributors**: Fix the Algolia dependency
+   - Add search backend selection to server command
+   - Or add conditional Algolia initialization
+   - Reference: `internal/cmd/commands/canary/canary.go` (has `-search-backend` flag)
 
 4. **Read the Docs**:
    - `scripts/README.md` - Canary test details
    - `testing/README.md` - Full containerized setup guide
+   - `.github/copilot-instructions.md` - Build standards and workflows
