@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp-forge/hermes/internal/config"
 	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
+	dexadapter "github.com/hashicorp-forge/hermes/pkg/auth/adapters/dex"
 	googleadapter "github.com/hashicorp-forge/hermes/pkg/auth/adapters/google"
 	oktaadapter "github.com/hashicorp-forge/hermes/pkg/auth/adapters/okta"
 	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
@@ -18,9 +19,19 @@ func AuthenticateRequest(
 ) http.Handler {
 	var provider pkgauth.Provider
 
-	// If Okta is configured and enabled, use Okta authentication.
-	if cfg.Okta != nil && !cfg.Okta.Disabled {
-		// Create Okta adapter.
+	// Priority: Dex > Okta > Google
+	// If Dex is configured and enabled, use Dex OIDC authentication.
+	if cfg.Dex != nil && !cfg.Dex.Disabled {
+		adapter, err := dexadapter.NewAdapter(*cfg.Dex, log)
+		if err != nil {
+			log.Error("error creating Dex authentication adapter", "error", err)
+			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				http.Error(w, "Internal server error", http.StatusInternalServerError)
+			})
+		}
+		provider = adapter
+	} else if cfg.Okta != nil && !cfg.Okta.Disabled {
+		// If Okta is configured and enabled, use Okta authentication.
 		oktaCfg := oktaadapter.Config{
 			AuthServerURL: cfg.Okta.AuthServerURL,
 			AWSRegion:     cfg.Okta.AWSRegion,
