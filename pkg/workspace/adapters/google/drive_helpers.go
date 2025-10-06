@@ -1,12 +1,15 @@
 package google
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
 	"github.com/cenkalti/backoff/v4"
+	"golang.org/x/oauth2/jwt"
 	"google.golang.org/api/drive/v3"
 	"google.golang.org/api/googleapi"
+	"google.golang.org/api/option"
 )
 
 const (
@@ -29,6 +32,50 @@ func (s *Service) CopyFile(
 	if err != nil {
 		return nil, fmt.Errorf("error copying file: %w", err)
 	}
+	return resp, nil
+}
+
+// CreateFileAsUser creates a file by copying a template, impersonating the specified user.
+// This requires the service account to have domain-wide delegation enabled.
+// The auth config must be set in the Service struct.
+func (s *Service) CreateFileAsUser(templateID, destFolderID, name, userEmail string) (*drive.File, error) {
+	if s.Config == nil {
+		return nil, fmt.Errorf("service config is required for creating files as user")
+	}
+
+	// Create JWT config for user impersonation
+	ctx := context.Background()
+	conf := &jwt.Config{
+		Email:      s.Config.ClientEmail,
+		PrivateKey: []byte(s.Config.PrivateKey),
+		Scopes: []string{
+			"https://www.googleapis.com/auth/drive",
+		},
+		Subject:  userEmail,
+		TokenURL: s.Config.TokenURL,
+	}
+	client := conf.Client(ctx)
+
+	// Create impersonated Drive service
+	impersonatedDrive, err := drive.NewService(ctx, option.WithHTTPClient(client))
+	if err != nil {
+		return nil, fmt.Errorf("error creating impersonated Drive service: %w", err)
+	}
+
+	// Copy file as the impersonated user
+	f := &drive.File{
+		Name:    name,
+		Parents: []string{destFolderID},
+	}
+
+	resp, err := impersonatedDrive.Files.Copy(templateID, f).
+		Fields("*").
+		SupportsAllDrives(true).
+		Do()
+	if err != nil {
+		return nil, fmt.Errorf("error copying file as user: %w", err)
+	}
+
 	return resp, nil
 }
 
