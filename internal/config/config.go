@@ -2,11 +2,15 @@ package config
 
 import (
 	"fmt"
+	"os"
 
 	oktaadapter "github.com/hashicorp-forge/hermes/pkg/auth/adapters/okta"
 	algoliaadapter "github.com/hashicorp-forge/hermes/pkg/search/adapters/algolia"
 	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
+	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclsimple"
+	"github.com/hashicorp/hcl/v2/hclsyntax"
 )
 
 // Config contains the Hermes configuration.
@@ -336,20 +340,75 @@ type Server struct {
 }
 
 // NewConfig parses an HCL configuration file and returns the Hermes config.
-func NewConfig(filename string) (*Config, error) {
-	c := &Config{
-		Algolia:         &algoliaadapter.Config{},
-		Email:           &Email{},
-		FeatureFlags:    &FeatureFlags{},
-		GoogleWorkspace: &GoogleWorkspace{},
-		Indexer:         &Indexer{},
-		Okta:            &oktaadapter.Config{},
-		Server:          &Server{},
-	}
-	err := hclsimple.DecodeFile(filename, nil, c)
+// If profile is non-empty, loads config from profile block with that name.
+// If profile is empty and file has profiles, uses "default" profile.
+// If profile is empty and file has no profiles, loads from root level (backward compatible).
+func NewConfig(filename string, profile string) (*Config, error) {
+	// Read and parse file to check if it has profiles
+	src, err := os.ReadFile(filename)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load configuration: %w", err)
+		return nil, fmt.Errorf("failed to read config file: %w", err)
 	}
 
-	return c, nil
+	file, diags := hclsyntax.ParseConfig(src, filename, hcl.Pos{Line: 1, Column: 1})
+	if diags.HasErrors() {
+		return nil, fmt.Errorf("failed to parse config file: %w", diags)
+	}
+
+	// Check if file has any profile blocks
+	body := file.Body.(*hclsyntax.Body)
+	hasProfiles := false
+	for _, block := range body.Blocks {
+		if block.Type == "profile" {
+			hasProfiles = true
+			break
+		}
+	}
+
+	// If no profiles in file and no profile requested, use root-level config (backward compatible)
+	if !hasProfiles && profile == "" {
+		c := &Config{
+			Algolia:         &algoliaadapter.Config{},
+			Email:           &Email{},
+			FeatureFlags:    &FeatureFlags{},
+			GoogleWorkspace: &GoogleWorkspace{},
+			Indexer:         &Indexer{},
+			Okta:            &oktaadapter.Config{},
+			Server:          &Server{},
+		}
+		err := hclsimple.DecodeFile(filename, nil, c)
+		if err != nil {
+			return nil, fmt.Errorf("failed to load configuration: %w", err)
+		}
+		return c, nil
+	}
+
+	// File has profiles - select which one to use
+	selectedProfile := profile
+	if selectedProfile == "" {
+		selectedProfile = "default" // Default profile when file has profiles
+	}
+
+	// Find and decode the requested profile
+	for _, block := range body.Blocks {
+		if block.Type == "profile" && len(block.Labels) > 0 && block.Labels[0] == selectedProfile {
+			// Found the profile, decode its body into Config
+			c := &Config{
+				Algolia:         &algoliaadapter.Config{},
+				Email:           &Email{},
+				FeatureFlags:    &FeatureFlags{},
+				GoogleWorkspace: &GoogleWorkspace{},
+				Indexer:         &Indexer{},
+				Okta:            &oktaadapter.Config{},
+				Server:          &Server{},
+			}
+			err := gohcl.DecodeBody(block.Body, nil, c)
+			if err != nil {
+				return nil, fmt.Errorf("failed to decode profile %q: %w", selectedProfile, err)
+			}
+			return c, nil
+		}
+	}
+
+	return nil, fmt.Errorf("profile %q not found in configuration", selectedProfile)
 }

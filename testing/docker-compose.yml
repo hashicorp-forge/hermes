@@ -37,29 +37,21 @@ services:
       - hermes-test
 
   hermes:
+    container_name: hermes-test
     build:
       context: ..
       dockerfile: testing/Dockerfile.hermes
     ports:
       - "8001:8000"  # Different port to avoid conflict with local dev
+    volumes:
+      # Mount the profile-based config (read-only)
+      - ./config-profiles.hcl:/app/config-profiles.hcl:ro
     environment:
-      # Database configuration
-      HERMES_SERVER_POSTGRES_HOST: postgres
-      HERMES_SERVER_POSTGRES_PORT: 5432
-      HERMES_SERVER_POSTGRES_USER: postgres
-      HERMES_SERVER_POSTGRES_PASSWORD: postgres
-      HERMES_SERVER_POSTGRES_DB: hermes_test
+      # Profile selection - uses testing profile from config-profiles.hcl
+      HERMES_SERVER_PROFILE: testing
       
-      # Server configuration
-      HERMES_SERVER_ADDR: 0.0.0.0:8000
+      # These can still override config values if needed
       HERMES_BASE_URL: http://localhost:8001
-      
-      # Meilisearch configuration
-      HERMES_SEARCH_BACKEND: meilisearch
-      HERMES_MEILISEARCH_HOST: http://meilisearch:7700
-      HERMES_MEILISEARCH_API_KEY: masterKey123
-      
-      # Auth configuration (disabled for testing)
       HERMES_SERVER_OKTA_DISABLED: "true"
       
     depends_on:
@@ -75,9 +67,6 @@ services:
       start_period: 10s
     networks:
       - hermes-test
-    volumes:
-      # Mount config if needed (optional)
-      - ./config.hcl:/app/config.hcl:ro
 
   web:
     build:

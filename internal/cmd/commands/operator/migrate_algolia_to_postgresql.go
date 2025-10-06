@@ -94,7 +94,7 @@ func (c *MigrateAlgoliaToPostgreSQLCommand) Run(args []string) int {
 	}
 
 	// Parse configuration.
-	cfg, err := config.NewConfig(c.flagConfig)
+	cfg, err := config.NewConfig(c.flagConfig, "") // No profile support in operator commands
 	if err != nil {
 		ui.Error(fmt.Sprintf("error parsing config file: %v", err))
 		return 1

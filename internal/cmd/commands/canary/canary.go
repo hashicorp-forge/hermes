@@ -81,24 +81,19 @@ func (c *Command) Run(args []string) int {
 	c.UI.Output("🐤 Starting Hermes Canary Test...")
 	c.UI.Output("")
 
-	// Load or create config
-	var cfg *config.Config
-	var err error
-
+	// Parse configuration file if specified.
+	var (
+		cfg *config.Config
+		err error
+	)
 	if c.flagConfig != "" {
-		cfg, err = config.NewConfig(c.flagConfig)
+		cfg, err = config.NewConfig(c.flagConfig, "") // No profile support in canary (uses CLI flags)
 		if err != nil {
-			c.UI.Error(fmt.Sprintf("❌ Error loading config: %v", err))
+			c.UI.Error(fmt.Sprintf("error parsing config file: %v: config=%q",
+				err, c.flagConfig))
 			return 1
 		}
-		c.UI.Output(fmt.Sprintf("✅ Loaded config from %s", c.flagConfig))
-	} else {
-		// Use default local docker-compose configuration
-		cfg = getDefaultLocalConfig()
-		c.UI.Output("✅ Using default local docker-compose configuration")
-	}
-
-	// Step 1: Connect to database
+	} // Step 1: Connect to database
 	c.UI.Output("")
 	c.UI.Output("Step 1: Connecting to PostgreSQL database...")
 	database, err := db.NewDB(*cfg.Postgres)

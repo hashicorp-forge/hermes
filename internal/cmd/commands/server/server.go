@@ -41,6 +41,7 @@ type Command struct {
 	flagAddr              string
 	flagBaseURL           string
 	flagConfig            string
+	flagProfile           string
 	flagOktaAuthServerURL string
 	flagOktaClientID      string
 	flagOktaDisabled      bool
@@ -76,6 +77,11 @@ func (c *Command) Flags() *base.FlagSet {
 		&c.flagConfig, "config", "", "Path to Hermes config file",
 	)
 	f.StringVar(
+		&c.flagProfile, "profile", "",
+		"[HERMES_SERVER_PROFILE] Configuration profile to use (e.g., 'default', 'testing'). "+
+			"If empty, uses 'default' profile when profiles exist, or root config for backward compatibility.",
+	)
+	f.StringVar(
 		&c.flagOktaAuthServerURL, "okta-auth-server-url", "",
 		"[HERMES_SERVER_OKTA_AUTH_SERVER_URL] URL to the Okta authorization server.",
 	)
@@ -103,10 +109,16 @@ func (c *Command) Run(args []string) int {
 		err error
 	)
 	if c.flagConfig != "" {
-		cfg, err = config.NewConfig(c.flagConfig)
+		// Get profile from flag or environment variable
+		profile := c.flagProfile
+		if val, ok := os.LookupEnv("HERMES_SERVER_PROFILE"); ok && profile == "" {
+			profile = val
+		}
+
+		cfg, err = config.NewConfig(c.flagConfig, profile)
 		if err != nil {
-			c.UI.Error(fmt.Sprintf("error parsing config file: %v: config=%q",
-				err, c.flagConfig))
+			c.UI.Error(fmt.Sprintf("error parsing config file: %v: config=%q profile=%q",
+				err, c.flagConfig, profile))
 			return 1
 		}
 	}

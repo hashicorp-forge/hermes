@@ -73,7 +73,7 @@ func (c *Command) Run(args []string) int {
 	}
 
 	// Parse configuration file.
-	cfg, err := config.NewConfig(c.flagConfig)
+	cfg, err := config.NewConfig(c.flagConfig, "") // No profile support in indexer
 	if err != nil {
 		ui.Error(fmt.Sprintf("error parsing configuration file: %v", err))
 		return 1
