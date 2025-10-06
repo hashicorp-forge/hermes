@@ -71,6 +71,10 @@ docker/dev/start: ## Start full development environment (PostgreSQL + Meilisearc
 docker/dev/stop: ## Stop development environment
 	docker-compose down
 
+.PHONY: canary
+canary: ## Run canary test against local docker-compose
+	@./scripts/canary-local.sh
+
 .PHONY: clean
 clean: ## Clean build artifacts
 	@echo "Cleaning build artifacts..."
