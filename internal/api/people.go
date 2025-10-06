@@ -40,18 +40,30 @@ func PeopleDataHandler(
 				return
 			}
 
-			// FIXME: The workspace.Provider interface doesn't expose the full People API.
-			// This endpoint requires SearchDirectoryPeople() with query string, ReadMask, and Sources.
-			// Current workspace.Provider.SearchPeople() only supports email-based lookups.
-			//
-			// See docs-internal/PROVIDER_INTERFACE_EXTENSIONS_TODO.md for the architectural plan
-			// to extend the Provider interface with SearchDirectory() support and capability detection.
-			// Implementation: Phase 2 & 4 of the provider extensions plan.
-			//
-			// For now, returning 501 to indicate this needs migration work.
-			log.Error("people search endpoint not yet migrated - requires extended Provider API")
-			http.Error(w, "People search endpoint not yet migrated",
-				http.StatusNotImplemented)
+			// Use the new SearchDirectory method for advanced people search
+			results, err := workspaceProvider.SearchDirectory(workspace.PeopleSearchOptions{
+				Query:   req.Query,
+				Fields:  []string{"photos", "emailAddresses"},
+				Sources: []string{"DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE"},
+			})
+			if err != nil {
+				log.Error("error searching directory", "error", err, "query", req.Query)
+				http.Error(w, "Error searching directory",
+					http.StatusInternalServerError)
+				return
+			}
+
+			// Write response
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+
+			enc := json.NewEncoder(w)
+			if err := enc.Encode(results); err != nil {
+				log.Error("error encoding people search response", "error", err)
+				http.Error(w, "Error encoding people search response",
+					http.StatusInternalServerError)
+				return
+			}
 			return
 		case "GET":
 			query := r.URL.Query()

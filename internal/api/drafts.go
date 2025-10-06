@@ -393,7 +393,10 @@ func DraftsHandler(
 				sortOrder = "asc"
 			}
 
-			// Build search query
+			// Get user email for owner/contributor filtering
+			userEmail := id // The OIDC identity is the user's email
+
+			// Build search query with OR filter for owners/contributors
 			searchQuery := &search.SearchQuery{
 				Query:     "", // Empty query to get all drafts
 				Page:      page,
@@ -402,16 +405,17 @@ func DraftsHandler(
 				Facets:    facets,
 				SortBy:    "createdTime",
 				SortOrder: sortOrder,
+				// Add OR filter group: user must be owner OR contributor
+				FilterGroups: []search.FilterGroup{
+					{
+						Operator: search.FilterOperatorOR,
+						Filters: []string{
+							fmt.Sprintf("owners = %q", userEmail),
+							fmt.Sprintf("contributors = %q", userEmail),
+						},
+					},
+				},
 			}
-
-			// FIXME: The filter logic needs to handle OR conditions for owners/contributors.
-			// The current search.Provider interface doesn't have a clean way to express:
-			// "WHERE (owners CONTAINS userEmail) OR (contributors CONTAINS userEmail)"
-			//
-			// See docs-internal/PROVIDER_INTERFACE_EXTENSIONS_TODO.md Solution 2 for the
-			// architectural plan to extend search.SearchQuery with FilterGroups and
-			// FilterOperator to support complex OR/AND filter composition.
-			// Implementation: Phase 3 of the provider extensions plan.
 
 			// Retrieve all documents
 			ctx := context.Background()
@@ -561,21 +565,14 @@ func DraftsDocumentHandler(
 			return
 		}
 
-		// FIXME: Subcollection handlers need to be updated to use providers
-		// instead of Algolia client and gw.Service.
-		//
-		// See docs-internal/PROVIDER_INTERFACE_EXTENSIONS_TODO.md Solution 4 for the
-		// architectural plan to migrate subcollection handlers (related resources,
-		// shareable) to use searchProvider and workspaceProvider with database queries.
-		// Implementation: Phase 4 of the provider extensions plan.
+		// Pass request off to associated subcollection (part of the URL after the
+		// document ID) handler, if appropriate.
 		switch reqType {
 		case relatedResourcesDocumentSubcollectionRequestType:
-			// documentsResourceRelatedResourcesHandler(w, r, docId, *doc, cfg, l, searchProvider, db)
-			http.Error(w, "Related resources endpoint not yet migrated to providers", http.StatusNotImplemented)
+			documentsResourceRelatedResourcesHandler(w, r, docId, *doc, cfg, l, searchProvider, db)
 			return
 		case shareableDocumentSubcollectionRequestType:
-			// draftsShareableHandler(w, r, docId, *doc, *cfg, l, searchProvider, workspaceProvider, db)
-			http.Error(w, "Shareable endpoint not yet migrated to providers", http.StatusNotImplemented)
+			draftsShareableHandler(w, r, docId, *doc, cfg, l, workspaceProvider, db)
 			return
 		}
 

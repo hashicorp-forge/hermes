@@ -569,60 +569,22 @@ func ReviewHandler(
 				"path", r.URL.Path,
 			)
 
-			// Compare search provider and database documents to find data inconsistencies.
-			// Get document object from search provider.
-			searchDocComp, err := searchProvider.DocumentIndex().GetObject(ctx, docID)
-			if err != nil {
-				l.Error("error getting search document for data comparison",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", docID,
-				)
-				return
-			}
-			algoDoc, err := searchDocumentToMap(searchDocComp)
-			if err != nil {
-				l.Error("error converting search document to map for data comparison",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", docID,
-				)
-				return
-			}
-			// Get document from database.
-			dbDoc := models.Document{
-				GoogleFileID: docID,
-			}
-			if err := dbDoc.Get(db); err != nil {
-				l.Error("error getting document from database for data comparison",
-					"error", err,
-					"path", r.URL.Path,
-					"method", r.Method,
-					"doc_id", docID,
-				)
-				return
-			}
-			// Get all reviews for the document.
-			var reviews models.DocumentReviews
-			if err := reviews.Find(db, models.DocumentReview{
-				Document: models.Document{
-					GoogleFileID: docID,
+			// Compare search index and database documents to find data inconsistencies.
+			checker := NewDocumentConsistencyChecker(
+				searchProvider,
+				db,
+				l,
+				cfg.DocumentTypes.DocumentType,
+			)
+			if err := checker.CheckDocumentConsistency(
+				r.Context(),
+				docID,
+				CheckOptions{
+					ValidateReviews: true,
+					StrictMode:      false,
 				},
-			}); err != nil {
-				l.Error("error getting all reviews for document for data comparison",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", docID,
-				)
-				return
-			}
-			if err := compareAlgoliaAndDatabaseDocument(
-				algoDoc, dbDoc, reviews, cfg.DocumentTypes.DocumentType,
 			); err != nil {
-				l.Warn("inconsistencies detected between Algolia and database docs",
+				l.Warn("inconsistencies detected between search and database",
 					"error", err,
 					"method", r.Method,
 					"path", r.URL.Path,

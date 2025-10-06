@@ -2,14 +2,14 @@ package api
 
 import (
 	"encoding/json"
-	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
 	"net/http"
 
+	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
+
 	"github.com/hashicorp-forge/hermes/internal/config"
-	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	"github.com/hashicorp-forge/hermes/pkg/document"
 	"github.com/hashicorp-forge/hermes/pkg/models"
-	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
+	"github.com/hashicorp-forge/hermes/pkg/workspace"
 	"github.com/hashicorp/go-hclog"
 	"gorm.io/gorm"
 )
@@ -27,10 +27,9 @@ func draftsShareableHandler(
 	r *http.Request,
 	docID string,
 	doc document.Document,
-	cfg config.Config,
+	cfg *config.Config,
 	l hclog.Logger,
-	algoRead *algolia.Client,
-	goog *gw.Service,
+	workspaceProvider workspace.Provider,
 	db *gorm.DB,
 ) {
 	switch r.Method {
@@ -120,7 +119,7 @@ func draftsShareableHandler(
 		}
 
 		// Find out if the draft is already shared with the domain.
-		perms, err := goog.ListPermissions(docID)
+		perms, err := workspaceProvider.ListPermissions(docID)
 		if err != nil {
 			l.Error("error listing Google Drive permissions",
 				"error", err,
@@ -152,12 +151,12 @@ func draftsShareableHandler(
 		if *req.IsShareable {
 			if len(alreadySharedPermIDs) == 0 {
 				// File is not already shared with domain, so share it.
-				goog.ShareFileWithDomain(docID, cfg.GoogleWorkspace.Domain, "commenter")
+				workspaceProvider.ShareFileWithDomain(docID, cfg.GoogleWorkspace.Domain, "commenter")
 			}
 		} else {
 			for _, id := range alreadySharedPermIDs {
 				// File is already shared with domain, so remove the permission.
-				goog.DeletePermission(docID, id)
+				workspaceProvider.DeletePermission(docID, id)
 			}
 		}
 
