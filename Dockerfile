@@ -13,7 +13,7 @@ WORKDIR /build
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy source code
+# Copy source code (excluding items in .dockerignore)
 COPY . .
 
 # Verify web/dist exists (must be built on host before docker build)
@@ -47,11 +47,6 @@ USER hermes
 # Expose port
 EXPOSE 8000
 
-# Health check - use a simple endpoint that doesn't require auth
-# Note: /api/v1/me requires authentication, so we just check if the port is listening
-HEALTHCHECK --interval=10s --timeout=5s --start-period=10s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:8000/ || exit 1
-
-# Run the binary with config path and profile selection
+# Run the binary
 ENTRYPOINT ["/app/hermes"]
-CMD ["server", "-config=/app/config-profiles.hcl", "-profile=testing"]
+CMD ["server"]

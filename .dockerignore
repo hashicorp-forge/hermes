@@ -1,67 +1,88 @@
-# .dockerignore for Hermes containerized builds
-# This file is used when building Docker images from the root context
+# .dockerignore for Hermes backend build
+# Only include what's needed for the Go server binary
 
-# CRITICAL: Exclude node_modules (2.4GB+) to speed up build
-web/node_modules/
-web/.npm/
+# Exclude testing infrastructure
+testing/
+tests/
 
-# Git
-.git/
-.gitignore
-.gitattributes
+# Exclude documentation
+docs-internal/
+*.md
+!README.md
 
-# Build artifacts
+# Exclude build artifacts
 build/
-hermes
+/hermes
 *.exe
 *.dll
 *.so
 *.dylib
 *.test
 *.out
-coverage.out
-*.log
-*.patch
+coverage*.out
+coverage*.html
 
-# Test artifacts
+# Exclude config files with secrets
+config.hcl
+credentials.json
+token.json
+.env*
+
+# Exclude version control
+.git/
+.github/
+.gitignore
+.gitattributes
+
+# Exclude test outputs and logs
 workspace.test
 test_results.log
 test_output.log
 test_final.log
+*.log
+*.patch
 
-# Documentation (not needed in container)
-docs-internal/
-*.md
-!web/README.md
+# Exclude macOS and OS files
+.DS_Store
+Thumbs.db
 
-# Testing directory (exclude except for what we need)
-testing/postgres_data/
-testing/meilisearch_data/
-
-# Scripts (not needed in container)
+# Exclude Python scripts
+*.py
+*.sh
+refactor_*.py
+fix_*.py
 scripts/
 
-# IDE
+# Exclude web development files (keep only dist/ and web.go)
+web/node_modules/
+web/.yarn/
+web/.pnp.*
+web/.npm/
+web/.eslintcache
+web/tests/
+web/mirage/
+web/tmp/
+web/.cache/
+web/babel.config.js
+web/ember-cli-build.js
+web/package.json
+web/yarn.lock
+web/tsconfig.json
+web/testem.js
+web/tailwind.config.js
+web/.template-lintrc.js
+web/.eslintrc.js
+web/.prettierrc.js
+web/types/
+web/vendor/
+
+# Keep only web/dist (needed for go:embed) and web/web.go
+!web/dist/
+!web/web.go
+
+# Exclude IDE
 .idea/
 .vscode/
 *.swp
 *.swo
 *~
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Ember build artifacts
-# NOTE: web/dist is needed for hermes binary (embeds static assets)
-# web/dist/  # DO NOT EXCLUDE - needed for go:embed
-web/tmp/
-web/.cache/
-
-# Config files (use mounted volumes or environment variables instead)
-config.hcl
-credentials.json
-token.json
-
-# Python scripts
-*.py
