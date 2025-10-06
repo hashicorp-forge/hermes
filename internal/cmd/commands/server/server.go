@@ -26,6 +26,7 @@ import (
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp-forge/hermes/pkg/links"
 	"github.com/hashicorp-forge/hermes/pkg/models"
+	searchalgolia "github.com/hashicorp-forge/hermes/pkg/search/adapters/algolia"
 	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
 	"github.com/hashicorp-forge/hermes/web"
 	"github.com/hashicorp/go-hclog"
@@ -244,7 +245,7 @@ func (c *Command) Run(args []string) int {
 	}
 
 	reqOpts := map[interface{}]string{
-		cfg.Algolia.ApplicationID:           "Algolia Application ID is required",
+		cfg.Algolia.AppID:                   "Algolia Application ID is required",
 		cfg.Algolia.SearchAPIKey:            "Algolia Search API Key is required",
 		cfg.BaseURL:                         "Base URL is required",
 		cfg.GoogleWorkspace.DocsFolder:      "Google Workspace Docs Folder is required",
@@ -259,19 +260,48 @@ func (c *Command) Run(args []string) int {
 		}
 	}
 
-	// Initialize Algolia search client.
-	algoSearch, err := algolia.NewSearchClient(cfg.Algolia)
+	// Convert search adapter config to legacy algolia config
+	algoliaClientCfg := &algolia.Config{
+		ApplicationID:          cfg.Algolia.AppID,
+		SearchAPIKey:           cfg.Algolia.SearchAPIKey,
+		WriteAPIKey:            cfg.Algolia.WriteAPIKey,
+		DocsIndexName:          cfg.Algolia.DocsIndexName,
+		DraftsIndexName:        cfg.Algolia.DraftsIndexName,
+		InternalIndexName:      cfg.Algolia.InternalIndexName,
+		LinksIndexName:         cfg.Algolia.LinksIndexName,
+		MissingFieldsIndexName: cfg.Algolia.MissingFieldsIndexName,
+		ProjectsIndexName:      cfg.Algolia.ProjectsIndexName,
+	}
+
+	// Initialize Algolia search client (legacy - still needed for proxy handler).
+	algoSearch, err := algolia.NewSearchClient(algoliaClientCfg)
 	if err != nil {
 		c.UI.Error(fmt.Sprintf("error initializing Algolia search client: %v", err))
 		return 1
 	}
 
-	// Initialize Algolia write client.
-	algoWrite, err := algolia.New(cfg.Algolia)
+	// Initialize Algolia write client (legacy - still needed for some operations).
+	algoWrite, err := algolia.New(algoliaClientCfg)
 	if err != nil {
 		c.UI.Error(fmt.Sprintf("error initializing Algolia write client: %v", err))
 		return 1
 	}
+
+	// Initialize modern search provider adapter.
+	searchAdapterCfg := &searchalgolia.Config{
+		AppID:           cfg.Algolia.AppID,
+		WriteAPIKey:     cfg.Algolia.WriteAPIKey,
+		DocsIndexName:   cfg.Algolia.DocsIndexName,
+		DraftsIndexName: cfg.Algolia.DraftsIndexName,
+	}
+	searchProvider, err := searchalgolia.NewAdapter(searchAdapterCfg)
+	if err != nil {
+		c.UI.Error(fmt.Sprintf("error initializing search provider: %v", err))
+		return 1
+	}
+
+	// Initialize modern workspace provider adapter.
+	workspaceProvider := gw.NewAdapter(goog)
 
 	// Initialize Jira service.
 	var jiraSvc *jira.Service
@@ -337,20 +367,19 @@ func (c *Command) Run(args []string) int {
 	}
 
 	srv := server.Server{
-		AlgoSearch: algoSearch,
-		AlgoWrite:  algoWrite,
-		Config:     cfg,
-		DB:         db,
-		GWService:  goog,
-		Jira:       jiraSvc,
-		Logger:     c.Log,
+		SearchProvider:    searchProvider,
+		WorkspaceProvider: workspaceProvider,
+		Config:            cfg,
+		DB:                db,
+		Jira:              jiraSvc,
+		Logger:            c.Log,
 	}
 
 	// Define handlers for authenticated endpoints.
 	authenticatedEndpoints := []endpoint{
 		// Algolia proxy.
 		{"/1/indexes/",
-			algolia.AlgoliaProxyHandler(algoSearch, cfg.Algolia, c.Log)},
+			algolia.AlgoliaProxyHandler(algoSearch, algoliaClientCfg, c.Log)},
 
 		// API v1.
 		{"/api/v1/approvals/",
@@ -410,7 +439,7 @@ func (c *Command) Run(args []string) int {
 		{"/", web.Handler()},
 		{"/api/v1/web/config", web.ConfigHandler(cfg, algoSearch, c.Log)},
 		{"/api/v2/web/config", web.ConfigHandler(cfg, algoSearch, c.Log)},
-		{"/l/", links.RedirectHandler(algoSearch, cfg.Algolia, c.Log)},
+		{"/l/", links.RedirectHandler(algoSearch, algoliaClientCfg, c.Log)},
 	}
 
 	// If Okta is enabled, add the web endpoints for the single page app as
