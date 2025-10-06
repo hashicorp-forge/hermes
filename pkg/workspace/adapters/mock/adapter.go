@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp-forge/hermes/pkg/workspace"
 	admin "google.golang.org/api/admin/directory/v1"
 	"google.golang.org/api/docs/v1"
 	"google.golang.org/api/drive/v3"
@@ -308,6 +309,53 @@ func (a *Adapter) SearchPeople(email string, fields string) ([]*people.Person, e
 	}
 
 	return []*people.Person{person}, nil
+}
+
+// SearchDirectory performs advanced directory search with query strings and filters.
+// For the mock adapter, this searches people by matching the query against names and emails.
+func (a *Adapter) SearchDirectory(opts workspace.PeopleSearchOptions) ([]*people.Person, error) {
+	// Simple implementation: return all people if query is empty, otherwise filter by query
+	results := []*people.Person{}
+
+	for _, person := range a.People {
+		// If query is empty, include all
+		if opts.Query == "" {
+			results = append(results, person)
+			continue
+		}
+
+		// Otherwise, search in names and emails
+		match := false
+
+		// Check email addresses
+		for _, email := range person.EmailAddresses {
+			if email.Value == opts.Query {
+				match = true
+				break
+			}
+		}
+
+		// Check names
+		if !match && len(person.Names) > 0 {
+			for _, name := range person.Names {
+				if name.DisplayName == opts.Query || name.GivenName == opts.Query || name.FamilyName == opts.Query {
+					match = true
+					break
+				}
+			}
+		}
+
+		if match {
+			results = append(results, person)
+		}
+	}
+
+	// Apply max results limit if specified
+	if opts.MaxResults > 0 && int64(len(results)) > opts.MaxResults {
+		results = results[:opts.MaxResults]
+	}
+
+	return results, nil
 }
 
 // GetSubfolder retrieves a subfolder ID by name within a parent folder.

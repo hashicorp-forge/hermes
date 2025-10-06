@@ -344,9 +344,18 @@ func (di *documentIndex) Search(ctx context.Context, query *hermessearch.SearchQ
 	}
 
 	// Add filters
-	if len(query.Filters) > 0 {
+	if len(query.Filters) > 0 || len(query.FilterGroups) > 0 {
 		filters := buildMeilisearchFilters(query.Filters)
-		req.Filter = filters
+		filterGroupsStr := buildMeilisearchFilterGroups(query.FilterGroups)
+
+		// Combine basic filters and filter groups with AND
+		if filters != nil && filterGroupsStr != "" {
+			req.Filter = fmt.Sprintf("(%s) AND (%s)", filters, filterGroupsStr)
+		} else if filters != nil {
+			req.Filter = filters
+		} else if filterGroupsStr != "" {
+			req.Filter = filterGroupsStr
+		}
 	}
 
 	// Add facets
@@ -574,6 +583,41 @@ func buildMeilisearchFilters(filters map[string][]string) interface{} {
 		return nil
 	}
 	return strings.Join(filterParts, " AND ")
+}
+
+// buildMeilisearchFilterGroups converts filter groups to Meilisearch filter syntax.
+// It supports AND/OR operators for complex filter logic.
+// Example: (owners = "user@example.com" OR contributors = "user@example.com")
+func buildMeilisearchFilterGroups(filterGroups []hermessearch.FilterGroup) string {
+	if len(filterGroups) == 0 {
+		return ""
+	}
+
+	var groupParts []string
+	for _, group := range filterGroups {
+		if len(group.Filters) == 0 {
+			continue
+		}
+
+		// Join filters within the group with the specified operator
+		operator := " AND "
+		if group.Operator == hermessearch.FilterOperatorOR {
+			operator = " OR "
+		}
+
+		groupStr := strings.Join(group.Filters, operator)
+		if len(group.Filters) > 1 {
+			groupStr = "(" + groupStr + ")"
+		}
+		groupParts = append(groupParts, groupStr)
+	}
+
+	if len(groupParts) == 0 {
+		return ""
+	}
+
+	// Multiple filter groups are combined with AND
+	return strings.Join(groupParts, " AND ")
 }
 
 func convertMeilisearchHit(hit meilisearch.Hit) (*hermessearch.Document, error) {

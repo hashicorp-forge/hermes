@@ -140,6 +140,20 @@ type Document struct {
 	IndexedAt time.Time `json:"-"`
 }
 
+// FilterOperator defines logical operators for filter composition.
+type FilterOperator string
+
+const (
+	FilterOperatorAND FilterOperator = "AND"
+	FilterOperatorOR  FilterOperator = "OR"
+)
+
+// FilterGroup represents a group of filters with a logical operator.
+type FilterGroup struct {
+	Operator FilterOperator
+	Filters  []string // Filter expressions like "owners:user@example.com"
+}
+
 // SearchQuery defines search parameters.
 type SearchQuery struct {
 	// Query text
@@ -151,6 +165,10 @@ type SearchQuery struct {
 
 	// Filters
 	Filters map[string][]string // e.g., {"product": ["terraform"], "status": ["approved"]}
+
+	// FilterGroups enables complex filter logic with AND/OR operators.
+	// Example: OR group for (owners:user@example.com OR contributors:user@example.com)
+	FilterGroups []FilterGroup
 
 	// Facets to return
 	Facets []string

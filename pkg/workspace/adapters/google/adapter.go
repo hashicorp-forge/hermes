@@ -70,6 +70,10 @@ func (a *Adapter) SearchPeople(email string, fields string) ([]*people.Person, e
 	return a.service.SearchPeople(email, fields)
 }
 
+func (a *Adapter) SearchDirectory(opts workspace.PeopleSearchOptions) ([]*people.Person, error) {
+	return a.service.SearchDirectory(opts)
+}
+
 // Folder operations
 
 func (a *Adapter) GetSubfolder(parentID, name string) (string, error) {

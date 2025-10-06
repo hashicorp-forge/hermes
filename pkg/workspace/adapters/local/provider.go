@@ -229,6 +229,66 @@ func (p *ProviderAdapter) SearchPeople(email string, fields string) ([]*people.P
 	return persons, nil
 }
 
+// SearchDirectory performs advanced directory search with query strings and filters.
+// For the local adapter, this performs a simple text search across user names and emails.
+func (p *ProviderAdapter) SearchDirectory(opts workspace.PeopleSearchOptions) ([]*people.Person, error) {
+	// For local adapter, we treat Query as a search term across names and emails
+	users, err := p.adapter.PeopleService().SearchUsers(p.ctx, opts.Query, []string{"names", "emailAddresses", "photos"})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(users) == 0 {
+		return []*people.Person{}, nil
+	}
+
+	// Apply max results limit if specified
+	if opts.MaxResults > 0 && int64(len(users)) > opts.MaxResults {
+		users = users[:opts.MaxResults]
+	}
+
+	// Convert workspace users to people.Person format
+	persons := make([]*people.Person, len(users))
+	for i, user := range users {
+		person := &people.Person{
+			ResourceName: fmt.Sprintf("people/%s", user.Email),
+			Etag:         user.Email,
+		}
+
+		// Add name if available
+		if user.Name != "" {
+			person.Names = []*people.Name{
+				{
+					DisplayName: user.Name,
+					GivenName:   user.GivenName,
+					FamilyName:  user.FamilyName,
+				},
+			}
+		}
+
+		// Add email
+		person.EmailAddresses = []*people.EmailAddress{
+			{
+				Value: user.Email,
+				Type:  "work",
+			},
+		}
+
+		// Add photo if available
+		if user.PhotoURL != "" {
+			person.Photos = []*people.Photo{
+				{
+					Url: user.PhotoURL,
+				},
+			}
+		}
+
+		persons[i] = person
+	}
+
+	return persons, nil
+}
+
 // GetSubfolder finds a subfolder by name within a parent folder.
 func (p *ProviderAdapter) GetSubfolder(parentID, name string) (string, error) {
 	folder, err := p.adapter.DocumentStorage().GetSubfolder(p.ctx, parentID, name)

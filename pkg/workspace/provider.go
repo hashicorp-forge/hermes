@@ -8,6 +8,15 @@ import (
 	"google.golang.org/api/people/v1"
 )
 
+// PeopleSearchOptions contains advanced search parameters for directory searches.
+type PeopleSearchOptions struct {
+	Query      string   // Free-text search query
+	Fields     []string // Fields to return (e.g., "photos", "emailAddresses", "names")
+	Sources    []string // Source types (e.g., "DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE")
+	MaxResults int64    // Maximum number of results
+	PageToken  string   // Pagination token
+}
+
 // Provider defines the interface for workspace operations (Google Drive, local storage, etc).
 // This is a simplified interface focusing on the methods actually used by Hermes handlers.
 type Provider interface {
@@ -29,6 +38,10 @@ type Provider interface {
 
 	// People operations
 	SearchPeople(email string, fields string) ([]*people.Person, error)
+
+	// SearchDirectory performs advanced directory search with query strings and filters.
+	// This supports free-text queries across the directory, unlike SearchPeople which is email-based.
+	SearchDirectory(opts PeopleSearchOptions) ([]*people.Person, error)
 
 	// Folder operations
 	GetSubfolder(parentID, name string) (string, error)
