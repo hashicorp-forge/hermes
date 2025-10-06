@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/hashicorp-forge/hermes/internal/api"
+	apiv2 "github.com/hashicorp-forge/hermes/internal/api/v2"
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/internal/server"
 	"github.com/hashicorp-forge/hermes/internal/test"
@@ -26,7 +27,9 @@ import (
 	"github.com/hashicorp-forge/hermes/pkg/search"
 	algoliaadapter "github.com/hashicorp-forge/hermes/pkg/search/adapters/algolia"
 	"github.com/hashicorp-forge/hermes/pkg/search/adapters/meilisearch"
+	"github.com/hashicorp-forge/hermes/pkg/workspace"
 	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
+	mock "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/mock"
 	"github.com/hashicorp/go-hclog"
 	"gorm.io/gorm"
 )
@@ -47,6 +50,9 @@ type Suite struct {
 
 	// SearchProvider is the search backend (Meilisearch or mock)
 	SearchProvider search.Provider
+
+	// WorkspaceProvider is the workspace backend (mock for tests)
+	WorkspaceProvider workspace.Provider
 
 	// Config is the server configuration
 	Config *config.Config
@@ -93,6 +99,9 @@ func NewSuite(t *testing.T, opts ...Option) *Suite {
 	if err := suite.setupSearch(); err != nil {
 		t.Fatalf("Failed to setup search: %v", err)
 	}
+
+	// Create workspace provider (mock for tests)
+	suite.WorkspaceProvider = mock.NewAdapter()
 
 	// Create test configuration
 	suite.Config = suite.createTestConfig()
@@ -212,6 +221,12 @@ func (s *Suite) createTestConfig() *config.Config {
 				},
 			},
 		},
+		GoogleWorkspace: &config.GoogleWorkspace{
+			DraftsFolder:          "test-drafts-folder",
+			TemporaryDraftsFolder: "test-temp-drafts-folder",
+			// Auth is nil by default (service account mode)
+			// Tests can override Config if they want to test CreateDocsAsUser mode
+		},
 	}
 }
 
@@ -243,23 +258,21 @@ func (s *Suite) seedDatabase(db *gorm.DB) error {
 
 // setupServer creates the test HTTP server.
 func (s *Suite) setupServer() error {
-	// Create empty Algolia clients (handlers will use database/search provider instead)
-	// These are kept as empty structs to satisfy the API handler signatures
+	//FIXME: v1 API handlers still use Algolia and GWService directly - need to migrate them
+	// Create empty Algolia clients for v1 handlers that haven't been migrated yet
 	algoSearch := &algolia.Client{}
 	algoWrite := &algolia.Client{}
 
-	// Create mock Google Workspace service
+	// Create mock Google Workspace service for v1 handlers
 	gwService := &gw.Service{}
 
-	// Create server with SearchProvider support
+	// Create server with SearchProvider and WorkspaceProvider support (v2 API uses these)
 	srv := &server.Server{
-		AlgoSearch:     algoSearch,
-		AlgoWrite:      algoWrite,
-		SearchProvider: s.SearchProvider, // Use the search provider from suite (Meilisearch or mock)
-		Config:         s.Config,
-		DB:             s.DB,
-		GWService:      gwService,
-		Logger:         hclog.NewNullLogger(),
+		SearchProvider:    s.SearchProvider,    // Use the search provider from suite (Meilisearch or mock)
+		WorkspaceProvider: s.WorkspaceProvider, // Use mock workspace provider for tests
+		Config:            s.Config,
+		DB:                s.DB,
+		Logger:            hclog.NewNullLogger(),
 	}
 
 	// Create mux and register endpoints (mimicking internal/cmd/commands/server/server.go)
@@ -276,6 +289,14 @@ func (s *Suite) setupServer() error {
 		api.ProductsHandler(s.Config, algoSearch, srv.Logger))
 	mux.Handle("/api/v1/reviews/",
 		api.ReviewHandler(s.Config, srv.Logger, algoSearch, algoWrite, gwService, s.DB))
+
+	// Register API v2 endpoints (use server.Server abstraction)
+	mux.Handle("/api/v2/documents/", apiv2.DocumentHandler(*srv))
+	mux.Handle("/api/v2/documents", apiv2.DocumentHandler(*srv))
+	mux.Handle("/api/v2/drafts/", apiv2.DraftsDocumentHandler(*srv))
+	mux.Handle("/api/v2/drafts", apiv2.DraftsHandler(*srv))
+	mux.Handle("/api/v2/reviews/", apiv2.ReviewsHandler(*srv))
+	mux.Handle("/api/v2/approvals/", apiv2.ApprovalsHandler(*srv))
 
 	// Create test server
 	s.Server = httptest.NewServer(mux)
@@ -323,6 +344,14 @@ func (m *mockSearchProvider) DraftIndex() search.DraftIndex {
 	return &mockDraftIndex{}
 }
 
+func (m *mockSearchProvider) ProjectIndex() search.ProjectIndex {
+	return &mockProjectIndex{}
+}
+
+func (m *mockSearchProvider) LinksIndex() search.LinksIndex {
+	return &mockLinksIndex{}
+}
+
 func (m *mockSearchProvider) Name() string {
 	return "mock"
 }
@@ -359,6 +388,10 @@ func (m *mockDocumentIndex) Search(ctx context.Context, query *search.SearchQuer
 		Facets:     &search.Facets{},
 		QueryTime:  0,
 	}, nil
+}
+
+func (m *mockDocumentIndex) GetObject(ctx context.Context, docID string) (*search.Document, error) {
+	return nil, search.ErrNotFound
 }
 
 func (m *mockDocumentIndex) GetFacets(ctx context.Context, facetNames []string) (*search.Facets, error) {
@@ -399,11 +432,63 @@ func (m *mockDraftIndex) Search(ctx context.Context, query *search.SearchQuery) 
 	}, nil
 }
 
+func (m *mockDraftIndex) GetObject(ctx context.Context, docID string) (*search.Document, error) {
+	return nil, search.ErrNotFound
+}
+
 func (m *mockDraftIndex) GetFacets(ctx context.Context, facetNames []string) (*search.Facets, error) {
 	return &search.Facets{}, nil
 }
 
 func (m *mockDraftIndex) Clear(ctx context.Context) error {
+	return nil
+}
+
+type mockProjectIndex struct{}
+
+func (m *mockProjectIndex) Index(ctx context.Context, project map[string]any) error {
+	return nil
+}
+
+func (m *mockProjectIndex) Delete(ctx context.Context, projectID string) error {
+	return nil
+}
+
+func (m *mockProjectIndex) Search(ctx context.Context, query *search.SearchQuery) (*search.SearchResult, error) {
+	return &search.SearchResult{
+		Hits:       []*search.Document{},
+		TotalHits:  0,
+		Page:       query.Page,
+		PerPage:    query.PerPage,
+		TotalPages: 0,
+		Facets:     &search.Facets{},
+		QueryTime:  0,
+	}, nil
+}
+
+func (m *mockProjectIndex) GetObject(ctx context.Context, projectID string) (map[string]any, error) {
+	return nil, search.ErrNotFound
+}
+
+func (m *mockProjectIndex) Clear(ctx context.Context) error {
+	return nil
+}
+
+type mockLinksIndex struct{}
+
+func (m *mockLinksIndex) SaveLink(ctx context.Context, link map[string]string) error {
+	return nil
+}
+
+func (m *mockLinksIndex) DeleteLink(ctx context.Context, objectID string) error {
+	return nil
+}
+
+func (m *mockLinksIndex) GetLink(ctx context.Context, objectID string) (map[string]string, error) {
+	return nil, search.ErrNotFound
+}
+
+func (m *mockLinksIndex) Clear(ctx context.Context) error {
 	return nil
 }
 

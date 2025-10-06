@@ -33,6 +33,14 @@ func (c *Client) SetAuth(email string) {
 	c.auth = email
 }
 
+// WithAuth returns a new client with authentication set.
+// This allows for fluent chaining: client.WithAuth("user@example.com").Get("/path")
+func (c *Client) WithAuth(email string) *Client {
+	newClient := *c
+	newClient.auth = email
+	return &newClient
+}
+
 // Get performs a GET request and returns a Response with assertions.
 func (c *Client) Get(path string) *Response {
 	return c.request("GET", path, nil)
@@ -143,6 +151,61 @@ func (r *Response) AssertStatus(expected int) *Response {
 		r.t.Fatalf("Expected status %d, got %d. Body: %s", expected, r.StatusCode, string(body))
 	}
 	return r
+}
+
+// ExpectStatus is an alias for AssertStatus for fluent API.
+func (r *Response) ExpectStatus(expected int) *Response {
+	return r.AssertStatus(expected)
+}
+
+// ExpectJSON decodes the response as JSON and returns the parsed data.
+func (r *Response) ExpectJSON() *Response {
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		r.t.Fatalf("Failed to read response body: %v", err)
+	}
+	r.Body.Close()
+
+	// Store the body for later access
+	r.Body = io.NopCloser(bytes.NewReader(body))
+
+	// Verify it's valid JSON
+	var data interface{}
+	if err := json.Unmarshal(body, &data); err != nil {
+		r.t.Fatalf("Expected valid JSON, got error: %v. Body: %s", err, string(body))
+	}
+
+	return r
+}
+
+// GetArray returns the response body as an array.
+func (r *Response) GetArray() []interface{} {
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		r.t.Fatalf("Failed to read response body: %v", err)
+	}
+	r.Body.Close()
+
+	var data []interface{}
+	if err := json.Unmarshal(body, &data); err != nil {
+		r.t.Fatalf("Failed to decode JSON array: %v. Body: %s", err, string(body))
+	}
+	return data
+}
+
+// GetMap returns the response body as a map.
+func (r *Response) GetMap() map[string]interface{} {
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		r.t.Fatalf("Failed to read response body: %v", err)
+	}
+	r.Body.Close()
+
+	var data map[string]interface{}
+	if err := json.Unmarshal(body, &data); err != nil {
+		r.t.Fatalf("Failed to decode JSON object: %v. Body: %s", err, string(body))
+	}
+	return data
 }
 
 // AssertStatusOK asserts the response is 200 OK.
