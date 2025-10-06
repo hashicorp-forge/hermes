@@ -29,7 +29,7 @@ services:
     volumes:
       - meilisearch_test:/meili_data
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:7700/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -93,9 +93,9 @@ services:
         condition: service_healthy
     networks:
       - hermes-test
-    volumes:
-      # Mount source for hot reload (optional for development)
-      # - ../web:/app:ro
+    # volumes:
+    #   # Mount source for hot reload (optional for development)
+    #   - ../web:/app:ro
 
 networks:
   hermes-test:

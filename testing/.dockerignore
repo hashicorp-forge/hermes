@@ -35,13 +35,13 @@ scripts/
 .DS_Store
 Thumbs.db
 
-# Node
-node_modules/
-.npm/
-.yarn/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Node (keep .yarn as it's needed for yarn berry)
+# Build context is parent dir, so use relative paths
+web/node_modules
+web/.npm
+web/npm-debug.log*
+web/yarn-debug.log*
+web/yarn-error.log*
 
 # Ember
 web/dist/

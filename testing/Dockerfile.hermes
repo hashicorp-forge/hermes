@@ -1,4 +1,7 @@
 # Multi-stage build for Hermes backend
+# NOTE: Requires web/dist to be pre-built on host (run `make web/build` first)
+# This avoids building web assets twice and running out of memory in Docker
+
 FROM golang:1.25-alpine AS builder
 
 # Install build dependencies
@@ -13,7 +16,10 @@ RUN go mod download
 # Copy source code
 COPY . .
 
-# Build the binary
+# Verify web/dist exists (must be built on host before docker build)
+RUN test -d web/dist || (echo "ERROR: web/dist not found! Run 'make web/build' first" && exit 1)
+
+# Build the binary (with embedded web assets from host)
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o hermes ./cmd/hermes
 
 # Final stage - minimal runtime image
@@ -43,6 +49,6 @@ EXPOSE 8000
 HEALTHCHECK --interval=10s --timeout=5s --start-period=10s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:8000/api/v1/me || exit 1
 
-# Run the binary
+# Run the binary with config path
 ENTRYPOINT ["/app/hermes"]
-CMD ["server"]
+CMD ["server", "-config=/app/config.hcl"]

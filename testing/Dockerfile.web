@@ -1,28 +1,14 @@
-# Multi-stage build for Hermes web frontend
-FROM node:20-alpine AS builder
+# Simple build for Hermes web frontend
+# NOTE: Requires web/dist to be pre-built on host (run `make web/build` first)
+# This avoids memory exhaustion during Docker build
 
-WORKDIR /build
-
-# Copy package files
-COPY web/package.json web/yarn.lock ./
-
-# Install dependencies
-RUN yarn install --frozen-lockfile
-
-# Copy web source
-COPY web/ ./
-
-# Build the frontend
-RUN yarn build:production
-
-# Final stage - serve with nginx
 FROM nginx:alpine
 
 # Copy nginx configuration
 COPY testing/nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy built assets from builder
-COPY --from=builder /build/dist /usr/share/nginx/html
+# Copy pre-built assets from host
+COPY web/dist /usr/share/nginx/html
 
 # Create non-root user for nginx
 RUN chown -R nginx:nginx /usr/share/nginx/html && \

@@ -1,0 +1,67 @@
+# .dockerignore for Hermes containerized builds
+# This file is used when building Docker images from the root context
+
+# CRITICAL: Exclude node_modules (2.4GB+) to speed up build
+web/node_modules/
+web/.npm/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Build artifacts
+build/
+hermes
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+coverage.out
+*.log
+*.patch
+
+# Test artifacts
+workspace.test
+test_results.log
+test_output.log
+test_final.log
+
+# Documentation (not needed in container)
+docs-internal/
+*.md
+!web/README.md
+
+# Testing directory (exclude except for what we need)
+testing/postgres_data/
+testing/meilisearch_data/
+
+# Scripts (not needed in container)
+scripts/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Ember build artifacts
+# NOTE: web/dist is needed for hermes binary (embeds static assets)
+# web/dist/  # DO NOT EXCLUDE - needed for go:embed
+web/tmp/
+web/.cache/
+
+# Config files (use mounted volumes or environment variables instead)
+config.hcl
+credentials.json
+token.json
+
+# Python scripts
+*.py
