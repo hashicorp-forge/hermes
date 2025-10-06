@@ -1,0 +1,48 @@
+# Multi-stage build for Hermes backend
+FROM golang:1.25-alpine AS builder
+
+# Install build dependencies
+RUN apk add --no-cache git make
+
+WORKDIR /build
+
+# Copy go mod files first for better caching
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy source code
+COPY . .
+
+# Build the binary
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o hermes ./cmd/hermes
+
+# Final stage - minimal runtime image
+FROM alpine:3.19
+
+# Install runtime dependencies
+RUN apk add --no-cache ca-certificates wget
+
+WORKDIR /app
+
+# Copy binary from builder
+COPY --from=builder /build/hermes /app/hermes
+
+# Copy configs (optional, can be mounted as volume)
+COPY --from=builder /build/configs /app/configs
+
+# Create non-root user
+RUN adduser -D -u 1000 hermes && \
+    chown -R hermes:hermes /app
+
+USER hermes
+
+# Expose port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=10s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:8000/api/v1/me || exit 1
+
+# Run the binary
+ENTRYPOINT ["/app/hermes"]
+CMD ["server"]

@@ -75,6 +75,23 @@ docker/dev/stop: ## Stop development environment
 canary: ## Run canary test against local docker-compose
 	@./scripts/canary-local.sh
 
+.PHONY: testing/up
+testing/up: ## Start containerized testing environment
+	@echo "Starting containerized testing environment..."
+	@cd testing && $(MAKE) up
+
+.PHONY: testing/down
+testing/down: ## Stop containerized testing environment
+	@cd testing && $(MAKE) down
+
+.PHONY: testing/test
+testing/test: ## Run tests in containerized environment
+	@cd testing && $(MAKE) test
+
+.PHONY: testing/clean
+testing/clean: ## Clean containerized testing environment
+	@cd testing && $(MAKE) clean
+
 .PHONY: clean
 clean: ## Clean build artifacts
 	@echo "Cleaning build artifacts..."

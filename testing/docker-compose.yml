@@ -1,0 +1,106 @@
+services:
+  postgres:
+    image: postgres:17.1-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: hermes_test
+    ports:
+      - "5433:5432"  # Different port to avoid conflict with root docker-compose
+    volumes:
+      - postgres_test:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hermes-test
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.11
+    environment:
+      MEILI_ENV: development
+      MEILI_MASTER_KEY: masterKey123
+      MEILI_NO_ANALYTICS: true
+    ports:
+      - "7701:7700"  # Different port to avoid conflict with root docker-compose
+    volumes:
+      - meilisearch_test:/meili_data
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:7700/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hermes-test
+
+  hermes:
+    build:
+      context: ..
+      dockerfile: testing/Dockerfile.hermes
+    ports:
+      - "8001:8000"  # Different port to avoid conflict with local dev
+    environment:
+      # Database configuration
+      HERMES_SERVER_POSTGRES_HOST: postgres
+      HERMES_SERVER_POSTGRES_PORT: 5432
+      HERMES_SERVER_POSTGRES_USER: postgres
+      HERMES_SERVER_POSTGRES_PASSWORD: postgres
+      HERMES_SERVER_POSTGRES_DB: hermes_test
+      
+      # Server configuration
+      HERMES_SERVER_ADDR: 0.0.0.0:8000
+      HERMES_BASE_URL: http://localhost:8001
+      
+      # Meilisearch configuration
+      HERMES_SEARCH_BACKEND: meilisearch
+      HERMES_MEILISEARCH_HOST: http://meilisearch:7700
+      HERMES_MEILISEARCH_API_KEY: masterKey123
+      
+      # Auth configuration (disabled for testing)
+      HERMES_SERVER_OKTA_DISABLED: "true"
+      
+    depends_on:
+      postgres:
+        condition: service_healthy
+      meilisearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8000/api/v1/me"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - hermes-test
+    volumes:
+      # Mount config if needed (optional)
+      - ./config.hcl:/app/config.hcl:ro
+
+  web:
+    build:
+      context: ..
+      dockerfile: testing/Dockerfile.web
+    ports:
+      - "4201:4200"  # Different port to avoid conflict with local dev
+    environment:
+      # Proxy to hermes backend
+      HERMES_API_URL: http://hermes:8000
+    depends_on:
+      hermes:
+        condition: service_healthy
+    networks:
+      - hermes-test
+    volumes:
+      # Mount source for hot reload (optional for development)
+      # - ../web:/app:ro
+
+networks:
+  hermes-test:
+    driver: bridge
+
+volumes:
+  postgres_test:
+  meilisearch_test:

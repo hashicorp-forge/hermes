@@ -1,0 +1,65 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Build artifacts
+build/
+hermes
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+coverage.out
+*.log
+
+# Documentation
+docs-internal/
+*.md
+!README.md
+
+# Testing
+testing/
+scripts/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+.npm/
+.yarn/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ember
+web/dist/
+web/tmp/
+web/.cache/
+
+# Config files (use mounted volumes instead)
+config.hcl
+credentials.json
+token.json
+
+# Docker
+docker-compose.yml
+Dockerfile*
+.dockerignore
+
+# Patches and temp files
+*.patch
+*.diff
+*.tmp
+*.bak
