@@ -9,11 +9,17 @@ import (
 	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
+	"github.com/hashicorp-forge/hermes/pkg/workspace"
 )
 
 //go:embed templates/*
 var tmplFS embed.FS
+
+// emailSender defines the interface for sending emails.
+// This is satisfied by workspace.Provider.
+type emailSender interface {
+	SendEmail(to []string, from, subject, body string) error
+}
 
 type User struct {
 	EmailAddress string
@@ -77,7 +83,7 @@ func SendDocumentApprovedEmail(
 	data DocumentApprovedEmailData,
 	to []string,
 	from string,
-	svc *gw.Service,
+	provider workspace.Provider,
 ) error {
 	// Validate data.
 	if err := validation.ValidateStruct(&data,
@@ -126,7 +132,7 @@ func SendDocumentApprovedEmail(
 	)
 
 	// Send email.
-	_, err = svc.SendEmail(
+	err = provider.SendEmail(
 		to,
 		from,
 		subject,
@@ -139,7 +145,7 @@ func SendNewOwnerEmail(
 	data NewOwnerEmailData,
 	to []string,
 	from string,
-	svc *gw.Service,
+	provider workspace.Provider,
 ) error {
 	// Validate data.
 	if err := validation.ValidateStruct(&data,
@@ -184,7 +190,7 @@ func SendNewOwnerEmail(
 	}
 
 	// Send email.
-	_, err = svc.SendEmail(
+	err = provider.SendEmail(
 		to,
 		from,
 		fmt.Sprintf("%s transferred to you", data.DocumentShortName),
@@ -197,7 +203,7 @@ func SendReviewRequestedEmail(
 	d ReviewRequestedEmailData,
 	to []string,
 	from string,
-	s *gw.Service,
+	provider workspace.Provider,
 ) error {
 	// Validate data.
 	if err := validation.ValidateStruct(&d,
@@ -228,7 +234,7 @@ func SendReviewRequestedEmail(
 		return fmt.Errorf("error executing template: %w", err)
 	}
 
-	_, err = s.SendEmail(
+	err = provider.SendEmail(
 		to,
 		from,
 		fmt.Sprintf("Document review requested for %s", d.DocumentShortName),
@@ -241,7 +247,7 @@ func SendSubscriberDocumentPublishedEmail(
 	d SubscriberDocumentPublishedEmailData,
 	to []string,
 	from string,
-	s *gw.Service,
+	provider emailSender,
 ) error {
 	// Validate data.
 	if err := validation.ValidateStruct(&d,
@@ -268,7 +274,7 @@ func SendSubscriberDocumentPublishedEmail(
 		return fmt.Errorf("error executing template: %w", err)
 	}
 
-	_, err = s.SendEmail(
+	err = provider.SendEmail(
 		to,
 		from,
 		fmt.Sprintf("New %s: [%s] %s",

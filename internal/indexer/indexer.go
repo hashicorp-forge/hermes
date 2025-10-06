@@ -570,7 +570,7 @@ func saveDocInAlgolia(
 
 	// Save document redirect details.
 	if doc.DocNumber != "" {
-		err = links.SaveDocumentRedirectDetails(
+		err = links.SaveDocumentRedirectDetailsLegacy(
 			algo, doc.ObjectID, doc.DocType, doc.DocNumber)
 		if err != nil {
 			return err

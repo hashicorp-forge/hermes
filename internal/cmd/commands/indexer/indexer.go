@@ -124,7 +124,18 @@ func (c *Command) Run(args []string) int {
 
 	// Initialize Algolia client.
 	var algo *algolia.Client
-	algo, err = algolia.New(cfg.Algolia)
+	algoliaClientCfg := &algolia.Config{
+		ApplicationID:          cfg.Algolia.AppID,
+		SearchAPIKey:           cfg.Algolia.SearchAPIKey,
+		WriteAPIKey:            cfg.Algolia.WriteAPIKey,
+		DocsIndexName:          cfg.Algolia.DocsIndexName,
+		DraftsIndexName:        cfg.Algolia.DraftsIndexName,
+		InternalIndexName:      cfg.Algolia.InternalIndexName,
+		LinksIndexName:         cfg.Algolia.LinksIndexName,
+		MissingFieldsIndexName: cfg.Algolia.MissingFieldsIndexName,
+		ProjectsIndexName:      cfg.Algolia.ProjectsIndexName,
+	}
+	algo, err = algolia.New(algoliaClientCfg)
 	if err != nil {
 		c.UI.Error(fmt.Sprintf("error initializing Algolia: %v", err))
 		return 1

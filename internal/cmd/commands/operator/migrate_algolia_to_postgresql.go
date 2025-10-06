@@ -108,7 +108,7 @@ func (c *MigrateAlgoliaToPostgreSQLCommand) Run(args []string) int {
 		return 1
 	}
 	if err := validation.ValidateStruct(cfg.Algolia,
-		validation.Field(&cfg.Algolia.ApplicationID, validation.Required),
+		validation.Field(&cfg.Algolia.AppID, validation.Required),
 		validation.Field(&cfg.Algolia.DocsIndexName, validation.Required),
 		validation.Field(&cfg.Algolia.DraftsIndexName, validation.Required),
 		validation.Field(&cfg.Algolia.WriteAPIKey, validation.Required),
@@ -119,7 +119,18 @@ func (c *MigrateAlgoliaToPostgreSQLCommand) Run(args []string) int {
 
 	// Initialize Algolia client.
 	// Note: Algolia requires a write API key to browse objects for...reasons.
-	algo, err := algolia.New(cfg.Algolia)
+	algoliaClientCfg := &algolia.Config{
+		ApplicationID:          cfg.Algolia.AppID,
+		SearchAPIKey:           cfg.Algolia.SearchAPIKey,
+		WriteAPIKey:            cfg.Algolia.WriteAPIKey,
+		DocsIndexName:          cfg.Algolia.DocsIndexName,
+		DraftsIndexName:        cfg.Algolia.DraftsIndexName,
+		InternalIndexName:      cfg.Algolia.InternalIndexName,
+		LinksIndexName:         cfg.Algolia.LinksIndexName,
+		MissingFieldsIndexName: cfg.Algolia.MissingFieldsIndexName,
+		ProjectsIndexName:      cfg.Algolia.ProjectsIndexName,
+	}
+	algo, err := algolia.New(algoliaClientCfg)
 	if err != nil {
 		ui.Error(fmt.Sprintf("error initializing Algolia search client: %v", err))
 		return 1
