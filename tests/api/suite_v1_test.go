@@ -6,6 +6,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"testing"
 
 	"github.com/hashicorp-forge/hermes/pkg/models"
@@ -55,8 +56,93 @@ func testV1Products(t *testing.T) {
 	suite := NewV1TestSuite(t)
 	defer suite.Cleanup()
 
-	// For now, skip these tests as they need handler implementation
-	t.Skip("Test implementation pending - will be migrated from existing tests")
+	t.Run("GET returns products from database", func(t *testing.T) {
+		// Create test products in database
+		products := []models.Product{
+			{Name: "Boundary", Abbreviation: "BND"},
+			{Name: "Consul", Abbreviation: "CNS"},
+			{Name: "Nomad", Abbreviation: "NMD"},
+			{Name: "Terraform", Abbreviation: "TF"},
+			{Name: "Vault", Abbreviation: "VLT"},
+		}
+
+		for _, p := range products {
+			err := p.FirstOrCreate(suite.DB)
+			if err != nil {
+				t.Fatalf("Failed to create product %s: %v", p.Name, err)
+			}
+		}
+
+		// Make request
+		resp := suite.Client.Get("/api/v1/products")
+		resp.AssertStatusOK()
+
+		// Parse response
+		result := resp.GetMap()
+
+		// Verify all products are present (may be more than our test products due to global test data)
+		if len(result) < len(products) {
+			t.Errorf("Expected at least %d products, got %d", len(products), len(result))
+		}
+
+		// Verify specific products - indexed by product name, not abbreviation
+		for _, p := range products {
+			prodData, ok := result[p.Name].(map[string]interface{})
+			if !ok {
+				t.Errorf("Product %s not found in response", p.Name)
+				continue
+			}
+
+			// Verify abbreviation
+			if abbr, ok := prodData["abbreviation"].(string); !ok || abbr != p.Abbreviation {
+				t.Errorf("Product %s: expected abbreviation %s, got %v", p.Name, p.Abbreviation, prodData["abbreviation"])
+			}
+
+			// Verify perDocTypeData exists and is a map
+			if perDocTypeData, ok := prodData["perDocTypeData"]; !ok {
+				t.Errorf("Product %s: perDocTypeData missing", p.Name)
+			} else if perDocTypeData == nil {
+				t.Errorf("Product %s: perDocTypeData is nil", p.Name)
+			} else if _, ok := perDocTypeData.(map[string]interface{}); !ok {
+				t.Errorf("Product %s: perDocTypeData is not a map, got %T", p.Name, perDocTypeData)
+			}
+		}
+	})
+
+	t.Run("GET returns empty map when no products", func(t *testing.T) {
+		// Use existing suite and delete all products
+		// Note: Global test fixtures may create some products by default
+		if err := suite.DB.Exec("DELETE FROM products").Error; err != nil {
+			t.Fatalf("Failed to clear products: %v", err)
+		}
+
+		// Make request
+		resp := suite.Client.Get("/api/v1/products")
+		resp.AssertStatusOK()
+
+		// Parse response
+		result := resp.GetMap()
+
+		// Verify empty map
+		if len(result) != 0 {
+			t.Errorf("Expected empty map after deleting all products, got %d items", len(result))
+		}
+	})
+
+	t.Run("POST method not allowed", func(t *testing.T) {
+		resp := suite.Client.Post("/api/v1/products", nil)
+		resp.AssertStatus(http.StatusMethodNotAllowed)
+	})
+
+	t.Run("PUT method not allowed", func(t *testing.T) {
+		resp := suite.Client.Put("/api/v1/products", nil)
+		resp.AssertStatus(http.StatusMethodNotAllowed)
+	})
+
+	t.Run("DELETE method not allowed", func(t *testing.T) {
+		resp := suite.Client.Delete("/api/v1/products")
+		resp.AssertStatus(http.StatusMethodNotAllowed)
+	})
 }
 
 // testV1Analytics tests the /api/v1/analytics endpoint.

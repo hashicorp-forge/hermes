@@ -22,7 +22,6 @@ import (
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/internal/server"
 	"github.com/hashicorp-forge/hermes/internal/test"
-	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	"github.com/hashicorp-forge/hermes/pkg/models"
 	"github.com/hashicorp-forge/hermes/pkg/search"
 	algoliaadapter "github.com/hashicorp-forge/hermes/pkg/search/adapters/algolia"
@@ -258,9 +257,8 @@ func (s *Suite) seedDatabase(db *gorm.DB) error {
 // setupServer creates the test HTTP server.
 func (s *Suite) setupServer() error {
 	//FIXME: v1 API handlers still use Algolia and GWService directly - need to migrate them
-	// Create empty Algolia clients for v1 handlers that haven't been migrated yet
-	algoSearch := &algolia.Client{}
-	// algoWrite := &algolia.Client{}  // TODO: Remove when all handlers migrated
+	// Note: Products handler has been migrated to use database instead of Algolia
+	// TODO: Migrate remaining v1 handlers (drafts, reviews) to use SearchProvider
 
 	// Create server with SearchProvider and WorkspaceProvider support (v2 API uses these)
 	srv := &server.Server{
@@ -283,7 +281,7 @@ func (s *Suite) setupServer() error {
 	// mux.Handle("/api/v1/drafts/",
 	// 	api.DraftsDocumentHandler(s.Config, srv.Logger, algoSearch, algoWrite, gwService, s.DB))
 	mux.Handle("/api/v1/products",
-		api.ProductsHandler(s.Config, algoSearch, srv.Logger))
+		api.ProductsHandler(s.Config, s.DB, srv.Logger))
 	// TODO: Refactor reviews handler to use search.Provider instead of algolia.Client
 	// mux.Handle("/api/v1/reviews/",
 	// 	api.ReviewHandler(s.Config, srv.Logger, algoSearch, algoWrite, gwService, s.DB))
