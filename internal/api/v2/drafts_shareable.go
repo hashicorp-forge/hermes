@@ -1,15 +1,16 @@
 package api
 
 import (
-pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
 	"encoding/json"
 	"net/http"
 
+	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
+	"github.com/hashicorp-forge/hermes/pkg/search"
+	"github.com/hashicorp-forge/hermes/pkg/workspace"
+
 	"github.com/hashicorp-forge/hermes/internal/config"
-	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	"github.com/hashicorp-forge/hermes/pkg/document"
 	"github.com/hashicorp-forge/hermes/pkg/models"
-	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
 	"github.com/hashicorp/go-hclog"
 	"gorm.io/gorm"
 )
@@ -29,8 +30,8 @@ func draftsShareableHandler(
 	doc document.Document,
 	cfg config.Config,
 	l hclog.Logger,
-	algoRead *algolia.Client,
-	goog *gw.Service,
+	searchProvider search.Provider,
+	workspaceProvider workspace.Provider,
 	db *gorm.DB,
 ) {
 	switch r.Method {
@@ -120,9 +121,9 @@ func draftsShareableHandler(
 		}
 
 		// Find out if the draft is already shared with the domain.
-		perms, err := goog.ListPermissions(docID)
+		perms, err := workspaceProvider.ListPermissions(docID)
 		if err != nil {
-			l.Error("error listing Google Drive permissions",
+			l.Error("error listing workspace permissions",
 				"error", err,
 				"path", r.URL.Path,
 				"method", r.Method,
@@ -152,12 +153,37 @@ func draftsShareableHandler(
 		if *req.IsShareable {
 			if len(alreadySharedPermIDs) == 0 {
 				// File is not already shared with domain, so share it.
-				goog.ShareFileWithDomain(docID, cfg.GoogleWorkspace.Domain, "commenter")
+				err := workspaceProvider.ShareFileWithDomain(docID, cfg.GoogleWorkspace.Domain, "commenter")
+				if err != nil {
+					l.Error("error sharing file with domain",
+						"error", err,
+						"path", r.URL.Path,
+						"method", r.Method,
+						"doc_id", docID,
+					)
+					http.Error(w,
+						"Error updating document permissions",
+						http.StatusInternalServerError)
+					return
+				}
 			}
 		} else {
 			for _, id := range alreadySharedPermIDs {
 				// File is already shared with domain, so remove the permission.
-				goog.DeletePermission(docID, id)
+				err := workspaceProvider.DeletePermission(docID, id)
+				if err != nil {
+					l.Error("error deleting permission",
+						"error", err,
+						"path", r.URL.Path,
+						"method", r.Method,
+						"doc_id", docID,
+						"permission_id", id,
+					)
+					http.Error(w,
+						"Error updating document permissions",
+						http.StatusInternalServerError)
+					return
+				}
 			}
 		}
 

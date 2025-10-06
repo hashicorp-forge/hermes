@@ -1,14 +1,14 @@
 package api
 
 import (
-pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
 	"encoding/json"
 	"net/http"
 
 	"github.com/hashicorp-forge/hermes/internal/config"
-	"github.com/hashicorp-forge/hermes/pkg/algolia"
+	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
 	"github.com/hashicorp-forge/hermes/pkg/document"
 	"github.com/hashicorp-forge/hermes/pkg/models"
+	"github.com/hashicorp-forge/hermes/pkg/search"
 	"github.com/hashicorp/go-hclog"
 	"gorm.io/gorm"
 )
@@ -55,7 +55,7 @@ func documentsResourceRelatedResourcesHandler(
 	doc document.Document,
 	cfg *config.Config,
 	l hclog.Logger,
-	algoRead *algolia.Client,
+	searchProvider search.Provider,
 	db *gorm.DB,
 ) {
 	switch r.Method {
@@ -117,11 +117,10 @@ func documentsResourceRelatedResourcesHandler(
 		}
 		// Add Hermes document related resources.
 		for _, hdrr := range hdrrs {
-			// Get document object from Algolia.
-			var algoObj map[string]any
-			err = algoRead.Docs.GetObject(hdrr.Document.GoogleFileID, &algoObj)
+			// Get document object from search provider.
+			searchDoc, err := searchProvider.DocumentIndex().GetObject(r.Context(), hdrr.Document.GoogleFileID)
 			if err != nil {
-				l.Error("error getting related resource document from Algolia",
+				l.Error("error getting related resource document from search provider",
 					"error", err,
 					"path", r.URL.Path,
 					"method", r.Method,
@@ -133,26 +132,13 @@ func documentsResourceRelatedResourcesHandler(
 				return
 			}
 
-			// Convert Algolia object to a document.
-			doc, err := document.NewFromAlgoliaObject(
-				algoObj, cfg.DocumentTypes.DocumentType)
-			if err != nil {
-				l.Error("error converting Algolia object to document type",
-					"error", err,
-					"doc_id", docID,
-				)
-				http.Error(w, "Error accessing draft document",
-					http.StatusInternalServerError)
-				return
-			}
-
 			resp.HermesDocuments = append(
 				resp.HermesDocuments,
 				hermesDocumentRelatedResourceGetResponse{
 					GoogleFileID:   hdrr.Document.GoogleFileID,
-					Title:          doc.Title,
-					DocumentType:   doc.DocType,
-					DocumentNumber: doc.DocNumber,
+					Title:          searchDoc.Title,
+					DocumentType:   searchDoc.DocType,
+					DocumentNumber: searchDoc.DocNumber,
 					SortOrder:      hdrr.RelatedResource.SortOrder,
 				})
 		}

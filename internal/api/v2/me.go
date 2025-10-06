@@ -67,7 +67,7 @@ func MeHandler(srv server.Server) http.Handler {
 				http.Error(w, userErrMsg, httpCode)
 			}
 
-			ppl, err := srv.GWService.SearchPeople(
+			ppl, err := srv.WorkspaceProvider.SearchPeople(
 				userEmail, "emailAddresses,names,photos")
 			if err != nil {
 				errResp(
@@ -98,7 +98,7 @@ func MeHandler(srv server.Server) http.Handler {
 					srv.Config.GoogleWorkspace.UserNotFoundEmail.Enabled &&
 					srv.Config.GoogleWorkspace.UserNotFoundEmail.Body != "" &&
 					srv.Config.GoogleWorkspace.UserNotFoundEmail.Subject != "" {
-					_, err = srv.GWService.SendEmail(
+					err = srv.WorkspaceProvider.SendEmail(
 						[]string{userEmail},
 						srv.Config.Email.FromAddress,
 						srv.Config.GoogleWorkspace.UserNotFoundEmail.Subject,

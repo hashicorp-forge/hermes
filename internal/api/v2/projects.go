@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,9 +13,9 @@ import (
 	"time"
 
 	"github.com/hashicorp-forge/hermes/internal/server"
-	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
 	"github.com/hashicorp-forge/hermes/pkg/models"
+	"github.com/hashicorp-forge/hermes/pkg/search"
 	"gorm.io/gorm"
 )
 
@@ -282,9 +283,9 @@ func ProjectsHandler(srv server.Server) http.Handler {
 
 			// Request post-processing.
 			go func() {
-				// Save project in Algolia.
-				if err := saveProjectInAlgolia(proj, srv.AlgoWrite); err != nil {
-					srv.Logger.Error("error saving project in Algolia",
+				// Save project in search index.
+				if err := saveProjectInAlgolia(proj, srv.SearchProvider); err != nil {
+					srv.Logger.Error("error saving project in search index",
 						append([]interface{}{
 							"error", err,
 						}, logArgs...)...,
@@ -534,9 +535,9 @@ func ProjectHandler(srv server.Server) http.Handler {
 
 				// Request post-processing.
 				go func() {
-					// Save project in Algolia.
-					if err := saveProjectInAlgolia(patch, srv.AlgoWrite); err != nil {
-						srv.Logger.Error("error saving project in Algolia",
+					// Save project in search index.
+					if err := saveProjectInAlgolia(patch, srv.SearchProvider); err != nil {
+						srv.Logger.Error("error saving project in search index",
 							append([]interface{}{
 								"error", err,
 							}, logArgs...)...,
@@ -602,9 +603,9 @@ func getProjectIDFromPath(path string, re *regexp.Regexp) (uint, error) {
 // saveProjectInAlgolia saves a project in Algolia.
 func saveProjectInAlgolia(
 	proj models.Project,
-	algoClient *algolia.Client,
+	provider search.Provider,
 ) error {
-	// Convert project to Algolia object.
+	// Convert project to search index object.
 	projObj := map[string]any{
 		"createdTime":  proj.ProjectCreatedAt.Unix(),
 		"creator":      proj.Creator.EmailAddress,
@@ -616,14 +617,11 @@ func saveProjectInAlgolia(
 		"title":        proj.Title,
 	}
 
-	// Save project in Algolia.
-	res, err := algoClient.Projects.SaveObject(projObj)
+	// Save project in search index.
+	ctx := context.Background()
+	err := provider.ProjectIndex().Index(ctx, projObj)
 	if err != nil {
 		return fmt.Errorf("error saving object: %w", err)
-	}
-	err = res.Wait()
-	if err != nil {
-		return fmt.Errorf("error waiting for save: %w", err)
 	}
 
 	return nil

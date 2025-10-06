@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,8 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/algolia/algoliasearch-client-go/v3/algolia/opt"
-	"github.com/algolia/algoliasearch-client-go/v3/algolia/search"
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/internal/email"
 	"github.com/hashicorp-forge/hermes/internal/server"
@@ -20,10 +17,9 @@ import (
 	"github.com/hashicorp-forge/hermes/pkg/document"
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp-forge/hermes/pkg/models"
-	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
-	"golang.org/x/oauth2/jwt"
+	"github.com/hashicorp-forge/hermes/pkg/search"
+	"github.com/hashicorp-forge/hermes/pkg/workspace"
 	"google.golang.org/api/drive/v3"
-	"google.golang.org/api/option"
 	"gorm.io/gorm"
 )
 
@@ -135,66 +131,21 @@ func DraftsHandler(srv server.Server) http.Handler {
 			// Copy template to new draft file.
 			if srv.Config.GoogleWorkspace.Auth != nil &&
 				srv.Config.GoogleWorkspace.Auth.CreateDocsAsUser {
-				// If configured to create documents as the logged-in Hermes user,
-				// create a new Google Drive service to do this.
-				ctx := context.Background()
-				conf := &jwt.Config{
-					Email:      srv.Config.GoogleWorkspace.Auth.ClientEmail,
-					PrivateKey: []byte(srv.Config.GoogleWorkspace.Auth.PrivateKey),
-					Scopes: []string{
-						"https://www.googleapis.com/auth/drive",
-					},
-					Subject:  userEmail,
-					TokenURL: srv.Config.GoogleWorkspace.Auth.TokenURL,
-				}
-				client := conf.Client(ctx)
-				copyTemplateSvc := *srv.GWService
-				copyTemplateSvc.Drive, err = drive.NewService(
-					ctx, option.WithHTTPClient(client))
+				// Create file as the logged-in user using the provider's impersonation method.
+				f, err = srv.WorkspaceProvider.CreateFileAsUser(
+					template,
+					srv.Config.GoogleWorkspace.DraftsFolder,
+					title,
+					userEmail,
+				)
 				if err != nil {
-					srv.Logger.Error("error creating impersonated Google Drive service",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-					)
-					http.Error(
-						w, "Error processing request", http.StatusInternalServerError)
-					return
-				}
-
-				// Copy template as user to new draft file in temporary drafts folder.
-				f, err = copyTemplateSvc.CopyFile(
-					template, title, srv.Config.GoogleWorkspace.TemporaryDraftsFolder)
-				if err != nil {
-					srv.Logger.Error(
-						"error copying template as user to temporary drafts folder",
+					srv.Logger.Error("error creating draft as user",
 						"error", err,
 						"method", r.Method,
 						"path", r.URL.Path,
 						"template", template,
 						"drafts_folder", srv.Config.GoogleWorkspace.DraftsFolder,
-						"temporary_drafts_folder", srv.Config.GoogleWorkspace.
-							TemporaryDraftsFolder,
 						"user", userEmail,
-					)
-					http.Error(w, "Error creating document draft",
-						http.StatusInternalServerError)
-					return
-				}
-
-				// Move draft file to drafts folder using service user.
-				_, err = srv.GWService.MoveFile(
-					f.Id, srv.Config.GoogleWorkspace.DraftsFolder)
-				if err != nil {
-					srv.Logger.Error(
-						"error moving draft file to drafts folder",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", f.Id,
-						"drafts_folder", srv.Config.GoogleWorkspace.DraftsFolder,
-						"temporary_drafts_folder", srv.Config.GoogleWorkspace.
-							TemporaryDraftsFolder,
 					)
 					http.Error(w, "Error creating document draft",
 						http.StatusInternalServerError)
@@ -202,8 +153,8 @@ func DraftsHandler(srv server.Server) http.Handler {
 				}
 			} else {
 				// Copy template to new draft file as service user.
-				f, err = srv.GWService.CopyFile(
-					template, title, srv.Config.GoogleWorkspace.DraftsFolder)
+				f, err = srv.WorkspaceProvider.CopyFile(
+					template, srv.Config.GoogleWorkspace.DraftsFolder, title)
 				if err != nil {
 					srv.Logger.Error("error creating draft",
 						"error", err,
@@ -235,7 +186,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 
 			// Get owner photo by searching Google Workspace directory.
 			op := []string{}
-			people, err := srv.GWService.SearchPeople(userEmail, "photos")
+			people, err := srv.WorkspaceProvider.SearchPeople(userEmail, "photos")
 			if err != nil {
 				srv.Logger.Error(
 					"error searching directory for person",
@@ -284,7 +235,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 
 			// Replace the doc header.
 			if err = doc.ReplaceHeader(
-				srv.Config.BaseURL, true, srv.GWService,
+				srv.Config.BaseURL, true, srv.WorkspaceProvider,
 			); err != nil {
 				srv.Logger.Error("error replacing draft doc header",
 					"error", err,
@@ -347,7 +298,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 			}
 
 			// Share file with the owner
-			if err := srv.GWService.ShareFile(f.Id, userEmail, "writer"); err != nil {
+			if err := srv.WorkspaceProvider.ShareFile(f.Id, userEmail, "writer"); err != nil {
 				srv.Logger.Error("error sharing file with the owner",
 					"error", err,
 					"method", r.Method,
@@ -363,7 +314,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 			// Google Drive API limitation is that you can only share files with one
 			// user at a time.
 			for _, c := range req.Contributors {
-				if err := srv.GWService.ShareFile(f.Id, c, "writer"); err != nil {
+				if err := srv.WorkspaceProvider.ShareFile(f.Id, c, "writer"); err != nil {
 					srv.Logger.Error("error sharing file with the contributor",
 						"error", err,
 						"method", r.Method,
@@ -409,22 +360,28 @@ func DraftsHandler(srv server.Server) http.Handler {
 
 			// Request post-processing.
 			go func() {
-				// Save document object in Algolia.
-				res, err := srv.AlgoWrite.Drafts.SaveObject(doc)
-				if err != nil {
-					srv.Logger.Error("error saving draft doc in Algolia",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", f.Id,
-					)
-					http.Error(w, "Error creating document draft",
-						http.StatusInternalServerError)
-					return
+				// Convert document.Document to search.Document for indexing
+				searchDoc := &search.Document{
+					ObjectID:     doc.ObjectID,
+					DocID:        doc.ObjectID,
+					Title:        doc.Title,
+					DocNumber:    doc.DocNumber,
+					DocType:      doc.DocType,
+					Product:      doc.Product,
+					Status:       doc.Status,
+					Owners:       doc.Owners,
+					Contributors: doc.Contributors,
+					Approvers:    doc.Approvers,
+					Summary:      doc.Summary,
+					Content:      doc.Content,
+					CreatedTime:  doc.CreatedTime,
+					ModifiedTime: doc.ModifiedTime,
 				}
-				err = res.Wait()
+
+				// Save document object in search index.
+				err := srv.SearchProvider.DraftIndex().Index(r.Context(), searchDoc)
 				if err != nil {
-					srv.Logger.Error("error saving draft doc in Algolia",
+					srv.Logger.Error("error saving draft doc in search index",
 						"error", err,
 						"method", r.Method,
 						"path", r.URL.Path,
@@ -435,12 +392,11 @@ func DraftsHandler(srv server.Server) http.Handler {
 					return
 				}
 
-				// Compare Algolia and database documents to find data inconsistencies.
-				// Get document object from Algolia.
-				var algoDoc map[string]any
-				err = srv.AlgoSearch.Drafts.GetObject(f.Id, &algoDoc)
+				// Compare search index and database documents to find data inconsistencies.
+				// Get document object from search index.
+				indexedDoc, err := srv.SearchProvider.DraftIndex().GetObject(r.Context(), f.Id)
 				if err != nil {
-					srv.Logger.Error("error getting Algolia object for data comparison",
+					srv.Logger.Error("error getting search object for data comparison",
 						"error", err,
 						"method", r.Method,
 						"path", r.URL.Path,
@@ -448,6 +404,12 @@ func DraftsHandler(srv server.Server) http.Handler {
 					)
 					return
 				}
+
+				// Convert search.Document to map for comparison
+				algoDocBytes, _ := json.Marshal(indexedDoc)
+				var algoDoc map[string]any
+				json.Unmarshal(algoDocBytes, &algoDoc)
+
 				// Get document from database.
 				dbDoc := models.Document{
 					GoogleFileID: f.Id,
@@ -560,7 +522,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 					http.StatusInternalServerError)
 				return
 			}
-			maxValuesPerFacet, err := strconv.Atoi(maxValuesPerFacetStr)
+			_, err = strconv.Atoi(maxValuesPerFacetStr)
 			if err != nil {
 				srv.Logger.Error("error converting to int",
 					"error", err,
@@ -585,30 +547,50 @@ func DraftsHandler(srv server.Server) http.Handler {
 				return
 			}
 
-			// Build params
-			params := []interface{}{
-				opt.Facets(facets...),
-				// FacetFilters are supplied as follows:
-				// ['attribute1:value', 'attribute2:value'], 'owners:owner_email_value'
-				opt.FacetFilterAnd(
-					facetFilters,
-					opt.FacetFilterOr("owners:"+userEmail, "contributors:"+userEmail),
-				),
-				opt.HitsPerPage(hitsPerPage),
-				opt.MaxValuesPerFacet(maxValuesPerFacet),
-				opt.Page(page),
+			// Build search query for the new provider API
+			sortBy := q.Get("sortBy")
+			sortOrder := "desc"
+			if sortBy == "dateAsc" {
+				sortOrder = "asc"
 			}
 
-			// Retrieve all documents
-			var resp search.QueryRes
-			sortBy := q.Get("sortBy")
-			if sortBy == "dateAsc" {
-				resp, err = srv.AlgoSearch.DraftsCreatedTimeAsc.Search("", params...)
-			} else {
-				resp, err = srv.AlgoSearch.DraftsCreatedTimeDesc.Search("", params...)
+			// Convert facetFilters to the new filters format
+			filters := make(map[string][]string)
+			for _, filter := range facetFilters {
+				if filter == "" {
+					continue
+				}
+				parts := strings.Split(filter, ":")
+				if len(parts) == 2 {
+					filters[parts[0]] = append(filters[parts[0]], parts[1])
+				}
 			}
+
+			// Add owner/contributor filter
+			if filters["owners"] == nil {
+				filters["owners"] = []string{}
+			}
+			filters["owners"] = append(filters["owners"], userEmail)
+
+			if filters["contributors"] == nil {
+				filters["contributors"] = []string{}
+			}
+			filters["contributors"] = append(filters["contributors"], userEmail)
+
+			searchQuery := &search.SearchQuery{
+				Query:     "",
+				Page:      page,
+				PerPage:   hitsPerPage,
+				Filters:   filters,
+				Facets:    facets,
+				SortBy:    "createdTime",
+				SortOrder: sortOrder,
+			}
+
+			// Retrieve all documents from search provider
+			resp, err := srv.SearchProvider.DraftIndex().Search(r.Context(), searchQuery)
 			if err != nil {
-				srv.Logger.Error("error retrieving document drafts from Algolia",
+				srv.Logger.Error("error retrieving document drafts from search provider",
 					"error", err,
 					"method", r.Method,
 					"path", r.URL.Path,
@@ -616,9 +598,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 				http.Error(w, "Error retrieving document drafts",
 					http.StatusInternalServerError)
 				return
-			}
-
-			// Write response.
+			} // Write response.
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
 
@@ -765,11 +745,11 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 		switch reqType {
 		case relatedResourcesDocumentSubcollectionRequestType:
 			documentsResourceRelatedResourcesHandler(
-				w, r, docID, *doc, srv.Config, srv.Logger, srv.AlgoSearch, srv.DB)
+				w, r, docID, *doc, srv.Config, srv.Logger, srv.SearchProvider, srv.DB)
 			return
 		case shareableDocumentSubcollectionRequestType:
 			draftsShareableHandler(w, r, docID, *doc, *srv.Config, srv.Logger,
-				srv.AlgoSearch, srv.GWService, srv.DB)
+				srv.SearchProvider, srv.WorkspaceProvider, srv.DB)
 			return
 		}
 
@@ -778,7 +758,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 			now := time.Now()
 
 			// Get file from Google Drive so we can return the latest modified time.
-			file, err := srv.GWService.GetFile(docID)
+			file, err := srv.WorkspaceProvider.GetFile(docID)
 			if err != nil {
 				srv.Logger.Error("error getting document file from Google",
 					"error", err,
@@ -864,14 +844,13 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 					}
 				}
 
-				// Compare Algolia and database documents to find data inconsistencies.
-				// Get document object from Algolia.
-				var algoDoc map[string]any
-				err = srv.AlgoSearch.Drafts.GetObject(docID, &algoDoc)
+				// Compare search index and database documents to find data inconsistencies.
+				// Get document object from search index.
+				indexedDoc, err := srv.SearchProvider.DraftIndex().GetObject(r.Context(), docID)
 				if err != nil {
-					// Only warn because we might be in the process of saving the Algolia
+					// Only warn because we might be in the process of saving the search index
 					// object for a new draft.
-					srv.Logger.Warn("error getting Algolia object for data comparison",
+					srv.Logger.Warn("error getting search object for data comparison",
 						"error", err,
 						"method", r.Method,
 						"path", r.URL.Path,
@@ -879,6 +858,11 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 					)
 					return
 				}
+
+				// Convert search.Document to map for comparison
+				algoDocBytes, _ := json.Marshal(indexedDoc)
+				var algoDoc map[string]any
+				json.Unmarshal(algoDocBytes, &algoDoc)
 				// Get document from database.
 				dbDoc := models.Document{
 					GoogleFileID: docID,
@@ -932,7 +916,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 			}
 
 			// Delete document in Google Drive.
-			err = srv.GWService.DeleteFile(docID)
+			err = srv.WorkspaceProvider.DeleteFile(docID)
 			if err != nil {
 				srv.Logger.Error(
 					"error deleting document",
@@ -946,11 +930,11 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				return
 			}
 
-			// Delete object in Algolia.
-			res, err := srv.AlgoWrite.Drafts.DeleteObject(docID)
+			// Delete object from search index.
+			err := srv.SearchProvider.DraftIndex().Delete(r.Context(), docID)
 			if err != nil {
 				srv.Logger.Error(
-					"error deleting document draft from Algolia",
+					"error deleting document draft from search index",
 					"error", err,
 					"method", r.Method,
 					"path", r.URL.Path,
@@ -960,10 +944,11 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 					http.StatusInternalServerError)
 				return
 			}
-			err = res.Wait()
-			if err != nil {
+
+			// Note: Delete is synchronous with the new provider API
+			if false { // Remove the old Wait() logic
 				srv.Logger.Error(
-					"error deleting document draft from Algolia",
+					"error deleting document draft from search index",
 					"error", err,
 					"method", r.Method,
 					"path", r.URL.Path,
@@ -1111,7 +1096,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 			}
 
 			// Check if document is locked.
-			locked, err := hcd.IsLocked(docID, srv.DB, srv.GWService, srv.Logger)
+			locked, err := hcd.IsLocked(docID, srv.DB, srv.WorkspaceProvider, srv.Logger)
 			if err != nil {
 				srv.Logger.Error("error checking document locked status",
 					"error", err,
@@ -1160,7 +1145,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 			// Google Drive API limitation is that you can only share files with one
 			// user at a time.
 			for _, c := range contributorsToAddSharing {
-				if err := srv.GWService.ShareFile(docID, c, "writer"); err != nil {
+				if err := srv.WorkspaceProvider.ShareFile(docID, c, "writer"); err != nil {
 					srv.Logger.Error("error sharing file with the contributor",
 						"error", err,
 						"method", r.Method,
@@ -1187,7 +1172,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				// associated with the permission doesn't
 				// match owner email(s).
 				if !contains(doc.Owners, c) {
-					if err := removeSharing(srv.GWService, docID, c); err != nil {
+					if err := removeSharing(srv.WorkspaceProvider, docID, c); err != nil {
 						srv.Logger.Error("error removing contributor from file",
 							"error", err,
 							"method", r.Method,
@@ -1399,7 +1384,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				}
 
 				// Share file with new owner.
-				if err := srv.GWService.ShareFile(
+				if err := srv.WorkspaceProvider.ShareFile(
 					docID, doc.Owners[0], "writer"); err != nil {
 					srv.Logger.Error("error sharing file with new owner",
 						"error", err,
@@ -1459,7 +1444,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				newOwner := email.User{
 					EmailAddress: doc.Owners[0],
 				}
-				ppl, err := srv.GWService.SearchPeople(
+				ppl, err := srv.WorkspaceProvider.SearchPeople(
 					doc.Owners[0], "emailAddresses,names")
 				if err != nil {
 					srv.Logger.Warn("error searching directory for new owner",
@@ -1478,7 +1463,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				oldOwner := email.User{
 					EmailAddress: userEmail,
 				}
-				ppl, err = srv.GWService.SearchPeople(
+				ppl, err = srv.WorkspaceProvider.SearchPeople(
 					userEmail, "emailAddresses,names")
 				if err != nil {
 					srv.Logger.Warn("error searching directory for old owner",
@@ -1507,7 +1492,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 					},
 					[]string{doc.Owners[0]},
 					srv.Config.Email.FromAddress,
-					srv.GWService,
+					srv.WorkspaceProvider,
 				); err != nil {
 					srv.Logger.Error("error sending new owner email",
 						"error", err,
@@ -1536,7 +1521,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 
 			// Replace the doc header.
 			if err := doc.ReplaceHeader(
-				srv.Config.BaseURL, true, srv.GWService,
+				srv.Config.BaseURL, true, srv.WorkspaceProvider,
 			); err != nil {
 				srv.Logger.Error("error replacing draft doc header",
 					"error", err,
@@ -1550,7 +1535,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 			}
 
 			// Rename file with new title.
-			srv.GWService.RenameFile(docID,
+			srv.WorkspaceProvider.RenameFile(docID,
 				fmt.Sprintf("[%s] %s", doc.DocNumber, doc.Title))
 
 			w.WriteHeader(http.StatusOK)
@@ -1563,10 +1548,28 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 
 			// Request post-processing.
 			go func() {
-				// Convert document to Algolia object.
-				docObj, err := doc.ToAlgoliaObject(true)
+				// Convert document.Document to search.Document for indexing
+				searchDoc := &search.Document{
+					ObjectID:     doc.ObjectID,
+					DocID:        doc.ObjectID,
+					Title:        doc.Title,
+					DocNumber:    doc.DocNumber,
+					DocType:      doc.DocType,
+					Product:      doc.Product,
+					Status:       doc.Status,
+					Owners:       doc.Owners,
+					Contributors: doc.Contributors,
+					Approvers:    doc.Approvers,
+					Summary:      doc.Summary,
+					Content:      doc.Content,
+					CreatedTime:  doc.CreatedTime,
+					ModifiedTime: doc.ModifiedTime,
+				}
+
+				// Save modified draft doc object in search index.
+				err := srv.SearchProvider.DraftIndex().Index(r.Context(), searchDoc)
 				if err != nil {
-					srv.Logger.Error("error converting document to Algolia object",
+					srv.Logger.Error("error saving patched draft doc in search index",
 						"error", err,
 						"method", r.Method,
 						"path", r.URL.Path,
@@ -1575,20 +1578,9 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 					return
 				}
 
-				// Save new modified draft doc object in Algolia.
-				res, err := srv.AlgoWrite.Drafts.SaveObject(docObj)
-				if err != nil {
-					srv.Logger.Error("error saving patched draft doc in Algolia",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", docID,
-					)
-					return
-				}
-				err = res.Wait()
-				if err != nil {
-					srv.Logger.Error("error saving patched draft doc in Algolia",
+				// Note: Index is synchronous with the new provider API
+				if false { // Remove the old Wait() logic
+					srv.Logger.Error("error saving patched draft doc in search index",
 						"error", err,
 						"method", r.Method,
 						"path", r.URL.Path,
@@ -1597,19 +1589,24 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 					return
 				}
 
-				// Compare Algolia and database documents to find data inconsistencies.
-				// Get document object from Algolia.
+				// Compare search index and database documents to find data inconsistencies.
+				// Get document object from search index.
+				indexedDoc, err := srv.SearchProvider.DraftIndex().GetObject(r.Context(), docID)
+				if err != nil {
+					srv.Logger.Error("error getting search object for data comparison",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID,
+					)
+					return
+				}
+
+				// Convert search.Document to map for comparison
+				algoDocBytes, _ := json.Marshal(indexedDoc)
 				var algoDoc map[string]any
-				err = srv.AlgoSearch.Drafts.GetObject(docID, &algoDoc)
-				if err != nil {
-					srv.Logger.Error("error getting Algolia object for data comparison",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", docID,
-					)
-					return
-				}
+				json.Unmarshal(algoDocBytes, &algoDoc)
+
 				// Get document from database.
 				dbDoc := models.Document{
 					GoogleFileID: docID,
@@ -1695,14 +1692,14 @@ func validateDocType(
 
 // removeSharing lists permissions for a document and then
 // deletes the permission for the supplied user email
-func removeSharing(s *gw.Service, docID, email string) error {
-	permissions, err := s.ListPermissions(docID)
+func removeSharing(provider workspace.Provider, docID, email string) error {
+	permissions, err := provider.ListPermissions(docID)
 	if err != nil {
 		return err
 	}
 	for _, p := range permissions {
 		if p.EmailAddress == email {
-			return s.DeletePermission(docID, p.Id)
+			return provider.DeletePermission(docID, p.Id)
 		}
 	}
 	return nil

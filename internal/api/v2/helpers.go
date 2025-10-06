@@ -11,12 +11,45 @@ import (
 
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/pkg/models"
-	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
+	"github.com/hashicorp-forge/hermes/pkg/search"
+	"github.com/hashicorp-forge/hermes/pkg/workspace"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-multierror"
 	"github.com/iancoleman/strcase"
 	"github.com/stretchr/testify/assert"
 )
+
+// mapToSearchDocument converts a map[string]any to a search.Document via JSON round-trip.
+// This is used to convert Algolia-style document objects to the search provider interface.
+func mapToSearchDocument(m map[string]any) (*search.Document, error) {
+	data, err := json.Marshal(m)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal map: %w", err)
+	}
+
+	var doc search.Document
+	if err := json.Unmarshal(data, &doc); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal to search.Document: %w", err)
+	}
+
+	return &doc, nil
+}
+
+// searchDocumentToMap converts a search.Document to a map[string]any via JSON round-trip.
+// This is used to convert search provider documents back to map format for compatibility.
+func searchDocumentToMap(doc *search.Document) (map[string]any, error) {
+	data, err := json.Marshal(doc)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal search.Document: %w", err)
+	}
+
+	var m map[string]any
+	if err := json.Unmarshal(data, &m); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal to map: %w", err)
+	}
+
+	return m, nil
+}
 
 // contains returns true if a string is present in a slice of strings.
 func contains(values []string, s string) bool {
@@ -534,16 +567,14 @@ func CompareAlgoliaAndDatabaseDocument(
 // isUserInGroups returns true if a user is in any supplied groups, false
 // otherwise.
 func isUserInGroups(
-	userEmail string, groupEmails []string, svc *gw.Service) (bool, error) {
+	userEmail string, groupEmails []string, provider workspace.Provider) (bool, error) {
 	// Get groups for user.
-	userGroups, err := svc.AdminDirectory.Groups.List().
-		UserKey(userEmail).
-		Do()
+	userGroups, err := provider.ListUserGroups(userEmail)
 	if err != nil {
 		return false, fmt.Errorf("error getting groups for user: %w", err)
 	}
 
-	for _, g := range userGroups.Groups {
+	for _, g := range userGroups {
 		if contains(groupEmails, g.Email) {
 			return true, nil
 		}
@@ -626,6 +657,10 @@ func getStringSliceValue(in map[string]any, key string) ([]string, error) {
 	result := []string{}
 
 	if v, ok := in[key]; ok {
+		// Handle nil value
+		if v == nil {
+			return result, nil
+		}
 		if reflect.TypeOf(v).Kind() == reflect.Slice {
 			for _, vv := range v.([]any) {
 				if vv, ok := vv.(string); ok {

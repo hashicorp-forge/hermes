@@ -1,9 +1,10 @@
 package api
 
 import (
-pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
 	"fmt"
 	"net/http"
+
+	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
 
 	"github.com/hashicorp-forge/hermes/internal/email"
 	"github.com/hashicorp-forge/hermes/internal/helpers"
@@ -114,7 +115,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 			}
 
 			// Check if document is locked.
-			locked, err := hcd.IsLocked(docID, srv.DB, srv.GWService, srv.Logger)
+			locked, err := hcd.IsLocked(docID, srv.DB, srv.WorkspaceProvider, srv.Logger)
 			if err != nil {
 				srv.Logger.Error("error checking document locked status",
 					"error", err,
@@ -145,7 +146,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 			doc.ApprovedBy = newApprovedBy
 
 			// Get latest Google Drive file revision.
-			latestRev, err := srv.GWService.GetLatestRevision(docID)
+			latestRev, err := srv.WorkspaceProvider.GetLatestRevision(docID)
 			if err != nil {
 				srv.Logger.Error("error getting latest revision",
 					"error", err,
@@ -158,7 +159,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 			}
 
 			// Mark latest revision to be kept forever.
-			_, err = srv.GWService.KeepRevisionForever(docID, latestRev.Id)
+			_, err = srv.WorkspaceProvider.KeepRevisionForever(docID, latestRev.Id)
 			if err != nil {
 				srv.Logger.Error("error marking revision to keep forever",
 					"error", err,
@@ -210,7 +211,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 
 			// Replace the doc header.
 			if err := doc.ReplaceHeader(
-				srv.Config.BaseURL, false, srv.GWService,
+				srv.Config.BaseURL, false, srv.WorkspaceProvider,
 			); err != nil {
 				srv.Logger.Error("error replacing doc header",
 					"error", err,
@@ -235,10 +236,10 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 
 			// Request post-processing.
 			go func() {
-				// Convert document to Algolia object.
-				docObj, err := doc.ToAlgoliaObject(true)
+				// Convert document to search index object.
+				docObjMap, err := doc.ToAlgoliaObject(true)
 				if err != nil {
-					srv.Logger.Error("error converting document to Algolia object",
+					srv.Logger.Error("error converting document to search object",
 						"error", err,
 						"method", r.Method,
 						"path", r.URL.Path,
@@ -249,83 +250,75 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 					return
 				}
 
-				// Save new modified doc object in Algolia.
-				res, err := srv.AlgoWrite.Docs.SaveObject(docObj)
-				if err != nil {
-					srv.Logger.Error("error saving approved document in Algolia",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", docID)
-					http.Error(w, "Error updating document status",
-						http.StatusInternalServerError)
-					return
-				}
-				err = res.Wait()
-				if err != nil {
-					srv.Logger.Error("error saving patched document in Algolia",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", docID)
-					http.Error(w, "Error updating document status",
-						http.StatusInternalServerError)
-					return
-				}
+				// Save new modified doc object in search index.
+				if srv.SearchProvider != nil {
+					// Convert map to search.Document via JSON round-trip
+					docObj, err := mapToSearchDocument(docObjMap)
+					if err != nil {
+						srv.Logger.Error("error converting document to search document",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"doc_id", docID,
+						)
+						return
+					}
 
-				// Compare Algolia and database documents to find data inconsistencies.
-				// Get document object from Algolia.
-				var algoDoc map[string]any
-				err = srv.AlgoSearch.Docs.GetObject(docID, &algoDoc)
-				if err != nil {
-					srv.Logger.Error("error getting Algolia object for data comparison",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", docID,
-					)
-					return
-				}
-				// Get document from database.
-				dbDoc := models.Document{
-					GoogleFileID: docID,
-				}
-				if err := dbDoc.Get(srv.DB); err != nil {
-					srv.Logger.Error(
-						"error getting document from database for data comparison",
-						"error", err,
-						"path", r.URL.Path,
-						"method", r.Method,
-						"doc_id", docID,
-					)
-					return
-				}
-				// Get all reviews for the document.
-				var reviews models.DocumentReviews
-				if err := reviews.Find(srv.DB, models.DocumentReview{
-					Document: models.Document{
+					ctx := r.Context()
+					err = srv.SearchProvider.DocumentIndex().Index(ctx, docObj)
+					if err != nil {
+						srv.Logger.Error("error saving approved document in search index",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"doc_id", docID)
+						http.Error(w, "Error updating document status",
+							http.StatusInternalServerError)
+						return
+					}
+
+					// Compare search index and database documents to find data inconsistencies.
+					// Get document from database.
+					dbDoc := models.Document{
 						GoogleFileID: docID,
-					},
-				}); err != nil {
-					srv.Logger.Error(
-						"error getting all reviews for document for data comparison",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", docID,
-					)
-					return
-				}
-				if err := CompareAlgoliaAndDatabaseDocument(
-					algoDoc, dbDoc, reviews, srv.Config.DocumentTypes.DocumentType,
-				); err != nil {
-					srv.Logger.Warn(
-						"inconsistencies detected between Algolia and database docs",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", docID,
-					)
+					}
+					if err := dbDoc.Get(srv.DB); err != nil {
+						srv.Logger.Error(
+							"error getting document from database for data comparison",
+							"error", err,
+							"path", r.URL.Path,
+							"method", r.Method,
+							"doc_id", docID,
+						)
+						return
+					}
+					// Get all reviews for the document.
+					var reviews models.DocumentReviews
+					if err := reviews.Find(srv.DB, models.DocumentReview{
+						Document: models.Document{
+							GoogleFileID: docID,
+						},
+					}); err != nil {
+						srv.Logger.Error(
+							"error getting all reviews for document for data comparison",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"doc_id", docID,
+						)
+						return
+					}
+					if err := CompareAlgoliaAndDatabaseDocument(
+						docObjMap, dbDoc, reviews, srv.Config.DocumentTypes.DocumentType,
+					); err != nil {
+						srv.Logger.Warn(
+							"inconsistencies detected between search index and database docs",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"doc_id", docID,
+						)
+					}
 				}
 			}()
 
@@ -344,7 +337,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 
 			// User is not an approver or in an approver group.
 			inApproverGroup, err := isUserInGroups(
-				userEmail, doc.ApproverGroups, srv.GWService)
+				userEmail, doc.ApproverGroups, srv.WorkspaceProvider)
 			if err != nil {
 				srv.Logger.Error("error calculating if user is in an approver group",
 					"error", err,
@@ -380,7 +373,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 				return
 			}
 			inApproverGroup, err := isUserInGroups(
-				userEmail, doc.ApproverGroups, srv.GWService)
+				userEmail, doc.ApproverGroups, srv.WorkspaceProvider)
 			if err != nil {
 				srv.Logger.Error("error calculating if user is in an approver group",
 					"error", err,
@@ -400,7 +393,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 			}
 
 			// Check if document is locked.
-			locked, err := hcd.IsLocked(docID, srv.DB, srv.GWService, srv.Logger)
+			locked, err := hcd.IsLocked(docID, srv.DB, srv.WorkspaceProvider, srv.Logger)
 			if err != nil {
 				srv.Logger.Error("error checking document locked status",
 					"error", err,
@@ -453,7 +446,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 			doc.ChangesRequestedBy = newChangesRequestedBy
 
 			// Get latest Google Drive file revision.
-			latestRev, err := srv.GWService.GetLatestRevision(docID)
+			latestRev, err := srv.WorkspaceProvider.GetLatestRevision(docID)
 			if err != nil {
 				srv.Logger.Error("error getting latest revision",
 					"error", err,
@@ -466,7 +459,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 			}
 
 			// Mark latest revision to be kept forever.
-			_, err = srv.GWService.KeepRevisionForever(docID, latestRev.Id)
+			_, err = srv.WorkspaceProvider.KeepRevisionForever(docID, latestRev.Id)
 			if err != nil {
 				srv.Logger.Error("error marking revision to keep forever",
 					"error", err,
@@ -517,7 +510,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 			}
 
 			// Replace the doc header.
-			err = doc.ReplaceHeader(srv.Config.BaseURL, false, srv.GWService)
+			err = doc.ReplaceHeader(srv.Config.BaseURL, false, srv.WorkspaceProvider)
 			if err != nil {
 				srv.Logger.Error("error replacing doc header",
 					"error", err,
@@ -549,7 +542,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 					approver := email.User{
 						EmailAddress: userEmail,
 					}
-					ppl, err := srv.GWService.SearchPeople(
+					ppl, err := srv.WorkspaceProvider.SearchPeople(
 						userEmail, "emailAddresses,names")
 					if err != nil {
 						srv.Logger.Warn("error searching directory for approver",
@@ -593,7 +586,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 						},
 						[]string{doc.Owners[0]},
 						srv.Config.Email.FromAddress,
-						srv.GWService,
+						srv.WorkspaceProvider,
 					); err != nil {
 						srv.Logger.Error("error sending document approved email",
 							"error", err,
@@ -604,10 +597,10 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 					}
 				}
 
-				// Convert document to Algolia object.
-				docObj, err := doc.ToAlgoliaObject(true)
+				// Convert document to search index object.
+				docObjMap, err := doc.ToAlgoliaObject(true)
 				if err != nil {
-					srv.Logger.Error("error converting document to Algolia object",
+					srv.Logger.Error("error converting document to search object",
 						"error", err,
 						"method", r.Method,
 						"path", r.URL.Path,
@@ -618,83 +611,75 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 					return
 				}
 
-				// Save new modified doc object in Algolia.
-				res, err := srv.AlgoWrite.Docs.SaveObject(docObj)
-				if err != nil {
-					srv.Logger.Error("error saving approved document in Algolia",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", docID)
-					http.Error(w, "Error updating document status",
-						http.StatusInternalServerError)
-					return
-				}
-				err = res.Wait()
-				if err != nil {
-					srv.Logger.Error("error saving approved document in Algolia",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", docID)
-					http.Error(w, "Error updating document status",
-						http.StatusInternalServerError)
-					return
-				}
+				// Save new modified doc object in search index.
+				if srv.SearchProvider != nil {
+					// Convert map to search.Document via JSON round-trip
+					docObj, err := mapToSearchDocument(docObjMap)
+					if err != nil {
+						srv.Logger.Error("error converting document to search document",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"doc_id", docID,
+						)
+						return
+					}
 
-				// Compare Algolia and database documents to find data inconsistencies.
-				// Get document object from Algolia.
-				var algoDoc map[string]any
-				err = srv.AlgoSearch.Docs.GetObject(docID, &algoDoc)
-				if err != nil {
-					srv.Logger.Error("error getting Algolia object for data comparison",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", docID,
-					)
-					return
-				}
-				// Get document from database.
-				dbDoc := models.Document{
-					GoogleFileID: docID,
-				}
-				if err := dbDoc.Get(srv.DB); err != nil {
-					srv.Logger.Error(
-						"error getting document from database for data comparison",
-						"error", err,
-						"path", r.URL.Path,
-						"method", r.Method,
-						"doc_id", docID,
-					)
-					return
-				}
-				// Get all reviews for the document.
-				var reviews models.DocumentReviews
-				if err := reviews.Find(srv.DB, models.DocumentReview{
-					Document: models.Document{
+					ctx := r.Context()
+					err = srv.SearchProvider.DocumentIndex().Index(ctx, docObj)
+					if err != nil {
+						srv.Logger.Error("error saving approved document in search index",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"doc_id", docID)
+						http.Error(w, "Error updating document status",
+							http.StatusInternalServerError)
+						return
+					}
+
+					// Compare search index and database documents to find data inconsistencies.
+					// Get document from database.
+					dbDoc := models.Document{
 						GoogleFileID: docID,
-					},
-				}); err != nil {
-					srv.Logger.Error(
-						"error getting all reviews for document for data comparison",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", docID,
-					)
-					return
-				}
-				if err := CompareAlgoliaAndDatabaseDocument(
-					algoDoc, dbDoc, reviews, srv.Config.DocumentTypes.DocumentType,
-				); err != nil {
-					srv.Logger.Warn(
-						"inconsistencies detected between Algolia and database docs",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", docID,
-					)
+					}
+					if err := dbDoc.Get(srv.DB); err != nil {
+						srv.Logger.Error(
+							"error getting document from database for data comparison",
+							"error", err,
+							"path", r.URL.Path,
+							"method", r.Method,
+							"doc_id", docID,
+						)
+						return
+					}
+					// Get all reviews for the document.
+					var reviews models.DocumentReviews
+					if err := reviews.Find(srv.DB, models.DocumentReview{
+						Document: models.Document{
+							GoogleFileID: docID,
+						},
+					}); err != nil {
+						srv.Logger.Error(
+							"error getting all reviews for document for data comparison",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"doc_id", docID,
+						)
+						return
+					}
+					if err := CompareAlgoliaAndDatabaseDocument(
+						docObjMap, dbDoc, reviews, srv.Config.DocumentTypes.DocumentType,
+					); err != nil {
+						srv.Logger.Warn(
+							"inconsistencies detected between search index and database docs",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"doc_id", docID,
+						)
+					}
 				}
 			}()
 
