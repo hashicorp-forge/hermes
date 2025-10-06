@@ -2,8 +2,9 @@ package api
 
 import (
 	"fmt"
-	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
 	"net/http"
+
+	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
 
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/errs"
 	"github.com/hashicorp-forge/hermes/internal/config"
@@ -41,7 +42,8 @@ func ApprovalHandler(
 			}
 
 			// Check if document is locked.
-			locked, err := hcd.IsLocked(docID, db, s, l)
+			provider := gw.NewAdapter(s)
+			locked, err := hcd.IsLocked(docID, db, provider, l)
 			if err != nil {
 				l.Error("error checking document locked status",
 					"error", err,
@@ -198,7 +200,8 @@ func ApprovalHandler(
 			}
 
 			// Replace the doc header.
-			if err := doc.ReplaceHeader(cfg.BaseURL, false, s); err != nil {
+			provider = gw.NewAdapter(s)
+			if err := doc.ReplaceHeader(cfg.BaseURL, false, provider); err != nil {
 				l.Error("error replacing doc header",
 					"error", err,
 					"doc_id", docID,
@@ -298,7 +301,8 @@ func ApprovalHandler(
 			}
 
 			// Check if document is locked.
-			locked, err := hcd.IsLocked(docID, db, s, l)
+			provider := gw.NewAdapter(s)
+			locked, err := hcd.IsLocked(docID, db, provider, l)
 			if err != nil {
 				l.Error("error checking document locked status",
 					"error", err,
@@ -457,7 +461,8 @@ func ApprovalHandler(
 			}
 
 			// Replace the doc header.
-			err = doc.ReplaceHeader(cfg.BaseURL, false, s)
+			provider = gw.NewAdapter(s)
+			err = doc.ReplaceHeader(cfg.BaseURL, false, provider)
 			if err != nil {
 				l.Error("error replacing doc header",
 					"error", err,

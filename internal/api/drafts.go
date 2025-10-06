@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -10,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
 
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/errs"
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/opt"
@@ -291,7 +292,8 @@ func DraftsHandler(
 			}
 
 			// Replace the doc header.
-			if err = doc.ReplaceHeader(cfg.BaseURL, true, s); err != nil {
+			provider := gw.NewAdapter(s)
+			if err = doc.ReplaceHeader(cfg.BaseURL, true, provider); err != nil {
 				l.Error("error replacing draft doc header",
 					"error", err, "doc_id", f.Id)
 				http.Error(w, "Error creating document draft",
@@ -916,7 +918,8 @@ func DraftsDocumentHandler(
 			}
 
 			// Check if document is locked.
-			locked, err := hcd.IsLocked(docId, db, s, l)
+			provider := gw.NewAdapter(s)
+			locked, err := hcd.IsLocked(docId, db, provider, l)
 			if err != nil {
 				l.Error("error checking document locked status",
 					"error", err,
@@ -1245,7 +1248,8 @@ func DraftsDocumentHandler(
 			}
 
 			// Replace the doc header.
-			if err := doc.ReplaceHeader(cfg.BaseURL, true, s); err != nil {
+			provider = gw.NewAdapter(s)
+			if err := doc.ReplaceHeader(cfg.BaseURL, true, provider); err != nil {
 				l.Error("error replacing draft doc header",
 					"error", err,
 					"method", r.Method,

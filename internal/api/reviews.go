@@ -14,9 +14,7 @@ import (
 	"github.com/hashicorp-forge/hermes/internal/email"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	"github.com/hashicorp-forge/hermes/pkg/document"
-	hcd "github.com/hashicorp-f		// Create go-link.
-		if err := links.SaveDocumentRedirectDetailsLegacy(
-			aw, docID, doc.DocType, doc.DocNumber); err != nil {e/hermes/pkg/hashicorpdocs"
+	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp-forge/hermes/pkg/links"
 	"github.com/hashicorp-forge/hermes/pkg/models"
 	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
@@ -385,7 +383,7 @@ func ReviewHandler(
 			)
 
 			// Create go-link.
-			if err := links.SaveDocumentRedirectDetails(
+			if err := links.SaveDocumentRedirectDetailsLegacy(
 				aw, docID, doc.DocType, doc.DocNumber); err != nil {
 				l.Error("error saving redirect details",
 					"error", err,
