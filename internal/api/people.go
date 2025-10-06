@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp-forge/hermes/internal/config"
-	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
+	"github.com/hashicorp-forge/hermes/pkg/workspace"
 	"github.com/hashicorp/go-hclog"
 	"google.golang.org/api/people/v1"
 )
@@ -20,10 +20,12 @@ type PeopleDataRequest struct {
 
 // PeopleDataHandler returns people related data from the Google API
 // to the Hermes frontend.
+// PeopleDataHandler returns people related data from the Google API
+// to the Hermes frontend.
 func PeopleDataHandler(
 	cfg *config.Config,
 	log hclog.Logger,
-	s *gw.Service) http.Handler {
+	workspaceProvider workspace.Provider) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := &PeopleDataRequest{}
@@ -38,33 +40,19 @@ func PeopleDataHandler(
 				return
 			}
 
-			users, err := s.People.SearchDirectoryPeople().
-				Query(req.Query).
-				// Only query for photos and email addresses
-				// This may be expanded based on use case
-				// in the future
-				ReadMask("emailAddresses,names,photos").
-				Sources("DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE").
-				Do()
-			if err != nil {
-				log.Error("error searching people directory", "error", err)
-				http.Error(w, fmt.Sprintf("Error searching people directory: %q", err),
-					http.StatusInternalServerError)
-				return
-			}
-
-			// Write response.
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-
-			enc := json.NewEncoder(w)
-			err = enc.Encode(users.People)
-			if err != nil {
-				log.Error("error encoding people response", "error", err)
-				http.Error(w, "Error searching people directory",
-					http.StatusInternalServerError)
-				return
-			}
+			// FIXME: The workspace.Provider interface doesn't expose the full People API.
+			// This endpoint requires SearchDirectoryPeople() with query string, ReadMask, and Sources.
+			// Current workspace.Provider.SearchPeople() only supports email-based lookups.
+			//
+			// See docs-internal/PROVIDER_INTERFACE_EXTENSIONS_TODO.md for the architectural plan
+			// to extend the Provider interface with SearchDirectory() support and capability detection.
+			// Implementation: Phase 2 & 4 of the provider extensions plan.
+			//
+			// For now, returning 501 to indicate this needs migration work.
+			log.Error("people search endpoint not yet migrated - requires extended Provider API")
+			http.Error(w, "People search endpoint not yet migrated",
+				http.StatusNotImplemented)
+			return
 		case "GET":
 			query := r.URL.Query()
 			if len(query["emails"]) != 1 {
@@ -72,19 +60,15 @@ func PeopleDataHandler(
 				http.Error(w, "Attempted to get users without providing a single value for the emails query parameter.", http.StatusBadRequest)
 			} else {
 				emails := strings.Split(query["emails"][0], ",")
-				var people []*people.Person
+				var peopleList []*people.Person
 
+				// Use workspace provider's SearchPeople method
 				for _, email := range emails {
-					result, err := s.People.SearchDirectoryPeople().
-						Query(email).
-						ReadMask("emailAddresses,names,photos").
-						Sources("DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE").
-						Do()
-
-					if err == nil && len(result.People) > 0 {
-						people = append(people, result.People[0])
+					result, err := workspaceProvider.SearchPeople(email, "emailAddresses,names,photos")
+					if err == nil && len(result) > 0 {
+						peopleList = append(peopleList, result[0])
 					} else {
-						log.Warn("Email lookup miss", "error", err)
+						log.Warn("Email lookup miss", "error", err, "email", email)
 					}
 				}
 
@@ -93,7 +77,7 @@ func PeopleDataHandler(
 				w.WriteHeader(http.StatusOK)
 
 				enc := json.NewEncoder(w)
-				err := enc.Encode(people)
+				err := enc.Encode(peopleList)
 				if err != nil {
 					log.Error("error encoding people response", "error", err)
 					http.Error(w, "Error getting people responses",

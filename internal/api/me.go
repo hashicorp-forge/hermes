@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
-	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
+	"github.com/hashicorp-forge/hermes/pkg/workspace"
 	"github.com/hashicorp/go-hclog"
 )
 
@@ -26,7 +26,7 @@ type MeGetResponse struct {
 
 func MeHandler(
 	l hclog.Logger,
-	s *gw.Service,
+	workspaceProvider workspace.Provider,
 ) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -72,7 +72,7 @@ func MeHandler(
 				http.Error(w, userErrMsg, httpCode)
 			}
 
-			ppl, err := s.SearchPeople(userEmail, "emailAddresses,names,photos")
+			ppl, err := workspaceProvider.SearchPeople(userEmail, "emailAddresses,names,photos")
 			if err != nil {
 				errResp(
 					http.StatusInternalServerError,

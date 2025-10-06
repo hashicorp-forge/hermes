@@ -12,7 +12,6 @@ import (
 
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/internal/email"
-	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	"github.com/hashicorp-forge/hermes/pkg/document"
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp-forge/hermes/pkg/links"
@@ -28,7 +27,6 @@ import (
 func ReviewHandler(
 	cfg *config.Config,
 	l hclog.Logger,
-	algoWrite *algolia.Client,
 	searchProvider search.Provider,
 	workspaceProvider workspace.Provider,
 	db *gorm.DB,
@@ -168,7 +166,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					*doc, product.Abbreviation, "", nil, cfg, algoWrite, searchProvider, workspaceProvider,
+					*doc, product.Abbreviation, "", nil, cfg, searchProvider, workspaceProvider,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -224,7 +222,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					*doc, product.Abbreviation, "", nil, cfg, algoWrite, searchProvider, workspaceProvider,
+					*doc, product.Abbreviation, "", nil, cfg, searchProvider, workspaceProvider,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -248,7 +246,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					*doc, product.Abbreviation, "", nil, cfg, algoWrite, searchProvider, workspaceProvider,
+					*doc, product.Abbreviation, "", nil, cfg, searchProvider, workspaceProvider,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -283,53 +281,35 @@ func ReviewHandler(
 				return
 			}
 
-			// Move document object to docs index in Algolia.
-			saveRes, err := algoWrite.Docs.SaveObject(docObj)
+			// Move document object to docs index via search provider.
+			searchDocForDocs, err := mapToSearchDocument(docObj)
 			if err != nil {
-				l.Error("error saving doc in Algolia", "error", err, "doc_id", docID)
+				l.Error("error converting document to search document", "error", err, "doc_id", docID)
 				http.Error(w, "Error creating review",
 					http.StatusInternalServerError)
 				return
 			}
-			err = saveRes.Wait()
+			err = searchProvider.DocumentIndex().Index(ctx, searchDocForDocs)
 			if err != nil {
-				l.Error("error saving doc in Algolia", "error", err, "doc_id", docID)
+				l.Error("error saving doc in search provider", "error", err, "doc_id", docID)
 				http.Error(w, "Error creating review",
 					http.StatusInternalServerError)
 				return
 			}
-			l.Info("doc saved in Algolia",
+			l.Info("doc saved in search provider",
 				"doc_id", docID,
 				"method", r.Method,
 				"path", r.URL.Path,
 			)
-			delRes, err := algoWrite.Drafts.DeleteObject(docID)
+			err = searchProvider.DraftIndex().Delete(ctx, docID)
 			if err != nil {
-				l.Error("error deleting draft in Algolia",
+				l.Error("error deleting draft in search provider",
 					"error", err, "doc_id", docID)
 				http.Error(w, "Error creating review",
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					*doc, product.Abbreviation, latestRev.Id, nil, cfg, algoWrite, searchProvider, workspaceProvider,
-				); err != nil {
-					l.Error("error reverting review creation",
-						"error", err,
-						"doc_id", docID,
-						"method", r.Method,
-						"path", r.URL.Path)
-				}
-				return
-			}
-			err = delRes.Wait()
-			if err != nil {
-				l.Error("error deleting draft in Algolia",
-					"error", err, "doc_id", docID)
-				http.Error(w, "Error creating review",
-					http.StatusInternalServerError)
-
-				if err := revertReviewCreation(
-					*doc, product.Abbreviation, latestRev.Id, nil, cfg, algoWrite, searchProvider, workspaceProvider,
+					*doc, product.Abbreviation, latestRev.Id, nil, cfg, searchProvider, workspaceProvider,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -352,7 +332,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					*doc, product.Abbreviation, latestRev.Id, nil, cfg, algoWrite, searchProvider, workspaceProvider,
+					*doc, product.Abbreviation, latestRev.Id, nil, cfg, searchProvider, workspaceProvider,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -380,7 +360,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					*doc, product.Abbreviation, latestRev.Id, shortcut, cfg, algoWrite, searchProvider, workspaceProvider,
+					*doc, product.Abbreviation, latestRev.Id, shortcut, cfg, searchProvider, workspaceProvider,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -397,8 +377,8 @@ func ReviewHandler(
 			)
 
 			// Create go-link.
-			if err := links.SaveDocumentRedirectDetailsLegacy(
-				algoWrite, docID, doc.DocType, doc.DocNumber); err != nil {
+			if err := links.SaveDocumentRedirectDetails(
+				searchProvider, docID, doc.DocType, doc.DocNumber); err != nil {
 				l.Error("error saving redirect details",
 					"error", err,
 					"doc_id", docID,
@@ -408,7 +388,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					*doc, product.Abbreviation, latestRev.Id, shortcut, cfg, algoWrite, searchProvider, workspaceProvider,
+					*doc, product.Abbreviation, latestRev.Id, shortcut, cfg, searchProvider, workspaceProvider,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -438,7 +418,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					*doc, product.Abbreviation, latestRev.Id, shortcut, cfg, algoWrite, searchProvider, workspaceProvider,
+					*doc, product.Abbreviation, latestRev.Id, shortcut, cfg, searchProvider, workspaceProvider,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -461,7 +441,7 @@ func ReviewHandler(
 					http.StatusInternalServerError)
 
 				if err := revertReviewCreation(
-					*doc, product.Abbreviation, latestRev.Id, shortcut, cfg, algoWrite, searchProvider, workspaceProvider,
+					*doc, product.Abbreviation, latestRev.Id, shortcut, cfg, searchProvider, workspaceProvider,
 				); err != nil {
 					l.Error("error reverting review creation",
 						"error", err,
@@ -733,7 +713,6 @@ func revertReviewCreation(
 	fileRevision string,
 	shortcut *drive.File,
 	cfg *config.Config,
-	a *algolia.Client,
 	searchProvider search.Provider,
 	workspaceProvider workspace.Provider) error {
 
@@ -741,8 +720,8 @@ func revertReviewCreation(
 	var result error
 
 	// Delete go-link if it exists.
-	if err := links.DeleteDocumentRedirectDetailsLegacy(
-		a, doc.ObjectID, doc.DocType, doc.DocNumber,
+	if err := links.DeleteDocumentRedirectDetails(
+		searchProvider, doc.ObjectID, doc.DocType, doc.DocNumber,
 	); err != nil {
 		result = multierror.Append(
 			result, fmt.Errorf("error deleting go-link: %w", err))
