@@ -3,21 +3,15 @@ package web
 import (
 	"embed"
 	"encoding/json"
-	"fmt"
 	"io/fs"
 	"net/http"
 	"strings"
 
-	pkgau		// Use the "x-amzn-oidc-identity" header if set
-		// as id to be hashed and toggle flags.
-		r.Header.Get("x-amzn-oidc-identity"),
-		// Get user email from value set by auth middleware
-		pkgauth.MustGetUserEmail(r.Context()),
-		log,thub.com/hashicorp-forge/hermes/pkg/auth"
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/internal/pkg/featureflags"
 	"github.com/hashicorp-forge/hermes/internal/version"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
+	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
 	"github.com/hashicorp/go-hclog"
 )
 
@@ -100,7 +94,7 @@ func ConfigHandler(
 			// Use the "x-amzn-oidc-identity" header if set
 			// as id to be hashed and toggle flags.
 			r.Header.Get("x-amzn-oidc-identity"),
-			// Get user email from value set by Okta middleware
+			// Get user email from value set by auth middleware
 			pkgauth.MustGetUserEmail(r.Context()),
 			log,
 		)
