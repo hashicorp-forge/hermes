@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp-forge/hermes/pkg/workspace"
 	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
 	"google.golang.org/api/drive/v3"
 )
@@ -36,7 +37,7 @@ type Doc interface {
 	GetTitle() string
 
 	MissingFields() []string
-	ReplaceHeader(fileID, baseURL string, isDraft bool, s *gw.Service) error
+	ReplaceHeader(fileID, baseURL string, isDraft bool, provider workspace.Provider) error
 
 	// Setters for fields common to all document types.
 	SetApprovedBy([]string)

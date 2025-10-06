@@ -10,7 +10,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/hashicorp-forge/hermes/internal/helpers"
-	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
+	"github.com/hashicorp-forge/hermes/pkg/workspace"
 	"google.golang.org/api/docs/v1"
 )
 
@@ -44,10 +44,10 @@ import (
 //   |-----------------------------------------------------------------------------|
 
 func (doc *Document) ReplaceHeader(
-	baseURL string, isDraft bool, s *gw.Service) error {
+	baseURL string, isDraft bool, provider workspace.Provider) error {
 
 	// Get doc.
-	d, err := s.GetDoc(doc.ObjectID)
+	d, err := provider.GetDoc(doc.ObjectID)
 	if err != nil {
 		return fmt.Errorf("error getting doc: %w", err)
 	}
@@ -93,7 +93,7 @@ func (doc *Document) ReplaceHeader(
 				},
 			},
 		}
-		_, err = s.Docs.Documents.BatchUpdate(doc.ObjectID, req).Do()
+		_, err = provider.UpdateDoc(doc.ObjectID, req.Requests)
 		if err != nil {
 			return fmt.Errorf("error deleting existing header: %w", err)
 		}
@@ -119,13 +119,13 @@ func (doc *Document) ReplaceHeader(
 			},
 		},
 	}
-	_, err = s.Docs.Documents.BatchUpdate(doc.ObjectID, req).Do()
+	_, err = provider.UpdateDoc(doc.ObjectID, req.Requests)
 	if err != nil {
 		return fmt.Errorf("error inserting header table: %w", err)
 	}
 
 	// Get doc again after inserting the header table.
-	d, err = s.GetDoc(doc.ObjectID)
+	d, err = provider.GetDoc(doc.ObjectID)
 	if err != nil {
 		return fmt.Errorf("error getting doc after inserting header table: %w", err)
 	}
@@ -382,7 +382,7 @@ func (doc *Document) ReplaceHeader(
 			},
 		},
 	}
-	_, err = s.Docs.Documents.BatchUpdate(doc.ObjectID, req).Do()
+	_, err = provider.UpdateDoc(doc.ObjectID, req.Requests)
 	if err != nil {
 		return fmt.Errorf("error applying formatting to header table: %w", err)
 	}
@@ -765,16 +765,13 @@ func (doc *Document) ReplaceHeader(
 	pos += cellLength + 5
 
 	// Do the batch update.
-	_, err = s.Docs.Documents.BatchUpdate(doc.ObjectID,
-		&docs.BatchUpdateDocumentRequest{
-			Requests: reqs}).
-		Do()
+	_, err = provider.UpdateDoc(doc.ObjectID, reqs)
 	if err != nil {
 		return fmt.Errorf("error populating table: %w", err)
 	}
 
 	// Rename file with new title.
-	err = s.RenameFile(
+	err = provider.RenameFile(
 		doc.ObjectID, fmt.Sprintf("[%s] %s", doc.DocNumber, doc.Title))
 	if err != nil {
 		return fmt.Errorf("error renaming file with new title: %w", err)

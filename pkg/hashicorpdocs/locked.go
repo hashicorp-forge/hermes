@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp-forge/hermes/pkg/models"
-	google "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
+	"github.com/hashicorp-forge/hermes/pkg/workspace"
 	"github.com/hashicorp/go-hclog"
 	"google.golang.org/api/docs/v1"
 	"gorm.io/gorm"
@@ -15,7 +15,7 @@ import (
 func IsLocked(
 	fileID string,
 	db *gorm.DB,
-	goog *google.Service,
+	provider workspace.Provider,
 	log hclog.Logger,
 ) (bool, error) {
 
@@ -30,7 +30,7 @@ func IsLocked(
 	// Find out if the document header contains a suggestion. Deleting text which
 	// contains a suggestion currently causes a Google internal API error so we
 	// need to lock the document.
-	gDoc, err := goog.GetDoc(fileID)
+	gDoc, err := provider.GetDoc(fileID)
 	if err != nil {
 		return false, fmt.Errorf("error getting Google Doc: %w", err)
 	}
