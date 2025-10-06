@@ -1,10 +1,17 @@
-# Hermes Testing Environment
+# Hermes Acceptance Testing Environment
 
-This directory contains a complete containerized testing environment for Hermes, including:
-- PostgreSQL database
-- Meilisearch search backend
-- Hermes backend service
-- Hermes web frontend (Ember.js)
+This directory contains a **full-stack containerized environment** for acceptance testing and manual QA of Hermes. This is distinct from the integration testing setup in the root directory.
+
+## Testing Environments Comparison
+
+| Aspect | Integration Testing (`/docker-compose.yml`) | Acceptance Testing (`/testing/docker-compose.yml`) |
+|--------|---------------------------------------------|---------------------------------------------------|
+| **Purpose** | Backend integration tests | Full-stack acceptance testing & manual QA |
+| **Scope** | Infrastructure only (DB, search) | Complete application (backend + frontend + infra) |
+| **Hermes** | Runs natively on host | Containerized |
+| **Frontend** | Not included | Containerized Nginx + Ember app |
+| **Usage** | `make go/test/with-docker-postgres` | Manual testing via browser |
+| **Ports** | 5432 (PG), 7700 (Meili) | 5433 (PG), 7701 (Meili), 8001 (API), 4201 (Web) |
 
 ## Architecture
 
@@ -15,12 +22,14 @@ This directory contains a complete containerized testing environment for Hermes,
                  │
          ┌───────▼────────┐
          │  Web (Nginx)   │  Port 4201 → 4200
-         │  Ember.js App  │
+         │  Ember.js App  │  (hermes-web-acceptance)
          └───────┬────────┘
-                 │ /api/*
+                 │ /api/* proxied to backend
          ┌───────▼────────┐
          │  Hermes API    │  Port 8001 → 8000
-         │  Go Backend    │
+         │  Go Backend    │  (hermes-acceptance)
+         │  + Meilisearch │  Uses 'testing' profile
+         │  + Google WS   │
          └───┬────────┬───┘
              │        │
     ┌────────▼───┐  ┌▼─────────────┐
@@ -29,24 +38,42 @@ This directory contains a complete containerized testing environment for Hermes,
     └────────────┘  └──────────────┘
 ```
 
+## Prerequisites
+
+**Important**: Web assets must be built before starting containers:
+
+```bash
+# From repository root
+make web/build
+```
+
+This creates `web/dist/` which is embedded into the Docker images.
+
 ## Quick Start
 
-### 1. Build and Start All Services
+### 1. Build Web Assets (First Time / After Frontend Changes)
+
+```bash
+# From repository root
+make web/build
+```
+
+### 2. Start All Services
 
 ```bash
 cd testing
-docker-compose up --build
+docker compose up -d --build
 ```
 
 This will:
-1. Build the Hermes backend container
-2. Build the web frontend container
+1. Build the Hermes backend container (from `/Dockerfile`)
+2. Build the web frontend container (from `/web/Dockerfile`)
 3. Start PostgreSQL and Meilisearch
 4. Wait for services to be healthy
-5. Start Hermes backend
+5. Start Hermes backend with 'testing' profile
 6. Start web frontend with nginx
 
-### 2. Access the Application
+### 3. Access the Application
 
 - **Web UI**: http://localhost:4201
 - **API**: http://localhost:8001

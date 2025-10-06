@@ -99,6 +99,28 @@ Jira can be optionally configured to enable linking Hermes projects with Jira is
 - Go 1.18
 - Node.js 20
 - Yarn ~3.3.0 ([install with corepack](https://yarnpkg.com/getting-started/install))
+- Docker & Docker Compose (for local development with Dex authentication)
+
+### Authentication Options
+
+Hermes supports multiple authentication providers:
+
+- **Google OAuth** (production): Requires Google Workspace setup (see above)
+- **Okta** (production): Enterprise SSO integration
+- **Dex OIDC** (development/testing): Local authentication without external dependencies
+
+For local development and testing, **Dex is the recommended option** as it doesn't require internet connectivity or external OAuth providers.
+
+**Quick Start with Dex**:
+```sh
+# Start infrastructure including Dex
+docker compose up -d
+
+# Dex will be available at http://localhost:5556
+# Test credentials: test@hermes.local / password
+```
+
+See [`docs-internal/DEX_QUICK_START.md`](docs-internal/DEX_QUICK_START.md) for details.
 
 ### Configuration File
 
@@ -107,6 +129,16 @@ Copy the example configuration file to the root of this repo and edit the file (
 ```sh
 cp configs/config.hcl ./
 # Edit config.hcl...
+```
+
+For local development with Dex authentication, add this block to your `config.hcl`:
+```hcl
+dex {
+  issuer_url    = "http://localhost:5556/dex"
+  client_id     = "hermes-integration"
+  client_secret = "ZXhhbXBsZS1hcHAtc2VjcmV0"
+  redirect_url  = "http://localhost:8000/auth/callback"
+}
 ```
 
 ### Build the Project
