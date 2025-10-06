@@ -6,12 +6,13 @@ import (
 
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/internal/structs"
-	"github.com/hashicorp-forge/hermes/pkg/algolia"
+	"github.com/hashicorp-forge/hermes/pkg/models"
 	"github.com/hashicorp/go-hclog"
+	"gorm.io/gorm"
 )
 
 // ProductsHandler returns the product mappings to the Hermes frontend.
-func ProductsHandler(cfg *config.Config, a *algolia.Client, log hclog.Logger) http.Handler {
+func ProductsHandler(cfg *config.Config, db *gorm.DB, log hclog.Logger) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Only allow GET requests.
 		if r.Method != http.MethodGet {
@@ -19,10 +20,10 @@ func ProductsHandler(cfg *config.Config, a *algolia.Client, log hclog.Logger) ht
 			return
 		}
 
-		// Get products and associated data from Algolia
-		products, err := getProductsData(a)
+		// Get products and associated data from database
+		products, err := getProductsData(db)
 		if err != nil {
-			log.Error("error getting products from algolia", "error", err)
+			log.Error("error getting products from database", "error", err)
 			http.Error(w, "Error getting product mappings",
 				http.StatusInternalServerError)
 			return
@@ -42,18 +43,25 @@ func ProductsHandler(cfg *config.Config, a *algolia.Client, log hclog.Logger) ht
 	})
 }
 
-// getProducts gets the product or area name and their associated
-// data from Algolia
-func getProductsData(a *algolia.Client) (map[string]structs.ProductData, error) {
-	p := structs.Products{
-		ObjectID: "products",
-		Data:     make(map[string]structs.ProductData, 0),
-	}
-
-	err := a.Internal.GetObject("products", &p)
-	if err != nil {
+// getProductsData gets the product or area name and their associated
+// data from the database.
+func getProductsData(db *gorm.DB) (map[string]structs.ProductData, error) {
+	var products []models.Product
+	if err := db.Find(&products).Error; err != nil {
 		return nil, err
 	}
 
-	return p.Data, nil
+	// Convert database products to API response format
+	result := make(map[string]structs.ProductData)
+	for _, p := range products {
+		result[p.Name] = structs.ProductData{
+			Abbreviation: p.Abbreviation,
+			// PerDocTypeData is not currently stored in the database.
+			// For now, return an empty map. If needed, this can be populated
+			// from the database in a future enhancement.
+			PerDocTypeData: make(map[string]structs.ProductDocTypeData),
+		}
+	}
+
+	return result, nil
 }
