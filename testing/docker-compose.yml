@@ -1,3 +1,29 @@
+# Docker Compose for Acceptance Testing
+# 
+# Purpose: Full-stack containerized environment for acceptance testing and manual QA.
+#          Runs complete Hermes application (backend + frontend) with all dependencies.
+#
+# Usage:
+#   cd testing
+#   docker compose up -d --build            # Build and start all services
+#   open http://localhost:4201              # Access web UI
+#   docker compose logs -f hermes           # View backend logs
+#   docker compose down                     # Stop and remove containers
+#   docker compose down -v                  # Stop and remove containers + volumes
+#
+# Architecture:
+#   - Uses profile-based configuration (config-profiles.hcl)
+#   - Backend: Hermes server with Meilisearch + local workspace adapter
+#   - Frontend: Nginx serving pre-built Ember app, proxying API to backend
+#   - Database: PostgreSQL for persistence
+#   - Search: Meilisearch for document indexing
+#
+# Ports (non-conflicting with integration testing):
+#   - PostgreSQL: 5433 (host) -> 5432 (container)
+#   - Meilisearch: 7701 (host) -> 7700 (container)
+#   - Hermes API: 8001 (host) -> 8000 (container)
+#   - Web UI: 4201 (host) -> 4200 (container)
+
 services:
   postgres:
     image: postgres:17.1-alpine
@@ -5,18 +31,18 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: hermes_test
+      POSTGRES_DB: hermes_acceptance
     ports:
-      - "5433:5432"  # Different port to avoid conflict with root docker-compose
+      - "5433:5432"
     volumes:
-      - postgres_test:/var/lib/postgresql/data
+      - postgres_acceptance:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
     networks:
-      - hermes-test
+      - hermes-acceptance
 
   meilisearch:
     image: getmeili/meilisearch:v1.11
@@ -25,71 +51,94 @@ services:
       MEILI_MASTER_KEY: masterKey123
       MEILI_NO_ANALYTICS: true
     ports:
-      - "7701:7700"  # Different port to avoid conflict with root docker-compose
+      - "7701:7700"
     volumes:
-      - meilisearch_test:/meili_data
+      - meilisearch_acceptance:/meili_data
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:7700/health"]
       interval: 5s
       timeout: 5s
       retries: 5
     networks:
-      - hermes-test
+      - hermes-acceptance
+
+  dex:
+    image: ghcr.io/dexidp/dex:v2.41.1
+    ports:
+      - "5557:5557"
+      - "5559:5559"
+    volumes:
+      - ./dex-config.yaml:/etc/dex/config.yaml:ro
+    command: ["dex", "serve", "/etc/dex/config.yaml"]
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5557/dex/.well-known/openid-configuration"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - hermes-acceptance
 
   hermes:
-    container_name: hermes-test
+    container_name: hermes-acceptance
     build:
       context: ..
-      dockerfile: testing/Dockerfile.hermes
+      dockerfile: Dockerfile
     ports:
-      - "8001:8000"  # Different port to avoid conflict with local dev
+      - "8001:8000"
     volumes:
-      # Mount the profile-based config (read-only)
+      # Mount acceptance testing configuration
       - ./config-profiles.hcl:/app/config-profiles.hcl:ro
+      # Mount workspace data (persists across restarts)
+      - hermes_workspace:/app/workspace_data
     environment:
-      # Profile selection - uses testing profile from config-profiles.hcl
+      # Use 'testing' profile from config-profiles.hcl
       HERMES_SERVER_PROFILE: testing
-      
-      # These can still override config values if needed
       HERMES_BASE_URL: http://localhost:8001
-      HERMES_SERVER_OKTA_DISABLED: "true"
-      
+      # Force Dex authentication provider
+      HERMES_AUTH_PROVIDER: dex
+    command: ["server", "-config=/app/config-profiles.hcl", "-profile=testing"]
     depends_on:
       postgres:
         condition: service_healthy
       meilisearch:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8000/api/v1/me"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "-O", "/dev/null", "http://localhost:8000/"]
+      interval: 3s
+      timeout: 2s
+      retries: 3
+      start_period: 5s
     networks:
-      - hermes-test
+      - hermes-acceptance
 
   web:
+    container_name: hermes-web-acceptance
     build:
-      context: ..
-      dockerfile: testing/Dockerfile.web
+      context: ../web
+      dockerfile: Dockerfile
     ports:
-      - "4201:4200"  # Different port to avoid conflict with local dev
+      - "4201:4200"
     environment:
-      # Proxy to hermes backend
+      # Nginx proxies API requests to hermes backend
       HERMES_API_URL: http://hermes:8000
     depends_on:
       hermes:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "-O", "/dev/null", "http://localhost:4200/"]
+      interval: 3s
+      timeout: 2s
+      retries: 3
+      start_period: 3s
     networks:
-      - hermes-test
-    # volumes:
-    #   # Mount source for hot reload (optional for development)
-    #   - ../web:/app:ro
+      - hermes-acceptance
 
 networks:
-  hermes-test:
+  hermes-acceptance:
     driver: bridge
 
 volumes:
-  postgres_test:
-  meilisearch_test:
+  postgres_acceptance:
+  meilisearch_acceptance:
+  hermes_workspace:

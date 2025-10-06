@@ -139,6 +139,22 @@ profile "testing" {
   base_url = "http://localhost:8001"
   log_format = "standard"
   
+  // Provider configuration for this profile
+  providers {
+    workspace = "google"      // Use Google workspace (with test/minimal config)
+    search    = "meilisearch" // Use Meilisearch adapter
+  }
+  
+  // Meilisearch configuration
+  meilisearch {
+    host                  = "http://meilisearch:7700"
+    api_key               = "masterKey123"
+    docs_index_name       = "docs"
+    drafts_index_name     = "drafts"
+    projects_index_name   = "projects"
+    links_index_name      = "links"
+  }
+  
   // Algolia placeholder - actual search backend is Meilisearch
   // These values allow the server to start without attempting real Algolia connection
   algolia {
@@ -155,7 +171,7 @@ profile "testing" {
   
   // PostgreSQL - connects to postgres container
   postgres {
-    dbname   = "hermes_test"
+    dbname   = "hermes_acceptance"
     host     = "postgres"  // Container name in docker-compose
     port     = 5432
     user     = "postgres"
@@ -174,6 +190,16 @@ profile "testing" {
     aws_region      = "us-east-1"
     client_id       = "test-client-id"
     jwt_signer      = "test-jwt-signer"
+  }
+  
+  // Dex OIDC for testing - enabled by default
+  // Use static test user: test@hermes.local / password
+  dex {
+    disabled      = false
+    issuer_url    = "http://dex:5557/dex"
+    client_id     = "hermes-acceptance"
+    client_secret = "YWNjZXB0YW5jZS1hcHAtc2VjcmV0"
+    redirect_url  = "http://localhost:8001/auth/callback"
   }
   
   // Datadog disabled for testing
@@ -276,6 +302,186 @@ profile "testing" {
     
     product "Engineering" {
       abbreviation = "ENG"
+    }
+  }
+}
+
+// Local profile - for local development with filesystem storage and Meilisearch
+profile "local" {
+  base_url = "http://localhost:8000"
+  log_format = "standard"
+  
+  // Provider configuration for this profile
+  providers {
+    workspace = "local"  // Use local filesystem adapter
+    search    = "meilisearch"  // Use Meilisearch adapter
+  }
+  
+  // Meilisearch configuration
+  meilisearch {
+    host                  = "http://localhost:7700"
+    api_key               = "masterKey"
+    docs_index_name       = "docs"
+    drafts_index_name     = "drafts"
+    projects_index_name   = "projects"
+    links_index_name      = "links"
+  }
+  
+  // Local workspace configuration
+  local_workspace {
+    base_path    = "./workspace_data"
+    docs_path    = "./workspace_data/docs"
+    drafts_path  = "./workspace_data/drafts"
+    folders_path = "./workspace_data/folders"
+    users_path   = "./workspace_data/users"
+    tokens_path  = "./workspace_data/tokens"
+    domain       = "local.dev"
+    
+    smtp {
+      enabled  = false
+      host     = "localhost"
+      port     = 1025
+      username = ""
+      password = ""
+    }
+  }
+  
+  // Algolia placeholder (not used when search provider is meilisearch)
+  algolia {
+    application_id            = "placeholder"
+    docs_index_name           = "docs"
+    drafts_index_name         = "drafts"
+    internal_index_name       = "internal"
+    links_index_name          = "links"
+    missing_fields_index_name = "missing_fields"
+    projects_index_name       = "projects"
+    search_api_key            = "placeholder"
+    write_api_key             = "placeholder"
+  }
+  
+  // PostgreSQL - local instance
+  postgres {
+    dbname   = "hermes"
+    host     = "localhost"
+    port     = 5432
+    user     = "postgres"
+    password = "postgres"
+  }
+  
+  // Server configuration
+  server {
+    addr = "127.0.0.1:8000"
+  }
+  
+  // Okta disabled for local development
+  okta {
+    disabled        = true
+    auth_server_url = "https://local.okta.com"
+    aws_region      = "us-east-1"
+    client_id       = "local-client-id"
+    jwt_signer      = "local-jwt-signer"
+  }
+  
+  // Datadog disabled
+  datadog {
+    enabled = false
+    env     = "local"
+  }
+  
+  // Email disabled
+  email {
+    enabled = false
+    from_address = "hermes@local.dev"
+  }
+  
+  // Feature flags
+  feature_flags {
+    flag "api_v2" {
+      enabled = true
+    }
+    flag "projects" {
+      enabled = true
+    }
+  }
+  
+  // Google Workspace placeholder (not used when workspace provider is local)
+  google_workspace {
+    create_doc_shortcuts = false
+    docs_folder          = "placeholder"
+    domain               = "local.dev"
+    drafts_folder        = "placeholder"
+    shortcuts_folder     = "placeholder"
+    
+    group_approvals {
+      enabled = false
+    }
+    
+    auth {
+      client_email        = "local@local.iam.gserviceaccount.com"
+      create_docs_as_user = false
+      private_key         = "-----BEGIN PRIVATE KEY-----\nPLACEHOLDER\n-----END PRIVATE KEY-----\n"
+      subject             = "local@local.dev"
+      token_url           = "https://oauth2.googleapis.com/token"
+    }
+    
+    oauth2 {
+      client_id    = "local-client-id"
+      hd           = "local.dev"
+      redirect_uri = "http://localhost:8000/torii/redirect.html"
+    }
+  }
+  
+  // Indexer configuration
+  indexer {
+    max_parallel_docs          = 10
+    update_doc_headers         = false
+    update_draft_headers       = false
+    use_database_for_document_data = true
+  }
+  
+  // Jira disabled
+  jira {
+    enabled   = false
+    api_token = ""
+    url       = ""
+    user      = ""
+  }
+  
+  // Document types
+  document_types {
+    document_type "RFC" {
+      long_name   = "Request for Comments"
+      description = "Create a Request for Comments document to present a proposal to colleagues for their review and feedback."
+      flight_icon = "discussion-circle"
+      template    = "local-rfc-template-id"
+      
+      custom_field {
+        name = "Stakeholders"
+        type = "people"
+      }
+    }
+    
+    document_type "PRD" {
+      long_name   = "Product Requirements"
+      description = "Create a Product Requirements Document to summarize a problem statement and outline a phased approach to addressing the problem."
+      flight_icon = "target"
+      template    = "local-prd-template-id"
+      
+      custom_field {
+        name = "Stakeholders"
+        type = "people"
+      }
+    }
+  }
+  
+  // Products
+  products {
+    product "Engineering" {
+      abbreviation = "ENG"
+    }
+    
+    product "Product" {
+      abbreviation = "PROD"
     }
   }
 }

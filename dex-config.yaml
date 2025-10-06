@@ -1,0 +1,75 @@
+# Dex OIDC Provider Configuration for Integration Testing
+# 
+# Purpose: Provides OpenID Connect authentication for local development and testing
+#          without requiring external OAuth providers (Google, Okta, etc.)
+#
+# Usage:
+#   - Runs on port 5556 in docker-compose.yml
+#   - Accessed at http://localhost:5556/dex
+#   - Static user: test@hermes.local / password
+#
+# OIDC Configuration:
+#   - Issuer: http://localhost:5556/dex
+#   - Client ID: hermes-integration
+#   - Client Secret: ZXhhbXBsZS1hcHAtc2VjcmV0
+#   - Redirect URI: http://localhost:8000/auth/callback
+
+issuer: http://localhost:5556/dex
+
+storage:
+  type: memory
+
+web:
+  http: 0.0.0.0:5556
+
+telemetry:
+  http: 0.0.0.0:5558
+
+# Static clients for Hermes integration
+staticClients:
+- id: hermes-integration
+  redirectURIs:
+  - 'http://localhost:8000/auth/callback'
+  - 'http://localhost:4200/auth/callback'
+  name: 'Hermes Integration'
+  secret: ZXhhbXBsZS1hcHAtc2VjcmV0
+
+# Static password connector for testing
+connectors:
+- type: mockCallback
+  id: mock
+  name: Mock
+- type: mockPassword
+  id: mock-password
+  name: Email
+  config:
+    username: test@hermes.local
+    password: password
+
+# Enable password grants
+enablePasswordDB: true
+
+# Static passwords for testing
+staticPasswords:
+- email: "test@hermes.local"
+  hash: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"  # password: "password"
+  username: "test"
+  userID: "08a8684b-db88-4b73-90a9-3cd1661f5466"
+- email: "admin@hermes.local"
+  hash: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"  # password: "password"
+  username: "admin"
+  userID: "08a8684b-db88-4b73-90a9-3cd1661f5467"
+- email: "user@hermes.local"
+  hash: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"  # password: "password"
+  username: "user"
+  userID: "08a8684b-db88-4b73-90a9-3cd1661f5468"
+
+# OAuth2 configuration
+oauth2:
+  skipApprovalScreen: true
+  responseTypes: ["code", "token", "id_token"]
+  
+# Logging
+logger:
+  level: "debug"
+  format: "text"
