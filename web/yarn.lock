@@ -301,7 +301,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/core@npm:^7.16.10, @babel/core@npm:^7.21.4, @babel/core@npm:^7.24.4, @babel/core@npm:^7.28.4":
+"@babel/core@npm:^7.12.3, @babel/core@npm:^7.16.10, @babel/core@npm:^7.21.4, @babel/core@npm:^7.24.4, @babel/core@npm:^7.28.4":
   version: 7.28.4
   resolution: "@babel/core@npm:7.28.4"
   dependencies:
@@ -992,7 +992,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/parser@npm:^7.1.0, @babel/parser@npm:^7.20.7, @babel/parser@npm:^7.27.2, @babel/parser@npm:^7.28.3, @babel/parser@npm:^7.28.4":
+"@babel/parser@npm:^7.1.0, @babel/parser@npm:^7.14.7, @babel/parser@npm:^7.20.7, @babel/parser@npm:^7.27.2, @babel/parser@npm:^7.28.3, @babel/parser@npm:^7.28.4":
   version: 7.28.4
   resolution: "@babel/parser@npm:7.28.4"
   dependencies:
@@ -3384,18 +3384,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ember/test-waiters@npm:^3.0.0":
-  version: 3.0.2
-  resolution: "@ember/test-waiters@npm:3.0.2"
-  dependencies:
-    calculate-cache-key-for-tree: "npm:^2.0.0"
-    ember-cli-babel: "npm:^7.26.6"
-    ember-cli-version-checker: "npm:^5.1.2"
-    semver: "npm:^7.3.5"
-  checksum: 10/f4aff2691c45cb60c6d9a85ca7abd799fd0a77469ccc4ef4f0f161763503cc08c5acaa7ce215b25d8b71a010a968d5e503a144c22de026abcd63a19e6ae1792e
-  languageName: node
-  linkType: hard
-
 "@ember/test-waiters@npm:^3.0.2, @ember/test-waiters@npm:^3.1.0":
   version: 3.1.0
   resolution: "@ember/test-waiters@npm:3.1.0"
@@ -4231,6 +4219,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@istanbuljs/load-nyc-config@npm:^1.0.0":
+  version: 1.1.0
+  resolution: "@istanbuljs/load-nyc-config@npm:1.1.0"
+  dependencies:
+    camelcase: "npm:^5.3.1"
+    find-up: "npm:^4.1.0"
+    get-package-type: "npm:^0.1.0"
+    js-yaml: "npm:^3.13.1"
+    resolve-from: "npm:^5.0.0"
+  checksum: 10/b000a5acd8d4fe6e34e25c399c8bdbb5d3a202b4e10416e17bfc25e12bab90bb56d33db6089ae30569b52686f4b35ff28ef26e88e21e69821d2b85884bd055b8
+  languageName: node
+  linkType: hard
+
+"@istanbuljs/schema@npm:^0.1.2":
+  version: 0.1.3
+  resolution: "@istanbuljs/schema@npm:0.1.3"
+  checksum: 10/a9b1e49acdf5efc2f5b2359f2df7f90c5c725f2656f16099e8b2cd3a000619ecca9fc48cf693ba789cf0fd989f6e0df6a22bc05574be4223ecdbb7997d04384b
+  languageName: node
+  linkType: hard
+
 "@jridgewell/gen-mapping@npm:^0.1.0":
   version: 0.1.1
   resolution: "@jridgewell/gen-mapping@npm:0.1.1"
@@ -4902,32 +4910,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/ember@npm:^3.16.5":
-  version: 3.16.7
-  resolution: "@types/ember@npm:3.16.7"
-  dependencies:
-    "@types/ember__application": "npm:^3"
-    "@types/ember__array": "npm:^3"
-    "@types/ember__component": "npm:^3"
-    "@types/ember__controller": "npm:^3"
-    "@types/ember__debug": "npm:^3"
-    "@types/ember__engine": "npm:^3"
-    "@types/ember__error": "npm:^3"
-    "@types/ember__object": "npm:^3"
-    "@types/ember__polyfills": "npm:^3"
-    "@types/ember__routing": "npm:^3"
-    "@types/ember__runloop": "npm:^3"
-    "@types/ember__service": "npm:^3"
-    "@types/ember__string": "npm:^2"
-    "@types/ember__template": "npm:^3"
-    "@types/ember__test": "npm:^3"
-    "@types/ember__utils": "npm:^3"
-    "@types/htmlbars-inline-precompile": "npm:*"
-    "@types/rsvp": "npm:*"
-  checksum: 10/8d041d57f7aa3497c90f6f815bf3360dbf4e99146f5f3b62c358f011643f207b9c6273f299fe1fded82626e0931cd4880b033ec8f96f8258b52896fa29d557e3
-  languageName: node
-  linkType: hard
-
 "@types/ember__application@npm:*, @types/ember__application@npm:latest":
   version: 4.0.5
   resolution: "@types/ember__application@npm:4.0.5"
@@ -4943,18 +4925,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/ember__application@npm:^3":
-  version: 3.16.4
-  resolution: "@types/ember__application@npm:3.16.4"
-  dependencies:
-    "@types/ember__application": "npm:^3"
-    "@types/ember__engine": "npm:^3"
-    "@types/ember__object": "npm:^3"
-    "@types/ember__routing": "npm:^3"
-  checksum: 10/6e314e93c9d0140fe9b27bb885199371cfb327ed2a2b208ac499f9316c7f267ddbafd1e0db13361a64e3cddb772bc98e9f1b96038ae1c37c0221f4661212284c
-  languageName: node
-  linkType: hard
-
 "@types/ember__array@npm:*, @types/ember__array@npm:latest":
   version: 4.0.3
   resolution: "@types/ember__array@npm:4.0.3"
@@ -4963,16 +4933,6 @@ __metadata:
     "@types/ember__array": "npm:*"
     "@types/ember__object": "npm:*"
   checksum: 10/482ddcbd89433d63c6ac8fd36124335821e4d0de9df14736ccd6ba6f8e547eac9ddacb096a4a54602698a6ce289f634e6efeddf78a25ac63b4afdd137ba4a4f4
-  languageName: node
-  linkType: hard
-
-"@types/ember__array@npm:^3":
-  version: 3.16.5
-  resolution: "@types/ember__array@npm:3.16.5"
-  dependencies:
-    "@types/ember__array": "npm:^3"
-    "@types/ember__object": "npm:^3"
-  checksum: 10/722aba581aa8c81d464edf20c6555763bf6f60a965fdd76030383ebc965bad859206ef3e55814f761493bd99181dadd1b42284d9e0a4064019d409e78e94ab1c
   languageName: node
   linkType: hard
 
@@ -4987,32 +4947,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/ember__component@npm:^3":
-  version: 3.16.7
-  resolution: "@types/ember__component@npm:3.16.7"
-  dependencies:
-    "@types/ember__component": "npm:^3"
-    "@types/ember__object": "npm:^3"
-    "@types/jquery": "npm:*"
-  checksum: 10/667f77949985b350ef888fd4646debb4e6118e53a8da24efbf4a390a572955b55ac91f81786e2a788b926f1eeda91be716612a9792fae3f62e73f9b97152b4e9
-  languageName: node
-  linkType: hard
-
 "@types/ember__controller@npm:*, @types/ember__controller@npm:latest":
   version: 4.0.4
   resolution: "@types/ember__controller@npm:4.0.4"
   dependencies:
     "@types/ember__object": "npm:*"
   checksum: 10/db9a165bea96e0da67f51ca2c068b96594fce73034b937c9acffbb49dc64961c6ff79f567fd256a0f05cafc3785927f4786b0983d2ad91f36be06e78151900a5
-  languageName: node
-  linkType: hard
-
-"@types/ember__controller@npm:^3":
-  version: 3.16.7
-  resolution: "@types/ember__controller@npm:3.16.7"
-  dependencies:
-    "@types/ember__object": "npm:^3"
-  checksum: 10/0df414b5076887e277dad2279f4ea8f3e8623ffe9de0bf616cbb6116f2168e7fba72081e9e14e03f6b0d6b78becc60cf511207ab05e5af50ef50dcc8fd8d5929
   languageName: node
   linkType: hard
 
@@ -5024,17 +4964,6 @@ __metadata:
     "@types/ember__object": "npm:*"
     "@types/ember__owner": "npm:*"
   checksum: 10/69a31777a6ba3dba0c8733b59e06e3f5eae0350cf9665421fd7adf23b8d9e43abfdc423d615b9ac91a4208c804e59c5d5f2b3000a7ed957bb9114a381536009c
-  languageName: node
-  linkType: hard
-
-"@types/ember__debug@npm:^3":
-  version: 3.16.7
-  resolution: "@types/ember__debug@npm:3.16.7"
-  dependencies:
-    "@types/ember__debug": "npm:^3"
-    "@types/ember__engine": "npm:^3"
-    "@types/ember__object": "npm:^3"
-  checksum: 10/4187a40bd202badd66b6ba9a81b6ba96bdf6e12e7aa140cade51077a2139efd7ca5d0f318ec10d631c97e4fd140581b8375a02d9da34b9f5729cc63dc587b8f4
   languageName: node
   linkType: hard
 
@@ -5056,27 +4985,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/ember__engine@npm:^3":
-  version: 3.16.4
-  resolution: "@types/ember__engine@npm:3.16.4"
-  dependencies:
-    "@types/ember__engine": "npm:^3"
-    "@types/ember__object": "npm:^3"
-  checksum: 10/2f444a6f08d99398b55e44b5f4015916c15db6757392425dca4cc7e583431c30291413a48b8f64126de15b96525a2568748540c9478c4849e23346d22a31c02a
-  languageName: node
-  linkType: hard
-
 "@types/ember__error@npm:*, @types/ember__error@npm:latest":
   version: 4.0.2
   resolution: "@types/ember__error@npm:4.0.2"
   checksum: 10/05e83815dbddc79f58d7b5fa8b6177caa94647b4da363a2509a5b4c8dea9217acc998c4febfa4e9873018cdf380c0a4742aa10b0d44193635b5623a9d07a4c76
-  languageName: node
-  linkType: hard
-
-"@types/ember__error@npm:^3":
-  version: 3.16.2
-  resolution: "@types/ember__error@npm:3.16.2"
-  checksum: 10/5bb8047c2c012a9068828eaf70e6f4c875c701660668c8c7b94e8c392a6f68c2150b0084bbdf36abe47aa109484026dcb2caf8aeff4de9bf88266b78da5a2b85
   languageName: node
   linkType: hard
 
@@ -5101,16 +5013,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/ember__object@npm:^3":
-  version: 3.12.8
-  resolution: "@types/ember__object@npm:3.12.8"
-  dependencies:
-    "@types/ember__object": "npm:^3"
-    "@types/rsvp": "npm:*"
-  checksum: 10/081807ad41d4f75a954acd6801775593ba5dc63e8e4662312c1a20beca8570359f4b7db111ed4c922ea991f4b8444ce53aa888dc5f788658f573a9cb5d3de363
-  languageName: node
-  linkType: hard
-
 "@types/ember__owner@npm:*":
   version: 4.0.2
   resolution: "@types/ember__owner@npm:4.0.2"
@@ -5122,13 +5024,6 @@ __metadata:
   version: 4.0.1
   resolution: "@types/ember__polyfills@npm:4.0.1"
   checksum: 10/a2b6ed3b0637fdeb6d4c93a3a1d5b7902e57124c860bf9bf82f1ea4148264991b8f0311ea6a8a50f5b243804f93650fc2a5f97a53192e0687213b41a5499e4be
-  languageName: node
-  linkType: hard
-
-"@types/ember__polyfills@npm:^3":
-  version: 3.12.2
-  resolution: "@types/ember__polyfills@npm:3.12.2"
-  checksum: 10/9bc363cf11f89f439e2fcd3639b144a1109ba481872b993996b2497fdefc5d080a7655ecd938fac8edb844990af3a6460863b38ea6e2e93791764fc0de3c04ab
   languageName: node
   linkType: hard
 
@@ -5145,19 +5040,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/ember__routing@npm:^3":
-  version: 3.16.17
-  resolution: "@types/ember__routing@npm:3.16.17"
-  dependencies:
-    "@types/ember__component": "npm:^3"
-    "@types/ember__controller": "npm:^3"
-    "@types/ember__object": "npm:^3"
-    "@types/ember__routing": "npm:^3"
-    "@types/ember__service": "npm:^3"
-  checksum: 10/775c32aaccbbfd54c2faa8b3808c24433f1ba94b6b71ef988b1e9f317f31759751db7fe4c93ff347d128dbd3d2ac705fa6e1b9ea20358ffc9e6b867ea4bd8f3b
-  languageName: node
-  linkType: hard
-
 "@types/ember__runloop@npm:*, @types/ember__runloop@npm:latest":
   version: 4.0.2
   resolution: "@types/ember__runloop@npm:4.0.2"
@@ -5165,15 +5047,6 @@ __metadata:
     "@types/ember": "npm:*"
     "@types/ember__runloop": "npm:*"
   checksum: 10/c7c098c9233907c0ff8842705191adb3356a78c675feda99ccc9887956cb4aaef2a6c8f38cce0554a74f7251a497188039327cec2cc93193b7d7eb2d20e81fca
-  languageName: node
-  linkType: hard
-
-"@types/ember__runloop@npm:^3":
-  version: 3.16.4
-  resolution: "@types/ember__runloop@npm:3.16.4"
-  dependencies:
-    "@types/ember__runloop": "npm:^3"
-  checksum: 10/1aed54fbc58d10f409ecb4e2cd9c75cbff273b25381435f61b01cc5a85e76ddc4d1aa2e2f452ee962e7c9a1ee0a06f67352d7d975254e091b2e0efae865f3cd4
   languageName: node
   linkType: hard
 
@@ -5186,30 +5059,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/ember__service@npm:^3":
-  version: 3.16.2
-  resolution: "@types/ember__service@npm:3.16.2"
-  dependencies:
-    "@types/ember__object": "npm:^3"
-  checksum: 10/e9c94be28cba6e929a794dfd216c758dbffe740a4f52a3fec1d0d2d59b523c3f5ac5bd5cf253ddefd239f82ffe1dcc67f38496d7ea3d45e59c4151ce42d22c21
-  languageName: node
-  linkType: hard
-
 "@types/ember__string@npm:*":
   version: 3.16.3
   resolution: "@types/ember__string@npm:3.16.3"
   dependencies:
     "@types/ember__template": "npm:*"
   checksum: 10/ee5998efc58c663dd316743ed91b1e0242321ccb79b83e2eae666e33570df8533a1ee25311ba156ec077ef63a8cbaadcf66d58cc440b86787e7a5f8e19f9f529
-  languageName: node
-  linkType: hard
-
-"@types/ember__string@npm:^2":
-  version: 2.0.0
-  resolution: "@types/ember__string@npm:2.0.0"
-  dependencies:
-    "@types/ember__template": "npm:^3"
-  checksum: 10/4aa8731277a8c632a9ba9d84765325bff838a17d243b071cefb5071090388426c4f396f29fb49ca7f51137607b394921a2c94984fa973a7fc5de8953da4fc0c7
   languageName: node
   linkType: hard
 
@@ -5224,13 +5079,6 @@ __metadata:
   version: 4.0.1
   resolution: "@types/ember__template@npm:4.0.1"
   checksum: 10/55c1bdccc1f11d428795da20832a1e52d76139af0a2378eb2ac6c18cf2406cd0b80007de4eafa5934a5b61cdf5979d9ad3e3ce27586b5908099e7535462d0b40
-  languageName: node
-  linkType: hard
-
-"@types/ember__template@npm:^3":
-  version: 3.16.2
-  resolution: "@types/ember__template@npm:3.16.2"
-  checksum: 10/d39a1dc786f732c1b0255c49ffa3d08ba813598c0d67d29ea1222c20898737e6129d2d503fb914a12589081b5f1935f9404c820ae6d9e2b816367ae77a7f5fc9
   languageName: node
   linkType: hard
 
@@ -5257,28 +5105,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/ember__test@npm:^3":
-  version: 3.16.2
-  resolution: "@types/ember__test@npm:3.16.2"
-  dependencies:
-    "@types/ember__application": "npm:^3"
-  checksum: 10/0b81edcff9e0dfc60bc3c2a5dffde274b7645a41805a1e5d9fdc18bfdd6f01d4847883b4a94c0bedc7aff988de6cd1589efc83c2cd7220158361f7242a23a161
-  languageName: node
-  linkType: hard
-
 "@types/ember__utils@npm:*, @types/ember__utils@npm:latest":
   version: 4.0.2
   resolution: "@types/ember__utils@npm:4.0.2"
   dependencies:
     "@types/ember": "npm:*"
   checksum: 10/8faa070bbafcbbedfbf33fbedc6a2f7d90ce262d494c4069ab7fbb68412cecafec109f6dcd689af977f2f22ed48e060aecc75a44bcf21dd987b80eb425cadec3
-  languageName: node
-  linkType: hard
-
-"@types/ember__utils@npm:^3":
-  version: 3.16.3
-  resolution: "@types/ember__utils@npm:3.16.3"
-  checksum: 10/c2c079446895e7edb2afdb07b077cc418061dbeeee2f4c3239a7cd6e7159a020a53a76c38110c28653e827ec2f0a8dde75d19fc8278fdb44028af582e89d7771
   languageName: node
   linkType: hard
 
@@ -5398,15 +5230,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jquery@npm:*":
-  version: 3.5.14
-  resolution: "@types/jquery@npm:3.5.14"
-  dependencies:
-    "@types/sizzle": "npm:*"
-  checksum: 10/a0ad2fe4fb3c14dbb02929b995203eb9d02db6dd6054d71058955ab62d659ae48fe3deca63ded0db16a2b99fa1827fffdddb9b4a1977cedfeaf1f8150829a81c
-  languageName: node
-  linkType: hard
-
 "@types/json-schema@npm:*, @types/json-schema@npm:^7.0.5, @types/json-schema@npm:^7.0.8, @types/json-schema@npm:^7.0.9":
   version: 7.0.11
   resolution: "@types/json-schema@npm:7.0.11"
@@ -5494,7 +5317,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/rsvp@npm:*, @types/rsvp@npm:^4.0.4, @types/rsvp@npm:latest":
+"@types/rsvp@npm:*, @types/rsvp@npm:latest":
   version: 4.0.4
   resolution: "@types/rsvp@npm:4.0.4"
   checksum: 10/1ff88ea7d070b439606b4dd312c1608e32b574726a4b9de7547265e38cdc7f46db45983aa7dab1ada2e09cda498498adb0a374635f5bac7fc4d98541ae641b83
@@ -5524,13 +5347,6 @@ __metadata:
   version: 8.1.2
   resolution: "@types/sinonjs__fake-timers@npm:8.1.2"
   checksum: 10/5f0ddaa4c79924f6fa82ae5f4f2894f4c1d40740690866665d06a74c7e0f220989c99a7f49561c1d9ad6b15a3a8a7cf7be9dc306a7e42fc1c9cf2c89ad80bef3
-  languageName: node
-  linkType: hard
-
-"@types/sizzle@npm:*":
-  version: 2.3.3
-  resolution: "@types/sizzle@npm:2.3.3"
-  checksum: 10/586a9fb1f6ff3e325e0f2cc1596a460615f0bc8a28f6e276ac9b509401039dd242fa8b34496d3a30c52f5b495873922d09a9e76c50c2ab2bcc70ba3fb9c4e160
   languageName: node
   linkType: hard
 
@@ -7093,6 +6909,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"babel-plugin-istanbul@npm:^6.1.1":
+  version: 6.1.1
+  resolution: "babel-plugin-istanbul@npm:6.1.1"
+  dependencies:
+    "@babel/helper-plugin-utils": "npm:^7.0.0"
+    "@istanbuljs/load-nyc-config": "npm:^1.0.0"
+    "@istanbuljs/schema": "npm:^0.1.2"
+    istanbul-lib-instrument: "npm:^5.0.4"
+    test-exclude: "npm:^6.0.0"
+  checksum: 10/ffd436bb2a77bbe1942a33245d770506ab2262d9c1b3c1f1da7f0592f78ee7445a95bc2efafe619dd9c1b6ee52c10033d6c7d29ddefe6f5383568e60f31dfe8d
+  languageName: node
+  linkType: hard
+
 "babel-plugin-module-resolver@npm:^3.2.0":
   version: 3.2.0
   resolution: "babel-plugin-module-resolver@npm:3.2.0"
@@ -7820,7 +7649,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"body-parser@npm:1.20.3":
+"body-parser@npm:1.20.3, body-parser@npm:^1.20.3":
   version: 1.20.3
   resolution: "body-parser@npm:1.20.3"
   dependencies:
@@ -8934,6 +8763,13 @@ __metadata:
   version: 2.0.1
   resolution: "camelcase-css@npm:2.0.1"
   checksum: 10/1cec2b3b3dcb5026688a470b00299a8db7d904c4802845c353dbd12d9d248d3346949a814d83bfd988d4d2e5b9904c07efe76fecd195a1d4f05b543e7c0b56b1
+  languageName: node
+  linkType: hard
+
+"camelcase@npm:^5.3.1":
+  version: 5.3.1
+  resolution: "camelcase@npm:5.3.1"
+  checksum: 10/e6effce26b9404e3c0f301498184f243811c30dfe6d0b9051863bd8e4034d09c8c2923794f280d6827e5aa055f6c434115ff97864a16a963366fb35fd673024b
   languageName: node
   linkType: hard
 
@@ -10277,21 +10113,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ember-app-scheduler@npm:^5.1.2 || ^6.0.0 || ^7.0.0":
-  version: 7.0.1
-  resolution: "ember-app-scheduler@npm:7.0.1"
-  dependencies:
-    "@ember/test-waiters": "npm:^3.0.0"
-    "@types/ember": "npm:^3.16.5"
-    "@types/rsvp": "npm:^4.0.4"
-    ember-cli-babel: "npm:^7.26.6"
-    ember-cli-typescript: "npm:^4.2.1"
-    ember-compatibility-helpers: "npm:^1.2.5"
-    ember-destroyable-polyfill: "npm:^2.0.2"
-  checksum: 10/e021a0bbff8cfcb5bf6f1baec56e42489efcf2d858380c3f83b346a50fc358d6aa00f75aca49f93c2071d4238a843e87fcbf4dfbc0dca210747c2273bd191000
-  languageName: node
-  linkType: hard
-
 "ember-assign-helper@npm:^0.5.0":
   version: 0.5.1
   resolution: "ember-assign-helper@npm:0.5.1"
@@ -10616,6 +10437,33 @@ __metadata:
   peerDependencies:
     "@babel/core": ^7.12.0
   checksum: 10/8599e81dc1c97c12420aef3a26a2c63202b99b72111b26adc85360507ebdb2bd72b1c959f85a395fa6a92afcbce79831a4c36dad4e7c37ae6ae9c8283b747189
+  languageName: node
+  linkType: hard
+
+"ember-cli-code-coverage@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "ember-cli-code-coverage@npm:3.1.0"
+  dependencies:
+    babel-plugin-istanbul: "npm:^6.1.1"
+    body-parser: "npm:^1.20.3"
+    ember-cli-babel: "npm:^7.26.6"
+    express: "npm:^4.21.0"
+    fs-extra: "npm:^9.0.0"
+    istanbul-lib-coverage: "npm:^3.2.2"
+    istanbul-lib-report: "npm:^3.0.1"
+    istanbul-lib-source-maps: "npm:^4.0.1"
+    istanbul-reports: "npm:^3.1.7"
+    node-dir: "npm:^0.1.17"
+    walk-sync: "npm:^2.1.0"
+  peerDependencies:
+    "@embroider/compat": ^0.47.0 || ^1.0.0 || ^2.0.0 || >=3.0.0
+    "@embroider/core": ^0.47.0 || ^1.0.0 || ^2.0.0 || >=3.0.0
+  peerDependenciesMeta:
+    "@embroider/compat":
+      optional: true
+    "@embroider/core":
+      optional: true
+  checksum: 10/db9d314869f890db8abc7c8e6355ad44f748620468b5a3bdbc195efab527d18f1183879b36f033a813b0c18a8fc9ef8b29e7e640c9dbb2323a7d462731fc7728
   languageName: node
   linkType: hard
 
@@ -11142,7 +10990,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ember-compatibility-helpers@npm:^1.1.2, ember-compatibility-helpers@npm:^1.2.0, ember-compatibility-helpers@npm:^1.2.1, ember-compatibility-helpers@npm:^1.2.5":
+"ember-compatibility-helpers@npm:^1.1.2, ember-compatibility-helpers@npm:^1.2.0, ember-compatibility-helpers@npm:^1.2.1":
   version: 1.2.6
   resolution: "ember-compatibility-helpers@npm:1.2.6"
   dependencies:
@@ -11587,17 +11435,6 @@ __metadata:
     "@babel/traverse": "npm:^7.4.5"
     recast: "npm:^0.18.1"
   checksum: 10/866733e97ae71bf75d70dd5713310397267d98510be38cf221e9f2c97e318c163f16afc2fd311cfe283d703bd847cd91d8e3770772b3dfeee9c0fe36101ab990
-  languageName: node
-  linkType: hard
-
-"ember-router-scroll@npm:^4.1.2":
-  version: 4.1.2
-  resolution: "ember-router-scroll@npm:4.1.2"
-  dependencies:
-    ember-app-scheduler: "npm:^5.1.2 || ^6.0.0 || ^7.0.0"
-    ember-cli-babel: "npm:^7.26.6"
-    ember-compatibility-helpers: "npm:^1.2.5"
-  checksum: 10/4f14d50c97cbe31c611f1b515fbc1cb6be2533488262f6272cbd3a401ad14e23483e1d310cfe12e235b2d70f6fb3ca8e9af851fd3af9b28104ccaa7f29350cc4
   languageName: node
   linkType: hard
 
@@ -12664,7 +12501,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express@npm:^4.21.1":
+"express@npm:^4.21.0, express@npm:^4.21.1":
   version: 4.21.2
   resolution: "express@npm:4.21.2"
   dependencies:
@@ -13077,7 +12914,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"find-up@npm:^4.0.0":
+"find-up@npm:^4.0.0, find-up@npm:^4.1.0":
   version: 4.1.0
   resolution: "find-up@npm:4.1.0"
   dependencies:
@@ -13398,7 +13235,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fs-extra@npm:^9.0.1, fs-extra@npm:^9.1.0":
+"fs-extra@npm:^9.0.0, fs-extra@npm:^9.0.1, fs-extra@npm:^9.1.0":
   version: 9.1.0
   resolution: "fs-extra@npm:9.1.0"
   dependencies:
@@ -13642,6 +13479,13 @@ __metadata:
     hasown: "npm:^2.0.2"
     math-intrinsics: "npm:^1.1.0"
   checksum: 10/6e9dd920ff054147b6f44cb98104330e87caafae051b6d37b13384a45ba15e71af33c3baeac7cb630a0aaa23142718dcf25b45cfdd86c184c5dcb4e56d953a10
+  languageName: node
+  linkType: hard
+
+"get-package-type@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "get-package-type@npm:0.1.0"
+  checksum: 10/bba0811116d11e56d702682ddef7c73ba3481f114590e705fc549f4d868972263896af313c57a25c076e3c0d567e11d919a64ba1b30c879be985fc9d44f96148
   languageName: node
   linkType: hard
 
@@ -14271,6 +14115,7 @@ __metadata:
     ember-cli: "npm:^6.7.0"
     ember-cli-app-version: "npm:^5.0.0"
     ember-cli-babel: "npm:^8.2.0"
+    ember-cli-code-coverage: "npm:^3.1.0"
     ember-cli-dependency-checker: "npm:^3.2.0"
     ember-cli-deprecation-workflow: "npm:^2.1.0"
     ember-cli-flash: "npm:^4.0.0"
@@ -14299,7 +14144,6 @@ __metadata:
     ember-power-select-with-create: "npm:^3.0.1"
     ember-qunit: "npm:^9.0.4"
     ember-resolver: "npm:^8.0.3"
-    ember-router-scroll: "npm:^4.1.2"
     ember-select: "npm:^0.8.3"
     ember-set-body-class: "npm:^1.0.2"
     ember-set-helper: "npm:^2.0.1"
@@ -14400,6 +14244,13 @@ __metadata:
   version: 3.1.1
   resolution: "htm@npm:3.1.1"
   checksum: 10/cb862dc5c9eac532937af7a9e26edd1e0e7939fc78a06efde4ae10b3a145f9506e644ff084c871dd808c315342b56fd0baa174a2a2cdf6071a4130ee0abee9e0
+  languageName: node
+  linkType: hard
+
+"html-escaper@npm:^2.0.0":
+  version: 2.0.2
+  resolution: "html-escaper@npm:2.0.2"
+  checksum: 10/034d74029dcca544a34fb6135e98d427acd73019796ffc17383eaa3ec2fe1c0471dcbbc8f8ed39e46e86d43ccd753a160631615e4048285e313569609b66d5b7
   languageName: node
   linkType: hard
 
@@ -15325,6 +15176,58 @@ __metadata:
   languageName: node
   linkType: hard
 
+"istanbul-lib-coverage@npm:^3.0.0, istanbul-lib-coverage@npm:^3.2.0, istanbul-lib-coverage@npm:^3.2.2":
+  version: 3.2.2
+  resolution: "istanbul-lib-coverage@npm:3.2.2"
+  checksum: 10/40bbdd1e937dfd8c830fa286d0f665e81b7a78bdabcd4565f6d5667c99828bda3db7fb7ac6b96a3e2e8a2461ddbc5452d9f8bc7d00cb00075fa6a3e99f5b6a81
+  languageName: node
+  linkType: hard
+
+"istanbul-lib-instrument@npm:^5.0.4":
+  version: 5.2.1
+  resolution: "istanbul-lib-instrument@npm:5.2.1"
+  dependencies:
+    "@babel/core": "npm:^7.12.3"
+    "@babel/parser": "npm:^7.14.7"
+    "@istanbuljs/schema": "npm:^0.1.2"
+    istanbul-lib-coverage: "npm:^3.2.0"
+    semver: "npm:^6.3.0"
+  checksum: 10/bbc4496c2f304d799f8ec22202ab38c010ac265c441947f075c0f7d46bd440b45c00e46017cf9053453d42182d768b1d6ed0e70a142c95ab00df9843aa5ab80e
+  languageName: node
+  linkType: hard
+
+"istanbul-lib-report@npm:^3.0.0, istanbul-lib-report@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "istanbul-lib-report@npm:3.0.1"
+  dependencies:
+    istanbul-lib-coverage: "npm:^3.0.0"
+    make-dir: "npm:^4.0.0"
+    supports-color: "npm:^7.1.0"
+  checksum: 10/86a83421ca1cf2109a9f6d193c06c31ef04a45e72a74579b11060b1e7bb9b6337a4e6f04abfb8857e2d569c271273c65e855ee429376a0d7c91ad91db42accd1
+  languageName: node
+  linkType: hard
+
+"istanbul-lib-source-maps@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "istanbul-lib-source-maps@npm:4.0.1"
+  dependencies:
+    debug: "npm:^4.1.1"
+    istanbul-lib-coverage: "npm:^3.0.0"
+    source-map: "npm:^0.6.1"
+  checksum: 10/5526983462799aced011d776af166e350191b816821ea7bcf71cab3e5272657b062c47dc30697a22a43656e3ced78893a42de677f9ccf276a28c913190953b82
+  languageName: node
+  linkType: hard
+
+"istanbul-reports@npm:^3.1.7":
+  version: 3.2.0
+  resolution: "istanbul-reports@npm:3.2.0"
+  dependencies:
+    html-escaper: "npm:^2.0.0"
+    istanbul-lib-report: "npm:^3.0.0"
+  checksum: 10/6773a1d5c7d47eeec75b317144fe2a3b1da84a44b6282bebdc856e09667865e58c9b025b75b3d87f5bc62939126cbba4c871ee84254537d934ba5da5d4c4ec4e
+  languageName: node
+  linkType: hard
+
 "istextorbinary@npm:2.1.0":
   version: 2.1.0
   resolution: "istextorbinary@npm:2.1.0"
@@ -15401,7 +15304,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"js-yaml@npm:^3.2.5, js-yaml@npm:^3.2.7":
+"js-yaml@npm:^3.13.1, js-yaml@npm:^3.2.5, js-yaml@npm:^3.2.7":
   version: 3.14.1
   resolution: "js-yaml@npm:3.14.1"
   dependencies:
@@ -16235,6 +16138,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"make-dir@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "make-dir@npm:4.0.0"
+  dependencies:
+    semver: "npm:^7.5.3"
+  checksum: 10/bf0731a2dd3aab4db6f3de1585cea0b746bb73eb5a02e3d8d72757e376e64e6ada190b1eddcde5b2f24a81b688a9897efd5018737d05e02e2a671dda9cff8a8a
+  languageName: node
+  linkType: hard
+
 "make-fetch-happen@npm:^10.0.3":
   version: 10.2.1
   resolution: "make-fetch-happen@npm:10.2.1"
@@ -17064,6 +16976,15 @@ __metadata:
   dependencies:
     node-gyp: "npm:latest"
   checksum: 10/ee1e1ed6284a2f8cd1d59ac6175ecbabf8978dcf570345e9a8095a9d0a2b9ced591074ae77f9009287b00c402352b38aa9322a34f2199cdc9f567b842a636b94
+  languageName: node
+  linkType: hard
+
+"node-dir@npm:^0.1.17":
+  version: 0.1.17
+  resolution: "node-dir@npm:0.1.17"
+  dependencies:
+    minimatch: "npm:^3.0.2"
+  checksum: 10/281fdea12d9c080a7250e5b5afefa3ab39426d40753ec8126a2d1e67f189b8824723abfed74f5d8549c5d78352d8c489fe08d0b067d7684c87c07283d38374a5
   languageName: node
   linkType: hard
 
@@ -19101,6 +19022,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"resolve-from@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "resolve-from@npm:5.0.0"
+  checksum: 10/be18a5e4d76dd711778664829841cde690971d02b6cbae277735a09c1c28f407b99ef6ef3cd585a1e6546d4097b28df40ed32c4a287b9699dcf6d7f208495e23
+  languageName: node
+  linkType: hard
+
 "resolve-package-path@npm:^1.0.11, resolve-package-path@npm:^1.2.6":
   version: 1.2.7
   resolution: "resolve-package-path@npm:1.2.7"
@@ -19680,7 +19608,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:^7.5.2, semver@npm:^7.6.0, semver@npm:^7.7.1":
+"semver@npm:^7.5.2, semver@npm:^7.5.3, semver@npm:^7.6.0, semver@npm:^7.7.1":
   version: 7.7.2
   resolution: "semver@npm:7.7.2"
   bin:
@@ -20962,6 +20890,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"test-exclude@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "test-exclude@npm:6.0.0"
+  dependencies:
+    "@istanbuljs/schema": "npm:^0.1.2"
+    glob: "npm:^7.1.4"
+    minimatch: "npm:^3.0.4"
+  checksum: 10/8fccb2cb6c8fcb6bb4115394feb833f8b6cf4b9503ec2485c2c90febf435cac62abe882a0c5c51a37b9bbe70640cdd05acf5f45e486ac4583389f4b0855f69e5
+  languageName: node
+  linkType: hard
+
 "testem@npm:^3.15.2":
   version: 3.16.0
   resolution: "testem@npm:3.16.0"
@@ -21909,7 +21848,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"walk-sync@npm:^2.0.0, walk-sync@npm:^2.0.2, walk-sync@npm:^2.2.0":
+"walk-sync@npm:^2.0.0, walk-sync@npm:^2.0.2, walk-sync@npm:^2.1.0, walk-sync@npm:^2.2.0":
   version: 2.2.0
   resolution: "walk-sync@npm:2.2.0"
   dependencies:
