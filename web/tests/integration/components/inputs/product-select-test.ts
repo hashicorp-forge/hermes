@@ -7,12 +7,14 @@ import { MirageTestContext } from "ember-cli-mirage/test-support";
 import { Placement } from "@floating-ui/dom";
 import htmlElement from "hermes/utils/html-element";
 import { setupProductIndex } from "hermes/tests/mirage-helpers/utils";
+import {
+  POPOVER,
+  PRODUCT_VALUE,
+  TOGGLE_SELECT,
+} from "hermes/tests/helpers/selectors";
 
-const TOGGLE = "[data-test-x-dropdown-list-toggle-select]";
-const POPOVER = "[data-test-x-dropdown-list-content]";
 const DROPDOWN_PRODUCT =
   "[data-test-x-dropdown-list-content] [data-test-product-select-item]";
-const PRODUCT_NAME = "[data-test-product-value]";
 const FOLDER_ICON = "[data-test-icon='folder']";
 const ABBREVIATION = "[data-test-product-select-item-abbreviation]";
 
@@ -52,13 +54,13 @@ module("Integration | Component | inputs/product-select", function (hooks) {
       />
     `);
 
-    assert.dom(TOGGLE).hasText("Vault VLT");
+    assert.dom(TOGGLE_SELECT).hasText("Vault VLT");
 
-    await click(TOGGLE);
+    await click(TOGGLE_SELECT);
 
     assert.dom(DROPDOWN_PRODUCT).exists({ count: 4 });
     assert
-      .dom(`${DROPDOWN_PRODUCT} ${PRODUCT_NAME}`)
+      .dom(`${DROPDOWN_PRODUCT} ${PRODUCT_VALUE}`)
       .containsText("Test Product 0");
     assert.dom(`${DROPDOWN_PRODUCT} ${ABBREVIATION}`).hasText("TP0");
   });
@@ -76,7 +78,7 @@ module("Integration | Component | inputs/product-select", function (hooks) {
       />
     `);
 
-    await click(TOGGLE);
+    await click(TOGGLE_SELECT);
     await click(DROPDOWN_PRODUCT);
 
     assert.equal(count, 1, "the action was called once");
@@ -99,9 +101,9 @@ module("Integration | Component | inputs/product-select", function (hooks) {
      * to demonstrate that the popover is sized by `matchAnchorWidth`
      */
 
-    await click(TOGGLE);
+    await click(TOGGLE_SELECT);
 
-    const buttonWidth = htmlElement(TOGGLE)?.offsetWidth;
+    const buttonWidth = htmlElement(TOGGLE_SELECT)?.offsetWidth;
     const popoverWidth = htmlElement(POPOVER)?.offsetWidth;
 
     assert.equal(buttonWidth, 800);
@@ -117,12 +119,12 @@ module("Integration | Component | inputs/product-select", function (hooks) {
       />
     `);
 
-    const toggle = htmlElement(TOGGLE);
+    const toggle = htmlElement(TOGGLE_SELECT);
 
     const toggleLeft = toggle.offsetLeft;
     const toggleBottom = toggle.offsetTop + toggle.offsetHeight;
 
-    await click(TOGGLE);
+    await click(TOGGLE_SELECT);
 
     const popover = htmlElement(POPOVER);
 
@@ -140,7 +142,7 @@ module("Integration | Component | inputs/product-select", function (hooks) {
       />
     `);
 
-    assert.dom(TOGGLE).hasText("Select a product/area");
+    assert.dom(TOGGLE_SELECT).hasText("Select a product/area");
     assert.dom(FOLDER_ICON).exists();
   });
 
@@ -153,7 +155,7 @@ module("Integration | Component | inputs/product-select", function (hooks) {
       />
     `);
 
-    assert.dom(`${TOGGLE} ${PRODUCT_NAME}`).hasText("Vault");
+    assert.dom(`${TOGGLE_SELECT} ${PRODUCT_VALUE}`).hasText("Vault");
     assert.dom(ABBREVIATION).doesNotExist();
   });
 
@@ -169,7 +171,7 @@ module("Integration | Component | inputs/product-select", function (hooks) {
     `);
 
     assert
-      .dom(TOGGLE)
+      .dom(TOGGLE_SELECT)
       .hasClass("shadow-elevation-low")
       .hasClass("border-color-border-input")
       .doesNotHaveClass("quarternary-button");
@@ -177,7 +179,7 @@ module("Integration | Component | inputs/product-select", function (hooks) {
     this.set("color", "quarternary");
 
     assert
-      .dom(TOGGLE)
+      .dom(TOGGLE_SELECT)
       .doesNotHaveClass("shadow-elevation-low")
       .doesNotHaveClass("border-color-border-input")
       .hasClass("quarternary-button");

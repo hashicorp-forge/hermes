@@ -12,23 +12,20 @@ import {
 import { setupMirage } from "ember-cli-mirage/test-support";
 import { MirageTestContext } from "ember-cli-mirage/test-support";
 import { authenticateTestUser } from "hermes/mirage/utils";
-
-const KEYBOARD_SHORTCUT_SELECTOR = ".global-search-shortcut-affordance";
-const SEARCH_INPUT_SELECTOR = "[data-test-global-search-input]";
-const POPOVER_SELECTOR = ".search-popover";
-const SEARCH_POPOVER_LINK_SELECTOR = "[data-test-x-dropdown-list-item-link-to]";
-
-const POPOVER_LOADING_ICON =
-  "[data-test-x-dropdown-list-default-loading-block]";
-
-const PROJECT_HITS = "[data-test-project-hits]";
-const DOCUMENT_HITS = "[data-test-document-hits]";
-const NO_MATCHES = "[data-test-no-matches]";
-const VIEW_ALL_RESULTS_LINK = "[data-test-view-all-results-link]";
-
-const PRODUCT_AREA_HIT = "[data-test-product-area-hit]";
-const PROJECT_HIT = "[data-test-project-hit]";
-const DOCUMENT_HIT = "[data-test-document-hit]";
+import {
+  DOCUMENT_HIT,
+  DOCUMENT_HITS,
+  KEYBOARD_SHORTCUT,
+  NO_MATCHES,
+  POPOVER_LOADING_ICON,
+  PRODUCT_AREA_HIT,
+  PROJECT_HIT,
+  PROJECT_HITS,
+  SEARCH_INPUT,
+  SEARCH_POPOVER,
+  SEARCH_POPOVER_LINK,
+  VIEW_ALL_RESULTS_LINK,
+} from "hermes/tests/helpers/selectors";
 
 interface Context extends MirageTestContext {
   query: string;
@@ -51,7 +48,7 @@ module("Integration | Component | header/search", function (hooks) {
     assert.dom(".test-search").exists("renders with the splatted className");
 
     assert
-      .dom(SEARCH_INPUT_SELECTOR)
+      .dom(SEARCH_INPUT)
       .hasAttribute("placeholder", "Search Hermes...");
   });
 
@@ -61,13 +58,13 @@ module("Integration | Component | header/search", function (hooks) {
     `);
 
     assert
-      .dom(KEYBOARD_SHORTCUT_SELECTOR)
+      .dom(KEYBOARD_SHORTCUT)
       .exists("the keyboard shortcut icon is shown");
 
-    await fillIn(SEARCH_INPUT_SELECTOR, "test");
+    await fillIn(SEARCH_INPUT, "test");
 
     assert
-      .dom(KEYBOARD_SHORTCUT_SELECTOR)
+      .dom(KEYBOARD_SHORTCUT)
       .doesNotExist(
         "the keyboard shortcut icon is hidden when the user enters a query",
       );
@@ -79,22 +76,22 @@ module("Integration | Component | header/search", function (hooks) {
       <div class="clickaway-target"></div>
     `);
 
-    assert.dom(POPOVER_SELECTOR).doesNotExist("the popover is hidden");
+    assert.dom(SEARCH_POPOVER).doesNotExist("the popover is hidden");
 
-    await fillIn(SEARCH_INPUT_SELECTOR, "t");
+    await fillIn(SEARCH_INPUT, "t");
 
     assert
-      .dom(POPOVER_SELECTOR)
+      .dom(SEARCH_POPOVER)
       .exists("the popover is shown when a query is entered");
 
     await click(".clickaway-target");
 
-    assert.dom(POPOVER_SELECTOR).doesNotExist("the popover is hidden");
+    assert.dom(SEARCH_POPOVER).doesNotExist("the popover is hidden");
 
-    await fillIn(SEARCH_INPUT_SELECTOR, "t");
+    await fillIn(SEARCH_INPUT, "t");
 
     assert
-      .dom(POPOVER_SELECTOR)
+      .dom(SEARCH_POPOVER)
       .exists("the popover is shown when a query is entered");
   });
 
@@ -103,11 +100,11 @@ module("Integration | Component | header/search", function (hooks) {
       <Header::Search />
     `);
 
-    await fillIn(SEARCH_INPUT_SELECTOR, "xyz");
+    await fillIn(SEARCH_INPUT, "xyz");
 
     assert.dom(DOCUMENT_HITS).doesNotExist("no documents are shown");
 
-    await fillIn(SEARCH_INPUT_SELECTOR, "vault");
+    await fillIn(SEARCH_INPUT, "vault");
 
     assert.dom(DOCUMENT_HITS).exists();
     assert.dom(DOCUMENT_HIT).exists({ count: 5 });
@@ -128,7 +125,7 @@ module("Integration | Component | header/search", function (hooks) {
       <Header::Search />
     `);
 
-    await fillIn(SEARCH_INPUT_SELECTOR, "house");
+    await fillIn(SEARCH_INPUT, "house");
 
     assert.dom(PROJECT_HITS).exists();
     assert.dom(PROJECT_HIT).exists({ count: 2 });
@@ -140,11 +137,11 @@ module("Integration | Component | header/search", function (hooks) {
       <Header::Search />
     `);
 
-    assert.dom(SEARCH_INPUT_SELECTOR).isNotFocused();
+    assert.dom(SEARCH_INPUT).isNotFocused();
 
     await triggerKeyEvent(document, "keydown", "K", { metaKey: true });
 
-    assert.dom(SEARCH_INPUT_SELECTOR).isFocused();
+    assert.dom(SEARCH_INPUT).isFocused();
   });
 
   test("the arrow keys work as expected", async function (this: Context, assert) {
@@ -152,26 +149,26 @@ module("Integration | Component | header/search", function (hooks) {
       <Header::Search />
     `);
 
-    await fillIn(SEARCH_INPUT_SELECTOR, "test document");
+    await fillIn(SEARCH_INPUT, "test document");
 
-    assert.dom(SEARCH_POPOVER_LINK_SELECTOR + "[aria-selected]").doesNotExist();
+    assert.dom(SEARCH_POPOVER_LINK + "[aria-selected]").doesNotExist();
 
-    await triggerKeyEvent(SEARCH_INPUT_SELECTOR, "keydown", "ArrowDown");
+    await triggerKeyEvent(SEARCH_INPUT, "keydown", "ArrowDown");
 
     assert
-      .dom(SEARCH_POPOVER_LINK_SELECTOR + "[aria-selected]")
+      .dom(SEARCH_POPOVER_LINK + "[aria-selected]")
       .containsText("Test Document 0");
 
-    await fillIn(SEARCH_INPUT_SELECTOR, "te");
+    await fillIn(SEARCH_INPUT, "te");
 
     assert
-      .dom(SEARCH_POPOVER_LINK_SELECTOR + "[aria-selected]")
+      .dom(SEARCH_POPOVER_LINK + "[aria-selected]")
       .doesNotExist("aria selection is updated when the query changes");
 
-    await triggerKeyEvent(SEARCH_INPUT_SELECTOR, "keydown", "ArrowDown");
+    await triggerKeyEvent(SEARCH_INPUT, "keydown", "ArrowDown");
 
     assert
-      .dom(SEARCH_POPOVER_LINK_SELECTOR + "[aria-selected]")
+      .dom(SEARCH_POPOVER_LINK + "[aria-selected]")
       .containsText("Test Document 0");
   });
 
@@ -180,7 +177,7 @@ module("Integration | Component | header/search", function (hooks) {
       <Header::Search />
     `);
 
-    await fillIn(SEARCH_INPUT_SELECTOR, "xyz");
+    await fillIn(SEARCH_INPUT, "xyz");
 
     assert.dom(NO_MATCHES).exists();
   });
@@ -196,9 +193,9 @@ module("Integration | Component | header/search", function (hooks) {
       <Header::Search @query={{this.query}} />
     `);
 
-    assert.dom(SEARCH_INPUT_SELECTOR).hasValue(query);
+    assert.dom(SEARCH_INPUT).hasValue(query);
 
-    const clickPromise = click(SEARCH_INPUT_SELECTOR);
+    const clickPromise = click(SEARCH_INPUT);
 
     await waitFor(POPOVER_LOADING_ICON);
 
@@ -225,7 +222,7 @@ module("Integration | Component | header/search", function (hooks) {
       <Header::Search />
     `);
 
-    await fillIn(SEARCH_INPUT_SELECTOR, query);
+    await fillIn(SEARCH_INPUT, query);
 
     assert.dom(PRODUCT_AREA_HIT).exists();
     assert.dom(PRODUCT_AREA_HIT).hasText(title);

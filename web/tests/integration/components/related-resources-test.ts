@@ -12,29 +12,28 @@ import { hbs } from "ember-cli-htmlbars";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { Response } from "miragejs";
 import config from "hermes/config/environment";
-import algoliaHosts from "hermes/mirage/algolia/hosts";
+import searchHosts from "hermes/mirage/search/hosts";
 import { RelatedResource } from "hermes/components/related-resources";
 import { RelatedResourcesScope } from "hermes/components/related-resources";
 import { authenticateTestUser } from "hermes/mirage/utils";
+import {
+  RELATED_DOCUMENT_OPTION,
+  ADD_RELATED_RESOURCES_SEARCH_INPUT,
+  NO_RESOURCES_FOUND,
+  ADD_RESOURCE_MODAL,
+  EXTERNAL_RESOURCE_TITLE_INPUT,
+  CUSTOM_PEOPLE_FIELD,
+} from "hermes/tests/helpers/selectors";
 
-const RELATED_DOCUMENT_OPTION_SELECTOR = ".related-document-option";
-const ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR =
-  "[data-test-related-resources-search-input]";
-const NO_RESOURCES_FOUND_SELECTOR = "[data-test-no-related-resources-found]";
-const ADD_FALLBACK_EXTERNAL_RESOURCE_SELECTOR =
-  "[data-test-add-fallback-external-resource]";
-const EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR = ".external-resource-title-input";
+const ADD_FALLBACK_EXTERNAL_RESOURCE_SELECTOR = "[data-test-add-fallback-external-resource]";
 const ADD_EXTERNAL_RESOURCE_ERROR_SELECTOR = `${ADD_FALLBACK_EXTERNAL_RESOURCE_SELECTOR} [data-test-error]`;
-const ADD_RESOURCE_MODAL_SELECTOR = "[data-test-add-related-resource-modal]";
-const EXTERNAL_RESOURCE_MODAL_SELECTOR =
-  "[data-test-add-or-edit-external-resource-modal]";
+const EXTERNAL_RESOURCE_MODAL_SELECTOR = "[data-test-add-or-edit-external-resource-modal]";
 const ADD_FALLBACK_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR = `${ADD_FALLBACK_EXTERNAL_RESOURCE_SELECTOR} [data-test-submit-button]`;
 const CURRENT_DOMAIN_PROTOCOL = window.location.protocol + "//";
 const CURRENT_DOMAIN = window.location.hostname;
 const CURRENT_PORT = window.location.port;
 const SHORT_LINK_BASE_URL = config.shortLinkBaseURL;
 const SEARCH_ERROR_MESSAGE = "Search error. Type to retry.";
-const CUSTOM_PEOPLE_FIELD_SELECTOR = "[data-test-custom-people-field]";
 
 interface RelatedResourcesComponentTestContext extends MirageTestContext {
   modalHeaderTitle: string;
@@ -163,9 +162,9 @@ module("Integration | Component | related-resources", function (hooks) {
 
     await click("button");
 
-    await waitFor(ADD_RESOURCE_MODAL_SELECTOR);
+    await waitFor(ADD_RESOURCE_MODAL);
 
-    assert.dom(ADD_RESOURCE_MODAL_SELECTOR).exists();
+    assert.dom(ADD_RESOURCE_MODAL).exists();
   });
 
   // do we want this component to handle editing, removing?
@@ -201,10 +200,10 @@ module("Integration | Component | related-resources", function (hooks) {
 
     await click("button");
 
-    await waitFor(ADD_RESOURCE_MODAL_SELECTOR);
-    await click(RELATED_DOCUMENT_OPTION_SELECTOR);
+    await waitFor(ADD_RESOURCE_MODAL);
+    await click(RELATED_DOCUMENT_OPTION);
 
-    assert.dom(ADD_RESOURCE_MODAL_SELECTOR).doesNotExist();
+    assert.dom(ADD_RESOURCE_MODAL).doesNotExist();
     assert.dom(".empty").doesNotExist();
 
     assert.dom(".list").exists();
@@ -228,17 +227,17 @@ module("Integration | Component | related-resources", function (hooks) {
 
     await click("button");
 
-    await waitFor(ADD_RESOURCE_MODAL_SELECTOR);
+    await waitFor(ADD_RESOURCE_MODAL);
 
-    assert.dom(RELATED_DOCUMENT_OPTION_SELECTOR).exists({ count: 3 });
+    assert.dom(RELATED_DOCUMENT_OPTION).exists({ count: 3 });
 
-    await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, "XYZ");
+    await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT, "XYZ");
 
-    await waitFor(NO_RESOURCES_FOUND_SELECTOR);
+    await waitFor(NO_RESOURCES_FOUND);
 
-    assert.dom(NO_RESOURCES_FOUND_SELECTOR).exists();
+    assert.dom(NO_RESOURCES_FOUND).exists();
 
-    assert.dom(RELATED_DOCUMENT_OPTION_SELECTOR).doesNotExist();
+    assert.dom(RELATED_DOCUMENT_OPTION).doesNotExist();
   });
 
   test("you can add related external links as a fallback", async function (this: RelatedResourcesComponentTestContext, assert) {
@@ -266,22 +265,22 @@ module("Integration | Component | related-resources", function (hooks) {
 
     await click("button");
 
-    await waitFor(ADD_RESOURCE_MODAL_SELECTOR);
+    await waitFor(ADD_RESOURCE_MODAL);
 
-    assert.dom(RELATED_DOCUMENT_OPTION_SELECTOR).exists({ count: 3 });
+    assert.dom(RELATED_DOCUMENT_OPTION).exists({ count: 3 });
 
     await fillIn(
-      ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR,
+      ADD_RELATED_RESOURCES_SEARCH_INPUT,
       "https://example.com",
     );
 
     assert
-      .dom(RELATED_DOCUMENT_OPTION_SELECTOR)
+      .dom(RELATED_DOCUMENT_OPTION)
       .doesNotExist("documents are removed when a valid URL is entered");
     assert.dom(ADD_FALLBACK_EXTERNAL_RESOURCE_SELECTOR).exists();
 
     assert
-      .dom(EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR)
+      .dom(EXTERNAL_RESOURCE_TITLE_INPUT)
       .hasAttribute("placeholder", "Enter a title");
 
     // Try to add a resource without a title
@@ -296,10 +295,10 @@ module("Integration | Component | related-resources", function (hooks) {
 
     // Now add a a title
 
-    await fillIn(EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR, "Example");
+    await fillIn(EXTERNAL_RESOURCE_TITLE_INPUT, "Example");
     await click(ADD_FALLBACK_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR);
 
-    assert.dom(ADD_RESOURCE_MODAL_SELECTOR).doesNotExist("the modal is closed");
+    assert.dom(ADD_RESOURCE_MODAL).doesNotExist("the modal is closed");
     assert.dom(".item").hasText("Example");
   });
 
@@ -334,7 +333,7 @@ module("Integration | Component | related-resources", function (hooks) {
 
     await click("button");
 
-    await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, url);
+    await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT, url);
 
     assert
       .dom(ADD_EXTERNAL_RESOURCE_ERROR_SELECTOR)
@@ -343,10 +342,10 @@ module("Integration | Component | related-resources", function (hooks) {
     await click(ADD_FALLBACK_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR);
 
     assert
-      .dom(ADD_RESOURCE_MODAL_SELECTOR)
+      .dom(ADD_RESOURCE_MODAL)
       .exists("the button is disabled when the URL is a duplicate");
 
-    await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, "https://");
+    await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT, "https://");
 
     assert
       .dom(ADD_EXTERNAL_RESOURCE_ERROR_SELECTOR)
@@ -384,13 +383,13 @@ module("Integration | Component | related-resources", function (hooks) {
 
     const openModal = async () => {
       await click("button");
-      await waitFor(ADD_RESOURCE_MODAL_SELECTOR);
+      await waitFor(ADD_RESOURCE_MODAL);
     };
 
     await openModal();
 
     assert
-      .dom(RELATED_DOCUMENT_OPTION_SELECTOR)
+      .dom(RELATED_DOCUMENT_OPTION)
       .exists({ count: 5 }, "all docs are shown");
 
     await click(".click-away");
@@ -400,7 +399,7 @@ module("Integration | Component | related-resources", function (hooks) {
     await openModal();
 
     assert
-      .dom(RELATED_DOCUMENT_OPTION_SELECTOR)
+      .dom(RELATED_DOCUMENT_OPTION)
       .exists({ count: 4 }, "the parent doc is excluded");
 
     await click(".click-away");
@@ -410,7 +409,7 @@ module("Integration | Component | related-resources", function (hooks) {
     await openModal();
 
     assert
-      .dom(RELATED_DOCUMENT_OPTION_SELECTOR)
+      .dom(RELATED_DOCUMENT_OPTION)
       .exists({ count: 2 }, "the related docs are excluded");
   });
 
@@ -433,15 +432,15 @@ module("Integration | Component | related-resources", function (hooks) {
 
     await click("button");
 
-    await waitFor(ADD_RESOURCE_MODAL_SELECTOR);
+    await waitFor(ADD_RESOURCE_MODAL);
 
     await fillIn(
-      ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR,
+      ADD_RELATED_RESOURCES_SEARCH_INPUT,
       "https://hashicorp.com",
     );
 
-    assert.dom(NO_RESOURCES_FOUND_SELECTOR).exists();
-    assert.dom(EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR).doesNotExist();
+    assert.dom(NO_RESOURCES_FOUND).exists();
+    assert.dom(EXTERNAL_RESOURCE_TITLE_INPUT).doesNotExist();
   });
 
   test("you can scope the component to external-link resources", async function (this: RelatedResourcesComponentTestContext, assert) {
@@ -472,7 +471,7 @@ module("Integration | Component | related-resources", function (hooks) {
 
     await waitFor(EXTERNAL_RESOURCE_MODAL_SELECTOR);
 
-    assert.dom(RELATED_DOCUMENT_OPTION_SELECTOR).doesNotExist();
+    assert.dom(RELATED_DOCUMENT_OPTION).doesNotExist();
     assert.dom("[data-test-external-resource-form]").exists();
     await fillIn("[data-test-external-resource-form-title-input]", "Example");
     await fillIn(
@@ -517,29 +516,29 @@ module("Integration | Component | related-resources", function (hooks) {
     // Construct a "valid" first-class Hermes URL
     const documentURL = `${CURRENT_DOMAIN_PROTOCOL}${CURRENT_DOMAIN}:${CURRENT_PORT}/document/${docID}`;
 
-    await waitFor(ADD_RESOURCE_MODAL_SELECTOR);
+    await waitFor(ADD_RESOURCE_MODAL);
 
-    await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, documentURL);
-    await waitFor(RELATED_DOCUMENT_OPTION_SELECTOR);
+    await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT, documentURL);
+    await waitFor(RELATED_DOCUMENT_OPTION);
 
     assert
-      .dom(RELATED_DOCUMENT_OPTION_SELECTOR)
+      .dom(RELATED_DOCUMENT_OPTION)
       .containsText(docTitle, "the document URL is correctly parsed");
 
     // Reset the input
-    await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, "");
+    await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT, "");
 
     // Confirm the reset
-    assert.dom(RELATED_DOCUMENT_OPTION_SELECTOR).doesNotContainText(docTitle);
+    assert.dom(RELATED_DOCUMENT_OPTION).doesNotContainText(docTitle);
 
     // Construct a first-class Google URL
     const googleURL = `https://docs.google.com/document/d/${docID}/edit`;
 
-    await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, googleURL);
-    await waitFor(RELATED_DOCUMENT_OPTION_SELECTOR);
+    await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT, googleURL);
+    await waitFor(RELATED_DOCUMENT_OPTION);
 
     assert
-      .dom(RELATED_DOCUMENT_OPTION_SELECTOR)
+      .dom(RELATED_DOCUMENT_OPTION)
       .containsText(docTitle, "the Google URL is correctly parsed");
   });
 
@@ -574,12 +573,12 @@ module("Integration | Component | related-resources", function (hooks) {
 
     await click("button");
 
-    await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, shortLink);
+    await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT, shortLink);
 
-    await waitFor(RELATED_DOCUMENT_OPTION_SELECTOR);
+    await waitFor(RELATED_DOCUMENT_OPTION);
 
     assert
-      .dom(RELATED_DOCUMENT_OPTION_SELECTOR)
+      .dom(RELATED_DOCUMENT_OPTION)
       .containsText(docTitle, "the shortLink is correctly parsed");
   });
 
@@ -602,7 +601,7 @@ module("Integration | Component | related-resources", function (hooks) {
     const documentURL = `${CURRENT_DOMAIN_PROTOCOL}${CURRENT_DOMAIN}:${CURRENT_PORT}/document/999`;
 
     await click("button");
-    await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, documentURL);
+    await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT, documentURL);
 
     assert
       .dom(ADD_FALLBACK_EXTERNAL_RESOURCE_SELECTOR)
@@ -626,7 +625,7 @@ module("Integration | Component | related-resources", function (hooks) {
     const shortLink = `${SHORT_LINK_BASE_URL}/RFC/VLT-999`;
 
     await click("button");
-    await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, shortLink);
+    await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT, shortLink);
 
     assert
       .dom(ADD_FALLBACK_EXTERNAL_RESOURCE_SELECTOR)
@@ -661,15 +660,15 @@ module("Integration | Component | related-resources", function (hooks) {
     const documentURL = `${CURRENT_DOMAIN_PROTOCOL}${CURRENT_DOMAIN}:${CURRENT_PORT}/document/${docID}`;
 
     // Find and add the document
-    await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, documentURL);
-    await click(RELATED_DOCUMENT_OPTION_SELECTOR);
+    await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT, documentURL);
+    await click(RELATED_DOCUMENT_OPTION);
 
     // Reopen the modal and paste the same URL
     await click("button");
-    await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, documentURL);
+    await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT, documentURL);
 
     assert
-      .dom(NO_RESOURCES_FOUND_SELECTOR)
+      .dom(NO_RESOURCES_FOUND)
       .hasText("This doc has already been added.");
   });
 
@@ -703,20 +702,20 @@ module("Integration | Component | related-resources", function (hooks) {
     await click("button");
 
     // Find and add the document
-    await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, shortLink);
-    await click(RELATED_DOCUMENT_OPTION_SELECTOR);
+    await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT, shortLink);
+    await click(RELATED_DOCUMENT_OPTION);
 
     // Reopen the modal and paste the same URL
     await click("button");
-    await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR, shortLink);
+    await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT, shortLink);
 
     assert
-      .dom(NO_RESOURCES_FOUND_SELECTOR)
+      .dom(NO_RESOURCES_FOUND)
       .hasText("This doc has already been added.");
   });
 
-  test("a non-404 getAlgoliaObject call is handled", async function (this: RelatedResourcesComponentTestContext, assert) {
-    algoliaHosts.forEach((host) => {
+  test("a non-404 getSearchObject call is handled", async function (this: RelatedResourcesComponentTestContext, assert) {
+    searchHosts.forEach((host) => {
       this.server.get(host, () => {
         return new Response(500, {}, {});
       });
@@ -739,25 +738,25 @@ module("Integration | Component | related-resources", function (hooks) {
 
     // Enter what looks like a valid URL to trigger an object lookup
     await fillIn(
-      ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR,
+      ADD_RELATED_RESOURCES_SEARCH_INPUT,
       `${CURRENT_DOMAIN_PROTOCOL}${CURRENT_DOMAIN}:${CURRENT_PORT}/document/xyz`,
     );
 
-    await waitFor(NO_RESOURCES_FOUND_SELECTOR);
+    await waitFor(NO_RESOURCES_FOUND);
 
     await waitUntil(() => {
-      return find(NO_RESOURCES_FOUND_SELECTOR)?.textContent?.includes(
+      return find(NO_RESOURCES_FOUND)?.textContent?.includes(
         SEARCH_ERROR_MESSAGE,
       );
     });
 
-    assert.dom(NO_RESOURCES_FOUND_SELECTOR).containsText(SEARCH_ERROR_MESSAGE);
+    assert.dom(NO_RESOURCES_FOUND).containsText(SEARCH_ERROR_MESSAGE);
   });
 
   test("it shows an error when searching fails", async function (this: RelatedResourcesComponentTestContext, assert) {
     this.server.createList("document", 3);
 
-    algoliaHosts.forEach((host) => {
+    searchHosts.forEach((host) => {
       this.server.post(host, () => {
         return new Response(500, {}, {});
       });
@@ -778,9 +777,9 @@ module("Integration | Component | related-resources", function (hooks) {
 
     await click("button");
 
-    await waitFor(NO_RESOURCES_FOUND_SELECTOR);
+    await waitFor(NO_RESOURCES_FOUND);
     assert
-      .dom(NO_RESOURCES_FOUND_SELECTOR)
+      .dom(NO_RESOURCES_FOUND)
       .containsText(
         SEARCH_ERROR_MESSAGE,
         "the error message is shown in the modal",
@@ -804,8 +803,8 @@ module("Integration | Component | related-resources", function (hooks) {
 
     await click("button");
 
-    await waitFor(ADD_RESOURCE_MODAL_SELECTOR);
+    await waitFor(ADD_RESOURCE_MODAL);
 
-    assert.dom(ADD_RESOURCE_MODAL_SELECTOR).exists();
+    assert.dom(ADD_RESOURCE_MODAL).exists();
   });
 });

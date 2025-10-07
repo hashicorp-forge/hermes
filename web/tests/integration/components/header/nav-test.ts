@@ -13,9 +13,9 @@ import {
   TEST_USER_2_GIVEN_NAME,
   TEST_USER_2_NAME,
 } from "hermes/mirage/utils";
+import { USER_MENU_TOGGLE } from "hermes/tests/helpers/selectors";
 
 const SUPPORT_URL = "https://example.com/support";
-const USER_MENU_TOGGLE_SELECTOR = "[data-test-user-menu-toggle]";
 const CREATE_NEW_BUTTON = "[data-test-create-new-button]";
 const HIGHLIGHT_BADGE = ".highlighted-new-badge";
 
@@ -54,7 +54,7 @@ module("Integration | Component | header/nav", function (hooks) {
 
     assert.dom(".global-search").exists();
 
-    await click(USER_MENU_TOGGLE_SELECTOR);
+    await click(USER_MENU_TOGGLE);
 
     assert.dom("[data-test-user-menu-title]").hasText(TEST_USER_2_NAME);
     assert.dom("[data-test-user-menu-email]").hasText(TEST_USER_2_EMAIL);
@@ -82,7 +82,7 @@ module("Integration | Component | header/nav", function (hooks) {
 
     assert.dom("[data-test-user-menu-highlight]").exists("highlight is shown");
 
-    await click(USER_MENU_TOGGLE_SELECTOR);
+    await click(USER_MENU_TOGGLE);
 
     assert
       .dom("[data-test-user-menu-highlight]")
@@ -91,8 +91,8 @@ module("Integration | Component | header/nav", function (hooks) {
     assert.dom(HIGHLIGHT_BADGE).hasText("New");
 
     // close and reopen the menu
-    await click(USER_MENU_TOGGLE_SELECTOR);
-    await click(USER_MENU_TOGGLE_SELECTOR);
+    await click(USER_MENU_TOGGLE);
+    await click(USER_MENU_TOGGLE);
 
     assert
       .dom(".highlighted-new")
@@ -110,7 +110,7 @@ module("Integration | Component | header/nav", function (hooks) {
       <Header::Nav />
     `);
 
-    await click(USER_MENU_TOGGLE_SELECTOR);
+    await click(USER_MENU_TOGGLE);
 
     assert
       .dom("[data-test-user-menu-item='support'] a")

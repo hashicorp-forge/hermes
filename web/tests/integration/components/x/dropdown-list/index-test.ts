@@ -14,6 +14,18 @@ import {
 import { hbs } from "ember-cli-htmlbars";
 import htmlElement from "hermes/utils/html-element";
 import { Placement } from "@floating-ui/dom";
+import {
+  DEFAULT_LOADER,
+  DEFAULT_NO_MATCHES,
+  EXTERNAL_LINK,
+  FILTER_INPUT,
+  LINK_TO,
+  LOADED_CONTENT,
+  LOADING_BLOCK,
+  TOGGLE_ACTION,
+  TOGGLE_ACTION_CHEVRON,
+  TOGGLE_BUTTON,
+} from "hermes/tests/helpers/selectors";
 
 // TODO: Replace with Mirage factories
 
@@ -33,19 +45,9 @@ export const LONG_ITEM_LIST = {
 };
 
 const CONTAINER_CLASS = "x-dropdown-list";
-const TOGGLE_BUTTON_SELECTOR = "[data-test-x-dropdown-list-toggle-button]";
-const TOGGLE_ACTION_SELECTOR = "[data-test-x-dropdown-list-toggle-action]";
 const FIRST_ITEM_ID = "x-dropdown-list-item-0";
 const SECOND_ITEM_ID = "x-dropdown-list-item-1";
 const LAST_ITEM_ID = "x-dropdown-list-item-7";
-const LINK_TO_SELECTOR = "[data-test-x-dropdown-list-item-link-to]";
-const EXTERNAL_LINK = "[data-test-x-dropdown-list-item-external-link]";
-const FILTER_INPUT_SELECTOR = "[data-test-x-dropdown-list-input]";
-const DEFAULT_NO_MATCHES_SELECTOR = ".x-dropdown-list-default-empty-state";
-const LOADED_CONTENT_SELECTOR = "[data-test-x-dropdown-list-loaded-content]";
-const LOADING_BLOCK_SELECTOR = "[data-test-x-dropdown-list-loading-block]";
-const DEFAULT_LOADER_SELECTOR = ".x-dropdown-list-default-loading-container";
-const TOGGLE_ACTION_CHEVRON = "[data-test-toggle-action-chevron]";
 
 interface XDropdownListComponentTestContext extends TestContext {
   items: Record<string, { count: number; isSelected: boolean }>;
@@ -86,7 +88,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
     await click("[data-test-toggle]");
 
-    assert.dom(FILTER_INPUT_SELECTOR).doesNotExist("The input is not shown");
+    assert.dom(FILTER_INPUT).doesNotExist("The input is not shown");
 
     await click("[data-test-toggle]");
 
@@ -94,7 +96,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
     await click("[data-test-toggle]");
 
-    assert.dom(FILTER_INPUT_SELECTOR).exists("The input is shown");
+    assert.dom(FILTER_INPUT).exists("The input is shown");
 
     ariaControlsValue =
       find("[data-test-toggle]")?.getAttribute("aria-controls");
@@ -106,7 +108,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
     assert.equal(
       document.activeElement,
-      find(FILTER_INPUT_SELECTOR),
+      find(FILTER_INPUT),
       "the input is autofocused",
     );
   });
@@ -132,7 +134,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
     assert.dom("[data-test-x-dropdown-list-item]").exists({ count: 8 });
 
-    await fillIn(FILTER_INPUT_SELECTOR, "2");
+    await fillIn(FILTER_INPUT, "2");
 
     assert.dom("[data-test-x-dropdown-list-item]").exists({ count: 1 });
 
@@ -140,10 +142,10 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       .dom("#" + FIRST_ITEM_ID)
       .hasText("Filter02", "the list is filtered and the IDs are updated");
 
-    await fillIn(FILTER_INPUT_SELECTOR, "foobar");
+    await fillIn(FILTER_INPUT, "foobar");
 
     assert.dom("[data-test-x-dropdown-list]").doesNotExist();
-    assert.dom(DEFAULT_NO_MATCHES_SELECTOR).hasText("No matches");
+    assert.dom(DEFAULT_NO_MATCHES).hasText("No matches");
   });
 
   test("filtering works as expected when a secondary filter is passed in", async function (assert) {
@@ -176,11 +178,11 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       </X::DropdownList>
     `);
 
-    await click(TOGGLE_BUTTON_SELECTOR);
+    await click(TOGGLE_BUTTON);
 
     assert.dom("[data-test-x-dropdown-list-item]").exists({ count: 3 });
 
-    await fillIn(FILTER_INPUT_SELECTOR, "foo");
+    await fillIn(FILTER_INPUT, "foo");
 
     assert
       .dom("[data-test-x-dropdown-list-item]")
@@ -189,7 +191,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
         "the list is filtered by both the primary value and secondary filter",
       );
 
-    await fillIn(FILTER_INPUT_SELECTOR, "abc");
+    await fillIn(FILTER_INPUT, "abc");
 
     assert.dom("[data-test-x-dropdown-list-item]").exists({ count: 1 });
   });
@@ -245,7 +247,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       </X::DropdownList>
     `);
 
-    await click(TOGGLE_BUTTON_SELECTOR);
+    await click(TOGGLE_BUTTON);
 
     await triggerKeyEvent("[data-test-toggle]", "keydown", "ArrowDown");
 
@@ -268,7 +270,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       </X::DropdownList>
     `);
 
-    await click(TOGGLE_BUTTON_SELECTOR);
+    await click(TOGGLE_BUTTON);
 
     await click(".x-dropdown-list-input-container");
 
@@ -297,19 +299,19 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     await click("button");
 
     assert.dom("[data-test-x-dropdown-list-item]").exists({ count: 8 });
-    assert.dom(FILTER_INPUT_SELECTOR).hasValue("");
+    assert.dom(FILTER_INPUT).hasValue("");
 
-    await fillIn(FILTER_INPUT_SELECTOR, "2");
+    await fillIn(FILTER_INPUT, "2");
 
     assert.dom("[data-test-x-dropdown-list-item]").exists({ count: 1 });
-    assert.dom(FILTER_INPUT_SELECTOR).hasValue("2");
+    assert.dom(FILTER_INPUT).hasValue("2");
 
     // close and reopen
     await click("button");
     await click("button");
 
     assert.dom("[data-test-x-dropdown-list-item]").exists({ count: 8 });
-    assert.dom(FILTER_INPUT_SELECTOR).hasValue("");
+    assert.dom(FILTER_INPUT).hasValue("");
   });
 
   test("the menu items are assigned IDs", async function (assert) {
@@ -621,9 +623,9 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
 
     await click("button");
 
-    assert.dom(LINK_TO_SELECTOR).exists({ count: 3 });
+    assert.dom(LINK_TO).exists({ count: 3 });
 
-    const firstLink = htmlElement(LINK_TO_SELECTOR);
+    const firstLink = htmlElement(LINK_TO);
 
     assert.equal(
       firstLink.getAttribute("href"),
@@ -673,9 +675,9 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     assert.dom(TOGGLE_ACTION_CHEVRON).exists();
     assert.dom(TOGGLE_ACTION_CHEVRON).hasClass("flight-icon-chevron-down");
 
-    await click(TOGGLE_ACTION_SELECTOR);
+    await click(TOGGLE_ACTION);
 
-    assert.dom(TOGGLE_ACTION_SELECTOR).hasClass("open");
+    assert.dom(TOGGLE_ACTION).hasClass("open");
 
     assert.dom(TOGGLE_ACTION_CHEVRON).hasClass("flight-icon-chevron-up");
   });
@@ -695,7 +697,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     `);
 
     assert
-      .dom(TOGGLE_BUTTON_SELECTOR)
+      .dom(TOGGLE_BUTTON)
       .exists()
       .hasClass("hds-button", "the toggle button has the HDS style")
       .hasAttribute("aria-haspopup", "listbox")
@@ -705,15 +707,15 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     assert.dom(".flight-icon-chevron-down").exists();
     assert.dom(".flight-icon-chevron-up").doesNotExist();
 
-    await click(TOGGLE_BUTTON_SELECTOR);
+    await click(TOGGLE_BUTTON);
 
-    assert.dom(TOGGLE_BUTTON_SELECTOR).hasAttribute("aria-expanded");
+    assert.dom(TOGGLE_BUTTON).hasAttribute("aria-expanded");
 
     assert.dom("." + CONTAINER_CLASS).exists();
     assert.dom(".flight-icon-chevron-down").doesNotExist();
     assert.dom(".flight-icon-chevron-up").exists();
 
-    const ariaControlsValue = htmlElement(TOGGLE_BUTTON_SELECTOR).getAttribute(
+    const ariaControlsValue = htmlElement(TOGGLE_BUTTON).getAttribute(
       "aria-controls",
     );
 
@@ -727,7 +729,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       "the aria-controls value matches the dropdown list ID",
     );
 
-    let dataAnchorID = htmlElement(TOGGLE_BUTTON_SELECTOR).getAttribute(
+    let dataAnchorID = htmlElement(TOGGLE_BUTTON).getAttribute(
       "data-anchor-id",
     );
 
@@ -761,20 +763,20 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
     `);
 
     assert
-      .dom(TOGGLE_ACTION_SELECTOR)
+      .dom(TOGGLE_ACTION)
       .exists()
       .hasAttribute("aria-haspopup", "listbox")
       .doesNotHaveAttribute("aria-expanded");
 
     assert.dom(CONTAINER_CLASS).doesNotExist();
 
-    await click(TOGGLE_ACTION_SELECTOR);
+    await click(TOGGLE_ACTION);
 
-    assert.dom(TOGGLE_ACTION_SELECTOR).hasAttribute("aria-expanded");
+    assert.dom(TOGGLE_ACTION).hasAttribute("aria-expanded");
 
     assert.dom("." + CONTAINER_CLASS).exists();
 
-    const ariaControlsValue = htmlElement(TOGGLE_ACTION_SELECTOR).getAttribute(
+    const ariaControlsValue = htmlElement(TOGGLE_ACTION).getAttribute(
       "aria-controls",
     );
 
@@ -788,7 +790,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       "the aria-controls value matches the dropdown list ID",
     );
 
-    let dataAnchorID = htmlElement(TOGGLE_ACTION_SELECTOR).getAttribute(
+    let dataAnchorID = htmlElement(TOGGLE_ACTION).getAttribute(
       "data-anchor-id",
     );
 
@@ -837,7 +839,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       </X::DropdownList>
     `);
 
-    await click(TOGGLE_BUTTON_SELECTOR);
+    await click(TOGGLE_BUTTON);
 
     assert
       .dom(".rendered-in-div")
@@ -874,7 +876,7 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       </X::DropdownList>
     `);
 
-    await click(TOGGLE_BUTTON_SELECTOR);
+    await click(TOGGLE_BUTTON);
 
     assert
       .dom("." + CONTAINER_CLASS)
@@ -905,22 +907,22 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       </X::DropdownList>
     `);
 
-    await click(TOGGLE_BUTTON_SELECTOR);
+    await click(TOGGLE_BUTTON);
 
     assert
-      .dom(LOADED_CONTENT_SELECTOR)
+      .dom(LOADED_CONTENT)
       .doesNotExist("the loaded content is not shown");
 
-    assert.dom(LOADING_BLOCK_SELECTOR).exists("the loading block is shown");
+    assert.dom(LOADING_BLOCK).exists("the loading block is shown");
 
     this.set("isLoading", false);
 
     assert
-      .dom(LOADED_CONTENT_SELECTOR)
+      .dom(LOADED_CONTENT)
       .exists("the loaded content is shown after loading is complete");
 
     assert
-      .dom(LOADING_BLOCK_SELECTOR)
+      .dom(LOADING_BLOCK)
       .doesNotExist("the loading block is not shown");
   });
 
@@ -938,12 +940,12 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       </X::DropdownList>
     `);
 
-    await click(TOGGLE_BUTTON_SELECTOR);
+    await click(TOGGLE_BUTTON);
 
-    assert.dom(LOADING_BLOCK_SELECTOR).doesNotExist("no custom block rendered");
-    assert.dom(LOADED_CONTENT_SELECTOR).doesNotExist("content not shown");
+    assert.dom(LOADING_BLOCK).doesNotExist("no custom block rendered");
+    assert.dom(LOADED_CONTENT).doesNotExist("content not shown");
 
-    assert.dom(DEFAULT_LOADER_SELECTOR).exists("the default loader is shown");
+    assert.dom(DEFAULT_LOADER).exists("the default loader is shown");
   });
 
   test("it can force the input to be hidden", async function (assert) {
@@ -960,9 +962,9 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       </X::DropdownList>
     `);
 
-    await click(TOGGLE_BUTTON_SELECTOR);
+    await click(TOGGLE_BUTTON);
 
-    assert.dom(FILTER_INPUT_SELECTOR).doesNotExist();
+    assert.dom(FILTER_INPUT).doesNotExist();
   });
 
   test('it yields a "no matches" block', async function (assert) {
@@ -984,11 +986,11 @@ module("Integration | Component | x/dropdown-list", function (hooks) {
       </X::DropdownList>
     `);
 
-    await click(TOGGLE_BUTTON_SELECTOR);
-    await fillIn(FILTER_INPUT_SELECTOR, "foobar");
+    await click(TOGGLE_BUTTON);
+    await fillIn(FILTER_INPUT, "foobar");
 
     assert
-      .dom(DEFAULT_NO_MATCHES_SELECTOR)
+      .dom(DEFAULT_NO_MATCHES)
       .doesNotExist("the default empty state is not shown");
 
     assert.dom("[data-test-nothing]").exists("the custom empty state is shown");
