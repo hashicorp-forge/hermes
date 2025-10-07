@@ -393,7 +393,14 @@ export default function (mirageConfig) {
        * And Mirage lacks wildcards, so we create a route for each.
        *
        * Additionally, we support the remaining Algolia routes.
+       * 
+       * IMPORTANT: Algolia routes are now proxied through backend at /1/indexes/*
+       * and must be registered WITHOUT the 'api/v1' namespace.
        */
+
+      // Temporarily clear namespace to register Algolia proxy routes at root
+      const currentNamespace = this.namespace;
+      this.namespace = "";
 
       algoliaHosts.forEach((host) => {
         this.post(host, (schema, request) => {
@@ -404,6 +411,9 @@ export default function (mirageConfig) {
           return handleAlgoliaRequest(schema, request);
         });
       });
+
+      // Restore namespace for remaining routes
+      this.namespace = currentNamespace;
 
       /*************************************************************************
        *
