@@ -1,7 +1,7 @@
 import Component from "@glimmer/component";
 import { HermesDocument } from "hermes/types/document";
 import { SortDirection } from "../table/sortable-header";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import FetchService from "hermes/services/fetch";
 import ConfigService from "hermes/services/config";

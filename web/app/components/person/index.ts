@@ -1,4 +1,4 @@
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import Component from "@glimmer/component";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import StoreService from "hermes/services/store";
@@ -22,7 +22,7 @@ export default class PersonComponent extends Component<PersonComponentSignature>
   }
 
   protected get label() {
-    if (this.args.email === this.authenticatedUser.info.email) {
+    if (this.args.email === this.authenticatedUser.info?.email) {
       return "Me";
     }
 

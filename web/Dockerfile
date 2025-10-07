@@ -1,26 +1,26 @@
-# Simple build for Hermes web frontend
-# NOTE: Requires dist/ to be pre-built (run `yarn build` from web/ directory first)
-# This avoids memory exhaustion during Docker build
+# Development build for Hermes web frontend with built-in proxy
+# Uses Ember's development server which can proxy API requests to the backend
 
-FROM nginx:alpine
+FROM node:20-alpine
 
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+WORKDIR /app
 
-# Copy pre-built assets
-COPY dist /usr/share/nginx/html
+# Enable Corepack for Yarn 4 support
+RUN corepack enable
 
-# Create non-root user for nginx
-RUN chown -R nginx:nginx /usr/share/nginx/html && \
-    chown -R nginx:nginx /var/cache/nginx && \
-    chown -R nginx:nginx /var/log/nginx && \
-    chown -R nginx:nginx /etc/nginx/conf.d && \
-    touch /var/run/nginx.pid && \
-    chown -R nginx:nginx /var/run/nginx.pid
+# Copy package files for dependency installation
+COPY package.json yarn.lock .yarnrc.yml ./
+COPY .yarn ./.yarn
 
-USER nginx
+# Install dependencies
+RUN yarn install --immutable
+
+# Copy application source
+COPY . .
 
 # Expose port
 EXPOSE 4200
 
-CMD ["nginx", "-g", "daemon off;"]
+# Start Ember development server with proxy to backend
+# The proxy URL is passed via HERMES_API_URL environment variable
+CMD ["sh", "-c", "yarn ember server --proxy ${HERMES_API_URL:-http://hermes:8000} --port 4200 --host 0.0.0.0"]

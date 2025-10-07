@@ -1,6 +1,6 @@
 import Service from "@ember/service";
 import fetch from "fetch";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import ConfigService from "hermes/services/config";
 import SessionService from "./session";
 
@@ -37,21 +37,29 @@ export default class FetchService extends Service {
   }
 
   async fetch(url: string, options: FetchOptions = {}, isPollCall = false) {
-    // If using Google auth, add the Google access token in a header if the URL
-    // starts with a frontslash, which will only target the application backend.
-    if (!this.configSvc.config.skip_google_auth) {
-      if (Array.from(url)[0] == "/") {
-        if (options.headers && options.headers["Hermes-Google-Access-Token"]) {
-          /**
-           * Don't modify headers with a Hermes-Google-Access-Token.
-           * In other words, let the authenticator's `restore` method use
-           * the session's previous access token to check if it still works.
-           */
-        } else {
+    // Add authentication token to backend API requests based on the configured auth provider
+    if (Array.from(url)[0] == "/") {
+      const authProvider = this.configSvc.config.auth_provider;
+      const accessToken = this.session.data.authenticated.access_token;
+
+      // Skip adding headers if already present (e.g., in authenticator restore method)
+      const hasAuthHeader =
+        options.headers &&
+        (options.headers["Hermes-Google-Access-Token"] ||
+          options.headers["Authorization"]);
+
+      if (!hasAuthHeader && accessToken) {
+        if (authProvider === "google") {
+          // Google OAuth uses custom header
           options.headers = {
             ...options.headers,
-            "Hermes-Google-Access-Token":
-              this.session.data.authenticated.access_token,
+            "Hermes-Google-Access-Token": accessToken,
+          };
+        } else if (authProvider === "dex" || authProvider === "okta") {
+          // OIDC providers use standard Authorization Bearer header
+          options.headers = {
+            ...options.headers,
+            Authorization: `Bearer ${accessToken}`,
           };
         }
       }

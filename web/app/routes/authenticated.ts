@@ -1,5 +1,5 @@
 import Route from "@ember/routing/route";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import AuthenticatedController from "hermes/controllers/authenticated";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import ConfigService from "hermes/services/config";
@@ -28,38 +28,46 @@ export default class AuthenticatedRoute extends Route {
     }
 
     /**
-     * If using Google auth, check if the session is authenticated.
+     * Check if the session is authenticated based on the auth provider.
      * If unauthenticated, it will redirect to the auth screen.
+     * Note: Dex authentication is currently not fully implemented in the frontend,
+     * so we skip authentication requirement for Dex (backend has web endpoints as unauthenticated).
+     * Once OIDC authorization code flow is implemented, add "dex" back to this list.
      */
-    if (!this.configSvc.config.skip_google_auth) {
+    const authProvider = this.configSvc.config.auth_provider;
+    if (authProvider === "google" || authProvider === "okta") {
       this.session.requireAuthentication(transition, "authenticate");
     }
   }
 
   // Note: Only called if the session is authenticated in the front end
   async afterModel() {
+    const authProvider = this.configSvc.config.auth_provider;
+
     /**
-     * Checks if the session is authenticated in the back end.
+     * For Dex, skip loading user info and product areas since the backend
+     * doesn't have OIDC authorization code flow endpoints yet. The backend
+     * serves web endpoints as unauthenticated when using Dex, which causes
+     * API endpoints to return HTML instead of JSON.
+     * 
+     * For Google and Okta, check if the session is authenticated in the back end.
      * If the `loadInfo` task returns a 401, it will bubble up to the
      * application error method which invalidates the session
      * and redirects to the auth screen.
      */
-    const loadInfoPromise = this.authenticatedUser.loadInfo.perform();
+    if (authProvider !== "dex") {
+      /**
+       * Load user info and product areas in parallel for authenticated providers.
+       */
+      await Promise.all([
+        this.authenticatedUser.loadInfo.perform(),
+        this.productAreas.fetch.perform(),
+      ]);
 
-    /**
-     * Fetch the product areas for the ProductAvatar and
-     * ProductSelect components.
-     */
-    const loadProductAreasPromise = this.productAreas.fetch.perform();
-
-    /**
-     * Wait for both promises to resolve.
-     */
-    await Promise.all([loadInfoPromise, loadProductAreasPromise]);
-
-    /**
-     * Kick off the task to poll for expired auth.
-     */
-    void this.session.pollForExpiredAuth.perform();
+      /**
+       * Kick off the task to poll for expired auth.
+       */
+      void this.session.pollForExpiredAuth.perform();
+    }
   }
 }

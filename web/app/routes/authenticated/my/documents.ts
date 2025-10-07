@@ -1,5 +1,5 @@
 import Route from "@ember/routing/route";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import AlgoliaService, { AlgoliaFacetsObject } from "hermes/services/algolia";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
@@ -58,7 +58,7 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
             `/api/${this.configSvc.config.api_version}/drafts?` +
               createDraftURLSearchParams({
                 ...options,
-                ownerEmail: this.authenticatedUser.info.email,
+                ownerEmail: this.authenticatedUser.info?.email ?? "",
               }),
           )
           .then((response) => response?.json());
@@ -91,7 +91,7 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
         page,
         facetFilters:
           params.includeSharedDrafts === false
-            ? [`owners:${this.authenticatedUser.info.email}`]
+            ? [`owners:${this.authenticatedUser.info?.email ?? ""}`]
             : undefined,
       }),
       this.algolia.getDocResults.perform(

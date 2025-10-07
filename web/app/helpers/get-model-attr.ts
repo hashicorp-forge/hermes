@@ -1,5 +1,5 @@
 import Helper from "@ember/component/helper";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import StoreService from "hermes/services/store";
 import getModelAttr, { GetModelAttrArgs } from "hermes/utils/get-model-attr";
 

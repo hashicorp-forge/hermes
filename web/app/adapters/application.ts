@@ -1,5 +1,5 @@
 import JSONAdapter from "@ember-data/adapter/json-api";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import SessionService from "hermes/services/session";

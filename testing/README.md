@@ -20,45 +20,34 @@ This directory contains a **full-stack containerized environment** for acceptanc
 │  Browser: http://localhost:4201         │
 └────────────────┬────────────────────────┘
                  │
-         ┌───────▼────────┐
-         │  Web (Nginx)   │  Port 4201 → 4200
-         │  Ember.js App  │  (hermes-web-acceptance)
-         └───────┬────────┘
+         ┌───────▼─────────────┐
+         │  Web (Ember Dev)    │  Port 4201 → 4200
+         │  ember serve        │  (hermes-web-acceptance)
+         │  --proxy backend    │  Live reload enabled
+         └───────┬─────────────┘
                  │ /api/* proxied to backend
          ┌───────▼────────┐
          │  Hermes API    │  Port 8001 → 8000
          │  Go Backend    │  (hermes-acceptance)
-         │  + Meilisearch │  Uses 'testing' profile
-         │  + Google WS   │
-         └───┬────────┬───┘
-             │        │
-    ┌────────▼───┐  ┌▼─────────────┐
-    │ PostgreSQL │  │ Meilisearch  │
-    │  Port 5433 │  │  Port 7701   │
-    └────────────┘  └──────────────┘
+         │  + Meilisearch │  Auth: Dex OIDC
+         │  + Workspace   │  Search: Algolia
+         └───┬───┬───┬────┘
+             │   │   │
+    ┌────────▼┐ ┌▼──────────┐ ┌▼────────────┐
+    │ PG 5433 │ │ Meili 7701│ │ Dex 5558    │
+    └─────────┘ └───────────┘ └─────────────┘
 ```
 
 ## Prerequisites
 
-**Important**: Web assets must be built before starting containers:
-
-```bash
-# From repository root
-make web/build
-```
-
-This creates `web/dist/` which is embedded into the Docker images.
+**No pre-build required!** The web container runs Ember's development server, which:
+- Builds assets on-demand (live reload)
+- Proxies API requests to the backend
+- Runs in development mode for easier debugging
 
 ## Quick Start
 
-### 1. Build Web Assets (First Time / After Frontend Changes)
-
-```bash
-# From repository root
-make web/build
-```
-
-### 2. Start All Services
+### 1. Start All Services
 
 ```bash
 cd testing
@@ -67,29 +56,42 @@ docker compose up -d --build
 
 This will:
 1. Build the Hermes backend container (from `/Dockerfile`)
-2. Build the web frontend container (from `/web/Dockerfile`)
-3. Start PostgreSQL and Meilisearch
+2. Build the web frontend container (from `/web/Dockerfile`) - **installs dependencies in container**
+3. Start PostgreSQL, Meilisearch, and Dex
 4. Wait for services to be healthy
-5. Start Hermes backend with 'testing' profile
-6. Start web frontend with nginx
+5. Start Hermes backend configured for Dex authentication
+6. Start web frontend with Ember dev server (`ember serve --proxy http://hermes:8000`)
 
-### 3. Access the Application
+**Note**: First build takes 3-5 minutes as it installs Node modules. Subsequent builds use Docker layer caching.
 
-- **Web UI**: http://localhost:4201
-- **API**: http://localhost:8001
+### 2. Access the Application
+
+- **Web UI**: http://localhost:4201 (Ember dev server with hot reload)
+- **API**: http://localhost:8001 (Hermes backend)
+- **Dex**: http://localhost:5558 (OIDC provider)
 - **PostgreSQL**: localhost:5433
 - **Meilisearch**: http://localhost:7701
 
-### 3. Stop Services
+### 3. Test Authentication
+
+1. Navigate to http://localhost:4201
+2. Frontend will detect `auth_provider: "dex"` from backend config
+3. Click login → redirects to Dex
+4. Use test credentials:
+   - Email: `test@hermes.local`
+   - Password: `password`
+5. After successful login, API requests include Bearer token
+
+### 4. Stop Services
 
 ```bash
-docker-compose down
+docker compose down
 ```
 
-### 4. Clean Up (Remove Volumes)
+### 5. Clean Up (Remove Volumes)
 
 ```bash
-docker-compose down -v
+docker compose down -v
 ```
 
 ## Service Details

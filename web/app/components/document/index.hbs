@@ -7,14 +7,16 @@
         We teardown and rebuild the sidebar when the model is changing
         so that its state is reset and it inherits the new model's data.
       }}
-      <Document::Sidebar
-        @profile={{this.authenticatedUser.info}}
-        @document={{@document}}
-        @docType={{@docType}}
-        @isCollapsed={{this.sidebarIsCollapsed}}
-        @toggleCollapsed={{this.toggleSidebarCollapsedState}}
-        @viewerIsGroupApprover={{@viewerIsGroupApprover}}
-      />
+      {{#if this.profile}}
+        <Document::Sidebar
+          @profile={{this.profile}}
+          @document={{@document}}
+          @docType={{@docType}}
+          @isCollapsed={{this.sidebarIsCollapsed}}
+          @toggleCollapsed={{this.toggleSidebarCollapsedState}}
+          @viewerIsGroupApprover={{@viewerIsGroupApprover}}
+        />
+      {{/if}}
     {{/unless}}
   </div>
 

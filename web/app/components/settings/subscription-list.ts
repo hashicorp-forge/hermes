@@ -1,7 +1,7 @@
 import Component from "@glimmer/component";
 import { restartableTask } from "ember-concurrency";
 import { tracked } from "@glimmer/tracking";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import ProductAreasService from "hermes/services/product-areas";
 
 interface SettingsSubscriptionListComponentSignature {

@@ -5,7 +5,7 @@ import { HermesDocument } from "hermes/types/document";
 import { assert } from "@ember/debug";
 import { restartableTask } from "ember-concurrency";
 import ConfigService from "hermes/services/config";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import {
   RelatedExternalLink,
   RelatedHermesDocument,

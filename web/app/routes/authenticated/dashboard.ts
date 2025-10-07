@@ -1,5 +1,5 @@
 import Route from "@ember/routing/route";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import AlgoliaService from "hermes/services/algolia";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
@@ -23,6 +23,11 @@ export default class DashboardRoute extends Route {
 
   async model(): Promise<HermesDocument[]> {
     const userInfo = this.authenticatedUser.info;
+
+    // If user info is not loaded (e.g., Dex auth without OIDC), skip loading docs
+    if (!userInfo) {
+      return [];
+    }
 
     const docsAwaitingReviewPromise = this.algolia.searchIndex
       .perform(this.configSvc.config.algolia_docs_index_name, "", {

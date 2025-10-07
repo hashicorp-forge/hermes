@@ -5,8 +5,8 @@ import { action } from "@ember/object";
 import { TransitionRules, TransitionContext, wait, move, fadeIn, fadeOut, easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated-stubs";
 import { emptyTransition } from "hermes/utils/ember-animated/empty-transition";
 import highlightElement from "hermes/utils/ember-animated/highlight-element";
-import Ember from "ember";
-import { inject as service } from "@ember/service";
+import { isTesting } from "@embroider/macros";
+import { service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
 import scrollIntoViewIfNeeded from "hermes/utils/scroll-into-view-if-needed";
 
@@ -108,7 +108,7 @@ export default class ProjectResourceListComponent extends Component<ProjectResou
   }
 
   *badgeTransition({ insertedSprites, removedSprites }: TransitionContext) {
-    if (Ember.testing) {
+    if (isTesting()) {
       return;
     }
 
@@ -127,7 +127,7 @@ export default class ProjectResourceListComponent extends Component<ProjectResou
   }
 
   *removeEmptyState({ insertedSprites, removedSprites }: TransitionContext) {
-    if (Ember.testing) {
+    if (isTesting()) {
       return;
     }
 
@@ -145,7 +145,7 @@ export default class ProjectResourceListComponent extends Component<ProjectResou
   }
 
   *showEmptyState({ insertedSprites }: TransitionContext) {
-    if (Ember.testing) {
+    if (isTesting()) {
       return;
     }
 
@@ -164,7 +164,7 @@ export default class ProjectResourceListComponent extends Component<ProjectResou
     keptSprites,
     removedSprites,
   }: TransitionContext) {
-    if (Ember.testing) {
+    if (isTesting()) {
       return;
     }
 

@@ -1,5 +1,5 @@
 import Component from "@glimmer/component";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import { action } from "@ember/object";
 import ConfigService from "hermes/services/config";
 import SessionService from "hermes/services/session";
@@ -43,7 +43,7 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
   @service declare router: RouterService;
   @service declare authenticatedUser: AuthenticatedUserService;
 
-  protected get profile(): PersonModel {
+  protected get profile(): PersonModel | null {
     return this.authenticatedUser.info;
   }
 

@@ -42,12 +42,13 @@ module.exports = function (environment) {
       },
     ],
     algolia: {
-      appID: getEnv("ALGOLIA_APP_ID"),
+      // Index names used by the search service
+      // Note: Algolia credentials are NOT needed here - all search requests
+      // are proxied through the Hermes backend at /1/indexes/*
       docsIndexName: getEnv("ALGOLIA_DOCS_INDEX_NAME", "docs"),
       draftsIndexName: getEnv("ALGOLIA_DRAFTS_INDEX_NAME", "drafts"),
       internalIndexName: getEnv("ALGOLIA_INTERNAL_INDEX_NAME", "internal"),
       projectsIndexName: getEnv("ALGOLIA_PROJECTS_INDEX_NAME", "projects"),
-      apiKey: getEnv("ALGOLIA_SEARCH_API_KEY"),
     },
 
     flashMessageDefaults: {
@@ -65,12 +66,15 @@ module.exports = function (environment) {
 
     shortLinkBaseURL: getEnv("SHORT_LINK_BASE_URL"),
 
+    // Authentication configuration
+    // Note: Auth provider is determined at runtime via /api/v2/web/config
+    // Google OAuth config is only needed if using Google as auth provider
     torii: {
       sessionServiceName: "session",
       providers: {
         "google-oauth2-bearer-v2": {
-          apiKey: getEnv("GOOGLE_OAUTH2_CLIENT_ID"),
-          hd: getEnv("GOOGLE_OAUTH2_HD"),
+          apiKey: getEnv("GOOGLE_OAUTH2_CLIENT_ID", ""),
+          hd: getEnv("GOOGLE_OAUTH2_HD", ""),
           scope: "email profile https://www.googleapis.com/auth/drive.appdata",
         },
       },

@@ -1,4 +1,4 @@
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import Component from "@glimmer/component";
 import { SearchScope } from "hermes/routes/authenticated/results";
 import ActiveFiltersService from "hermes/services/active-filters";

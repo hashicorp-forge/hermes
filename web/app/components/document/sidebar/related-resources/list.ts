@@ -5,7 +5,7 @@ import animateTransform from "hermes/utils/ember-animated/animate-transform";
 import { action } from "@ember/object";
 // import { Transition } from "ember-animated/-private/transition";
 type Transition = any; // stub type
-import Ember from "ember";
+import { isTesting } from "@embroider/macros";
 import { emptyTransition } from "hermes/utils/ember-animated/empty-transition";
 import { assert } from "@ember/debug";
 
@@ -78,7 +78,7 @@ export default class DocumentSidebarRelatedResourcesListComponent extends Compon
     keptSprites,
     removedSprites,
   }: TransitionContext) {
-    if (Ember.testing) {
+    if (isTesting()) {
       return;
     }
 

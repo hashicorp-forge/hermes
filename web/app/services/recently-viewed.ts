@@ -1,5 +1,5 @@
 import Service from "@ember/service";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import { keepLatestTask } from "ember-concurrency";
 import FetchService from "./fetch";
 import { tracked } from "@glimmer/tracking";

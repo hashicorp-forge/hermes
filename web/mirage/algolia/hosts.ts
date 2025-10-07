@@ -1,24 +1,12 @@
 /**
- * Algolia has one static endpoint and several wildcard hosts, e.g.,
- * - appID-1.algolianet.com
- * - appID-2.algolianet.com
- *
- * Mirage lacks wildcard support, so we create a route for each.
- * Used in tests to mock Algolia endpoints.
+ * Algolia search is now proxied through the Hermes backend at /1/indexes/*
+ * This eliminates direct calls to Algolia's infrastructure and removes the need
+ * for Algolia credentials in the web build.
+ * 
+ * For tests, we mock the backend proxy endpoint instead of Algolia directly.
  */
 
-import config from "hermes/config/environment";
-
-// Start with the static route.
-let algoliaHosts = [
-  `https://${config.algolia.appID}-dsn.algolia.net/1/indexes/**`,
-];
-
-// Add wildcard routes.
-for (let i = 1; i <= 9; i++) {
-  algoliaHosts.push(
-    `https://${config.algolia.appID}-${i}.algolianet.com/1/indexes/**`,
-  );
-}
+// Mock the backend Algolia proxy endpoint
+let algoliaHosts = ["/1/indexes/**"];
 
 export default algoliaHosts;

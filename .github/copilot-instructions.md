@@ -40,7 +40,7 @@ make docker/postgres/stop               # Cleanup
 
 ### ⚠️ Known Build Behaviors & Workarounds
 
-**Web Build Environment Variables**: The web build shows ~12 env var warnings (e.g., `HERMES_WEB_ALGOLIA_APP_ID was not set!`). This is **expected** and **not an error** - defaults are applied.
+**Web Build Environment Variables**: The web build shows ~10 env var warnings for optional configuration. This is **expected** and **not an error** - defaults are applied. Note: As of October 2025, `HERMES_WEB_ALGOLIA_APP_ID` and `HERMES_WEB_ALGOLIA_SEARCH_API_KEY` are **no longer needed** (search proxies through backend). `HERMES_WEB_GOOGLE_OAUTH2_CLIENT_ID` is **optional** (only needed for Google auth provider).
 
 **Web Tests Currently Fail**: `yarn test:ember` has a known syntax error in `web/tests/integration/components/related-resources/add-test.ts` (line 10: `@relatedDocuments={{array}}`). **Do not run** `yarn test:ember` or `make web/test` until this is fixed. The CI workflow also runs this and will fail.
 
@@ -118,7 +118,8 @@ make docker/postgres/stop && make docker/postgres/start
 ### Common Patterns in Codebase
 - **TODO comments**: 20+ across codebase (see `internal/indexer/`, `pkg/hashicorpdocs/`, `internal/api/`)
 - **Document types**: RFC, PRD, FRD with custom header replacement logic
-- **Google OAuth**: Both web client ID (build-time) and service account (runtime)
+- **Multi-provider auth**: Supports Google OAuth, Okta OIDC, and Dex OIDC with runtime selection
+- **Backend-only search**: All Algolia search operations proxy through backend at `/1/indexes/*`
 
 ## Development Workflow
 
@@ -127,11 +128,12 @@ make docker/postgres/stop && make docker/postgres/start
 # Terminal 1 - Backend
 make docker/postgres/start
 cp configs/config.hcl ./config.hcl
-# Edit config.hcl with Google credentials, Algolia keys, etc.
+# Edit config.hcl - configure auth provider (Google/Okta/Dex) and Algolia
 ./hermes server -config=config.hcl
 
 # Terminal 2 - Frontend (proxies to backend)
 cd web
+# No build-time auth/search credentials needed!
 yarn start:with-proxy  # Runs on localhost:4200, proxies to :8000
 ```
 
@@ -160,12 +162,14 @@ make build  # Should complete successfully with warnings
 ## Environment Variables (Build-Time for Web)
 
 These are **optional** and have sensible defaults:
-- `HERMES_WEB_GOOGLE_OAUTH2_CLIENT_ID`: Google OAuth client ID
-- `HERMES_WEB_ALGOLIA_APP_ID`: Algolia application ID
-- `HERMES_WEB_ALGOLIA_SEARCH_API_KEY`: Algolia search key
-- `HERMES_WEB_ALGOLIA_*_INDEX_NAME`: Index names (docs, drafts, internal, projects)
+- `HERMES_WEB_GOOGLE_OAUTH2_CLIENT_ID`: Google OAuth client ID (only needed if using Google auth)
+- ~~`HERMES_WEB_ALGOLIA_APP_ID`~~: **REMOVED** - No longer needed (search proxies through backend)
+- ~~`HERMES_WEB_ALGOLIA_SEARCH_API_KEY`~~: **REMOVED** - No longer needed (search proxies through backend)
+- `HERMES_WEB_ALGOLIA_*_INDEX_NAME`: Index names (docs, drafts, internal, projects) with defaults
 - `HERMES_WEB_SHORT_LINK_BASE_URL`: Base URL for short links
 - `HERMES_WEB_GOOGLE_ANALYTICS_TAG_ID`: GA tracking ID
+
+**Note**: As of October 2025, the web frontend no longer requires Algolia credentials or Google OAuth client ID for non-Google auth providers. Authentication provider and search configuration are determined at runtime via `/api/v2/web/config`.
 
 ## What Not To Do
 

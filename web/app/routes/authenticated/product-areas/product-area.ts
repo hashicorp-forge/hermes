@@ -1,6 +1,6 @@
 import Route from "@ember/routing/route";
 import RouterService from "@ember/routing/router-service";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import { dasherize } from "@ember/string";
 import AlgoliaService from "hermes/services/algolia";
 import AuthenticatedUserService from "hermes/services/authenticated-user";

@@ -96,6 +96,11 @@ func toggleFlagPercentage(s string, p int) bool {
 // toggleFlagEmail toggles a feature flag
 // using user email
 func toggleFlagEmail(a *algolia.Client, flag string, email string, log hclog.Logger) bool {
+	// Return false if algolia client is nil (e.g., when using Meilisearch)
+	if a == nil {
+		return false
+	}
+
 	f := FeatureFlagsObj{}
 	err := a.Internal.GetObject("featureFlags", &f)
 	if err != nil {

@@ -1,5 +1,5 @@
 import Route from "@ember/routing/route";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import AlgoliaService from "hermes/services/algolia";
 import ConfigService from "hermes/services/config";
 import { ResultsRouteParams } from "hermes/types/document-routes";

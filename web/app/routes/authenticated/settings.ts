@@ -1,5 +1,5 @@
 import Route from "@ember/routing/route";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import ProductAreasService from "hermes/services/product-areas";
 

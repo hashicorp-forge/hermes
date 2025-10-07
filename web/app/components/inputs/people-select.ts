@@ -1,11 +1,11 @@
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import { restartableTask, timeout } from "ember-concurrency";
 import { action } from "@ember/object";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
-import Ember from "ember";
+import { isTesting } from "@embroider/macros";
 import StoreService from "hermes/services/store";
 import PersonModel from "hermes/models/person";
 import { Select } from "ember-power-select/components/power-select";
@@ -72,7 +72,7 @@ interface InputsPeopleSelectComponentSignature {
 }
 
 const MAX_RETRIES = 3;
-const INITIAL_RETRY_DELAY = Ember.testing ? 0 : 500;
+const INITIAL_RETRY_DELAY = isTesting() ? 0 : 500;
 
 export default class InputsPeopleSelectComponent extends Component<InputsPeopleSelectComponentSignature> {
   @service("config") declare configSvc: ConfigService;
@@ -248,7 +248,7 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
               // filter the authenticated user if `excludeSelf` is true
               return (
                 !this.args.excludeSelf ||
-                email !== this.authenticatedUser.info.email
+                email !== this.authenticatedUser.info?.email
               );
             });
         } else {

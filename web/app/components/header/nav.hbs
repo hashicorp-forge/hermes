@@ -52,11 +52,19 @@
             aria-label="User menu"
             class="user-menu-button -mr-1"
           >
-            <Person::Avatar
-              @email={{this.profile.email}}
-              @size="large"
-              data-test-user-menu-toggle
-            />
+            {{#if this.profile}}
+              <Person::Avatar
+                @email={{this.profile.email}}
+                @size="large"
+                data-test-user-menu-toggle
+              />
+            {{else}}
+              <Person::Avatar
+                @email="guest@hermes.local"
+                @size="large"
+                data-test-user-menu-toggle
+              />
+            {{/if}}
           </dd.ToggleAction>
           {{#if this.userMenuHighlightIsShown}}
             <Header::UserMenuHighlight />
@@ -67,12 +75,21 @@
             {{did-insert this.onDropdownOpen}}
             class="mb-1 border-b border-b-color-border-primary py-3.5 px-5"
           >
-            <div class="font-semibold" data-test-user-menu-title>
-              {{this.profile.name}}
-            </div>
-            <div class="text-color-foreground-faint" data-test-user-menu-email>
-              {{this.profile.email}}
-            </div>
+            {{#if this.profile}}
+              <div class="font-semibold" data-test-user-menu-title>
+                {{this.profile.name}}
+              </div>
+              <div class="text-color-foreground-faint" data-test-user-menu-email>
+                {{this.profile.email}}
+              </div>
+            {{else}}
+              <div class="font-semibold" data-test-user-menu-title>
+                Guest User
+              </div>
+              <div class="text-color-foreground-faint" data-test-user-menu-email>
+                guest@hermes.local
+              </div>
+            {{/if}}
           </div>
         </:header>
         <:item as |dd|>

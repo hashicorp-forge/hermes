@@ -1,6 +1,6 @@
 import Service from "@ember/service";
 import { tracked } from "@glimmer/tracking";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import { assert } from "@ember/debug";
 import { task } from "ember-concurrency";
 import ConfigService from "hermes/services/config";
@@ -28,8 +28,9 @@ export default class AuthenticatedUserService extends Service {
   @tracked subscriptions: Subscription[] | null = null;
   @tracked _info: PersonModel | null = null;
 
-  get info(): PersonModel {
-    assert("user info must exist", this._info);
+  get info(): PersonModel | null {
+    // Note: When using Dex authentication without OIDC flow, user info may not be loaded
+    // Return null instead of asserting to prevent application crashes
     return this._info;
   }
 

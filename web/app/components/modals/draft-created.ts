@@ -1,6 +1,6 @@
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
-import Ember from "ember";
+import { isTesting } from "@embroider/macros";
 import window from "ember-window-mock";
 
 interface ModalsDraftCreatedComponentSignature {
@@ -9,7 +9,7 @@ interface ModalsDraftCreatedComponentSignature {
   };
 }
 
-export const DRAFT_CREATED_LOCAL_STORAGE_KEY = Ember.testing
+export const DRAFT_CREATED_LOCAL_STORAGE_KEY = isTesting()
   ? "test-docCreatedModalIsHidden"
   : "docCreatedModalIsHidden";
 

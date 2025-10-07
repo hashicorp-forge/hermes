@@ -1,5 +1,5 @@
 import Service from "@ember/service";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import { keepLatestTask } from "ember-concurrency";
 import { tracked } from "@glimmer/tracking";
 import ConfigService from "hermes/services/config";

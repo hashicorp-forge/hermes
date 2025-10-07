@@ -1,9 +1,9 @@
 import Component from "@glimmer/component";
 import { XDropdownListInteractiveComponentArgs } from "./_shared";
 import { action } from "@ember/object";
-import Ember from "ember";
+import { isTesting } from "@embroider/macros";
 import { next, schedule } from "@ember/runloop";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
 
 interface XDropdownListLinkToComponentSignature {
@@ -36,7 +36,7 @@ export default class XDropdownListLinkToComponent extends Component<XDropdownLis
    * when testing, we use `schedule` as an approximation.
    */
   @action protected onClick(): void {
-    if (Ember.testing) {
+    if (isTesting()) {
       schedule("afterRender", this.args.onClick);
     } else {
       next(() => {

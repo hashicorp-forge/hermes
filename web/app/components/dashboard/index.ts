@@ -1,7 +1,7 @@
 import Component from "@glimmer/component";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { HermesDocument } from "hermes/types/document";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 
 interface DashboardIndexComponentSignature {
   Element: null;
@@ -17,7 +17,8 @@ export default class DashboardIndexComponent extends Component<DashboardIndexCom
   @service declare authenticatedUser: AuthenticatedUserService;
 
   protected get firstName(): string {
-    return this.authenticatedUser.info.firstName;
+    // Note: When using Dex authentication without OIDC flow, user info may not be loaded
+    return this.authenticatedUser.info?.firstName ?? "Guest";
   }
 }
 

@@ -1,9 +1,9 @@
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
 import EmberSimpleAuthSessionService from "ember-simple-auth/services/session";
 import window from "ember-window-mock";
 import { dropTask, keepLatestTask, timeout } from "ember-concurrency";
-import Ember from "ember";
+import { isTesting } from "@embroider/macros";
 import { tracked } from "@glimmer/tracking";
 import simpleTimeout from "hermes/utils/simple-timeout";
 import ConfigService from "hermes/services/config";
@@ -58,13 +58,21 @@ export default class SessionService extends EmberSimpleAuthSessionService {
   @tracked reauthFlashMessage: FlashObject | null = null;
 
   /**
-   * Whether the app is configured to use Okta.
+   * Whether the app is configured to use OIDC (Okta or Dex).
    * Dictates reauthButton text and behavior.
    * Determines whether we poll the back end for a 401
    * while the reauthentication message is shown.
    */
+  get isUsingOIDC(): boolean {
+    const provider = this.configSvc.config.auth_provider;
+    return provider === "okta" || provider === "dex";
+  }
+
+  /**
+   * Legacy compatibility - Okta was the first non-Google provider
+   */
   get isUsingOkta(): boolean {
-    return this.configSvc.config.skip_google_auth;
+    return this.isUsingOIDC;
   }
 
   /**
@@ -73,7 +81,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
    * Kicked off by the Authenticated route.
    */
   pollForExpiredAuth = keepLatestTask(async () => {
-    await simpleTimeout(Ember.testing ? 100 : 10000);
+    await simpleTimeout(isTesting() ? 100 : 10000);
 
     // Make a HEAD request to the back end.
     // On 401, the fetch service will set `this.pollResponseIs401` true.
@@ -83,7 +91,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
       true,
     );
 
-    if (this.isUsingOkta) {
+    if (this.isUsingOIDC) {
       this.tokenIsValid = !this.pollResponseIs401;
     } else {
       let isLoggedIn = this.requireAuthentication(null, () => {});
@@ -157,22 +165,23 @@ export default class SessionService extends EmberSimpleAuthSessionService {
    */
   protected reauthenticate = dropTask(async () => {
     try {
-      if (this.isUsingOkta) {
-        // Reload to redirect to Okta login.
+      if (this.isUsingOIDC) {
+        // Reload to redirect to OIDC provider (Okta or Dex)
         window.location.reload();
       } else {
+        // Google OAuth flow
         await this.authenticate("authenticator:torii", "google-oauth2-bearer");
       }
 
       this.reauthFlashMessage?.destroyMessage();
 
       // Wait a bit to show the success message.
-      await timeout(Ember.testing ? 0 : 1000);
+      await timeout(isTesting() ? 0 : 1000);
 
       this.flashMessages.add({
         title: "Login successful",
         message: `Welcome back${
-          this.authenticatedUser.info.firstName
+          this.authenticatedUser.info?.firstName
             ? `, ${this.authenticatedUser.info.firstName}`
             : ""
         }!`,

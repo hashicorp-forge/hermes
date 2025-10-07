@@ -116,7 +116,26 @@ jira {
   user      = ""
 }
 
-// Okta authentication (disabled - using local test mode)
+// Meilisearch configuration (used for testing instead of Algolia)
+meilisearch {
+  host              = "http://meilisearch:7700"
+  api_key           = "masterKey123"
+  docs_index_name   = "docs"
+  drafts_index_name = "drafts"
+  projects_index_name = "projects"
+  links_index_name  = "links"
+}
+
+// Dex OIDC authentication (enabled for acceptance testing)
+dex {
+  disabled      = false
+  issuer_url    = "http://dex:5557/dex"
+  client_id     = "hermes-acceptance"
+  client_secret = "YWNjZXB0YW5jZS1hcHAtc2VjcmV0"
+  redirect_url  = "http://localhost:8001/auth/callback"
+}
+
+// Okta authentication (disabled - using Dex instead)
 okta {
   disabled        = true
   auth_server_url = "https://test.okta.com"

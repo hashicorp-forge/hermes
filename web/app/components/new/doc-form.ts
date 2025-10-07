@@ -1,10 +1,10 @@
 import Component from "@glimmer/component";
 import { task, timeout } from "ember-concurrency";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import ConfigService from "hermes/services/config";
-import Ember from "ember";
+import { isTesting } from "@embroider/macros";
 import FetchService from "hermes/services/fetch";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import RouterService from "@ember/routing/router-service";
@@ -21,7 +21,7 @@ interface DocFormErrors {
   productAbbreviation: string | null;
 }
 
-const AWAIT_DOC_DELAY = Ember.testing ? 0 : 2000;
+const AWAIT_DOC_DELAY = isTesting() ? 0 : 2000;
 
 interface NewDocFormComponentSignature {
   Args: {

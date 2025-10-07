@@ -1,11 +1,11 @@
-import Ember from "ember";
+import { isTesting } from "@embroider/macros";
 
 /**
  * Blinks an element twice by toggling its visibility.
  * Used for emphasis, such as to reiterate an
  * already-visible form error.
  */
-const DURATION = Ember.testing ? 0 : 100;
+const DURATION = isTesting() ? 0 : 100;
 
 export default function blinkElement(element?: Element | null) {
   if (!element) {

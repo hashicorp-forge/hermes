@@ -2,7 +2,7 @@
 // @ts-ignore -- TODO: Add Types
 // import Torii from "ember-simple-auth/authenticators/torii";
 import { Base } from "ember-simple-auth/authenticators/base";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 

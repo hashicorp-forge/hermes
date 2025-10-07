@@ -1,6 +1,6 @@
 import Component from "@glimmer/component";
 import { action } from "@ember/object";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import {
   FacetDropdownGroups,
   FacetDropdownObjectDetails,
@@ -18,7 +18,7 @@ import { XDropdownListAnchorAPI } from "../x/dropdown-list";
 import AlgoliaService from "hermes/services/algolia";
 import ConfigService from "hermes/services/config";
 import { SearchForFacetValuesResponse } from "instantsearch.js";
-import Ember from "ember";
+import { isTesting } from "@embroider/macros";
 import { ProjectStatus } from "hermes/types/project-status";
 import StoreService from "hermes/services/_store";
 import PersonModel from "hermes/models/person";
@@ -330,7 +330,7 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
        *
        * TODO: Improve this.
        */
-      if (Ember.testing) {
+      if (isTesting()) {
         schedule("afterRender", () => {
           dd?.resetFocusedItemIndex();
           dd?.scheduleAssignMenuItemIDs();

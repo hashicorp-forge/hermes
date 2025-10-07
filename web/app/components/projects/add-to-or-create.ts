@@ -5,7 +5,7 @@ import { action } from "@ember/object";
 import { HermesDocument } from "hermes/types/document";
 import { task } from "ember-concurrency";
 import FetchService from "hermes/services/fetch";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import ConfigService from "hermes/services/config";
 import AlgoliaService from "hermes/services/algolia";
 import { ProjectStatus } from "hermes/types/project-status";

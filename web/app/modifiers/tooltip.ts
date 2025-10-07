@@ -19,7 +19,7 @@ import { FOCUSABLE } from "hermes/components/editable-field";
 import { guidFor } from "@ember/object/internals";
 import htmlElement from "hermes/utils/html-element";
 import { restartableTask, timeout } from "ember-concurrency";
-import Ember from "ember";
+import { isTesting } from "@embroider/macros";
 import simpleTimeout from "hermes/utils/simple-timeout";
 import { schedule } from "@ember/runloop";
 
@@ -254,7 +254,7 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
 
     this.updateState(TooltipState.Opening);
 
-    if (!Ember.testing && this.delay > 0) {
+    if (!isTesting() && this.delay > 0) {
       await timeout(this.delay);
     }
 
@@ -390,11 +390,11 @@ export default class TooltipModifier extends Modifier<TooltipModifierSignature> 
       updatePosition,
     );
 
-    if (!Ember.testing && this.openDuration) {
+    if (!isTesting() && this.openDuration) {
       const fadeAnimation = this.tooltip.animate(
         [{ opacity: 0 }, { opacity: 1 }],
         {
-          duration: Ember.testing ? 0 : 50,
+          duration: isTesting() ? 0 : 50,
         },
       );
       const transformAnimation = this.tooltip.animate(
