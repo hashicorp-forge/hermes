@@ -26,7 +26,7 @@ export default class HeaderActiveFilterListComponent extends Component<HeaderAct
    * A flat array of active filters. Looped through in the template.
    */
   protected get shownFilters(): string[] {
-    return Object.values(this.activeFilters.index).flat().compact();
+    return Object.values(this.activeFilters.index).flat().filter((item): item is string => item != null);
   }
 }
 

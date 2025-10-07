@@ -5,7 +5,7 @@ import { service } from "@ember/service";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import FetchService from "hermes/services/fetch";
 import ConfigService from "hermes/services/config";
-import AlgoliaService from "hermes/services/algolia";
+import SearchService from "hermes/services/search";
 import { SortByValue } from "../header/toolbar";
 import RouterService from "@ember/routing/router-service";
 
@@ -22,7 +22,7 @@ interface MyDocsComponentSignature {
 export default class MyDocsComponent extends Component<MyDocsComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
-  @service declare algolia: AlgoliaService;
+  @service declare search: SearchService;
   @service declare authenticatedUser: AuthenticatedUserService;
   @service declare router: RouterService;
 

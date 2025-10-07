@@ -1,5 +1,5 @@
 import Component from "@glimmer/component";
-import { HITS_PER_PAGE } from "hermes/services/algolia";
+import { HITS_PER_PAGE } from "hermes/services/search";
 import { HermesDocument } from "hermes/types/document";
 
 interface ProductAreaIndexComponentSignature {

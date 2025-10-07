@@ -71,7 +71,7 @@ export default class ProjectResourceComponent extends Component<ProjectResourceC
       canMoveDown ? moveToBottom : null,
     ];
 
-    return items.compact();
+    return items.filter(Boolean) as { label: MoveOptionLabel; icon: MoveOptionIcon; action: () => void; }[];
   }
 }
 

@@ -3,7 +3,7 @@ import Component from "@glimmer/component";
 import { service } from "@ember/service";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
-import AlgoliaService from "hermes/services/algolia";
+import SearchService from "hermes/services/search";
 import RouterService from "@ember/routing/router-service";
 import { HermesDocument } from "hermes/types/document";
 import { assert } from "@ember/debug";
@@ -40,7 +40,7 @@ interface HeaderSearchComponentSignature {
 export default class HeaderSearchComponent extends Component<HeaderSearchComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
-  @service declare algolia: AlgoliaService;
+  @service declare searchService: SearchService;
   @service declare router: RouterService;
   @service declare store: StoreService;
 
@@ -103,7 +103,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
       ...projectItems,
       ...this.docMatches,
       viewAllDocResults,
-    ].compact();
+    ].filter(Boolean);
 
     return items ?? [];
   }
@@ -238,7 +238,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
         this.searchInputIsEmpty = false;
 
         try {
-          const productSearch = this.algolia.searchForFacetValues.perform(
+          const productSearch = this.searchService.searchForFacetValues.perform(
             this.configSvc.config.algolia_docs_index_name,
             "product",
             this.query,
@@ -247,11 +247,11 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
             },
           );
 
-          const docSearch = this.algolia.search.perform(this.query, {
+          const docSearch = this.searchService.search.perform(this.query, {
             hitsPerPage: 5,
           });
 
-          const projectSearch = this.algolia.searchIndex.perform(
+          const projectSearch = this.searchService.searchIndex.perform(
             this.configSvc.config.algolia_projects_index_name,
             this.query,
             {
@@ -259,13 +259,13 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
             },
           );
 
-          let algoliaResults = await Promise.all([
+          let searchResults = await Promise.all([
             productSearch,
             docSearch,
             projectSearch,
           ]).then((values) => values);
 
-          let [productAreas, docs, projects] = algoliaResults;
+          let [productAreas, docs, projects] = searchResults;
 
           const hits = (docs?.hits as HermesDocument[]) ?? [];
 

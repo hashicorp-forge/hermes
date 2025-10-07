@@ -15,7 +15,7 @@ import ProductAreasService from "hermes/services/product-areas";
 import { tracked } from "@glimmer/tracking";
 import { restartableTask, task } from "ember-concurrency";
 import { XDropdownListAnchorAPI } from "../x/dropdown-list";
-import AlgoliaService from "hermes/services/algolia";
+import SearchService from "hermes/services/search";
 import ConfigService from "hermes/services/config";
 import { SearchForFacetValuesResponse } from "instantsearch.js";
 import { isTesting } from "@embroider/macros";
@@ -66,7 +66,7 @@ interface ToolbarComponentSignature {
 
 export default class ToolbarComponent extends Component<ToolbarComponentSignature> {
   @service("config") declare configSvc: ConfigService;
-  @service declare algolia: AlgoliaService;
+  @service declare search: SearchService;
   @service declare activeFilters: ActiveFiltersService;
   @service declare documentTypes: DocumentTypesService;
   @service declare productAreas: ProductAreasService;
@@ -267,7 +267,7 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
       if (this.ownerQuery.length) {
         this.searchInputIsEmpty = false;
         try {
-          const algoliaResultsPromise = this.algolia.searchForFacetValues
+          const searchResultsPromise = this.search.searchForFacetValues
             .perform(
               this.configSvc.config.algolia_docs_index_name,
               "owners",
@@ -287,8 +287,8 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
             query: this.ownerQuery,
           });
 
-          const [algoliaResults, peopleResults] = await Promise.all([
-            algoliaResultsPromise,
+          const [searchResults, peopleResults] = await Promise.all([
+            searchResultsPromise,
             peoplePromise,
           ]);
 
@@ -300,11 +300,11 @@ export default class ToolbarComponent extends Component<ToolbarComponentSignatur
               .filter((email: string) => {
                 return (
                   !this.activeFilters.index[FacetName.Owners].includes(email) &&
-                  !algoliaResults.some((result) => result.value === email)
+                  !searchResults.some((result) => result.value === email)
                 );
               });
           }
-          this.ownerResults = algoliaResults
+          this.ownerResults = searchResults
             .map((result) => result.value)
             .concat(people);
         } catch (e) {

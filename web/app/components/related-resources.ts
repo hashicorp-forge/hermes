@@ -1,6 +1,6 @@
 import { service } from "@ember/service";
 import ConfigService from "hermes/services/config";
-import AlgoliaService from "hermes/services/algolia";
+import SearchService from "hermes/services/search";
 import Component from "@glimmer/component";
 import { HermesDocument } from "hermes/types/document";
 import { restartableTask, timeout } from "ember-concurrency";
@@ -77,7 +77,7 @@ interface RelatedResourcesComponentSignature {
 
 export default class RelatedResourcesComponent extends Component<RelatedResourcesComponentSignature> {
   @service("config") declare configSvc: ConfigService;
-  @service declare algolia: AlgoliaService;
+  @service declare searchService: SearchService;
   @service declare store: StoreService;
 
   @tracked private _algoliaResults: HermesDocument[] | null = null;
@@ -225,7 +225,7 @@ export default class RelatedResourcesComponent extends Component<RelatedResource
       }
 
       try {
-        let algoliaResponse = await this.algolia.searchIndex
+        let algoliaResponse = await this.searchService.searchIndex
           .perform(index, query, {
             hitsPerPage: options?.hitsPerPage || 12,
             filters: filterString,
@@ -283,7 +283,7 @@ export default class RelatedResourcesComponent extends Component<RelatedResource
   protected getObject = restartableTask(
     async (dd: XDropdownListAnchorAPI | null, objectID: string) => {
       try {
-        let algoliaResponse = await this.algolia.getObject.perform(objectID);
+        let algoliaResponse = await this.searchService.getObject.perform(objectID);
         if (algoliaResponse) {
           this._algoliaResults = [
             algoliaResponse,

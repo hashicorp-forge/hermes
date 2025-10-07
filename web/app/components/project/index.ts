@@ -257,9 +257,15 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     const cachedLinks = this.externalLinks.slice();
 
     if ("googleFileID" in doc) {
-      this.hermesDocuments.removeObject(doc);
+      const index = this.hermesDocuments.indexOf(doc);
+      if (index > -1) {
+        this.hermesDocuments.splice(index, 1);
+      }
     } else {
-      this.externalLinks.removeObject(doc);
+      const index = this.externalLinks.indexOf(doc);
+      if (index > -1) {
+        this.externalLinks.splice(index, 1);
+      }
     }
     void this.saveProjectResources.perform(cachedDocuments, cachedLinks);
   }
@@ -352,14 +358,14 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
 
     if (resourceType === RelatedResourcesScope.Documents) {
       assert("removed must be a document", "googleFileID" in removed);
-      this.hermesDocuments.insertAt(newIndex, removed);
+      this.hermesDocuments.splice(newIndex, 0, removed);
       void this.saveProjectResources.perform(
         cached,
         this.externalLinks.slice(),
       );
     } else {
       assert("removed must be a link", "url" in removed);
-      this.externalLinks.insertAt(newIndex, removed);
+      this.externalLinks.splice(newIndex, 0, removed);
       void this.saveProjectResources.perform(
         this.hermesDocuments.slice(),
         cached,
@@ -398,7 +404,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   @action protected addDocument(resource: RelatedHermesDocument) {
     const cachedDocuments = this.hermesDocuments.slice();
 
-    this.hermesDocuments.unshiftObject(resource);
+    this.hermesDocuments.unshift(resource);
 
     void this.saveProjectResources.perform(
       cachedDocuments,
@@ -413,7 +419,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   @action protected addLink(resource: RelatedExternalLink) {
     const cachedLinks = this.externalLinks.slice();
 
-    this.externalLinks.unshiftObject(resource);
+    this.externalLinks.unshift(resource);
 
     void this.saveProjectResources.perform(
       this.hermesDocuments.slice(),

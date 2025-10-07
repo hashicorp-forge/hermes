@@ -4,7 +4,7 @@ import { tracked } from "@glimmer/tracking";
 import { service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
 import ConfigService from "hermes/services/config";
-import AlgoliaService from "hermes/services/algolia";
+import SearchService from "hermes/services/search";
 import { restartableTask, task } from "ember-concurrency";
 import { next, schedule } from "@ember/runloop";
 import htmlElement from "hermes/utils/html-element";
@@ -43,7 +43,7 @@ interface DocumentSidebarRelatedResourcesComponentSignature {
 export default class DocumentSidebarRelatedResourcesComponent extends Component<DocumentSidebarRelatedResourcesComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
-  @service declare algolia: AlgoliaService;
+  @service declare algolia: SearchService;
   @service declare flashMessages: HermesFlashMessagesService;
 
   @tracked relatedLinks: RelatedExternalLink[] = [];
@@ -88,8 +88,8 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
 
     this.updateSortOrder();
 
-    resourcesArray.pushObjects(this.relatedDocuments);
-    resourcesArray.pushObjects(this.relatedLinks);
+    resourcesArray.push(...this.relatedDocuments);
+    resourcesArray.push(...this.relatedLinks);
 
     return resourcesArray;
   }
@@ -172,10 +172,10 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     let cachedDocuments = this.relatedDocuments.slice();
 
     if ("url" in resource) {
-      this.relatedLinks.unshiftObject(resource);
+      this.relatedLinks.unshift(resource);
     } else {
       resourceSelector = RelatedResourceSelector.HermesDocument;
-      this.relatedDocuments.unshiftObject(resource);
+      this.relatedDocuments.unshift(resource);
     }
 
     void this.saveRelatedResources.perform(
@@ -194,9 +194,15 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     const cachedLinks = this.relatedLinks;
 
     if ("url" in resource) {
-      this.relatedLinks.removeObject(resource);
+      const index = this.relatedLinks.indexOf(resource);
+      if (index > -1) {
+        this.relatedLinks.splice(index, 1);
+      }
     } else {
-      this.relatedDocuments.removeObject(resource);
+      const index = this.relatedDocuments.indexOf(resource);
+      if (index > -1) {
+        this.relatedDocuments.splice(index, 1);
+      }
     }
 
     void this.saveRelatedResources.perform(cachedDocuments, cachedLinks);
