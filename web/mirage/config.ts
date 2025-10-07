@@ -2,9 +2,9 @@
 
 import { Collection, Response, createServer } from "miragejs";
 import { getTestDocNumber } from "./factories/document";
-import algoliaHosts from "./algolia/hosts";
+import searchHosts from "./search/hosts";
 import { ProjectStatus } from "hermes/types/project-status";
-import { HITS_PER_PAGE } from "hermes/services/algolia";
+import { HITS_PER_PAGE } from "hermes/services/search";
 import { PROJECT_HITS_PER_PAGE } from "hermes/routes/authenticated/projects/index";
 import { assert as emberAssert } from "@ember/debug";
 import { HermesDocument } from "hermes/types/document";
@@ -17,7 +17,7 @@ import {
   TEST_USER_GIVEN_NAME,
   TEST_USER_PHOTO,
 } from "../mirage/utils";
-import { getFacetsFromHits } from "./algolia/utils";
+import { getFacetsFromHits } from "./search/utils";
 
 export default function (mirageConfig) {
   let finalConfig = {
@@ -402,7 +402,7 @@ export default function (mirageConfig) {
       const currentNamespace = this.namespace;
       this.namespace = "";
 
-      algoliaHosts.forEach((host) => {
+      searchHosts.forEach((host) => {
         this.post(host, (schema, request) => {
           return handleAlgoliaRequest(schema, request);
         });
