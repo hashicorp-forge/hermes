@@ -1,4 +1,4 @@
-import { HITS_PER_PAGE } from "hermes/services/algolia";
+import { HITS_PER_PAGE } from "hermes/services/search";
 
 export function createDraftURLSearchParams(options: {
   ownerEmail: string;
