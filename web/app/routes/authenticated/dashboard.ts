@@ -1,6 +1,6 @@
 import Route from "@ember/routing/route";
 import { service } from "@ember/service";
-import AlgoliaService from "hermes/services/algolia";
+import SearchService from "hermes/services/search";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import RecentlyViewedService from "hermes/services/recently-viewed";
@@ -16,7 +16,7 @@ export default class DashboardRoute extends Route {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare recentlyViewed: RecentlyViewedService;
-  @service declare algolia: AlgoliaService;
+  @service declare search: SearchService;
   @service declare session: SessionService;
   @service declare authenticatedUser: AuthenticatedUserService;
   @service declare store: StoreService;
@@ -29,7 +29,7 @@ export default class DashboardRoute extends Route {
       return [];
     }
 
-    const docsAwaitingReviewPromise = this.algolia.searchIndex
+    const docsAwaitingReviewPromise = this.search.searchIndex
       .perform(this.configSvc.config.algolia_docs_index_name, "", {
         filters:
           `approvers:'${userInfo.email}'` +

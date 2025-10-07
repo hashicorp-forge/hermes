@@ -1,6 +1,6 @@
 import Route from "@ember/routing/route";
 import { service } from "@ember/service";
-import { HITS_PER_PAGE } from "hermes/services/algolia";
+import { HITS_PER_PAGE } from "hermes/services/search";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import { ProjectStatus } from "hermes/types/project-status";

@@ -5,12 +5,12 @@ import { tracked } from "@glimmer/tracking";
 import ConfigService from "hermes/services/config";
 import { HermesDocument } from "hermes/types/document";
 import { assert } from "@ember/debug";
-import AlgoliaService from "./algolia";
+import SearchService from "./search";
 import StoreService from "hermes/services/store";
 
 export default class LatestDocsService extends Service {
   @service("config") declare configSvc: ConfigService;
-  @service declare algolia: AlgoliaService;
+  @service declare search: SearchService;
   @service declare store: StoreService;
 
   /**
@@ -31,7 +31,7 @@ export default class LatestDocsService extends Service {
    * in the background on subsequent visits.
    */
   fetchAll = keepLatestTask(async () => {
-    const response = await this.algolia.searchIndex
+    const response = await this.search.searchIndex
       .perform(
         this.configSvc.config.algolia_docs_index_name + "_createdTime_desc",
         "",

@@ -2,7 +2,7 @@ import Route from "@ember/routing/route";
 import RouterService from "@ember/routing/router-service";
 import { service } from "@ember/service";
 import { dasherize } from "@ember/string";
-import AlgoliaService from "hermes/services/algolia";
+import SearchService from "hermes/services/search";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import ConfigService from "hermes/services/config";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
@@ -14,7 +14,7 @@ import { SearchResponse } from "instantsearch.js";
 export default class AuthenticatedProductAreasProductAreaRoute extends Route {
   @service("config") declare configSvc: ConfigService;
   @service declare router: RouterService;
-  @service declare algolia: AlgoliaService;
+  @service declare search: SearchService;
   @service declare authenticatedUser: AuthenticatedUserService;
   @service declare flashMessages: HermesFlashMessagesService;
   @service declare productAreas: ProductAreasService;
@@ -43,7 +43,7 @@ export default class AuthenticatedProductAreasProductAreaRoute extends Route {
       );
       this.router.transitionTo("authenticated.dashboard");
     } else {
-      const searchResponse = (await this.algolia.getDocResults.perform(
+      const searchResponse = (await this.search.getDocResults.perform(
         searchIndex,
         {
           filters: `product:"${productArea}"`,

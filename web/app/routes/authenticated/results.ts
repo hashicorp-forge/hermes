@@ -1,6 +1,6 @@
 import Route from "@ember/routing/route";
 import { service } from "@ember/service";
-import AlgoliaService from "hermes/services/algolia";
+import SearchService from "hermes/services/search";
 import ConfigService from "hermes/services/config";
 import { ResultsRouteParams } from "hermes/types/document-routes";
 import ActiveFiltersService from "hermes/services/active-filters";
@@ -19,7 +19,7 @@ export enum SearchScope {
 export default class AuthenticatedResultsRoute extends Route {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
-  @service declare algolia: AlgoliaService;
+  @service declare search: SearchService;
   @service declare activeFilters: ActiveFiltersService;
   @service declare store: StoreService;
 
@@ -58,7 +58,7 @@ export default class AuthenticatedResultsRoute extends Route {
     const scopeIsDocs = scope === SearchScope.Docs;
 
     const productResultsPromise = scopeIsAll
-      ? this.algolia.searchForFacetValues.perform(
+      ? this.search.searchForFacetValues.perform(
           this.configSvc.config.algolia_docs_index_name,
           "product",
           params.q,
@@ -69,19 +69,19 @@ export default class AuthenticatedResultsRoute extends Route {
       : undefined;
     let docFacetsPromise = scopeIsProjects
       ? undefined
-      : this.algolia.getFacets.perform(docsIndex, params);
+      : this.search.getFacets.perform(docsIndex, params);
 
     let docResultsPromise = scopeIsProjects
       ? undefined
-      : this.algolia.getDocResults.perform(docsIndex, params);
+      : this.search.getDocResults.perform(docsIndex, params);
 
     let projectFacetsPromise = scopeIsDocs
       ? undefined
-      : this.algolia.getFacets.perform(projectsIndex, params);
+      : this.search.getFacets.perform(projectsIndex, params);
 
     let projectResultsPromise = scopeIsDocs
       ? undefined
-      : this.algolia.getProjectResults.perform(params);
+      : this.search.getProjectResults.perform(params);
     const [
       docFacets,
       docResults,

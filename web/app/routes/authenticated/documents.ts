@@ -1,7 +1,7 @@
 import Route from "@ember/routing/route";
 import { service } from "@ember/service";
 import ConfigService from "hermes/services/config";
-import AlgoliaService from "hermes/services/algolia";
+import SearchService from "hermes/services/search";
 import { DocumentsRouteParams } from "hermes/types/document-routes";
 import ActiveFiltersService from "hermes/services/active-filters";
 import { SortByValue } from "hermes/components/header/toolbar";
@@ -11,7 +11,7 @@ import { SearchResponse } from "instantsearch.js";
 
 export default class AuthenticatedDocumentsRoute extends Route {
   @service("config") declare configSvc: ConfigService;
-  @service declare algolia: AlgoliaService;
+  @service declare search: SearchService;
   @service declare activeFilters: ActiveFiltersService;
   @service declare store: StoreService;
 
@@ -45,8 +45,8 @@ export default class AuthenticatedDocumentsRoute extends Route {
         : this.configSvc.config.algolia_docs_index_name + "_createdTime_desc";
 
     const [facets, results] = await Promise.all([
-      this.algolia.getFacets.perform(searchIndex, params),
-      this.algolia.getDocResults.perform(searchIndex, params),
+      this.search.getFacets.perform(searchIndex, params),
+      this.search.getDocResults.perform(searchIndex, params),
     ]);
 
     const typedResults = results as SearchResponse<HermesDocument>;
