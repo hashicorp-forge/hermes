@@ -5230,6 +5230,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/http-proxy@npm:^1.17.15":
+  version: 1.17.16
+  resolution: "@types/http-proxy@npm:1.17.16"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10/a054ac8f5301acfcfdcec3a775f52dc371180bbe60037906534312f10cceb3799b4a16e46c56c22f9925d078e11dcda1723c38f1ddd124be8169a4cccca69c8c
+  languageName: node
+  linkType: hard
+
 "@types/json-schema@npm:*, @types/json-schema@npm:^7.0.5, @types/json-schema@npm:^7.0.8, @types/json-schema@npm:^7.0.9":
   version: 7.0.11
   resolution: "@types/json-schema@npm:7.0.11"
@@ -11323,12 +11332,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ember-page-title@npm:^6.2.2":
-  version: 6.2.2
-  resolution: "ember-page-title@npm:6.2.2"
+"ember-page-title@npm:^9.0.3":
+  version: 9.0.3
+  resolution: "ember-page-title@npm:9.0.3"
   dependencies:
-    ember-cli-babel: "npm:^7.23.1"
-  checksum: 10/fcf2ad48e34010e0d6bd9d8f3c8820fde06f94fb07e5a9213044e17f476a0690e1b65690ca4c04d1227bc09216f19fd5b0b7ea72c33b0727a91d9b4e6f2831f7
+    "@embroider/addon-shim": "npm:^1.8.7"
+    "@simple-dom/document": "npm:^1.4.0"
+  checksum: 10/64876e6ece874cb2f9cdc9bfddb1821c3908b3365e5203ebd36c7507db2e03ac1271a2e5aca69dbd6e6b159273f9104db1a809a3f43ae1bf5895cde26c275485
   languageName: node
   linkType: hard
 
@@ -14139,7 +14149,7 @@ __metadata:
     ember-metrics: "npm:^2.0.0-beta.2"
     ember-modifier: "npm:^4.1.0"
     ember-on-helper: "npm:^0.1.0"
-    ember-page-title: "npm:^6.2.2"
+    ember-page-title: "npm:^9.0.3"
     ember-power-select: "npm:^8.9.0"
     ember-power-select-with-create: "npm:^3.0.1"
     ember-qunit: "npm:^9.0.4"
@@ -14160,6 +14170,7 @@ __metadata:
     eslint-plugin-prettier: "npm:^5.5.4"
     eslint-plugin-qunit: "npm:^6.2.0"
     font-color-contrast: "npm:^11.1.0"
+    http-proxy-middleware: "npm:^3.0.5"
     instantsearch.js: "npm:^4.80.0"
     loader.js: "npm:^4.7.0"
     miragejs: "npm:^0.1.47"
@@ -14301,6 +14312,20 @@ __metadata:
     agent-base: "npm:6"
     debug: "npm:4"
   checksum: 10/5ee19423bc3e0fd5f23ce991b0755699ad2a46a440ce9cec99e8126bb98448ad3479d2c0ea54be5519db5b19a4ffaa69616bac01540db18506dd4dac3dc418f0
+  languageName: node
+  linkType: hard
+
+"http-proxy-middleware@npm:^3.0.5":
+  version: 3.0.5
+  resolution: "http-proxy-middleware@npm:3.0.5"
+  dependencies:
+    "@types/http-proxy": "npm:^1.17.15"
+    debug: "npm:^4.3.6"
+    http-proxy: "npm:^1.18.1"
+    is-glob: "npm:^4.0.3"
+    is-plain-object: "npm:^5.0.0"
+    micromatch: "npm:^4.0.8"
+  checksum: 10/83c1956be6451a5f4a2f3c7b3d84085dbd47e1efb5bb684c1ed668a6606c18c7c07be823b0dbba1326955b64cf88de2672492940b0b48d140215fbdb06105c9a
   languageName: node
   linkType: hard
 
@@ -14989,6 +15014,13 @@ __metadata:
   dependencies:
     isobject: "npm:^3.0.1"
   checksum: 10/2a401140cfd86cabe25214956ae2cfee6fbd8186809555cd0e84574f88de7b17abacb2e477a6a658fa54c6083ecbda1e6ae404c7720244cd198903848fca70ca
+  languageName: node
+  linkType: hard
+
+"is-plain-object@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "is-plain-object@npm:5.0.0"
+  checksum: 10/e32d27061eef62c0847d303125440a38660517e586f2f3db7c9d179ae5b6674ab0f469d519b2e25c147a1a3bc87156d0d5f4d8821e0ce4a9ee7fe1fcf11ce45c
   languageName: node
   linkType: hard
 

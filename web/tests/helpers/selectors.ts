@@ -8,6 +8,11 @@ export const FLASH_MESSAGE = "[data-test-flash-notification]";
 
 // Tooltips
 export const TOOLTIP = ".hermes-tooltip";
+export const TOOLTIP_ICON_TRIGGER = "[data-test-tooltip-icon-trigger]";
+
+// Favicons
+export const FAVICON = "[data-test-favicon]";
+export const FALLBACK_FAVICON = "[data-test-fallback-favicon]";
 
 // Modals and dialogs
 export const POPOVER = "[data-test-x-dropdown-list-content]";
@@ -39,7 +44,7 @@ export const PRODUCT_SELECT_ITEM = `${POPOVER} [data-test-product-select-item]`;
 // People selection
 export const PEOPLE_SELECT_INPUT = ".ember-power-select-trigger-multiple-input";
 export const PEOPLE_SELECT_OPTION = ".ember-power-select-option:not(.ember-power-select-option--no-matches-message)";
-export const PEOPLE_SELECT_REMOVE_BUTTON = "[data-test-people-select-remove-button]";
+export const PEOPLE_SELECT_REMOVE_BUTTON = ".ember-power-select-multiple-remove-btn";
 
 // Editable fields
 export const EDITABLE_FIELD_READ_VALUE = "[data-test-editable-field-read-value]";
@@ -54,9 +59,24 @@ export const RELATED_DOCUMENT_OPTION = ".related-document-option";
 export const ADD_RELATED_RESOURCES_SEARCH_INPUT = "[data-test-add-related-resources-search-input]";
 export const NO_RESOURCES_FOUND = "[data-test-no-related-resources-found]";
 export const ADD_RESOURCE_MODAL = "[data-test-add-related-resource-modal]";
+export const RELATED_RESOURCES_LIST = "[data-test-related-resources-list]";
+export const RELATED_RESOURCES_LIST_ITEM = ".related-resource";
+export const RELATED_RESOURCES_LIST_LOADING_ICON = "[data-test-related-resources-list-loading-icon]";
+export const RELATED_RESOURCES_LIST_EMPTY_STATE = "[data-test-related-resources-list-empty-state]";
+export const RESOURCE_TITLE = "[data-test-resource-title]";
+export const RESOURCE_SECONDARY_TEXT = "[data-test-resource-secondary-text]";
+export const HERMES_DOCUMENT = ".hermes-document";
+export const EXTERNAL_RESOURCE = ".external-resource";
+export const OVERFLOW_BUTTON = ".overflow-button";
+export const OVERFLOW_MENU_EDIT_ACTION = "[data-test-overflow-menu-action='edit']";
+export const OVERFLOW_MENU_REMOVE_ACTION = "[data-test-overflow-menu-action='remove']";
 
 // External resources
 export const EXTERNAL_RESOURCE_TITLE_INPUT = ".external-resource-title-input";
+export const EXTERNAL_RESOURCE_URL_INPUT = "[data-test-external-resource-url-input]";
+export const EXTERNAL_RESOURCE_TITLE_ERROR = "[data-test-external-resource-title-error]";
+export const ADD_OR_EDIT_EXTERNAL_RESOURCE_MODAL = "[data-test-add-or-edit-external-resource-modal]";
+export const ADD_FALLBACK_EXTERNAL_RESOURCE = "[data-test-add-fallback-external-resource]";
 
 // Draft visibility
 export const DRAFT_VISIBILITY_DROPDOWN = "[data-test-draft-visibility-dropdown]";
@@ -70,11 +90,16 @@ export const SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON = "[data-test-sidebar-publish-for
 export const SIDEBAR_FOOTER_PRIMARY_BUTTON_READ_ONLY = "[data-test-sidebar-footer-primary-button-read-only]";
 export const SIDEBAR_FOOTER_SECONDARY_DROPDOWN_BUTTON = "[data-test-sidebar-footer-secondary-dropdown-button]";
 export const SIDEBAR_FOOTER_OVERFLOW_MENU = "[data-test-sidebar-footer-overflow-menu]";
+export const SIDEBAR_SECTION_HEADER = ".sidebar-section-header";
+export const SIDEBAR_SECTION_HEADER_BUTTON = "[data-test-sidebar-section-header-button]";
+export const RELATED_RESOURCES_ERROR_BUTTON = "[data-test-related-resources-error-button]";
 
 // Buttons
 export const APPROVE_BUTTON = "[data-test-approve-button]";
 export const DELETE_BUTTON = "[data-test-delete-draft-button]";
 export const DOCUMENT_MODAL_PRIMARY_BUTTON = "[data-test-document-modal-primary-button]";
+export const SAVE_BUTTON = "[data-test-save-button]";
+export const SUBMIT_BUTTON = "[data-test-submit-button]";
 
 // Modals
 export const DELETE_MODAL = "[data-test-delete-draft-modal]";
@@ -82,6 +107,7 @@ export const PUBLISH_FOR_REVIEW_MODAL = "[data-test-publish-for-review-modal]";
 export const DOC_PUBLISHED_MODAL = "[data-test-doc-published-modal]";
 export const TRANSFER_OWNERSHIP_MODAL = "[data-test-transfer-ownership-modal]";
 export const OWNERSHIP_TRANSFERRED_MODAL = "[data-test-ownership-transferred-modal]";
+export const MODAL_HEADER = "[data-test-modal-header]";
 
 // Search
 export const SEARCH_INPUT = "[data-test-global-search-input]";

@@ -14,10 +14,11 @@
 #   - Client Secret: YWNjZXB0YW5jZS1hcHAtc2VjcmV0
 #   - Redirect URI: http://localhost:8001/auth/callback
 #
-# Note: Using 'dex' as hostname (Docker service name) instead of 'localhost' 
-#       so that Hermes container can communicate with Dex container
+# Note: Using 'localhost:5558' as the issuer so both browsers AND containers can access it.
+#       Port 5558 is the host-mapped port (5557 is internal container port)
+#       The hermes container uses extra_hosts to map localhost to host-gateway
 
-issuer: http://dex:5557/dex
+issuer: http://localhost:5558/dex
 
 storage:
   type: memory

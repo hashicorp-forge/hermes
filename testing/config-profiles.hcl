@@ -194,9 +194,10 @@ profile "testing" {
   
   // Dex OIDC for testing - enabled by default
   // Use static test user: test@hermes.local / password
+  // Note: issuer_url uses localhost:5558 (host-mapped port) so browser can access Dex
   dex {
     disabled      = false
-    issuer_url    = "http://dex:5557/dex"
+    issuer_url    = "http://localhost:5558/dex"
     client_id     = "hermes-acceptance"
     client_secret = "YWNjZXB0YW5jZS1hcHAtc2VjcmV0"
     redirect_url  = "http://localhost:8001/auth/callback"

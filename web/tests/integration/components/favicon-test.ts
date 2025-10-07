@@ -2,9 +2,7 @@ import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { find, render, waitFor } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
-
-const FALLBACK_ICON_SELECTOR = "[data-test-fallback-favicon]";
-const FAVICON_SELECTOR = "[data-test-favicon]";
+import { FALLBACK_FAVICON, FAVICON } from "hermes/tests/helpers/selectors";
 
 module("Integration | Component | favicon", function (hooks) {
   setupRenderingTest(hooks);
@@ -15,7 +13,7 @@ module("Integration | Component | favicon", function (hooks) {
     `);
 
     assert
-      .dom(FAVICON_SELECTOR)
+      .dom(FAVICON)
       .hasAttribute(
         "src",
         "https://www.google.com/s2/favicons?sz=64&domain=https://hashicorp.com"
@@ -27,13 +25,13 @@ module("Integration | Component | favicon", function (hooks) {
       <Favicon @url="-"/>
     `);
 
-    assert.dom(FALLBACK_ICON_SELECTOR).doesNotExist();
+    assert.dom(FALLBACK_FAVICON).doesNotExist();
 
-    find(FAVICON_SELECTOR)?.dispatchEvent(new Event("error"));
+    find(FAVICON)?.dispatchEvent(new Event("error"));
 
-    await waitFor(FALLBACK_ICON_SELECTOR);
+    await waitFor(FALLBACK_FAVICON);
 
-    assert.dom(FALLBACK_ICON_SELECTOR).exists();
-    assert.dom(FAVICON_SELECTOR).doesNotExist();
+    assert.dom(FALLBACK_FAVICON).exists();
+    assert.dom(FAVICON).doesNotExist();
   });
 });

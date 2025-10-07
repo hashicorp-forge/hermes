@@ -126,10 +126,12 @@ meilisearch {
   links_index_name  = "links"
 }
 
-// Dex OIDC authentication (enabled for acceptance testing)
+// Dex OIDC authentication (enabled for acceptance testing)  
+// Note: issuer_url uses host.docker.internal:5558 so both browser AND Hermes container can access Dex
+//       On macOS/Windows Docker Desktop, host.docker.internal resolves to the host machine
 dex {
   disabled      = false
-  issuer_url    = "http://dex:5557/dex"
+  issuer_url    = "http://localhost:5558/dex"
   client_id     = "hermes-acceptance"
   client_secret = "YWNjZXB0YW5jZS1hcHAtc2VjcmV0"
   redirect_url  = "http://localhost:8001/auth/callback"
@@ -146,7 +148,7 @@ okta {
 
 // PostgreSQL configuration (connects to postgres container)
 postgres {
-  dbname   = "hermes_test"
+  dbname   = "hermes_acceptance"
   host     = "postgres"
   port     = 5432
   user     = "postgres"

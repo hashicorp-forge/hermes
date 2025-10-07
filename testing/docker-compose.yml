@@ -98,6 +98,8 @@ services:
       HERMES_MEILISEARCH_URL: http://meilisearch:7700
       HERMES_MEILISEARCH_KEY: masterKey123
     command: ["server", "-config=/app/config.hcl"]
+    extra_hosts:
+      - "localhost:host-gateway"
     depends_on:
       postgres:
         condition: service_healthy
@@ -106,7 +108,7 @@ services:
       dex:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "-O", "/dev/null", "http://localhost:8000/"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "-O", "/dev/null", "http://localhost:8000/health"]
       interval: 3s
       timeout: 2s
       retries: 3

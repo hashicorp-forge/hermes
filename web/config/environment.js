@@ -16,7 +16,7 @@ module.exports = function (environment) {
     modulePrefix: "hermes",
     environment,
     rootURL: "/",
-    locationType: "auto",
+    locationType: "history",
     EmberENV: {
       FEATURES: {
         // Here you can enable experimental features on an ember canary build
@@ -31,6 +31,7 @@ module.exports = function (environment) {
     APP: {
       // Here you can pass flags/options to your application instance
       // when it is created
+      rootElement: '#ember-application',
     },
     metricsAdapters: [
       {
@@ -59,9 +60,9 @@ module.exports = function (environment) {
     },
 
     // ember-simple-auth configuration
-    // We manually handle session restoration in the application route's beforeModel hook
+    // Session setup is called manually in application route's beforeModel after config is loaded
     'ember-simple-auth': {
-      useSessionSetupMethod: true,
+      useSessionSetupMethod: false,  // We call session.setup() manually after loading config
     },
 
     google: {
@@ -81,6 +82,13 @@ module.exports = function (environment) {
 
     featureFlags: {},
   };
+
+  // Disable Mirage when MIRAGE_ENABLED=false (for testing with real backend)
+  if (process.env.MIRAGE_ENABLED === 'false') {
+    ENV['ember-cli-mirage'] = {
+      enabled: false
+    };
+  }
 
   if (environment === "development") {
     ENV.shortLinkBaseURL = "https://fake.short.link";

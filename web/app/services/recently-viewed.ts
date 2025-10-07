@@ -60,7 +60,9 @@ export default class RecentlyViewedService extends Service {
    * A potentially combined array of the ten most recently viewed docs and projects.
    */
   get index(): Array<RecentlyViewedDoc | RecentlyViewedProject> | undefined {
-    return this._index?.sortBy("viewedTime").reverse().slice(0, 10);
+    return this._index
+      ?.sort((a, b) => (b.viewedTime || 0) - (a.viewedTime || 0))
+      .slice(0, 10);
   }
 
   /**
@@ -148,7 +150,7 @@ export default class RecentlyViewedService extends Service {
       );
 
       // Update the local array to recompute the getter
-      this._index = formattedItems.compact();
+      this._index = formattedItems.filter((item): item is RecentlyViewedDoc | RecentlyViewedProject => item != null);
     } catch (e) {
       // Log an error if the fetch fails
       console.error("Error fetching recently viewed docs", e);

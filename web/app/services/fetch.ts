@@ -40,7 +40,8 @@ export default class FetchService extends Service {
     // Add authentication token to backend API requests based on the configured auth provider
     if (Array.from(url)[0] == "/") {
       const authProvider = this.configSvc.config.auth_provider;
-      const accessToken = this.session.data.authenticated.access_token;
+      // Safely access session data - it may be undefined if user is not authenticated
+      const accessToken = this.session?.data?.authenticated?.access_token;
 
       // Skip adding headers if already present (e.g., in authenticator restore method)
       const hasAuthHeader =
@@ -48,6 +49,7 @@ export default class FetchService extends Service {
         (options.headers["Hermes-Google-Access-Token"] ||
           options.headers["Authorization"]);
 
+      // Only add auth headers if we have a token and no auth header already exists
       if (!hasAuthHeader && accessToken) {
         if (authProvider === "google") {
           // Google OAuth uses custom header
@@ -68,7 +70,7 @@ export default class FetchService extends Service {
     try {
       const resp = await fetch(url, options);
       // if it's a poll call, tell the SessionService if the response was a 401
-      if (isPollCall) {
+      if (isPollCall && this.session) {
         this.session.pollResponseIs401 = resp.status === 401;
       }
 
@@ -96,7 +98,9 @@ export default class FetchService extends Service {
         if (isPollCall) {
           // Swallow error. The session service polling will prompt the user to
           // reauthenticate.
-          this.session.pollResponseIs401 = true;
+          if (this.session) {
+            this.session.pollResponseIs401 = true;
+          }
         } else {
           // Reload to redirect to Okta login.
           window.location.reload();

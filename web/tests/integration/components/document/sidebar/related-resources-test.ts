@@ -14,40 +14,40 @@ import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { HermesDocument } from "hermes/types/document";
 import { Response } from "miragejs";
 import { setupProductIndex } from "hermes/tests/mirage-helpers/utils";
+import {
+  RELATED_RESOURCES_LIST_LOADING_ICON,
+  RELATED_RESOURCES_LIST,
+  RELATED_RESOURCES_LIST_ITEM,
+  HERMES_DOCUMENT,
+  EXTERNAL_RESOURCE,
+  SIDEBAR_SECTION_HEADER,
+  RELATED_RESOURCES_ERROR_BUTTON,
+  OVERFLOW_BUTTON,
+  OVERFLOW_MENU_EDIT_ACTION,
+  OVERFLOW_MENU_REMOVE_ACTION,
+  ADD_OR_EDIT_EXTERNAL_RESOURCE_MODAL,
+  MODAL_HEADER,
+  SAVE_BUTTON,
+  DELETE_BUTTON,
+  EXTERNAL_RESOURCE_TITLE_INPUT,
+  EXTERNAL_RESOURCE_URL_INPUT,
+  SIDEBAR_SECTION_HEADER_BUTTON,
+  ADD_RESOURCE_MODAL,
+  RELATED_DOCUMENT_OPTION,
+  EXTERNAL_RESOURCE_TITLE_ERROR,
+  RESOURCE_TITLE,
+  RESOURCE_SECONDARY_TEXT,
+  TOOLTIP_ICON_TRIGGER,
+  TOOLTIP,
+  ADD_FALLBACK_EXTERNAL_RESOURCE,
+  SUBMIT_BUTTON,
+  RELATED_RESOURCES_LIST_EMPTY_STATE,
+} from "hermes/tests/helpers/selectors";
 
-const LOADING_ICON_SELECTOR = "[data-test-related-resources-list-loading-icon]";
-const LIST_SELECTOR = "[data-test-related-resources-list]";
-const LIST_ITEM_SELECTOR = ".related-resource";
-const HERMES_DOCUMENT_SELECTOR = ".hermes-document";
-const EXTERNAL_RESOURCE_SELECTOR = ".external-resource";
-const HEADER_SELECTOR = ".sidebar-section-header";
+// Local selectors not yet in shared file
 const ERROR_MESSAGE_SELECTOR = ".failed-to-load-text";
-const ERROR_BUTTON_SELECTOR = "[data-test-related-resources-error-button]";
-const OVERFLOW_BUTTON_SELECTOR = ".overflow-button";
-const EDIT_BUTTON_SELECTOR = "[data-test-overflow-menu-action='edit']";
-const REMOVE_BUTTON_SELECTOR = "[data-test-overflow-menu-action='remove']";
-const EDIT_MODAL_SELECTOR = "[data-test-add-or-edit-external-resource-modal]";
-const EDIT_MODAL_HEADER_SELECTOR = `${EDIT_MODAL_SELECTOR} [data-test-modal-header]`;
-const EDIT_RESOURCE_SAVE_BUTTON_SELECTOR = `${EDIT_MODAL_SELECTOR} [data-test-save-button]`;
-const ADD_EXTERNAL_RESOURCE_MODAL_DELETE_BUTTON_SELECTOR = `${EDIT_MODAL_SELECTOR} [data-test-delete-button]`;
-const EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR = ".external-resource-title-input";
-const EDIT_RESOURCE_URL_INPUT_SELECTOR =
-  "[data-test-external-resource-url-input]";
-const ADD_RESOURCE_BUTTON_SELECTOR =
-  "[data-test-sidebar-section-header-button]";
-const ADD_RESOURCE_MODAL_SELECTOR = "[data-test-add-related-resource-modal]";
-
-const ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR =
-  ".related-document-option";
 const ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR =
   "[data-test-related-resources-search-input]";
-const ADD_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR = `[data-test-add-fallback-external-resource] [data-test-submit-button]`;
-const EDIT_EXTERNAL_RESOURCE_ERROR_SELECTOR =
-  "[data-test-external-resource-title-error]";
-const RESOURCE_TITLE_SELECTOR = "[data-test-resource-title]";
-const RESOURCE_SECONDARY_TEXT_SELECTOR = "[data-test-resource-secondary-text]";
-const TOOLTIP_TRIGGER_SELECTOR = "[data-test-tooltip-icon-trigger]";
-const TOOLTIP_SELECTOR = ".hermes-tooltip";
 
 interface DocumentSidebarRelatedResourcesTestContext extends MirageTestContext {
   document: HermesDocument;
@@ -112,7 +112,7 @@ module(
 
       await click("[data-test-related-resources-list-empty-state]");
 
-      assert.dom(ADD_RESOURCE_MODAL_SELECTOR).exists();
+      assert.dom(ADD_RESOURCE_MODAL).exists();
     });
 
     test("it renders the related resources list", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
@@ -141,34 +141,34 @@ module(
         />
       `);
 
-      await waitFor(LOADING_ICON_SELECTOR);
-      assert.dom(LOADING_ICON_SELECTOR).exists("a loading icon is shown");
+      await waitFor(RELATED_RESOURCES_LIST_LOADING_ICON);
+      assert.dom(RELATED_RESOURCES_LIST_LOADING_ICON).exists("a loading icon is shown");
 
       await renderPromise;
 
-      assert.dom(LIST_SELECTOR).exists("the list is shown");
-      assert.dom(LIST_ITEM_SELECTOR).exists({ count: 4 }, "there are 4 items");
+      assert.dom(RELATED_RESOURCES_LIST).exists("the list is shown");
+      assert.dom(RELATED_RESOURCES_LIST_ITEM).exists({ count: 4 }, "there are 4 items");
 
       assert
-        .dom(HEADER_SELECTOR)
+        .dom(SIDEBAR_SECTION_HEADER)
         .hasText("Test title", "the header title is correct");
 
-      assert.dom(TOOLTIP_SELECTOR).doesNotExist();
-      assert.dom(TOOLTIP_TRIGGER_SELECTOR).exists();
-      await triggerEvent(TOOLTIP_TRIGGER_SELECTOR, "mouseenter");
+      assert.dom(TOOLTIP).doesNotExist();
+      assert.dom(TOOLTIP_ICON_TRIGGER).exists();
+      await triggerEvent(TOOLTIP_ICON_TRIGGER, "mouseenter");
       assert
         .dom(".hermes-tooltip")
         .hasText("Documents and links that are relevant to this work.");
 
       assert
-        .dom(HERMES_DOCUMENT_SELECTOR)
+        .dom(HERMES_DOCUMENT)
         .exists({ count: 2 }, "there are 2 hermes documents");
       assert
-        .dom(EXTERNAL_RESOURCE_SELECTOR)
+        .dom(EXTERNAL_RESOURCE)
         .exists({ count: 2 }, "there are 2 external resources");
 
       const listItemIDs = [
-        ...document.querySelectorAll(LIST_ITEM_SELECTOR),
+        ...document.querySelectorAll(RELATED_RESOURCES_LIST_ITEM),
       ].map((item) => item.id);
 
       let expectedIds = [];
@@ -184,7 +184,7 @@ module(
       );
 
       const hrefs = [
-        ...document.querySelectorAll(`${LIST_ITEM_SELECTOR} a`),
+        ...document.querySelectorAll(`${RELATED_RESOURCES_LIST_ITEM} a`),
       ].map((link) => link.getAttribute("href"));
 
       assert.deepEqual(hrefs, [
@@ -212,18 +212,18 @@ module(
       `);
 
       assert
-        .dom(LIST_SELECTOR)
+        .dom(RELATED_RESOURCES_LIST)
         .doesNotExist("the list is not shown when loading fails");
 
       assert.dom(ERROR_MESSAGE_SELECTOR).hasText("Failed to load");
-      assert.dom(ERROR_BUTTON_SELECTOR).hasText("Retry");
+      assert.dom(RELATED_RESOURCES_ERROR_BUTTON).hasText("Retry");
       this.server.get("/documents/:document_id/related-resources", () => {
         return new Response(200, {}, {});
       });
 
-      await click(ERROR_BUTTON_SELECTOR);
+      await click(RELATED_RESOURCES_ERROR_BUTTON);
 
-      assert.dom(LIST_SELECTOR).exists("the list is shown again");
+      assert.dom(RELATED_RESOURCES_LIST).exists("the list is shown again");
     });
 
     test("resources can be deleted (overflow menu)", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
@@ -241,17 +241,17 @@ module(
         />
       `);
 
-      assert.dom(LIST_ITEM_SELECTOR).exists({ count: 2 });
+      assert.dom(RELATED_RESOURCES_LIST_ITEM).exists({ count: 2 });
 
-      await click(OVERFLOW_BUTTON_SELECTOR);
-      await click(REMOVE_BUTTON_SELECTOR);
+      await click(OVERFLOW_BUTTON);
+      await click(OVERFLOW_MENU_REMOVE_ACTION);
 
-      assert.dom(LIST_ITEM_SELECTOR).exists({ count: 1 });
+      assert.dom(RELATED_RESOURCES_LIST_ITEM).exists({ count: 1 });
 
-      await click(OVERFLOW_BUTTON_SELECTOR);
-      await click(REMOVE_BUTTON_SELECTOR);
+      await click(OVERFLOW_BUTTON);
+      await click(OVERFLOW_MENU_REMOVE_ACTION);
 
-      assert.dom(LIST_ITEM_SELECTOR).doesNotExist();
+      assert.dom(RELATED_RESOURCES_LIST_ITEM).doesNotExist();
     });
 
     test("external resources can be deleted (modal)", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
@@ -271,16 +271,16 @@ module(
         />
       `);
 
-      assert.dom(LIST_ITEM_SELECTOR).exists({ count: 1 });
+      assert.dom(RELATED_RESOURCES_LIST_ITEM).exists({ count: 1 });
 
-      await click(OVERFLOW_BUTTON_SELECTOR);
-      await click(EDIT_BUTTON_SELECTOR);
+      await click(OVERFLOW_BUTTON);
+      await click(OVERFLOW_MENU_EDIT_ACTION);
 
-      await waitFor(EDIT_MODAL_SELECTOR);
+      await waitFor(ADD_OR_EDIT_EXTERNAL_RESOURCE_MODAL);
 
-      await click(ADD_EXTERNAL_RESOURCE_MODAL_DELETE_BUTTON_SELECTOR);
+      await click(`${ADD_OR_EDIT_EXTERNAL_RESOURCE_MODAL} ${DELETE_BUTTON}`);
 
-      assert.dom(LIST_ITEM_SELECTOR).doesNotExist("the item is removed");
+      assert.dom(RELATED_RESOURCES_LIST_ITEM).doesNotExist("the item is removed");
     });
 
     test("external resources can be edited", async function (this: DocumentSidebarRelatedResourcesTestContext, assert) {
@@ -300,30 +300,30 @@ module(
         />
       `);
 
-      await click(OVERFLOW_BUTTON_SELECTOR);
-      await click(EDIT_BUTTON_SELECTOR);
+      await click(OVERFLOW_BUTTON);
+      await click(OVERFLOW_MENU_EDIT_ACTION);
 
-      await waitFor(EDIT_MODAL_SELECTOR);
+      await waitFor(ADD_OR_EDIT_EXTERNAL_RESOURCE_MODAL);
 
-      assert.dom(EDIT_MODAL_SELECTOR).exists("the edit modal is shown");
-      assert.dom(EDIT_MODAL_HEADER_SELECTOR).hasText("Edit resource");
+      assert.dom(ADD_OR_EDIT_EXTERNAL_RESOURCE_MODAL).exists("the edit modal is shown");
+      assert.dom(`${ADD_OR_EDIT_EXTERNAL_RESOURCE_MODAL} ${MODAL_HEADER}`).hasText("Edit resource");
 
-      assert.dom(EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR).hasValue("Example");
+      assert.dom(EXTERNAL_RESOURCE_TITLE_INPUT).hasValue("Example");
       assert
-        .dom(EDIT_RESOURCE_URL_INPUT_SELECTOR)
+        .dom(EXTERNAL_RESOURCE_URL_INPUT)
         .hasValue("https://example.com");
 
-      await fillIn(EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR, "New title");
-      await fillIn(EDIT_RESOURCE_URL_INPUT_SELECTOR, "https://new-url.com");
+      await fillIn(EXTERNAL_RESOURCE_TITLE_INPUT, "New title");
+      await fillIn(EXTERNAL_RESOURCE_URL_INPUT, "https://new-url.com");
 
-      await click(EDIT_RESOURCE_SAVE_BUTTON_SELECTOR);
+      await click(`${ADD_OR_EDIT_EXTERNAL_RESOURCE_MODAL} ${SAVE_BUTTON}`);
 
-      assert.dom(EDIT_MODAL_SELECTOR).doesNotExist("the modal is closed");
+      assert.dom(ADD_OR_EDIT_EXTERNAL_RESOURCE_MODAL).doesNotExist("the modal is closed");
 
-      assert.dom(RESOURCE_TITLE_SELECTOR).hasText("New title");
-      assert.dom(RESOURCE_SECONDARY_TEXT_SELECTOR).hasText("new-url.com");
+      assert.dom(RESOURCE_TITLE).hasText("New title");
+      assert.dom(RESOURCE_SECONDARY_TEXT).hasText("new-url.com");
       assert
-        .dom(EXTERNAL_RESOURCE_SELECTOR + " a")
+        .dom(EXTERNAL_RESOURCE + " a")
         .hasAttribute("href", "https://new-url.com");
     });
 
@@ -344,16 +344,16 @@ module(
         />
       `);
 
-      assert.dom(LIST_ITEM_SELECTOR).doesNotExist("no items yet");
+      assert.dom(RELATED_RESOURCES_LIST_ITEM).doesNotExist("no items yet");
 
-      await click(ADD_RESOURCE_BUTTON_SELECTOR);
-      await waitFor(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR);
-      await click(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR);
+      await click(SIDEBAR_SECTION_HEADER_BUTTON);
+      await waitFor(RELATED_DOCUMENT_OPTION);
+      await click(RELATED_DOCUMENT_OPTION);
 
-      await waitFor(LIST_ITEM_SELECTOR);
+      await waitFor(RELATED_RESOURCES_LIST_ITEM);
 
       assert
-        .dom(LIST_ITEM_SELECTOR + " a")
+        .dom(RELATED_RESOURCES_LIST_ITEM + " a")
         .exists()
         .hasAttribute("href", "/document/300");
     });
@@ -370,22 +370,22 @@ module(
         />
       `);
 
-      assert.dom(LIST_ITEM_SELECTOR).doesNotExist("no items yet");
+      assert.dom(RELATED_RESOURCES_LIST_ITEM).doesNotExist("no items yet");
 
-      await click(ADD_RESOURCE_BUTTON_SELECTOR);
-      await waitFor(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR);
+      await click(SIDEBAR_SECTION_HEADER_BUTTON);
+      await waitFor(RELATED_DOCUMENT_OPTION);
       await fillIn(
         ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR,
         "https://example.com",
       );
 
-      await fillIn(EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR, "Example");
-      await click(ADD_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR);
+      await fillIn(EXTERNAL_RESOURCE_TITLE_INPUT, "Example");
+      await click(`${ADD_FALLBACK_EXTERNAL_RESOURCE} ${SUBMIT_BUTTON}`);
 
-      await waitFor(LIST_ITEM_SELECTOR);
+      await waitFor(RELATED_RESOURCES_LIST_ITEM);
 
       assert
-        .dom(LIST_ITEM_SELECTOR + " a")
+        .dom(RELATED_RESOURCES_LIST_ITEM + " a")
         .hasAttribute("href", "https://example.com");
     });
 
@@ -411,11 +411,11 @@ module(
       `);
 
       assert
-        .dom(LIST_ITEM_SELECTOR)
+        .dom(RELATED_RESOURCES_LIST_ITEM)
         .exists({ count: 1 }, "items are limited by the 'itemLimit' argument");
 
       assert
-        .dom(ADD_RESOURCE_BUTTON_SELECTOR)
+        .dom(SIDEBAR_SECTION_HEADER_BUTTON)
         .doesNotExist("the add button is removed when the limit is reached");
     });
 
@@ -438,15 +438,15 @@ module(
       `);
 
       assert
-        .dom(LIST_ITEM_SELECTOR)
+        .dom(RELATED_RESOURCES_LIST_ITEM)
         .exists({ count: 1 }, "it loaded resources from the drafts endpoint");
 
-      await click(OVERFLOW_BUTTON_SELECTOR);
+      await click(OVERFLOW_BUTTON);
 
-      await click(REMOVE_BUTTON_SELECTOR);
+      await click(OVERFLOW_MENU_REMOVE_ACTION);
 
       assert
-        .dom(LIST_ITEM_SELECTOR)
+        .dom(RELATED_RESOURCES_LIST_ITEM)
         .doesNotExist("the PUT call went to the drafts endpoint");
     });
 
@@ -485,19 +485,19 @@ module(
         />
       `);
 
-        assert.dom(LIST_ITEM_SELECTOR).exists({ count: 3 });
+        assert.dom(RELATED_RESOURCES_LIST_ITEM).exists({ count: 3 });
 
         // Add a new document
-        await click(ADD_RESOURCE_BUTTON_SELECTOR);
-        await waitFor(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR);
-        await click(ADD_RELATED_RESOURCES_DOCUMENT_OPTION_SELECTOR);
+        await click(SIDEBAR_SECTION_HEADER_BUTTON);
+        await waitFor(RELATED_DOCUMENT_OPTION);
+        await click(RELATED_DOCUMENT_OPTION);
 
-        assert.dom(LIST_ITEM_SELECTOR).exists({ count: 4 });
+        assert.dom(RELATED_RESOURCES_LIST_ITEM).exists({ count: 4 });
 
         await waitFor(".highlight-affordance");
 
         // A new document will be the first item
-        assert.dom(LIST_ITEM_SELECTOR + " .highlight-affordance").exists();
+        assert.dom(RELATED_RESOURCES_LIST_ITEM + " .highlight-affordance").exists();
 
         // Confirm that the highlight-affordance div is removed
         await waitUntil(() => {
@@ -505,21 +505,21 @@ module(
         });
 
         // Add a new external resource
-        await click(ADD_RESOURCE_BUTTON_SELECTOR);
+        await click(SIDEBAR_SECTION_HEADER_BUTTON);
         await fillIn(
           ADD_RELATED_RESOURCES_SEARCH_INPUT_SELECTOR,
           "https://new-resource-example.com",
         );
-        await fillIn(EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR, "New resource");
-        await click(ADD_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR);
+        await fillIn(EXTERNAL_RESOURCE_TITLE_INPUT, "New resource");
+        await click(`${ADD_FALLBACK_EXTERNAL_RESOURCE} ${SUBMIT_BUTTON}`);
 
-        assert.dom(LIST_ITEM_SELECTOR).exists({ count: 5 });
+        assert.dom(RELATED_RESOURCES_LIST_ITEM).exists({ count: 5 });
 
         await waitFor(".highlight-affordance");
 
         assert
           // A new external resource will render after the 3 documents.
-          .dom(LIST_ITEM_SELECTOR + ":nth-child(4) .highlight-affordance")
+          .dom(RELATED_RESOURCES_LIST_ITEM + ":nth-child(4) .highlight-affordance")
           .exists();
 
         // Confirm that the highlight-affordance div is removed
@@ -530,16 +530,16 @@ module(
 
         // Edit a document
         await click(
-          LIST_ITEM_SELECTOR + ":nth-child(4) " + OVERFLOW_BUTTON_SELECTOR,
+          RELATED_RESOURCES_LIST_ITEM + ":nth-child(4) " + OVERFLOW_BUTTON,
         );
-        await click(EDIT_BUTTON_SELECTOR);
+        await click(OVERFLOW_MENU_EDIT_ACTION);
 
-        await click(EDIT_RESOURCE_SAVE_BUTTON_SELECTOR);
+        await click(`${ADD_OR_EDIT_EXTERNAL_RESOURCE_MODAL} ${SAVE_BUTTON}`);
 
         await waitFor(".highlight-affordance");
 
         assert
-          .dom(LIST_ITEM_SELECTOR + ":nth-child(4) .highlight-affordance")
+          .dom(RELATED_RESOURCES_LIST_ITEM + ":nth-child(4) .highlight-affordance")
           .exists();
       },
     );
@@ -562,14 +562,14 @@ module(
         />
       `);
 
-      await click(OVERFLOW_BUTTON_SELECTOR);
-      await click(EDIT_BUTTON_SELECTOR);
+      await click(OVERFLOW_BUTTON);
+      await click(OVERFLOW_MENU_EDIT_ACTION);
 
-      await fillIn(EXTERNAL_RESOURCE_TITLE_INPUT_SELECTOR, "");
-      await click(EDIT_RESOURCE_SAVE_BUTTON_SELECTOR);
+      await fillIn(EXTERNAL_RESOURCE_TITLE_INPUT, "");
+      await click(`${ADD_OR_EDIT_EXTERNAL_RESOURCE_MODAL} ${SAVE_BUTTON}`);
 
       assert
-        .dom(EDIT_EXTERNAL_RESOURCE_ERROR_SELECTOR)
+        .dom(EXTERNAL_RESOURCE_TITLE_ERROR)
         .hasText("A title is required.");
     });
   },

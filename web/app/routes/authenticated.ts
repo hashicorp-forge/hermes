@@ -1,5 +1,6 @@
 import Route from "@ember/routing/route";
 import { service } from "@ember/service";
+import type RouterService from "@ember/routing/router-service";
 import AuthenticatedController from "hermes/controllers/authenticated";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import ConfigService from "hermes/services/config";
@@ -11,8 +12,9 @@ export default class AuthenticatedRoute extends Route {
   @service declare session: SessionService;
   @service declare authenticatedUser: AuthenticatedUserService;
   @service declare productAreas: ProductAreasService;
+  @service declare router: RouterService;
 
-  beforeModel(transition: any) {
+  async beforeModel(transition: any) {
     /**
      * If the user is dry-loading the results route with a query,
      * we capture the query on our controller and pass it to the search input.
@@ -29,13 +31,36 @@ export default class AuthenticatedRoute extends Route {
 
     /**
      * Check if the session is authenticated based on the auth provider.
-     * If unauthenticated, it will redirect to the auth screen.
-     * Note: Dex authentication is currently not fully implemented in the frontend,
-     * so we skip authentication requirement for Dex (backend has web endpoints as unauthenticated).
-     * Once OIDC authorization code flow is implemented, add "dex" back to this list.
+     * For Dex, check the session cookie by making a request to /api/v2/me.
+     * For Google/Okta, use the session service's requireAuthentication.
      */
     const authProvider = this.configSvc.config.auth_provider;
-    if (authProvider === "google" || authProvider === "okta") {
+    if (authProvider === "dex") {
+      // For Dex, check if user is authenticated by trying to access the ME endpoint
+      try {
+        const response = await fetch("/api/v2/me", {
+          method: "HEAD",
+          credentials: "include", // Include cookies
+        });
+        
+        if (!response.ok) {
+          // Not authenticated - redirect to backend login endpoint
+          // Force full page reload to bypass Ember router and hit the backend proxy
+          const redirectUrl = encodeURIComponent(window.location.pathname + window.location.search);
+          window.location.href = `/auth/login?redirect=${redirectUrl}`;
+          // Return a promise that never resolves to prevent route from continuing
+          return new Promise(() => {});
+        }
+        // User is authenticated, continue
+      } catch (error) {
+        // Network error or other issue - redirect to login
+        const redirectUrl = encodeURIComponent(window.location.pathname + window.location.search);
+        const loginUrl = new URL("/auth/login", window.location.origin);
+        loginUrl.searchParams.set("redirect", redirectUrl);
+        window.location.replace(loginUrl.toString());
+        return new Promise(() => {});
+      }
+    } else if (authProvider === "google" || authProvider === "okta") {
       this.session.requireAuthentication(transition, "authenticate");
     }
   }

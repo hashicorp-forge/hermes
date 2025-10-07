@@ -542,31 +542,8 @@ func (c *Command) Run(args []string) int {
 	}
 
 	// Define handlers for authenticated endpoints.
+	// All API endpoints use v2.
 	authenticatedEndpoints := []endpoint{
-		// API v1.
-		{"/api/v1/approvals/",
-			api.ApprovalHandler(cfg, c.Log, srv.SearchProvider, srv.WorkspaceProvider, db)},
-		{"/api/v1/document-types", api.DocumentTypesHandler(*cfg, c.Log)},
-		{"/api/v1/documents/",
-			api.DocumentHandler(cfg, c.Log, srv.SearchProvider, srv.WorkspaceProvider, db)},
-		{"/api/v1/drafts",
-			api.DraftsHandler(cfg, c.Log, srv.SearchProvider, srv.WorkspaceProvider, db)},
-		{"/api/v1/drafts/",
-			api.DraftsDocumentHandler(cfg, c.Log, srv.SearchProvider, srv.WorkspaceProvider, db)},
-		{"/api/v1/jira/issue/picker", apiv2.JiraIssuePickerHandler(srv)},
-		{"/api/v1/jira/issues/", apiv2.JiraIssueHandler(srv)},
-		{"/api/v1/me", api.MeHandler(c.Log, srv.WorkspaceProvider)},
-		{"/api/v1/me/recently-viewed-docs",
-			api.MeRecentlyViewedDocsHandler(cfg, c.Log, db)},
-		{"/api/v1/people", api.PeopleDataHandler(cfg, c.Log, srv.WorkspaceProvider)},
-		{"/api/v1/products", api.ProductsHandler(cfg, db, c.Log)},
-		{"/api/v1/projects", apiv2.ProjectsHandler(srv)},
-		{"/api/v1/projects/", apiv2.ProjectHandler(srv)},
-		{"/api/v1/reviews/",
-			api.ReviewHandler(cfg, c.Log, srv.SearchProvider, srv.WorkspaceProvider, db)},
-		{"/api/v1/web/analytics", api.AnalyticsHandler(c.Log)},
-
-		// API v2.
 		{"/api/v2/approvals/", apiv2.ApprovalsHandler(srv)},
 		{"/api/v2/document-types", apiv2.DocumentTypesHandler(srv)},
 		{"/api/v2/documents/", apiv2.DocumentHandler(srv)},
@@ -596,58 +573,56 @@ func (c *Command) Run(args []string) int {
 		})
 	}
 
-	// Add Google Workspace-specific endpoints if using Google workspace provider.
-	if workspaceProviderName == "google" && goog != nil {
-		authenticatedEndpoints = append(authenticatedEndpoints, endpoint{
-			"/api/v1/me/subscriptions",
-			api.MeSubscriptionsHandler(cfg, c.Log, goog, db),
-		})
-	}
-
 	// Define handlers for unauthenticated endpoints.
 	unauthenticatedEndpoints := []endpoint{
 		{"/health", healthHandler()},
 		{"/pub/", http.StripPrefix("/pub/", pub.Handler())},
 	}
 
-	// Web endpoints are conditionally authenticated based on if Okta is enabled.
-	webEndpoints := []endpoint{
-		{"/", web.Handler()},
+	// Add Dex OIDC auth endpoints if Dex is configured
+	if cfg.Dex != nil && !cfg.Dex.Disabled {
+		unauthenticatedEndpoints = append(unauthenticatedEndpoints,
+			endpoint{"/auth/login", api.LoginHandler(*cfg, c.Log)},
+			endpoint{"/auth/callback", api.CallbackHandler(*cfg, c.Log)},
+			endpoint{"/auth/logout", api.LogoutHandler(c.Log)},
+		)
 	}
 
-	// Add search-provider-specific web endpoints
+	// Web config endpoints are always unauthenticated so the frontend can load
+	// and determine the auth provider before attempting to authenticate.
 	if searchProviderName == "algolia" && algoSearch != nil {
-		webEndpoints = append(webEndpoints,
-			endpoint{"/api/v1/web/config", web.ConfigHandler(cfg, algoSearch, c.Log)},
+		unauthenticatedEndpoints = append(unauthenticatedEndpoints,
 			endpoint{"/api/v2/web/config", web.ConfigHandler(cfg, algoSearch, c.Log)},
 			endpoint{"/l/", links.RedirectHandler(algoSearch, algoliaClientCfg, c.Log)},
 		)
 	} else {
 		// For non-Algolia search providers, provide minimal config handlers
 		// that return configuration without Algolia-specific data
-		webEndpoints = append(webEndpoints,
-			endpoint{"/api/v1/web/config", web.ConfigHandler(cfg, nil, c.Log)},
+		unauthenticatedEndpoints = append(unauthenticatedEndpoints,
 			endpoint{"/api/v2/web/config", web.ConfigHandler(cfg, nil, c.Log)},
 		)
 	}
 
-	// If Okta is enabled, add the web endpoints for the single page app as
-	// authenticated endpoints.
-	if cfg.Okta != nil && !cfg.Okta.Disabled {
-		authenticatedEndpoints = append(authenticatedEndpoints, webEndpoints...)
+	// SPA handler - conditionally authenticated based on if Okta or Dex is enabled.
+	spaEndpoints := []endpoint{
+		{"/", web.Handler()},
+	}
+
+	// If Okta or Dex is enabled, add the SPA handler as an authenticated endpoint.
+	if (cfg.Okta != nil && !cfg.Okta.Disabled) || (cfg.Dex != nil && !cfg.Dex.Disabled) {
+		authenticatedEndpoints = append(authenticatedEndpoints, spaEndpoints...)
 	} else {
-		// If Okta is disabled, we need to add the web endpoints for the SPA as
-		// unauthenticated endpoints so the application will load.
-		unauthenticatedEndpoints = append(unauthenticatedEndpoints, webEndpoints...)
+		// If both Okta and Dex are disabled, add the SPA handler as an unauthenticated endpoint.
+		unauthenticatedEndpoints = append(unauthenticatedEndpoints, spaEndpoints...)
 	}
 
 	// Register handlers.
 	for _, e := range authenticatedEndpoints {
-		// Note: auth.AuthenticateRequest currently requires a Google Workspace service
-		// for non-Okta authentication. When using non-Google workspace providers,
+		// Note: auth.AuthenticateRequest supports Dex, Okta, or Google authentication.
+		// When using non-Google workspace providers with non-Dex authentication,
 		// Okta authentication must be enabled.
-		if goog == nil && (cfg.Okta == nil || cfg.Okta.Disabled) {
-			c.UI.Error("error: when using non-Google workspace providers, Okta authentication must be enabled")
+		if goog == nil && (cfg.Okta == nil || cfg.Okta.Disabled) && (cfg.Dex == nil || cfg.Dex.Disabled) {
+			c.UI.Error("error: when using non-Google workspace providers, Okta or Dex authentication must be enabled")
 			return 1
 		}
 		mux.Handle(

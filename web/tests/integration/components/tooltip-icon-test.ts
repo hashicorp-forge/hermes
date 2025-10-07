@@ -2,13 +2,11 @@ import { module, test } from "qunit";
 import { setupRenderingTest } from "ember-qunit";
 import { TestContext, render, triggerEvent } from "@ember/test-helpers";
 import { hbs } from "ember-cli-htmlbars";
+import { TOOLTIP_ICON_TRIGGER, TOOLTIP } from "hermes/tests/helpers/selectors";
 
 interface TooltipIconComponentTestContext extends TestContext {
   icon?: string;
 }
-
-const TRIGGER_SELECTOR = "[data-test-tooltip-icon-trigger]";
-const TOOLTIP_SELECTOR = ".hermes-tooltip";
 
 module("Integration | Component | tooltip-icon", function (hooks) {
   setupRenderingTest(hooks);
@@ -25,26 +23,26 @@ module("Integration | Component | tooltip-icon", function (hooks) {
     `);
 
     assert
-      .dom(TRIGGER_SELECTOR)
+      .dom(TOOLTIP_ICON_TRIGGER)
       .hasAttribute("data-test-icon", "help", "default icon shown")
       .hasClass("foo", "splattributes handled");
 
-    assert.dom(TOOLTIP_SELECTOR).doesNotExist();
+    assert.dom(TOOLTIP).doesNotExist();
 
     this.set("icon", "smile");
 
     assert
-      .dom(TRIGGER_SELECTOR)
+      .dom(TOOLTIP_ICON_TRIGGER)
       .hasAttribute(
         "data-test-icon",
         "smile",
         "default icon can be overridden"
       );
 
-    await triggerEvent(TRIGGER_SELECTOR, "mouseenter");
+    await triggerEvent(TOOLTIP_ICON_TRIGGER, "mouseenter");
 
     assert
-      .dom(TOOLTIP_SELECTOR)
+      .dom(TOOLTIP)
       .hasText("This is a tooltip", "tooltip text shown");
   });
 });

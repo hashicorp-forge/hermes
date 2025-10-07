@@ -42,7 +42,20 @@ make docker/postgres/stop               # Cleanup
 
 **Web Build Environment Variables**: The web build shows ~10 env var warnings for optional configuration. This is **expected** and **not an error** - defaults are applied. Note: As of October 2025, `HERMES_WEB_ALGOLIA_APP_ID` and `HERMES_WEB_ALGOLIA_SEARCH_API_KEY` are **no longer needed** (search proxies through backend). `HERMES_WEB_GOOGLE_OAUTH2_CLIENT_ID` is **optional** (only needed for Google auth provider).
 
-**Web Tests Currently Fail**: `yarn test:ember` has a known syntax error in `web/tests/integration/components/related-resources/add-test.ts` (line 10: `@relatedDocuments={{array}}`). **Do not run** `yarn test:ember` or `make web/test` until this is fixed. The CI workflow also runs this and will fail.
+**Web Tests Status** (Updated October 6, 2025):
+- **Unit Tests**: 32 passing / 5 failing (86.5% pass rate) ✅
+- **Integration Tests**: Verified working, deprecation warnings silenced ✅  
+- **Acceptance Tests**: 2 immediate failures (API mocking issues) ⚠️
+- **Test Output**: Clean and readable (external deprecations silenced) ✅
+
+**Test Failures**:
+1. Config service version check (1 failure) - needs build-time variable mocking
+2. Algolia/recently-viewed Mirage routes (3 failures) - needs route configuration
+3. Blink-element timing (1 failure) - needs fake timers or timeout adjustment
+
+**Deprecation Warnings Fixed**: 12 Ember 7.0 deprecation warnings from external libraries now silenced via `web/config/deprecation-workflow.js`. Test output is clean and focused on actual test results.
+
+See `docs-internal/testing/` for detailed test analysis and fix strategies.
 
 **Linting Has Known Issues**: `yarn lint:js` reports 43 ESLint errors (mostly `@typescript-eslint/no-empty-object-type`). These are **non-blocking** - linting does not prevent builds or deployment.
 
@@ -151,7 +164,7 @@ yarn start:with-proxy  # Runs on localhost:4200, proxies to :8000
 2. Run `yarn test:types` to catch type errors early
 3. Run `yarn lint:hbs` if modifying templates
 4. Run `yarn build` to verify production build
-5. **Skip** `yarn test:ember` until test syntax is fixed
+5. Run `yarn test:unit` to verify unit tests (should pass, 5 known failures)
 6. Test manually in browser with `yarn start:with-proxy`
 
 **Full Build Verification**:

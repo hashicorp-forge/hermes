@@ -8,16 +8,18 @@ import {
   RelatedHermesDocument,
 } from "hermes/components/related-resources";
 import htmlElement from "hermes/utils/html-element";
+import {
+  RELATED_RESOURCES_LIST_ITEM,
+  OVERFLOW_BUTTON,
+  RESOURCE_TITLE,
+  RESOURCE_SECONDARY_TEXT,
+} from "hermes/tests/helpers/selectors";
 
-const RELATED_RESOURCE_SELECTOR = ".related-resource";
+// Local selectors not yet in shared file
 const RELATED_RESOURCE_LINK_SELECTOR = ".related-resource-link";
-const OVERFLOW_BUTTON_SELECTOR = ".overflow-button";
 const OVERFLOW_MENU_BUTTON_SELECTOR = ".overflow-menu-item-button";
 const OVERFLOW_MENU_SELECTOR = "[data-test-overflow-menu]";
 const DROPDOWN_LIST_ITEM_SELECTOR = ".x-dropdown-list-item";
-
-const RESOURCE_TITLE_SELECTOR = "[data-test-resource-title]";
-const RESOURCE_SECONDARY_TEXT_SELECTOR = "[data-test-resource-secondary-text]";
 
 interface DocumentSidebarRelatedResourcesListItemTestContext
   extends MirageTestContext {
@@ -70,10 +72,10 @@ module(
         />
       `);
 
-      assert.dom(RELATED_RESOURCE_SELECTOR).exists({ count: 2 });
+      assert.dom(RELATED_RESOURCES_LIST_ITEM).exists({ count: 2 });
 
-      const firstListItemSelector = `${RELATED_RESOURCE_SELECTOR}:nth-child(1)`;
-      const secondListItemSelector = `${RELATED_RESOURCE_SELECTOR}:nth-child(2)`;
+      const firstListItemSelector = `${RELATED_RESOURCES_LIST_ITEM}:nth-child(1)`;
+      const secondListItemSelector = `${RELATED_RESOURCES_LIST_ITEM}:nth-child(2)`;
 
       const firstListItem = htmlElement(firstListItemSelector);
       assert.dom(firstListItem).hasClass("hermes-document");
@@ -81,10 +83,10 @@ module(
         .dom(`${firstListItemSelector} ${RELATED_RESOURCE_LINK_SELECTOR}`)
         .hasAttribute("data-test-item-type", "hermes-document");
       assert
-        .dom(`${firstListItemSelector} ${RESOURCE_TITLE_SELECTOR}`)
+        .dom(`${firstListItemSelector} ${RESOURCE_TITLE}`)
         .hasText("Test Document 0");
       assert
-        .dom(`${firstListItemSelector} ${RESOURCE_SECONDARY_TEXT_SELECTOR}`)
+        .dom(`${firstListItemSelector} ${RESOURCE_SECONDARY_TEXT}`)
         .hasText("RFC · HCP-001");
 
       const secondListItem = htmlElement(secondListItemSelector);
@@ -93,10 +95,10 @@ module(
         .dom(`${secondListItemSelector} ${RELATED_RESOURCE_LINK_SELECTOR}`)
         .hasAttribute("data-test-item-type", "external-resource");
       assert
-        .dom(`${secondListItemSelector} ${RESOURCE_TITLE_SELECTOR}`)
+        .dom(`${secondListItemSelector} ${RESOURCE_TITLE}`)
         .hasText("Example");
       assert
-        .dom(`${secondListItemSelector} ${RESOURCE_SECONDARY_TEXT_SELECTOR}`)
+        .dom(`${secondListItemSelector} ${RESOURCE_SECONDARY_TEXT}`)
         .hasText("example.com");
     });
 
@@ -120,7 +122,7 @@ module(
         .dom(OVERFLOW_MENU_SELECTOR)
         .doesNotExist("overflow menu is hidden");
 
-      await click(OVERFLOW_BUTTON_SELECTOR);
+      await click(OVERFLOW_BUTTON);
 
       assert.dom(OVERFLOW_MENU_SELECTOR).exists("overflow menu is visible");
 
@@ -157,7 +159,7 @@ module(
         />
       `);
 
-      await click(OVERFLOW_BUTTON_SELECTOR);
+      await click(OVERFLOW_BUTTON);
 
       assert
         .dom(OVERFLOW_MENU_BUTTON_SELECTOR)
@@ -182,7 +184,7 @@ module(
       await click(`${modalSelector} [data-test-save-button]`);
       assert.equal(count, 1, "edit button was clicked");
 
-      await click(OVERFLOW_BUTTON_SELECTOR);
+      await click(OVERFLOW_BUTTON);
 
       const removeButton = htmlElement(
         `${DROPDOWN_LIST_ITEM_SELECTOR}:nth-child(2) button`,

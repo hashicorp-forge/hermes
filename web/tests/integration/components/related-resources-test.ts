@@ -23,12 +23,16 @@ import {
   ADD_RESOURCE_MODAL,
   EXTERNAL_RESOURCE_TITLE_INPUT,
   CUSTOM_PEOPLE_FIELD,
+  ADD_FALLBACK_EXTERNAL_RESOURCE,
+  ADD_OR_EDIT_EXTERNAL_RESOURCE_MODAL,
+  SUBMIT_BUTTON,
 } from "hermes/tests/helpers/selectors";
 
-const ADD_FALLBACK_EXTERNAL_RESOURCE_SELECTOR = "[data-test-add-fallback-external-resource]";
-const ADD_EXTERNAL_RESOURCE_ERROR_SELECTOR = `${ADD_FALLBACK_EXTERNAL_RESOURCE_SELECTOR} [data-test-error]`;
-const EXTERNAL_RESOURCE_MODAL_SELECTOR = "[data-test-add-or-edit-external-resource-modal]";
-const ADD_FALLBACK_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR = `${ADD_FALLBACK_EXTERNAL_RESOURCE_SELECTOR} [data-test-submit-button]`;
+// Test-specific selectors
+const ADD_EXTERNAL_RESOURCE_ERROR_SELECTOR = `${ADD_FALLBACK_EXTERNAL_RESOURCE} [data-test-error]`;
+const ADD_FALLBACK_EXTERNAL_RESOURCE_SUBMIT_BUTTON_SELECTOR = `${ADD_FALLBACK_EXTERNAL_RESOURCE} ${SUBMIT_BUTTON}`;
+
+// Test constants
 const CURRENT_DOMAIN_PROTOCOL = window.location.protocol + "//";
 const CURRENT_DOMAIN = window.location.hostname;
 const CURRENT_PORT = window.location.port;
@@ -277,7 +281,7 @@ module("Integration | Component | related-resources", function (hooks) {
     assert
       .dom(RELATED_DOCUMENT_OPTION)
       .doesNotExist("documents are removed when a valid URL is entered");
-    assert.dom(ADD_FALLBACK_EXTERNAL_RESOURCE_SELECTOR).exists();
+    assert.dom(ADD_FALLBACK_EXTERNAL_RESOURCE).exists();
 
     assert
       .dom(EXTERNAL_RESOURCE_TITLE_INPUT)
@@ -469,7 +473,7 @@ module("Integration | Component | related-resources", function (hooks) {
 
     await click("button");
 
-    await waitFor(EXTERNAL_RESOURCE_MODAL_SELECTOR);
+    await waitFor(ADD_OR_EDIT_EXTERNAL_RESOURCE_MODAL);
 
     assert.dom(RELATED_DOCUMENT_OPTION).doesNotExist();
     assert.dom("[data-test-external-resource-form]").exists();
@@ -481,7 +485,7 @@ module("Integration | Component | related-resources", function (hooks) {
 
     await click("[data-test-save-button]");
 
-    assert.dom(EXTERNAL_RESOURCE_MODAL_SELECTOR).doesNotExist();
+    assert.dom(ADD_OR_EDIT_EXTERNAL_RESOURCE_MODAL).doesNotExist();
     assert.dom(".item").hasText("Example - https://example.com");
   });
 
@@ -604,7 +608,7 @@ module("Integration | Component | related-resources", function (hooks) {
     await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT, documentURL);
 
     assert
-      .dom(ADD_FALLBACK_EXTERNAL_RESOURCE_SELECTOR)
+      .dom(ADD_FALLBACK_EXTERNAL_RESOURCE)
       .exists('the "add resource" form is shown');
   });
 
@@ -628,7 +632,7 @@ module("Integration | Component | related-resources", function (hooks) {
     await fillIn(ADD_RELATED_RESOURCES_SEARCH_INPUT, shortLink);
 
     assert
-      .dom(ADD_FALLBACK_EXTERNAL_RESOURCE_SELECTOR)
+      .dom(ADD_FALLBACK_EXTERNAL_RESOURCE)
       .exists('the "add resource" form is shown');
   });
 

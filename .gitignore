@@ -52,3 +52,7 @@ test_*.log
 # Patch files
 *.patch
 
+/web/dist-test
+
+# Playwright MCP screenshots and artifacts
+.playwright-mcp/

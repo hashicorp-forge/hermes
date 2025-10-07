@@ -123,7 +123,7 @@ export default class AuthenticatedUserService extends Service {
 
       let cached = this.subscriptions;
 
-      this.subscriptions.addObject({
+      this.subscriptions.push({
         productArea,
         subscriptionType,
       });
@@ -168,7 +168,10 @@ export default class AuthenticatedUserService extends Service {
         subscriptionToRemove,
       );
 
-      this.subscriptions.removeObject(subscriptionToRemove);
+      const indexToRemove = this.subscriptions.indexOf(subscriptionToRemove);
+      if (indexToRemove > -1) {
+        this.subscriptions.splice(indexToRemove, 1);
+      }
 
       try {
         await this.fetchSvc.fetch(

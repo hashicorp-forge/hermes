@@ -1,13 +1,14 @@
 import Service from "@ember/service";
+import { tracked } from "@glimmer/tracking";
 import config, { HermesConfig } from "hermes/config/environment";
 
 export default class ConfigService extends Service {
-  config = {
+  @tracked config = {
     algolia_docs_index_name: config.algolia.docsIndexName,
     algolia_drafts_index_name: config.algolia.draftsIndexName,
     algolia_internal_index_name: config.algolia.internalIndexName,
     algolia_projects_index_name: config.algolia.projectsIndexName,
-    api_version: "v1",
+    api_version: "v2", // Always use v2 API
     auth_provider: "google" as "google" | "okta" | "dex", // Runtime auth provider selection
     create_docs_as_user: config.createDocsAsUser,
     dex_issuer_url: "",
@@ -26,13 +27,11 @@ export default class ConfigService extends Service {
   };
 
   setConfig(param: HermesConfig) {
-    this.set("config", param);
-
-    // Set API version.
-    this.config["api_version"] = "v1";
-    if (this.config.feature_flags["api_v2"]) {
-      this.config["api_version"] = "v2";
-    }
+    // Merge backend config into existing config (using tracked property reactivity)
+    this.config = { ...this.config, ...param };
+    
+    // Always use v2 API
+    this.config["api_version"] = "v2";
   }
 }
 

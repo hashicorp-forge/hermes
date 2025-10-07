@@ -24,7 +24,13 @@ export default function (mirageConfig) {
     ...mirageConfig,
 
     routes() {
-      this.namespace = "api/v1";
+      // Passthrough all API and auth requests to the real backend
+      // when running in development with the proxy server.
+      // This allows testing with real backend instead of Mirage mocks.
+      this.passthrough('/api/**');
+      this.passthrough('/auth/**');
+      
+      this.namespace = "api/v2";
 
       /*************************************************************************
        *

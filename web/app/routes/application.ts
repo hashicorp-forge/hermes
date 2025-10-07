@@ -62,17 +62,31 @@ export default class ApplicationRoute extends Route {
       );
     }
 
-    await this.session.setup();
-
-    await this.fetchSvc
-      .fetch(`/api/${this.config.config.api_version}/web/config`)
-      .then((response) => response?.json())
-      .then((json) => {
+    // Step 1: Load backend config FIRST (before session setup)
+    // This determines the auth provider (google/okta/dex) that session.setup() will use
+    try {
+      // Use native fetch to avoid circular dependency with session service
+      const response = await fetch("/api/v2/web/config");
+      
+      if (response.ok) {
+        const json = await response.json();
         this.config.setConfig(json);
-      })
-      .catch((err) => {
-        console.log("Error fetching and setting web config: " + err);
-      });
+      } else {
+        console.error("Failed to load web config:", response.status);
+      }
+    } catch (err) {
+      console.error("Error fetching web config:", err);
+    }
+
+    // Step 2: Now that config is loaded, initialize the session
+    // This will attempt to restore any existing session based on the auth provider
+    try {
+      await this.session.setup();
+    } catch (err) {
+      // Session setup can fail if there's no existing session or token is expired
+      // This is expected for unauthenticated users - they'll be redirected to auth if needed
+      console.debug("Session setup completed (may not be authenticated):", err);
+    }
 
     // Initialize the metrics service
     this.metrics;
