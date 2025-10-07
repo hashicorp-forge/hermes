@@ -170,7 +170,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
         window.location.reload();
       } else {
         // Google OAuth flow
-        await this.authenticate("authenticator:torii", "google-oauth2-bearer");
+        await this.authenticate("authenticator:custom-auth", "google-oauth2-bearer");
       }
 
       this.reauthFlashMessage?.destroyMessage();

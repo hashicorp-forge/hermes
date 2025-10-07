@@ -18,7 +18,7 @@ export default class AuthenticateController extends Controller {
 
   protected authenticate = dropTask(async () => {
     await this.session.authenticate(
-      "authenticator:torii",
+      "authenticator:custom-auth",
       "google-oauth2-bearer"
     );
   });

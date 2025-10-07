@@ -58,6 +58,12 @@ module.exports = function (environment) {
       types: ["critical", "success"],
     },
 
+    // ember-simple-auth configuration
+    // We manually handle session restoration in the application route's beforeModel hook
+    'ember-simple-auth': {
+      useSessionSetupMethod: true,
+    },
+
     google: {
       docFolders: getEnv("GOOGLE_DOCFOLDERS", "").split(","),
     },
@@ -68,17 +74,8 @@ module.exports = function (environment) {
 
     // Authentication configuration
     // Note: Auth provider is determined at runtime via /api/v2/web/config
-    // Google OAuth config is only needed if using Google as auth provider
-    torii: {
-      sessionServiceName: "session",
-      providers: {
-        "google-oauth2-bearer-v2": {
-          apiKey: getEnv("GOOGLE_OAUTH2_CLIENT_ID", ""),
-          hd: getEnv("GOOGLE_OAUTH2_HD", ""),
-          scope: "email profile https://www.googleapis.com/auth/drive.appdata",
-        },
-      },
-    },
+    // Google OAuth uses ember-simple-auth directly (no Torii library)
+    // OIDC providers (Okta/Dex) use backend redirect flows
 
     showEmberAnimatedTools: getEnv("SHOW_EMBER_ANIMATED_TOOLS", false),
 
