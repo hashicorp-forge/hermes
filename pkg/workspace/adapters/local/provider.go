@@ -41,6 +41,13 @@ func NewProviderAdapterWithContext(adapter *Adapter, ctx context.Context) *Provi
 	}
 }
 
+// GetAdapter returns the underlying local Adapter for direct access.
+// This is useful for operations not exposed through the Provider interface,
+// such as document indexing on startup.
+func (p *ProviderAdapter) GetAdapter() *Adapter {
+	return p.adapter
+}
+
 // GetFile retrieves a file by ID and converts it to Google Drive format.
 func (p *ProviderAdapter) GetFile(fileID string) (*drive.File, error) {
 	doc, err := p.adapter.DocumentStorage().GetDocument(p.ctx, fileID)

@@ -380,6 +380,9 @@ func (c *Command) Run(args []string) int {
 		// Create workspace provider adapter
 		workspaceProvider = localadapter.NewProviderAdapter(adapter)
 
+		// Note: searchProvider not yet initialized at this point
+		// Document indexing will be triggered after search provider is initialized
+
 	default:
 		c.UI.Error(fmt.Sprintf("error initializing server: unknown workspace provider %q", workspaceProviderName))
 		return 1
@@ -466,6 +469,28 @@ func (c *Command) Run(args []string) int {
 	default:
 		c.UI.Error(fmt.Sprintf("error initializing server: unknown search provider %q", searchProviderName))
 		return 1
+	}
+
+	// If using Local workspace provider, index all documents into search provider.
+	// This ensures the search index is synchronized with the filesystem on startup.
+	if workspaceProviderName == "local" {
+		// Extract the local adapter from the provider wrapper
+		if providerAdapter, ok := workspaceProvider.(*localadapter.ProviderAdapter); ok {
+			localAdapter := providerAdapter.GetAdapter()
+			indexer := localadapter.NewDocumentIndexer(localAdapter, searchProvider, c.Log)
+
+			c.UI.Info("Indexing documents from local workspace into search provider...")
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+			defer cancel()
+
+			if err := indexer.IndexAll(ctx); err != nil {
+				c.UI.Warn(fmt.Sprintf("warning: document indexing failed: %v", err))
+				c.UI.Warn("documents may not appear in search results until manually indexed")
+				// Don't fail startup - server can still operate with empty search index
+			} else {
+				c.UI.Info("Document indexing completed successfully")
+			}
+		}
 	}
 
 	// Initialize Jira service.
