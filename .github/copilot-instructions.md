@@ -60,8 +60,9 @@ make docker/postgres/stop && make docker/postgres/start
 - **`Makefile`**: Primary build orchestration (25+ targets)
 - **`go.mod`**: Go 1.25.0, main deps: gorm, google.golang.org/api, algolia, datadog
 - **`docker-compose.yml`**: PostgreSQL 17.1-alpine (port 5432)
-- **`config.hcl`**: Runtime config (copy from `configs/config.hcl`, gitignored)
-- **`.gitignore`**: Excludes
+- **`config.hcl`**: **Fully documented runtime config** (tracked in git, 652 lines with comprehensive examples)
+- **`configs/config.hcl`**: Minimal config template (246 lines, for reference)
+- **`.gitignore`**: Excludes `credentials.json`, `token.json`, but NOT `config.hcl`
 
 ### Backend Structure (`cmd/`, `internal/`, `pkg/`)
 - **`cmd/hermes/main.go`**: Entry point
@@ -116,8 +117,9 @@ make docker/postgres/stop && make docker/postgres/start
 ```bash
 # Terminal 1 - Backend
 make docker/postgres/start
-cp configs/config.hcl ./config.hcl
-# Edit config.hcl - configure auth provider (Google/Okta/Dex) and Algolia
+docker compose up -d dex meilisearch
+# config.hcl is already configured for local dev with Dex + Local + Meilisearch
+# See docs-internal/CONFIG_HCL_DOCUMENTATION.md for full documentation
 ./hermes server -config=config.hcl
 
 # Terminal 2 - Frontend (proxies to backend)
@@ -150,7 +152,8 @@ make build  # Should complete successfully with warnings
 
 ## What Not To Do
 
-❌ **Don't** commit `credentials.json`, or `token.json` (gitignored)
+❌ **Don't** commit `credentials.json` or `token.json` (gitignored)
+✅ **Do** track `config.hcl` (comprehensive example config, tracked in git)
 ❌ **Don't** run PostgreSQL tests without starting the Docker container first
 ❌ **Don't** commit without documenting the prompt used (see Commit Standards below)
 
