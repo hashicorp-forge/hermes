@@ -371,15 +371,14 @@ func (c *Command) Run(args []string) int {
 		}
 
 		localCfg := cfg.LocalWorkspace.ToLocalAdapterConfig()
-		_, err := localadapter.NewAdapter(localCfg)
+		adapter, err := localadapter.NewAdapter(localCfg)
 		if err != nil {
 			c.UI.Error(fmt.Sprintf("error initializing local workspace adapter: %v", err))
 			return 1
 		}
-		// TODO: Local adapter needs to implement workspace.Provider interface
-		// For now, this is a placeholder to demonstrate the provider selection architecture
-		c.UI.Error("error: local workspace provider is not yet fully implemented")
-		return 1
+
+		// Create workspace provider adapter
+		workspaceProvider = localadapter.NewProviderAdapter(adapter)
 
 	default:
 		c.UI.Error(fmt.Sprintf("error initializing server: unknown workspace provider %q", workspaceProviderName))
