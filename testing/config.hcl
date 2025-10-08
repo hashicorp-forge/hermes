@@ -2,8 +2,11 @@
 // This configuration is designed for the containerized testing environment
 // in docker-compose with postgres, meilisearch, hermes backend, and web frontend
 
-// Base URL for the application (external access port)
-base_url = "http://localhost:8001"
+// Base URL for the application (external access URL - frontend dev server)
+// This is where users will be redirected after OAuth authentication.
+// For local development with Ember dev server: http://localhost:4201
+// For containerized frontend: http://localhost:4201 (or whatever port web service uses)
+base_url = "http://localhost:4201"
 
 // Logging format
 log_format = "standard"
