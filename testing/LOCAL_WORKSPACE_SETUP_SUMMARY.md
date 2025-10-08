@@ -50,7 +50,7 @@ Added volume mount for users.json in the hermes service:
 
 ```yaml
 volumes:
-  # Mount acceptance testing configuration
+  # Mount testing configuration
   - ./config.hcl:/app/config.hcl:ro
   # Mount test users data (mirrors Dex identities)
   - ./users.json:/app/workspace_data/users.json:ro
@@ -154,10 +154,10 @@ docker compose up -d --build
 ### Verify Users API
 ```bash
 # Check mounted users.json
-docker exec hermes-acceptance cat /app/workspace_data/users.json
+docker exec hermes-server cat /app/workspace_data/users.json
 
 # Check workspace directory
-docker exec hermes-acceptance ls -la /app/workspace_data/
+docker exec hermes-server ls -la /app/workspace_data/
 
 # View logs
 docker compose logs -f hermes

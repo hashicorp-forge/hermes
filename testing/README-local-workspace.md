@@ -1,4 +1,4 @@
-# Local Workspace Provider Setup for Acceptance Testing
+# Local Workspace Provider Setup for Testing Environment
 
 ## Overview
 
@@ -90,10 +90,10 @@ docker compose up -d --build
 
 ```bash
 # Check that users.json is mounted
-docker exec hermes-acceptance cat /app/workspace_data/users.json
+docker exec hermes-server cat /app/workspace_data/users.json
 
 # Check workspace directory structure
-docker exec hermes-acceptance ls -la /app/workspace_data/
+docker exec hermes-server ls -la /app/workspace_data/
 
 # View logs to confirm local provider is active
 docker compose logs -f hermes | grep -i "workspace provider"

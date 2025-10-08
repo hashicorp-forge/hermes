@@ -33,8 +33,8 @@ fi
 
 echo ""
 echo "2️⃣  Verifying users.json is mounted..."
-if docker exec hermes-acceptance test -f /app/workspace_data/users.json; then
-    USER_COUNT=$(docker exec hermes-acceptance sh -c "cat /app/workspace_data/users.json | grep -o '\"email\"' | wc -l")
+if docker exec hermes-server test -f /app/workspace_data/users.json; then
+    USER_COUNT=$(docker exec hermes-server sh -c "cat /app/workspace_data/users.json | grep -o '\"email\"' | wc -l")
     echo -e "${GREEN}✓${NC} users.json mounted successfully ($USER_COUNT users)"
 else
     echo -e "${RED}✗ users.json not found in container${NC}"
@@ -44,7 +44,7 @@ fi
 echo ""
 echo "3️⃣  Checking workspace directory structure..."
 for dir in docs drafts folders; do
-    if docker exec hermes-acceptance test -d "/app/workspace_data/$dir"; then
+    if docker exec hermes-server test -d "/app/workspace_data/$dir"; then
         echo -e "${GREEN}✓${NC} /app/workspace_data/$dir exists"
     else
         echo -e "${RED}✗ /app/workspace_data/$dir missing${NC}"
@@ -54,7 +54,7 @@ done
 
 echo ""
 echo "4️⃣  Verifying backend configuration..."
-CONFIG_CHECK=$(docker exec hermes-acceptance cat /app/config.hcl | grep -A3 'providers {' | grep 'workspace.*=.*"local"' || echo "")
+CONFIG_CHECK=$(docker exec hermes-server cat /app/config.hcl | grep -A3 'providers {' | grep 'workspace.*=.*"local"' || echo "")
 if [ -n "$CONFIG_CHECK" ]; then
     echo -e "${GREEN}✓${NC} Backend configured to use local workspace provider"
 else

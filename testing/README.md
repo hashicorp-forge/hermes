@@ -1,14 +1,14 @@
-# Hermes Acceptance Testing Environment
+# Hermes Testing Environment
 
-This directory contains a **full-stack containerized environment** for acceptance testing and manual QA of Hermes. This is distinct from the integration testing setup in the root directory.
+This directory contains a **full-stack containerized environment** for testing and manual QA of Hermes. This is distinct from the integration testing setup in the root directory.
 
 **🆕 Now uses Local Workspace Provider**: This environment uses the local filesystem adapter for document storage instead of Google Workspace, with test users mirroring Dex identities. See [README-local-workspace.md](./README-local-workspace.md) for details.
 
 ## Testing Environments Comparison
 
-| Aspect | Integration Testing (`/docker-compose.yml`) | Acceptance Testing (`/testing/docker-compose.yml`) |
+| Aspect | Integration Testing (`/docker-compose.yml`) | Testing Environment (`/testing/docker-compose.yml`) |
 |--------|---------------------------------------------|---------------------------------------------------|
-| **Purpose** | Backend integration tests | Full-stack acceptance testing & manual QA |
+| **Purpose** | Backend integration tests | Full-stack testing & manual QA |
 | **Scope** | Infrastructure only (DB, search) | Complete application (backend + frontend + infra) |
 | **Hermes** | Runs natively on host | Containerized |
 | **Frontend** | Not included | Containerized Nginx + Ember app |
@@ -24,13 +24,13 @@ This directory contains a **full-stack containerized environment** for acceptanc
                  │
          ┌───────▼─────────────┐
          │  Web (Ember Dev)    │  Port 4201 → 4200
-         │  ember serve        │  (hermes-web-acceptance)
+         │  ember serve        │  (hermes-web)
          │  --proxy backend    │  Live reload enabled
          └───────┬─────────────┘
                  │ /api/* proxied to backend
          ┌───────▼────────┐
          │  Hermes API    │  Port 8001 → 8000
-         │  Go Backend    │  (hermes-acceptance)
+         │  Go Backend    │  (hermes-server)
          │  + Meilisearch │  Auth: Dex OIDC
          │  + Workspace   │  Search: Algolia
          └───┬───┬───┬────┘

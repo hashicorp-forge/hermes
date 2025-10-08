@@ -1,6 +1,6 @@
-# Dex OIDC Provider Configuration for Acceptance Testing
+# Dex OIDC Provider Configuration for Testing Environment
 # 
-# Purpose: Provides OpenID Connect authentication for acceptance testing
+# Purpose: Provides OpenID Connect authentication for testing
 #          Uses port 5557 to avoid conflicts with integration testing (5556)
 #
 # Usage:
@@ -10,8 +10,8 @@
 #
 # OIDC Configuration:
 #   - Issuer: http://dex:5557/dex (uses Docker internal DNS for container-to-container communication)
-#   - Client ID: hermes-acceptance
-#   - Client Secret: YWNjZXB0YW5jZS1hcHAtc2VjcmV0
+#   - Client ID: hermes-testing
+#   - Client Secret: dGVzdGluZy1hcHAtc2VjcmV0
 #   - Redirect URI: http://localhost:8001/auth/callback
 #
 # Note: Using 'localhost:5558' as the issuer so both browsers AND containers can access it.
@@ -29,14 +29,14 @@ web:
 telemetry:
   http: 0.0.0.0:5559
 
-# Static clients for Hermes acceptance testing
+# Static clients for Hermes testing
 staticClients:
-- id: hermes-acceptance
+- id: hermes-testing
   redirectURIs:
   - 'http://localhost:8001/auth/callback'
   - 'http://localhost:4201/auth/callback'
-  name: 'Hermes Acceptance'
-  secret: YWNjZXB0YW5jZS1hcHAtc2VjcmV0
+  name: 'Hermes Testing'
+  secret: dGVzdGluZy1hcHAtc2VjcmV0
 
 # Static password connector for testing
 connectors:

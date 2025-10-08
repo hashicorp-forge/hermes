@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # quick-start-local-workspace.sh
-# One-command setup for local workspace acceptance testing
+# One-command setup for local workspace testing environment
 
 set -euo pipefail
 
@@ -13,7 +13,7 @@ BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}🚀 Hermes Local Workspace Quick Start${NC}"
+echo -e "${BLUE}🚀 Hermes Local Workspace Testing Environment${NC}"
 echo ""
 
 # Step 1: Verify configuration
@@ -81,7 +81,7 @@ echo -e "${BLUE}Running integration tests...${NC}"
 if ./test-local-workspace-integration.sh; then
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo -e "${GREEN}✅ Hermes is ready for acceptance testing!${NC}"
+    echo -e "${GREEN}✅ Hermes testing environment is ready!${NC}"
     echo ""
     echo "🌐 Access the application:"
     echo "   Web UI:     http://localhost:4201"

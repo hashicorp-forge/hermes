@@ -171,7 +171,7 @@ profile "testing" {
   
   // PostgreSQL - connects to postgres container
   postgres {
-    dbname   = "hermes_acceptance"
+    dbname   = "hermes_testing"
     host     = "postgres"  // Container name in docker-compose
     port     = 5432
     user     = "postgres"
@@ -198,7 +198,7 @@ profile "testing" {
   dex {
     disabled      = false
     issuer_url    = "http://localhost:5558/dex"
-    client_id     = "hermes-acceptance"
+    client_id     = "hermes-testing"
     client_secret = "YWNjZXB0YW5jZS1hcHAtc2VjcmV0"
     redirect_url  = "http://localhost:8001/auth/callback"
   }

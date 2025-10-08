@@ -1,6 +1,6 @@
-# Docker Compose for Acceptance Testing
+# Docker Compose for Testing Environment
 # 
-# Purpose: Full-stack containerized environment for acceptance testing and manual QA.
+# Purpose: Full-stack containerized environment for testing and manual QA.
 #          Runs complete Hermes application (backend + frontend) with all dependencies.
 #
 # Usage:
@@ -31,18 +31,18 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: hermes_acceptance
+      POSTGRES_DB: hermes_testing
     ports:
       - "5433:5432"
     volumes:
-      - postgres_acceptance:/var/lib/postgresql/data
+      - postgres_testing:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
     networks:
-      - hermes-acceptance
+      - hermes-testing
 
   meilisearch:
     image: getmeili/meilisearch:v1.11
@@ -53,18 +53,18 @@ services:
     ports:
       - "7701:7700"
     volumes:
-      - meilisearch_acceptance:/meili_data
+      - meilisearch_testing:/meili_data
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:7700/health"]
       interval: 5s
       timeout: 5s
       retries: 5
     networks:
-      - hermes-acceptance
+      - hermes-testing
 
   dex:
     image: ghcr.io/dexidp/dex:v2.41.1
-    container_name: dex-acceptance
+    container_name: hermes-dex
     ports:
       - "5558:5557"
       - "5559:5559"
@@ -78,17 +78,17 @@ services:
       retries: 5
       start_period: 10s
     networks:
-      - hermes-acceptance
+      - hermes-testing
 
   hermes:
-    container_name: hermes-acceptance
+    container_name: hermes-server
     build:
       context: ..
       dockerfile: Dockerfile
     ports:
       - "8001:8000"
     volumes:
-      # Mount acceptance testing configuration
+      # Mount testing configuration
       - ./config.hcl:/app/config.hcl:ro
       # Mount test users data (mirrors Dex identities)
       - ./users.json:/app/workspace_data/users.json:ro
@@ -116,10 +116,10 @@ services:
       retries: 3
       start_period: 5s
     networks:
-      - hermes-acceptance
+      - hermes-testing
 
   web:
-    container_name: hermes-web-acceptance
+    container_name: hermes-web
     build:
       context: ../web
       dockerfile: Dockerfile
@@ -138,13 +138,13 @@ services:
       retries: 3
       start_period: 5s
     networks:
-      - hermes-acceptance
+      - hermes-testing
 
 networks:
-  hermes-acceptance:
+  hermes-testing:
     driver: bridge
 
 volumes:
-  postgres_acceptance:
-  meilisearch_acceptance:
+  postgres_testing:
+  meilisearch_testing:
   hermes_workspace:
