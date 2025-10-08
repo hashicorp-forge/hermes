@@ -1,0 +1,17 @@
+{
+  "name": "hermes-acceptance-tests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Playwright acceptance tests for Hermes",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:auth": "playwright test tests/auth.spec.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^20.0.0"
+  }
+}
