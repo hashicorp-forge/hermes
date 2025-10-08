@@ -181,6 +181,13 @@ local_workspace {
   }
 }
 
+// Provider selection (use Google Workspace and Meilisearch search)
+// Note: Local provider is not yet fully supported in containerized environment
+providers {
+  workspace = "google"
+  search    = "meilisearch"
+}
+
 // Server configuration (bind to all interfaces in container)
 server {
   addr = "0.0.0.0:8000"

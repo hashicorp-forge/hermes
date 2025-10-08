@@ -90,6 +90,8 @@ services:
     volumes:
       # Mount acceptance testing configuration
       - ./config.hcl:/app/config.hcl:ro
+      # Mount test users data (mirrors Dex identities)
+      - ./users.json:/app/workspace_data/users.json:ro
       # Mount workspace data (persists across restarts)
       - hermes_workspace:/app/workspace_data
     environment:
