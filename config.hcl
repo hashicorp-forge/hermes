@@ -120,23 +120,33 @@ datadog {
 //------------------------------------------------------------------------------
 // Define the types of documents your organization uses. Each document type
 // can have custom fields, templates, and validation checks.
+//
+// Template Fields:
+//   - template: Google Docs file ID (for Google Workspace provider)
+//   - markdown_template: Path to markdown frontmatter template (for Local provider)
+//
+// At least one template should be provided depending on your workspace provider.
 
 document_types {
   // RFC (Request for Comments) - Technical design proposals
   document_type "RFC" {
-    // long_name: Full name displayed in UI
+    // long_name: Full name displayed in UI (required)
     long_name = "Request for Comments"
     
-    // description: Explanation shown when creating new document
+    // description: Explanation shown when creating new document (required)
     description = "Create a Request for Comments document to present a proposal to colleagues for their review and feedback."
     
-    // flight_icon: Icon name from Helios Design System
+    // flight_icon: Icon name from Helios Design System (optional)
     // See: https://helios.hashicorp.design/icons/library
     flight_icon = "discussion-circle"
     
     // template: Google Docs file ID to use as template (Google Workspace only)
-    // For local workspace, this field is optional
+    // Get this from the Google Docs URL: https://docs.google.com/document/d/FILE_ID/edit
     template = "1Oz_7FhaWxdFUDEzKCC5Cy58t57C4znmC_Qr80BORy1U"
+
+    // markdown_template: Path to markdown frontmatter template (Local Workspace only)
+    // Example: "templates/rfc.md"
+    // markdown_template = "templates/rfc.md"
 
     // more_info_link: Optional link to documentation about this doc type
     more_info_link {
@@ -144,35 +154,39 @@ document_types {
       url  = "https://works.hashicorp.com/articles/rfc-template"
     }
 
-    // custom_field: Metadata fields specific to this document type
-    // Type options: "string", "people" (email addresses), "person" (single email)
+    // custom_field: Metadata fields specific to this document type (optional)
+    // Type options: "string", "people" (multiple emails), "person" (single email)
     custom_field {
       name = "Current Version"
       type = "string"
-      // read_only = false  // Optional: make field read-only
+      read_only = false  // Optional: make field read-only (default: false)
     }
     custom_field {
       name = "PRD"
       type = "string"
+      read_only = false
     }
     custom_field {
       name = "Stakeholders"
       type = "people"  // Multiple email addresses
+      read_only = false
     }
     custom_field {
       name = "Target Version"
       type = "string"
+      read_only = false
     }
     
     // check: Pre-publish validation checkboxes (optional)
-    // check {
-    //   label = "I have updated the status to 'In Review'"
-    //   helper_text = "Documents must be in review status before publishing"
-    //   link {
-    //     text = "Status guide"
-    //     url = "https://docs.example.com/status-guide"
-    //   }
-    // }
+    // Users must check these boxes before publishing the document
+    check {
+      label = "I have updated the status to 'In Review'"
+      helper_text = "Documents must be in review status before publishing"
+      link {
+        text = "Status guide"
+        url = "https://works.hashicorp.com/articles/rfc-status"
+      }
+    }
   }
 
   // PRD (Product Requirements Document) - Product specifications
@@ -180,7 +194,12 @@ document_types {
     long_name   = "Product Requirements"
     description = "Create a Product Requirements Document to summarize a problem statement and outline a phased approach to addressing the problem."
     flight_icon = "target"
-    template    = "1oS4q6IPDr3aMSTTk9UDdOnEcFwVWW9kT8ePCNqcg1P4"
+    
+    // Google Docs template for Google Workspace
+    template = "1oS4q6IPDr3aMSTTk9UDdOnEcFwVWW9kT8ePCNqcg1P4"
+    
+    // Markdown template for Local Workspace
+    // markdown_template = "templates/prd.md"
 
     more_info_link {
       text = "More info on the PRD template"
@@ -190,33 +209,125 @@ document_types {
     custom_field {
       name = "RFC"
       type = "string"
+      read_only = false
     }
     custom_field {
       name = "Stakeholders"
       type = "people"
+      read_only = false
+    }
+    custom_field {
+      name = "Target Release"
+      type = "string"
+      read_only = false
     }
   }
 
-  // EXAMPLE: Additional document type (commented out)
-  // Uncomment and customize for your organization's needs
-  // document_type "Memo" {
-  //   long_name = "Memo"
-  //   description = "Create a Memo document to share an idea or brief note with colleagues."
-  //   flight_icon = "radio"
-  //   template = "file-id-for-a-blank-doc"
-  //   
-  //   custom_field {
-  //     name = "Distribution List"
-  //     type = "people"
-  //   }
-  // }
-  
-  // document_type "FRD" {
-  //   long_name = "Functional Requirements Document"
-  //   description = "Detailed functional specifications for engineering implementation."
-  //   flight_icon = "docs-link"
-  //   template = "file-id-for-frd-template"
-  // }
+  // ADR (Architectural Decision Record) - Document architectural decisions
+  document_type "ADR" {
+    long_name   = "Architectural Decision Record"
+    description = "Document an architectural decision including context, alternatives considered, and rationale for the chosen solution."
+    flight_icon = "building"
+    
+    // Google Docs template for Google Workspace
+    // template = "YOUR_GOOGLE_DOCS_ADR_TEMPLATE_ID"
+    
+    // Markdown template for Local Workspace
+    // markdown_template = "templates/adr.md"
+
+    more_info_link {
+      text = "Learn about ADRs"
+      url  = "https://adr.github.io/"
+    }
+
+    custom_field {
+      name = "Status"
+      type = "string"
+      read_only = false
+    }
+    custom_field {
+      name = "Decision Owners"
+      type = "people"
+      read_only = false
+    }
+    custom_field {
+      name = "Related RFCs"
+      type = "string"
+      read_only = false
+    }
+    custom_field {
+      name = "Systems Impacted"
+      type = "string"
+      read_only = false
+    }
+
+    check {
+      label = "I have documented all alternatives considered"
+      helper_text = "ADRs should include at least 2-3 alternative approaches"
+    }
+    check {
+      label = "I have clearly stated the consequences of this decision"
+      helper_text = "Include both positive and negative consequences"
+    }
+  }
+
+  // FRD (Functional Requirements Document) - Detailed technical specifications
+  document_type "FRD" {
+    long_name = "Functional Requirements Document"
+    description = "Create detailed functional specifications for engineering implementation, including technical requirements and acceptance criteria."
+    flight_icon = "docs-link"
+    
+    // Google Docs template for Google Workspace
+    // template = "YOUR_GOOGLE_DOCS_FRD_TEMPLATE_ID"
+    
+    // Markdown template for Local Workspace
+    // markdown_template = "templates/frd.md"
+
+    more_info_link {
+      text = "FRD best practices"
+      url  = "https://works.hashicorp.com/articles/frd-template"
+    }
+
+    custom_field {
+      name = "Related PRD"
+      type = "string"
+      read_only = false
+    }
+    custom_field {
+      name = "Engineers"
+      type = "people"
+      read_only = false
+    }
+    custom_field {
+      name = "Epic Link"
+      type = "string"
+      read_only = false
+    }
+  }
+
+  // Memo - Short-form communication and announcements
+  document_type "Memo" {
+    long_name = "Memo"
+    description = "Create a Memo document to share an idea, update, or brief note with colleagues."
+    flight_icon = "radio"
+    
+    // Google Docs template for Google Workspace
+    // template = "YOUR_GOOGLE_DOCS_MEMO_TEMPLATE_ID"
+    
+    // Markdown template for Local Workspace
+    // markdown_template = "templates/memo.md"
+
+    custom_field {
+      name = "Distribution List"
+      type = "people"
+      read_only = false
+    }
+    custom_field {
+      name = "Category"
+      type = "string"
+      read_only = false
+    }
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -245,13 +356,6 @@ email {
 //   - Percentage-based rollout (percentage = 0-100)
 
 feature_flags {
-  // api_v2: Enable version 2 of the REST API
-  // V2 API uses workspace providers and has improved error handling
-  flag "api_v2" {
-    enabled = false
-    // percentage = 25  // Optional: enable for 25% of users
-  }
-
   // projects: Enable the projects feature in the UI
   // Allows grouping documents into projects for better organization
   flag "projects" {
@@ -509,6 +613,9 @@ postgres {
 // Each product requires:
 //   - name: Full product name (displayed in UI)
 //   - abbreviation: Short code (2-4 uppercase letters, used in document IDs)
+//
+// Document IDs are generated as: {abbreviation}-{number}
+// Example: "ENG-123" for Engineering product
 
 products {
   product "Engineering" {
@@ -519,21 +626,37 @@ products {
     abbreviation = "LAB"
   }
   
-  product "MyProduct" {
-    abbreviation = "MY"
+  product "Platform" {
+    abbreviation = "PLT"
   }
   
-  // Add your organization's products here:
-  // product "Platform" {
-  //   abbreviation = "PLT"
+  product "Security" {
+    abbreviation = "SEC"
+  }
+  
+  product "Infrastructure" {
+    abbreviation = "INF"
+  }
+
+  product "Product Management" {
+    abbreviation = "PM"
+  }
+
+  product "Design" {
+    abbreviation = "DES"
+  }
+
+  // Add more products as needed:
+  // product "MyProduct" {
+  //   abbreviation = "MY"
   // }
-  // 
-  // product "Security" {
-  //   abbreviation = "SEC"
+  //
+  // product "Data Engineering" {
+  //   abbreviation = "DE"
   // }
-  // 
-  // product "Infrastructure" {
-  //   abbreviation = "INF"
+  //
+  // product "DevOps" {
+  //   abbreviation = "DO"
   // }
 }
 
