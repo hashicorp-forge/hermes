@@ -59,14 +59,25 @@ staticPasswords:
   hash: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"  # password: "password"
   username: "test"
   userID: "08a8684b-db88-4b73-90a9-3cd1661f5466"
+  name: "Test User"
+  groups:
+    - "users"
+    - "testers"
 - email: "admin@hermes.local"
   hash: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"  # password: "password"
   username: "admin"
   userID: "08a8684b-db88-4b73-90a9-3cd1661f5467"
+  name: "Admin User"
+  groups:
+    - "users"
+    - "admins"
 - email: "user@hermes.local"
   hash: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"  # password: "password"
   username: "user"
   userID: "08a8684b-db88-4b73-90a9-3cd1661f5468"
+  name: "Regular User"
+  groups:
+    - "users"
 
 # OAuth2 configuration
 oauth2:

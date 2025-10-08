@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/hashicorp-forge/hermes/internal/server"
 	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
@@ -67,105 +68,146 @@ func MeHandler(srv server.Server) http.Handler {
 				http.Error(w, userErrMsg, httpCode)
 			}
 
-			ppl, err := srv.WorkspaceProvider.SearchPeople(
-				userEmail, "emailAddresses,names,photos")
-			if err != nil {
-				errResp(
-					http.StatusInternalServerError,
-					"Error getting user information",
-					"error searching people directory",
-					err,
-				)
-				return
-			}
+			// Try to get user information from auth claims first
+			claims, hasClaims := pkgauth.GetUserClaims(r.Context())
 
-			// Verify that the result only contains one person.
-			if len(ppl) != 1 {
-				errResp(
-					http.StatusInternalServerError,
-					"Error getting user information",
-					fmt.Sprintf(
-						"wrong number of people in search result: %d", len(ppl)),
-					nil,
-					"user_email", userEmail,
-				)
+			var resp MeGetResponse
 
-				// If configured, send an email to the user to notify them that their
-				// account was not found in the directory.
-				if srv.Config.Email != nil && srv.Config.Email.Enabled &&
-					srv.Config.GoogleWorkspace != nil &&
-					srv.Config.GoogleWorkspace.UserNotFoundEmail != nil &&
-					srv.Config.GoogleWorkspace.UserNotFoundEmail.Enabled &&
-					srv.Config.GoogleWorkspace.UserNotFoundEmail.Body != "" &&
-					srv.Config.GoogleWorkspace.UserNotFoundEmail.Subject != "" {
-					err = srv.WorkspaceProvider.SendEmail(
-						[]string{userEmail},
-						srv.Config.Email.FromAddress,
-						srv.Config.GoogleWorkspace.UserNotFoundEmail.Subject,
-						srv.Config.GoogleWorkspace.UserNotFoundEmail.Body,
-					)
-					if err != nil {
-						srv.Logger.Error("error sending user not found email",
-							"error", err,
-							"method", r.Method,
-							"path", r.URL.Path,
-							"user_email", userEmail,
-						)
-					} else {
-						srv.Logger.Info("user not found email sent",
-							"method", r.Method,
-							"path", r.URL.Path,
-							"user_email", userEmail,
-						)
-					}
+			if hasClaims && claims != nil {
+				// Use claims from authentication provider (e.g., Dex OIDC)
+				srv.Logger.Info("using user claims from auth context",
+					"email", claims.Email,
+					"name", claims.Name,
+					"preferred_username", claims.PreferredUsername,
+					"groups", claims.Groups)
+
+				resp = MeGetResponse{
+					ID:            claims.Email, // Use email as ID for non-workspace auth
+					Email:         claims.Email,
+					VerifiedEmail: true, // Verified by OIDC provider
+					Name:          claims.Name,
+					GivenName:     claims.GivenName,
+					FamilyName:    claims.FamilyName,
 				}
 
-				return
-			}
-			p := ppl[0]
+				// If name is empty, try to construct from given/family name or use preferred_username or email
+				if resp.Name == "" {
+					if claims.PreferredUsername != "" {
+						resp.Name = claims.PreferredUsername
+					} else if claims.GivenName != "" || claims.FamilyName != "" {
+						resp.Name = strings.TrimSpace(claims.GivenName + " " + claims.FamilyName)
+					} else {
+						// Last resort: use email local part as display name
+						resp.Name = strings.Split(claims.Email, "@")[0]
+					}
+				}
+			} else {
+				// Fallback to workspace provider (e.g., Google Workspace)
+				srv.Logger.Debug("falling back to workspace provider for user info",
+					"email", userEmail)
 
-			// Make sure that the result's email address is the same as the
-			// authenticated user, is the primary email address, and is verified.
-			if len(p.EmailAddresses) == 0 ||
-				p.EmailAddresses[0].Value != userEmail ||
-				!p.EmailAddresses[0].Metadata.Primary ||
-				!p.EmailAddresses[0].Metadata.Verified {
-				errResp(
-					http.StatusInternalServerError,
-					"Error getting user information",
-					"wrong user in search result",
-					err,
-				)
-				return
+				ppl, err := srv.WorkspaceProvider.SearchPeople(
+					userEmail, "emailAddresses,names,photos")
+				if err != nil {
+					errResp(
+						http.StatusInternalServerError,
+						"Error getting user information",
+						"error searching people directory",
+						err,
+					)
+					return
+				}
+
+				// Verify that the result only contains one person.
+				if len(ppl) != 1 {
+					errResp(
+						http.StatusInternalServerError,
+						"Error getting user information",
+						fmt.Sprintf(
+							"wrong number of people in search result: %d", len(ppl)),
+						nil,
+						"user_email", userEmail,
+					)
+
+					// If configured, send an email to the user to notify them that their
+					// account was not found in the directory.
+					if srv.Config.Email != nil && srv.Config.Email.Enabled &&
+						srv.Config.GoogleWorkspace != nil &&
+						srv.Config.GoogleWorkspace.UserNotFoundEmail != nil &&
+						srv.Config.GoogleWorkspace.UserNotFoundEmail.Enabled &&
+						srv.Config.GoogleWorkspace.UserNotFoundEmail.Body != "" &&
+						srv.Config.GoogleWorkspace.UserNotFoundEmail.Subject != "" {
+						err = srv.WorkspaceProvider.SendEmail(
+							[]string{userEmail},
+							srv.Config.Email.FromAddress,
+							srv.Config.GoogleWorkspace.UserNotFoundEmail.Subject,
+							srv.Config.GoogleWorkspace.UserNotFoundEmail.Body,
+						)
+						if err != nil {
+							srv.Logger.Error("error sending user not found email",
+								"error", err,
+								"method", r.Method,
+								"path", r.URL.Path,
+								"user_email", userEmail,
+							)
+						} else {
+							srv.Logger.Info("user not found email sent",
+								"method", r.Method,
+								"path", r.URL.Path,
+								"user_email", userEmail,
+							)
+						}
+					}
+
+					return
+				}
+				p := ppl[0]
+
+				// Make sure that the result's email address is the same as the
+				// authenticated user, is the primary email address, and is verified.
+				if len(p.EmailAddresses) == 0 ||
+					p.EmailAddresses[0].Value != userEmail ||
+					!p.EmailAddresses[0].Metadata.Primary ||
+					!p.EmailAddresses[0].Metadata.Verified {
+					errResp(
+						http.StatusInternalServerError,
+						"Error getting user information",
+						"wrong user in search result",
+						err,
+					)
+					return
+				}
+
+				// Verify other required values are set.
+				if len(p.Names) == 0 {
+					errResp(
+						http.StatusInternalServerError,
+						"Error getting user information",
+						"no names in result",
+						err,
+					)
+					return
+				}
+
+				// Build response from workspace provider data
+				resp = MeGetResponse{
+					ID:            p.EmailAddresses[0].Metadata.Source.Id,
+					Email:         p.EmailAddresses[0].Value,
+					VerifiedEmail: p.EmailAddresses[0].Metadata.Verified,
+					Name:          p.Names[0].DisplayName,
+					GivenName:     p.Names[0].GivenName,
+					FamilyName:    p.Names[0].FamilyName,
+				}
+				if len(p.Photos) > 0 {
+					resp.Picture = p.Photos[0].Url
+				}
 			}
 
-			// Verify other required values are set.
-			if len(p.Names) == 0 {
-				errResp(
-					http.StatusInternalServerError,
-					"Error getting user information",
-					"no names in result",
-					err,
-				)
-				return
-			}
-
-			// Write response.
-			resp := MeGetResponse{
-				ID:            p.EmailAddresses[0].Metadata.Source.Id,
-				Email:         p.EmailAddresses[0].Value,
-				VerifiedEmail: p.EmailAddresses[0].Metadata.Verified,
-				Name:          p.Names[0].DisplayName,
-				GivenName:     p.Names[0].GivenName,
-				FamilyName:    p.Names[0].FamilyName,
-			}
-			if len(p.Photos) > 0 {
-				resp.Picture = p.Photos[0].Url
-			}
+			// Write response (common for both paths)
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
 			enc := json.NewEncoder(w)
-			err = enc.Encode(resp)
+			err := enc.Encode(resp)
 			if err != nil {
 				errResp(
 					http.StatusInternalServerError,

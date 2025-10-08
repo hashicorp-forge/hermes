@@ -166,6 +166,21 @@ products {
   }
 }
 
+// Local workspace configuration (for testing without Google Workspace)
+local_workspace {
+  base_path    = "/app/workspace_data"
+  docs_path    = "/app/workspace_data/docs"
+  drafts_path  = "/app/workspace_data/drafts"
+  folders_path = "/app/workspace_data/folders"
+  users_path   = "/app/workspace_data/users"
+  tokens_path  = "/app/workspace_data/tokens"
+  domain       = "hermes.local"
+  
+  smtp {
+    enabled = false
+  }
+}
+
 // Server configuration (bind to all interfaces in container)
 server {
   addr = "0.0.0.0:8000"
