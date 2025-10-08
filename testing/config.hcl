@@ -31,29 +31,175 @@ datadog {
   env     = "testing"
 }
 
-// Document types (minimal set for testing)
+// Document types - comprehensive set matching core config.hcl patterns
+// Templates reference files in testing/templates/ directory (mapped to container)
 document_types {
+  // RFC (Request for Comments) - Technical design proposals
   document_type "RFC" {
     long_name   = "Request for Comments"
     description = "Create a Request for Comments document to present a proposal to colleagues for their review and feedback."
     flight_icon = "discussion-circle"
-    template    = "test-rfc-template-id"
     
+    // For local workspace: use markdown template from testing/templates/
+    template = "template-rfc"  // References a template document that will be created
+
+    more_info_link {
+      text = "More info on the RFC template"
+      url  = "https://works.hashicorp.com/articles/rfc-template"
+    }
+
+    custom_field {
+      name = "Current Version"
+      type = "string"
+      read_only = false
+    }
+    custom_field {
+      name = "PRD"
+      type = "string"
+      read_only = false
+    }
     custom_field {
       name = "Stakeholders"
       type = "people"
+      read_only = false
+    }
+    custom_field {
+      name = "Target Version"
+      type = "string"
+      read_only = false
+    }
+    
+    check {
+      label = "I have updated the status to 'In Review'"
+      helper_text = "Documents must be in review status before publishing"
+      link {
+        text = "Status guide"
+        url = "https://works.hashicorp.com/articles/rfc-status"
+      }
     }
   }
 
+  // PRD (Product Requirements Document) - Product specifications
   document_type "PRD" {
     long_name   = "Product Requirements"
     description = "Create a Product Requirements Document to summarize a problem statement and outline a phased approach to addressing the problem."
     flight_icon = "target"
-    template    = "test-prd-template-id"
     
+    template = "template-prd"
+
+    more_info_link {
+      text = "More info on the PRD template"
+      url  = "https://works.hashicorp.com/articles/prd-template"
+    }
+
+    custom_field {
+      name = "RFC"
+      type = "string"
+      read_only = false
+    }
     custom_field {
       name = "Stakeholders"
       type = "people"
+      read_only = false
+    }
+    custom_field {
+      name = "Target Release"
+      type = "string"
+      read_only = false
+    }
+  }
+
+  // ADR (Architectural Decision Record) - Document architectural decisions
+  document_type "ADR" {
+    long_name   = "Architectural Decision Record"
+    description = "Document an architectural decision including context, alternatives considered, and rationale for the chosen solution."
+    flight_icon = "building"
+    
+    template = "template-adr"
+
+    more_info_link {
+      text = "Learn about ADRs"
+      url  = "https://adr.github.io/"
+    }
+
+    custom_field {
+      name = "Status"
+      type = "string"
+      read_only = false
+    }
+    custom_field {
+      name = "Decision Owners"
+      type = "people"
+      read_only = false
+    }
+    custom_field {
+      name = "Related RFCs"
+      type = "string"
+      read_only = false
+    }
+    custom_field {
+      name = "Systems Impacted"
+      type = "string"
+      read_only = false
+    }
+
+    check {
+      label = "I have documented all alternatives considered"
+      helper_text = "ADRs should include at least 2-3 alternative approaches"
+    }
+    check {
+      label = "I have clearly stated the consequences of this decision"
+      helper_text = "Include both positive and negative consequences"
+    }
+  }
+
+  // FRD (Functional Requirements Document) - Detailed technical specifications
+  document_type "FRD" {
+    long_name = "Functional Requirements Document"
+    description = "Create detailed functional specifications for engineering implementation, including technical requirements and acceptance criteria."
+    flight_icon = "docs-link"
+    
+    template = "template-frd"
+
+    more_info_link {
+      text = "FRD best practices"
+      url  = "https://works.hashicorp.com/articles/frd-template"
+    }
+
+    custom_field {
+      name = "Related PRD"
+      type = "string"
+      read_only = false
+    }
+    custom_field {
+      name = "Engineers"
+      type = "people"
+      read_only = false
+    }
+    custom_field {
+      name = "Epic Link"
+      type = "string"
+      read_only = false
+    }
+  }
+
+  // Memo - Short-form communication and announcements
+  document_type "Memo" {
+    long_name = "Memo"
+    description = "Create a Memo document to share an idea, update, or brief note with colleagues."
+    flight_icon = "radio"
+    
+    template = "template-memo"
+
+    custom_field {
+      name = "Distribution List"
+      type = "people"
+      read_only = false
+    }
+    custom_field {
+      name = "Category"
+      type = "string"
+      read_only = false
     }
   }
 }
@@ -158,25 +304,61 @@ postgres {
   password = "postgres"
 }
 
-// Products (test product for testing)
+// Products - comprehensive set matching core config.hcl patterns
+// Document IDs are generated as: {abbreviation}-{number}
+// Example: "ENG-123" for Engineering product
 products {
-  product "Test Product" {
-    abbreviation = "TEST"
-  }
-  
   product "Engineering" {
     abbreviation = "ENG"
+  }
+  
+  product "Labs" {
+    abbreviation = "LAB"
+  }
+  
+  product "Platform" {
+    abbreviation = "PLT"
+  }
+  
+  product "Security" {
+    abbreviation = "SEC"
+  }
+  
+  product "Infrastructure" {
+    abbreviation = "INF"
+  }
+
+  product "Product Management" {
+    abbreviation = "PM"
+  }
+
+  product "Design" {
+    abbreviation = "DES"
   }
 }
 
 // Local workspace configuration (for testing without Google Workspace)
+// Paths are mapped to container volumes in docker-compose.yml
+// - testing/templates -> /app/workspace_data/templates (template source files)
+// - hermes_workspace volume -> /app/workspace_data (runtime data)
 local_workspace {
+  // Base path for all workspace data (container path)
   base_path    = "/app/workspace_data"
+  
+  // Document storage paths (container paths)
   docs_path    = "/app/workspace_data/docs"
   drafts_path  = "/app/workspace_data/drafts"
+  
+  // Metadata paths (container paths)
   folders_path = "/app/workspace_data/folders"
   users_path   = "/app/workspace_data/users"
   tokens_path  = "/app/workspace_data/tokens"
+  
+  // Templates path - stores template documents that are referenced by document_type.template
+  // These are actual documents that get copied when creating new docs
+  templates_path = "/app/workspace_data/templates"
+  
+  // Domain for local workspace users (email addresses will be user@domain)
   domain       = "hermes.local"
   
   smtp {
