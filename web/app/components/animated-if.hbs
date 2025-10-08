@@ -1,0 +1,12 @@
+{{!--
+  TEMPORARY STUB for animated-if component (ember-animated migration)
+  
+  Conditionally renders default or else block based on predicate argument.
+  This is a passthrough component without animation.
+--}}
+
+{{#if this.shouldRenderDefault}}
+  {{yield}}
+{{else if (has-block "else")}}
+  {{yield to="else"}}
+{{/if}}

@@ -1,0 +1,10 @@
+{{!--
+  TEMPORARY STUB for animated-each component (ember-animated migration)
+  
+  Iterates over items and yields each item without animation.
+  This is a passthrough component.
+--}}
+
+{{#each this.itemsArray key=this.keyName as |item index|}}
+  {{yield item index}}
+{{/each}}
