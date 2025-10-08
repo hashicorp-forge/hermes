@@ -181,10 +181,10 @@ local_workspace {
   }
 }
 
-// Provider selection (use Google Workspace and Meilisearch search)
-// Note: Local provider is not yet fully supported in containerized environment
+// Provider selection (use Local Workspace and Meilisearch search)
+// This allows testing without Google Workspace credentials
 providers {
-  workspace = "google"
+  workspace = "local"
   search    = "meilisearch"
 }
 
