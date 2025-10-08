@@ -561,6 +561,7 @@ func (c *Command) Run(args []string) int {
 		{"/api/v2/projects", apiv2.ProjectsHandler(srv)},
 		{"/api/v2/projects/", apiv2.ProjectHandler(srv)},
 		{"/api/v2/reviews/", apiv2.ReviewsHandler(srv)},
+		{"/api/v2/search/", apiv2.SearchHandler(srv)},
 		{"/api/v2/web/analytics", apiv2.AnalyticsHandler(srv)},
 	}
 
