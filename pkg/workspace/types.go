@@ -124,22 +124,22 @@ type Revision struct {
 // User represents a user/person.
 type User struct {
 	// Email is the user's email address.
-	Email string
+	Email string `json:"email"`
 
 	// Name is the user's full name.
-	Name string
+	Name string `json:"name"`
 
 	// GivenName is the user's first name.
-	GivenName string
+	GivenName string `json:"given_name"`
 
 	// FamilyName is the user's last name.
-	FamilyName string
+	FamilyName string `json:"family_name"`
 
 	// PhotoURL is the URL to the user's profile photo.
-	PhotoURL string
+	PhotoURL string `json:"photo_url"`
 
 	// Metadata contains flexible user metadata.
-	Metadata map[string]any
+	Metadata map[string]any `json:"metadata,omitempty"`
 }
 
 // Permission represents a document permission.
