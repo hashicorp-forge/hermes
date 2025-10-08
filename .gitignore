@@ -35,6 +35,15 @@ coverage*.html
 coverage*.out
 test-output.log
 
+# Playwright test artifacts
+/tests/e2e-playwright/test-results/
+/tests/e2e-playwright/playwright-report/
+/tests/e2e-playwright/.playwright/
+/tests/e2e-playwright/playwright/.cache/
+**/test-results/
+**/.playwright/
+.playwright-mcp/
+
 # Terraform related
 .terraform
 
