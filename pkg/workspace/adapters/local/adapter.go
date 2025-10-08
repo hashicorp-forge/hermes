@@ -105,7 +105,7 @@ func (a *Adapter) getDocumentPath(id string, isDraft bool) (string, bool) {
 	return filepath.Join(basePath, id+".md"), false
 }
 
-// findDocumentPath searches for a document in both docs and drafts directories.
+// findDocumentPath searches for a document in docs, drafts, and templates directories.
 // Returns the path, whether it's a draft, whether it's directory-based, or an error if not found.
 func (a *Adapter) findDocumentPath(id string) (string, bool, bool, error) {
 	// Try docs first
@@ -138,7 +138,14 @@ func (a *Adapter) findDocumentPath(id string) (string, bool, bool, error) {
 		}
 	}
 
-	return "", false, false, workspace.NotFoundError("document", id)
+	// Try templates directory (for template documents like template-rfc, template-prd, etc.)
+	templatesPath := filepath.Join(a.basePath, "templates")
+	templateFile := filepath.Join(templatesPath, id+".md")
+	if _, err := a.fs.Stat(templateFile); err == nil {
+		return templateFile, false, false, nil
+	}
+
+	return "", false, false, fmt.Errorf("%w (templates checked at: %s)", workspace.NotFoundError("document", id), templatesPath)
 }
 
 // getFolderPath returns the filesystem path for folder metadata.

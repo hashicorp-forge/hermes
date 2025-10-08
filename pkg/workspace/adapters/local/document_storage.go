@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -24,7 +25,30 @@ func (ds *documentStorage) GetDocument(ctx context.Context, id string) (*workspa
 		return nil, err
 	}
 
-	// Load metadata and content from the file
+	// Check if this is a template file (templates don't have frontmatter metadata)
+	templatesPath := filepath.Join(ds.adapter.basePath, "templates")
+	if strings.HasPrefix(docPath, templatesPath) {
+		// For template files, read as plain content without frontmatter
+		content, err := afero.ReadFile(ds.adapter.fs, docPath)
+		if err != nil {
+			return nil, workspace.NotFoundError("document", id)
+		}
+
+		return &workspace.Document{
+			ID:             id,
+			Name:           id + ".md",
+			Content:        string(content),
+			MimeType:       "text/markdown",
+			ParentFolderID: "",
+			CreatedTime:    time.Now(),
+			ModifiedTime:   time.Now(),
+			Owner:          "",
+			Metadata:       make(map[string]any),
+			Trashed:        false,
+		}, nil
+	}
+
+	// Load metadata and content from the file (with frontmatter)
 	meta, content, err := ds.adapter.metadataStore.GetWithContent(docPath)
 	if err != nil {
 		return nil, workspace.NotFoundError("document", id)
