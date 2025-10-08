@@ -408,3 +408,14 @@ func TestAdapterServiceGetters(t *testing.T) {
 		assert.NotNil(t, svc)
 	})
 }
+
+// TestNewAdapter_ErrorPaths tests error handling in NewAdapter.
+func TestNewAdapter_ErrorPaths(t *testing.T) {
+	t.Run("InvalidConfig", func(t *testing.T) {
+		_, err := local.NewAdapter(&local.Config{
+			BasePath: "", // Empty base path should fail validation
+		})
+		assert.Error(t, err, "Should error on invalid config")
+		assert.Contains(t, err.Error(), "invalid configuration")
+	})
+}
