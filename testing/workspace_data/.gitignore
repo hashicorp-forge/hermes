@@ -1,0 +1,28 @@
+# Git tracking for testing/workspace_data
+#
+# Strategy: Track seed data (templates), ignore runtime data
+#
+# ✅ Tracked (committed to git):
+#   - templates/      Template documents for document creation
+#   - README.md       Documentation
+#
+# ❌ Ignored (runtime data):
+#   - docs/          Published documents (created at runtime)
+#   - drafts/        Draft documents (created at runtime)
+#   - folders/       Folder metadata (created at runtime)
+#   - users/         User profiles (created at runtime, except users.json in parent)
+#   - tokens/        Auth tokens (created at runtime)
+
+# Ignore all runtime directories
+/docs/
+/drafts/
+/folders/
+/users/
+/tokens/
+
+# Keep templates (tracked)
+!/templates/
+!/templates/**
+
+# Keep documentation
+!README.md
