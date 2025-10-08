@@ -328,6 +328,58 @@ document_types {
       read_only = false
     }
   }
+
+  // PATH (Golden Path) - Step-by-step workflow guides
+  document_type "PATH" {
+    long_name = "Golden Path"
+    description = "Create a Golden Path document to provide step-by-step guidance for repeatable workflows and processes."
+    flight_icon = "map"
+    
+    // Google Docs template for Google Workspace
+    // template = "YOUR_GOOGLE_DOCS_PATH_TEMPLATE_ID"
+    
+    // Markdown template for Local Workspace
+    // markdown_template = "templates/path.md"
+
+    more_info_link {
+      text = "Golden Paths overview"
+      url  = "https://works.hashicorp.com/articles/golden-paths"
+    }
+
+    custom_field {
+      name = "Category"
+      type = "string"
+      read_only = false
+    }
+    custom_field {
+      name = "Time Investment"
+      type = "string"
+      read_only = false
+    }
+    custom_field {
+      name = "Steps"
+      type = "number"
+      read_only = false
+    }
+    custom_field {
+      name = "Related Paths"
+      type = "string"
+      read_only = false
+    }
+
+    check {
+      label = "I have documented all prerequisites"
+      helper_text = "Include both required and helpful prerequisites"
+    }
+    check {
+      label = "I have provided time estimates for each step"
+      helper_text = "Help users plan their time effectively"
+    }
+    check {
+      label = "I have included working examples"
+      helper_text = "Real examples help users understand the path"
+    }
+  }
 }
 
 //------------------------------------------------------------------------------

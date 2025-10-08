@@ -202,6 +202,54 @@ document_types {
       read_only = false
     }
   }
+
+  // PATH (Golden Path) - Step-by-step workflow guides
+  document_type "PATH" {
+    long_name = "Golden Path"
+    description = "Create a Golden Path document to provide step-by-step guidance for repeatable workflows and processes."
+    flight_icon = "map"
+    
+    template = "template-path"
+
+    more_info_link {
+      text = "Golden Paths overview"
+      url  = "https://works.hashicorp.com/articles/golden-paths"
+    }
+
+    custom_field {
+      name = "Category"
+      type = "string"
+      read_only = false
+    }
+    custom_field {
+      name = "Time Investment"
+      type = "string"
+      read_only = false
+    }
+    custom_field {
+      name = "Steps"
+      type = "number"
+      read_only = false
+    }
+    custom_field {
+      name = "Related Paths"
+      type = "string"
+      read_only = false
+    }
+
+    check {
+      label = "I have documented all prerequisites"
+      helper_text = "Include both required and helpful prerequisites"
+    }
+    check {
+      label = "I have provided time estimates for each step"
+      helper_text = "Help users plan their time effectively"
+    }
+    check {
+      label = "I have included working examples"
+      helper_text = "Real examples help users understand the path"
+    }
+  }
 }
 
 // Email (disabled for testing)
@@ -278,6 +326,10 @@ meilisearch {
 // Dex OIDC authentication (enabled for testing)  
 // Note: issuer_url uses host.docker.internal:5558 so both browser AND Hermes container can access Dex
 //       On macOS/Windows Docker Desktop, host.docker.internal resolves to the host machine
+// Dex configuration for Docker environment
+// Note: Dex runs in testing docker-compose on port 5558 (external) / 5557 (internal)
+//       issuer_url must match the issuer in dex-config.yaml (http://localhost:5558/dex)
+//       Uses extra_hosts to map localhost to host-gateway for container access
 dex {
   disabled      = false
   issuer_url    = "http://localhost:5558/dex"
@@ -354,15 +406,15 @@ local_workspace {
   users_path   = "/app/workspace_data/users"
   tokens_path  = "/app/workspace_data/tokens"
   
-  // Templates path - stores template documents that are referenced by document_type.template
-  // These are actual documents that get copied when creating new docs
-  templates_path = "/app/workspace_data/templates"
-  
-  // Domain for local workspace users (email addresses will be user@domain)
+  // Domain for local workspace users
   domain       = "hermes.local"
   
   smtp {
-    enabled = false
+    enabled  = false
+    host     = "localhost"
+    port     = 1025
+    username = ""
+    password = ""
   }
 }
 
