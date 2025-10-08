@@ -146,18 +146,36 @@ func CallbackHandler(cfg config.Config, log hclog.Logger) http.Handler {
 			SameSite: http.SameSiteLaxMode,
 		})
 
-		// Redirect to dashboard
-		redirectURL := "/dashboard"
+		// Build redirect URL - use BaseURL from config if available
+		// This ensures we redirect to the frontend URL (e.g., http://localhost:4201)
+		// instead of the backend URL (e.g., http://localhost:8001)
+		redirectPath := "/dashboard"
 
-		// Check if there's a redirect URL in the query params
+		// Check if there's a redirect path in the query params
 		if redirect := r.URL.Query().Get("redirect"); redirect != "" {
 			// Validate redirect URL to prevent open redirects
 			if u, err := url.Parse(redirect); err == nil && u.Host == "" {
-				redirectURL = redirect
+				redirectPath = redirect
 			}
 		}
 
-		log.Debug("redirecting after authentication", "url", redirectURL, "email", email)
+		// Construct absolute URL if BaseURL is configured
+		var redirectURL string
+		if cfg.BaseURL != "" {
+			baseURL, err := url.Parse(cfg.BaseURL)
+			if err != nil {
+				log.Error("invalid base_url in configuration", "base_url", cfg.BaseURL, "error", err)
+				redirectURL = redirectPath // Fallback to relative path
+			} else {
+				baseURL.Path = redirectPath
+				redirectURL = baseURL.String()
+			}
+		} else {
+			// Fallback to relative redirect if BaseURL not configured
+			redirectURL = redirectPath
+		}
+
+		log.Info("redirecting after authentication", "url", redirectURL, "base_url", cfg.BaseURL, "email", email)
 		http.Redirect(w, r, redirectURL, http.StatusFound)
 	})
 }
