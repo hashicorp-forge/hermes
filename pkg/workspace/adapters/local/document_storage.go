@@ -18,25 +18,15 @@ type documentStorage struct {
 
 // GetDocument retrieves a document by ID.
 func (ds *documentStorage) GetDocument(ctx context.Context, id string) (*workspace.Document, error) {
-	// Try both docs and drafts paths since we don't know which it is yet
-	paths := []string{
-		ds.adapter.getDocumentPath(id, false), // docs
-		ds.adapter.getDocumentPath(id, true),  // drafts
+	// Find the document in either docs or drafts
+	docPath, _, _, err := ds.adapter.findDocumentPath(id)
+	if err != nil {
+		return nil, err
 	}
 
-	var meta *DocumentMetadata
-	var content string
-	var err error
-
-	for _, path := range paths {
-		// Load metadata and content from the file
-		meta, content, err = ds.adapter.metadataStore.GetWithContent(path)
-		if err == nil {
-			break
-		}
-	}
-
-	if meta == nil {
+	// Load metadata and content from the file
+	meta, content, err := ds.adapter.metadataStore.GetWithContent(docPath)
+	if err != nil {
 		return nil, workspace.NotFoundError("document", id)
 	}
 
@@ -77,8 +67,8 @@ func (ds *documentStorage) CreateDocument(ctx context.Context, doc *workspace.Do
 	now := time.Now()
 	isDraft := doc.ParentFolderID == "drafts" || strings.Contains(doc.ParentFolderID, "draft")
 
-	// Write content to file
-	docPath := ds.adapter.getDocumentPath(id, isDraft)
+	// Write content to file (use single-file format for new documents)
+	docPath, _ := ds.adapter.getDocumentPath(id, isDraft)
 	if err := afero.WriteFile(ds.adapter.fs, docPath, []byte(content), 0644); err != nil {
 		return nil, fmt.Errorf("failed to write document: %w", err)
 	}
@@ -116,7 +106,7 @@ func (ds *documentStorage) CreateDocument(ctx context.Context, doc *workspace.Do
 // UpdateDocument updates an existing document.
 func (ds *documentStorage) UpdateDocument(ctx context.Context, id string, updates *workspace.DocumentUpdate) (*workspace.Document, error) {
 	// Find the document
-	docPath, isDraft, err := ds.adapter.findDocumentPath(id)
+	docPath, isDraft, isDir, err := ds.adapter.findDocumentPath(id)
 	if err != nil {
 		return nil, err
 	}
@@ -136,9 +126,9 @@ func (ds *documentStorage) UpdateDocument(ctx context.Context, id string, update
 	}
 	if updates.ParentFolderID != nil {
 		// Handle move between docs/drafts
-		oldPath := ds.adapter.getDocumentPath(id, isDraft)
+		oldPath, _ := ds.adapter.getDocumentPath(id, isDraft)
 		newIsDraft := *updates.ParentFolderID == "drafts" || strings.Contains(*updates.ParentFolderID, "draft")
-		newPath := ds.adapter.getDocumentPath(id, newIsDraft)
+		newPath, _ := ds.adapter.getDocumentPath(id, newIsDraft)
 
 		if oldPath != newPath {
 			if err := ds.adapter.fs.Rename(oldPath, newPath); err != nil {
@@ -148,6 +138,9 @@ func (ds *documentStorage) UpdateDocument(ctx context.Context, id string, update
 
 		meta.ParentFolderID = *updates.ParentFolderID
 		isDraft = newIsDraft
+		// Note: Moving a directory-based document is not fully supported yet
+		// This will only work for single-file format documents
+		_ = isDir // Acknowledge we're ignoring this for now
 	}
 	if updates.Content != nil {
 		contentToSave = *updates.Content
@@ -164,7 +157,7 @@ func (ds *documentStorage) UpdateDocument(ctx context.Context, id string, update
 	meta.ModifiedTime = time.Now()
 
 	// Update the final path in case it changed
-	finalPath := ds.adapter.getDocumentPath(id, isDraft)
+	finalPath, _ := ds.adapter.getDocumentPath(id, isDraft)
 
 	// Write metadata and content together atomically
 	if err := ds.adapter.metadataStore.Set(finalPath, meta, contentToSave); err != nil {
@@ -178,7 +171,7 @@ func (ds *documentStorage) UpdateDocument(ctx context.Context, id string, update
 // DeleteDocument deletes a document.
 func (ds *documentStorage) DeleteDocument(ctx context.Context, id string) error {
 	// Find the document
-	docPath, _, err := ds.adapter.findDocumentPath(id)
+	docPath, _, _, err := ds.adapter.findDocumentPath(id)
 	if err != nil {
 		return err
 	}

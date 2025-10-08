@@ -3,6 +3,7 @@ package local
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"path/filepath"
 	"strconv"
@@ -42,11 +43,20 @@ func NewMetadataStore(basePath string, fs FileSystem) (*MetadataStore, error) {
 	}, nil
 }
 
-// Get retrieves metadata from a document file's frontmatter.
+// Get retrieves metadata from a document file's frontmatter or metadata.json.
+// Supports both single-file format (.md with frontmatter) and directory format (folder with metadata.json).
 func (ms *MetadataStore) Get(docPath string) (*DocumentMetadata, error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 
+	// Check if this is a directory-based document
+	metadataPath := filepath.Join(docPath, "metadata.json")
+	if stat, err := ms.fs.Stat(metadataPath); err == nil && !stat.IsDir() {
+		// Directory-based format: read metadata.json
+		return ms.getFromMetadataJSON(metadataPath)
+	}
+
+	// Single-file format: read .md file with frontmatter
 	data, err := afero.ReadFile(ms.fs, docPath)
 	if err != nil {
 		if _, statErr := ms.fs.Stat(docPath); statErr != nil {
@@ -64,10 +74,30 @@ func (ms *MetadataStore) Get(docPath string) (*DocumentMetadata, error) {
 }
 
 // GetWithContent retrieves both metadata and content from a document file.
+// Supports both single-file format (.md with frontmatter) and directory format (folder with metadata.json + content.md).
 func (ms *MetadataStore) GetWithContent(docPath string) (*DocumentMetadata, string, error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 
+	// Check if this is a directory-based document
+	metadataPath := filepath.Join(docPath, "metadata.json")
+	if stat, err := ms.fs.Stat(metadataPath); err == nil && !stat.IsDir() {
+		// Directory-based format: read metadata.json and content.md
+		meta, err := ms.getFromMetadataJSON(metadataPath)
+		if err != nil {
+			return nil, "", fmt.Errorf("failed to read metadata.json: %w", err)
+		}
+
+		contentPath := filepath.Join(docPath, "content.md")
+		contentData, err := afero.ReadFile(ms.fs, contentPath)
+		if err != nil {
+			return nil, "", fmt.Errorf("failed to read content.md: %w", err)
+		}
+
+		return meta, string(contentData), nil
+	}
+
+	// Single-file format: read .md file with frontmatter
 	data, err := afero.ReadFile(ms.fs, docPath)
 	if err != nil {
 		if _, statErr := ms.fs.Stat(docPath); statErr != nil {
@@ -84,15 +114,140 @@ func (ms *MetadataStore) GetWithContent(docPath string) (*DocumentMetadata, stri
 	return meta, content, nil
 }
 
-// Set updates metadata in a document file's frontmatter.
+// getFromMetadataJSON reads metadata from a metadata.json file.
+func (ms *MetadataStore) getFromMetadataJSON(metadataPath string) (*DocumentMetadata, error) {
+	data, err := afero.ReadFile(ms.fs, metadataPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read metadata.json: %w", err)
+	}
+
+	var jsonMeta map[string]interface{}
+	if err := json.Unmarshal(data, &jsonMeta); err != nil {
+		return nil, fmt.Errorf("failed to parse metadata.json: %w", err)
+	}
+
+	meta := &DocumentMetadata{
+		Metadata: make(map[string]any),
+	}
+
+	// Parse standard fields
+	if id, ok := jsonMeta["id"].(string); ok {
+		meta.ID = id
+	}
+	if googleFileID, ok := jsonMeta["googleFileID"].(string); ok && meta.ID == "" {
+		meta.ID = googleFileID // Use googleFileID as fallback for ID
+	}
+	if title, ok := jsonMeta["title"].(string); ok {
+		meta.Name = title
+	} else if name, ok := jsonMeta["name"].(string); ok {
+		meta.Name = name
+	}
+	if parentID, ok := jsonMeta["parent_folder_id"].(string); ok {
+		meta.ParentFolderID = parentID
+	}
+	if owner, ok := jsonMeta["owner"].(string); ok {
+		meta.Owner = owner
+	} else if owners, ok := jsonMeta["owners"].([]interface{}); ok && len(owners) > 0 {
+		if ownerStr, ok := owners[0].(string); ok {
+			meta.Owner = ownerStr
+		}
+	}
+	if thumbnail, ok := jsonMeta["thumbnail_url"].(string); ok {
+		meta.ThumbnailURL = thumbnail
+	}
+	if trashed, ok := jsonMeta["trashed"].(bool); ok {
+		meta.Trashed = trashed
+	}
+
+	// Parse timestamps
+	if createdStr, ok := jsonMeta["createdTime"].(string); ok {
+		if t, err := time.Parse(time.RFC3339, createdStr); err == nil {
+			meta.CreatedTime = t
+		} else if t, err := time.Parse(time.RFC3339Nano, createdStr); err == nil {
+			meta.CreatedTime = t
+		}
+	}
+	if modifiedStr, ok := jsonMeta["modifiedTime"].(string); ok {
+		if t, err := time.Parse(time.RFC3339, modifiedStr); err == nil {
+			meta.ModifiedTime = t
+		} else if t, err := time.Parse(time.RFC3339Nano, modifiedStr); err == nil {
+			meta.ModifiedTime = t
+		}
+	}
+
+	// Store all other fields in Metadata map
+	for key, value := range jsonMeta {
+		switch key {
+		case "id", "googleFileID", "title", "name", "parent_folder_id", "owner", "owners",
+			"thumbnail_url", "trashed", "createdTime", "modifiedTime":
+			// Skip standard fields already parsed
+			continue
+		default:
+			meta.Metadata[key] = value
+		}
+	}
+
+	return meta, nil
+}
+
+// Set updates metadata in a document file's frontmatter or directory structure.
+// Preserves the existing format (single-file or directory-based).
 func (ms *MetadataStore) Set(docPath string, meta *DocumentMetadata, content string) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 
-	data := serializeFrontmatter(meta, content)
+	// Check if this is a directory-based document
+	metadataPath := filepath.Join(docPath, "metadata.json")
+	if stat, err := ms.fs.Stat(metadataPath); err == nil && !stat.IsDir() {
+		// Directory-based format: update metadata.json and content.md
+		return ms.setInDirectory(docPath, meta, content)
+	}
 
+	// Single-file format: write .md file with frontmatter
+	data := serializeFrontmatter(meta, content)
 	if err := afero.WriteFile(ms.fs, docPath, data, 0644); err != nil {
 		return fmt.Errorf("failed to write document: %w", err)
+	}
+
+	return nil
+}
+
+// setInDirectory writes metadata and content to a directory-based document structure.
+func (ms *MetadataStore) setInDirectory(docPath string, meta *DocumentMetadata, content string) error {
+	// Write metadata.json
+	metadataPath := filepath.Join(docPath, "metadata.json")
+	metadataJSON := map[string]interface{}{
+		"id":               meta.ID,
+		"googleFileID":     meta.ID,
+		"title":            meta.Name,
+		"name":             meta.Name,
+		"parent_folder_id": meta.ParentFolderID,
+		"owner":            meta.Owner,
+		"createdTime":      meta.CreatedTime.Format(time.RFC3339),
+		"modifiedTime":     meta.ModifiedTime.Format(time.RFC3339),
+		"trashed":          meta.Trashed,
+	}
+	if meta.ThumbnailURL != "" {
+		metadataJSON["thumbnail_url"] = meta.ThumbnailURL
+	}
+	// Add custom metadata fields
+	for key, value := range meta.Metadata {
+		metadataJSON[key] = value
+	}
+
+	metadataData, err := json.MarshalIndent(metadataJSON, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal metadata: %w", err)
+	}
+
+	if err := afero.WriteFile(ms.fs, metadataPath, metadataData, 0644); err != nil {
+		return fmt.Errorf("failed to write metadata.json: %w", err)
+	}
+
+	// Write content.md
+	contentPath := filepath.Join(docPath, "content.md")
+	if err := afero.WriteFile(ms.fs, contentPath, []byte(content), 0644); err != nil {
+		return fmt.Errorf("failed to write content.md: %w", err)
 	}
 
 	return nil

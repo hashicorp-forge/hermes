@@ -84,30 +84,61 @@ func generateID() string {
 }
 
 // getDocumentPath returns the filesystem path for a document.
-func (a *Adapter) getDocumentPath(id string, isDraft bool) string {
+// Supports two formats:
+// 1. Single-file: document-id.md with YAML frontmatter
+// 2. Directory-based: document-id/ with metadata.json + content.md
+// Returns the path and whether it's a directory-based document.
+func (a *Adapter) getDocumentPath(id string, isDraft bool) (string, bool) {
 	basePath := a.docsPath
 	if isDraft {
 		basePath = a.draftsPath
 	}
-	return filepath.Join(basePath, id+".md")
+
+	// Check for directory-based format first (metadata.json + content.md)
+	dirPath := filepath.Join(basePath, id)
+	metadataPath := filepath.Join(dirPath, "metadata.json")
+	if _, err := a.fs.Stat(metadataPath); err == nil {
+		return dirPath, true
+	}
+
+	// Fall back to single-file format (document-id.md)
+	return filepath.Join(basePath, id+".md"), false
 }
 
 // findDocumentPath searches for a document in both docs and drafts directories.
-// Returns the path and whether it's a draft, or an error if not found.
-func (a *Adapter) findDocumentPath(id string) (string, bool, error) {
+// Returns the path, whether it's a draft, whether it's directory-based, or an error if not found.
+func (a *Adapter) findDocumentPath(id string) (string, bool, bool, error) {
 	// Try docs first
-	docPath := a.getDocumentPath(id, false)
-	if _, err := a.fs.Stat(docPath); err == nil {
-		return docPath, false, nil
+	docPath, isDir := a.getDocumentPath(id, false)
+	if isDir {
+		// Check for metadata.json in directory
+		metadataPath := filepath.Join(docPath, "metadata.json")
+		if _, err := a.fs.Stat(metadataPath); err == nil {
+			return docPath, false, true, nil
+		}
+	} else {
+		// Check for single file
+		if _, err := a.fs.Stat(docPath); err == nil {
+			return docPath, false, false, nil
+		}
 	}
 
 	// Try drafts
-	draftPath := a.getDocumentPath(id, true)
-	if _, err := a.fs.Stat(draftPath); err == nil {
-		return draftPath, true, nil
+	draftPath, isDir := a.getDocumentPath(id, true)
+	if isDir {
+		// Check for metadata.json in directory
+		metadataPath := filepath.Join(draftPath, "metadata.json")
+		if _, err := a.fs.Stat(metadataPath); err == nil {
+			return draftPath, true, true, nil
+		}
+	} else {
+		// Check for single file
+		if _, err := a.fs.Stat(draftPath); err == nil {
+			return draftPath, true, false, nil
+		}
 	}
 
-	return "", false, workspace.NotFoundError("document", id)
+	return "", false, false, workspace.NotFoundError("document", id)
 }
 
 // getFolderPath returns the filesystem path for folder metadata.
