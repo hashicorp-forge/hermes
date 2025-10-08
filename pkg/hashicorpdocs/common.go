@@ -82,6 +82,8 @@ func NewEmptyDoc(docType string) (Doc, error) {
 		return &RFC{}, nil
 	case "PRD":
 		return &PRD{}, nil
+	case "PATH":
+		return &PATH{}, nil
 	default:
 		return nil, fmt.Errorf("invalid doc type")
 	}
@@ -116,6 +118,13 @@ func ParseDoc(
 		p, err := NewPRD(f, s, allFolders)
 		if err != nil {
 			return nil, fmt.Errorf("error parsing PRD: %w", err)
+		}
+		return p, nil
+
+	case "path":
+		p, err := NewPATH(f, s, allFolders)
+		if err != nil {
+			return nil, fmt.Errorf("error parsing PATH: %w", err)
 		}
 		return p, nil
 
