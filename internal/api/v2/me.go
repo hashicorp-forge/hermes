@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -109,25 +108,31 @@ func MeHandler(srv server.Server) http.Handler {
 				ppl, err := srv.WorkspaceProvider.SearchPeople(
 					userEmail, "emailAddresses,names,photos")
 				if err != nil {
-					errResp(
-						http.StatusInternalServerError,
-						"Error getting user information",
-						"error searching people directory",
-						err,
-					)
-					return
-				}
+					// If workspace search fails (e.g., using local workspace with no indexed users),
+					// return basic user info derived from email instead of failing
+					srv.Logger.Warn("workspace search failed, returning basic user info from email",
+						"email", userEmail,
+						"error", err)
 
-				// Verify that the result only contains one person.
-				if len(ppl) != 1 {
-					errResp(
-						http.StatusInternalServerError,
-						"Error getting user information",
-						fmt.Sprintf(
-							"wrong number of people in search result: %d", len(ppl)),
-						nil,
-						"user_email", userEmail,
-					)
+					resp = MeGetResponse{
+						ID:            userEmail,
+						Email:         userEmail,
+						VerifiedEmail: true,                             // Verified by authentication
+						Name:          strings.Split(userEmail, "@")[0], // Use email local part as name
+					}
+				} else if len(ppl) != 1 {
+					// If workspace search returns wrong number of results,
+					// return basic user info instead of failing
+					srv.Logger.Warn("workspace search returned unexpected number of results, returning basic user info",
+						"email", userEmail,
+						"result_count", len(ppl))
+
+					resp = MeGetResponse{
+						ID:            userEmail,
+						Email:         userEmail,
+						VerifiedEmail: true,                             // Verified by authentication
+						Name:          strings.Split(userEmail, "@")[0], // Use email local part as name
+					}
 
 					// If configured, send an email to the user to notify them that their
 					// account was not found in the directory.
@@ -158,48 +163,48 @@ func MeHandler(srv server.Server) http.Handler {
 							)
 						}
 					}
+				} else {
+					// Workspace search succeeded with exactly 1 result
+					p := ppl[0]
 
-					return
-				}
-				p := ppl[0]
+					// Make sure that the result's email address is the same as the
+					// authenticated user, is the primary email address, and is verified.
+					if len(p.EmailAddresses) == 0 ||
+						p.EmailAddresses[0].Value != userEmail ||
+						!p.EmailAddresses[0].Metadata.Primary ||
+						!p.EmailAddresses[0].Metadata.Verified {
+						errResp(
+							http.StatusInternalServerError,
+							"Error getting user information",
+							"wrong user in search result",
+							err,
+						)
+						return
+					}
 
-				// Make sure that the result's email address is the same as the
-				// authenticated user, is the primary email address, and is verified.
-				if len(p.EmailAddresses) == 0 ||
-					p.EmailAddresses[0].Value != userEmail ||
-					!p.EmailAddresses[0].Metadata.Primary ||
-					!p.EmailAddresses[0].Metadata.Verified {
-					errResp(
-						http.StatusInternalServerError,
-						"Error getting user information",
-						"wrong user in search result",
-						err,
-					)
-					return
-				}
+					// Verify other required values are set.
+					if len(p.Names) == 0 {
+						errResp(
+							http.StatusInternalServerError,
+							"Error getting user information",
+							"no names in result",
+							err,
+						)
+						return
+					}
 
-				// Verify other required values are set.
-				if len(p.Names) == 0 {
-					errResp(
-						http.StatusInternalServerError,
-						"Error getting user information",
-						"no names in result",
-						err,
-					)
-					return
-				}
-
-				// Build response from workspace provider data
-				resp = MeGetResponse{
-					ID:            p.EmailAddresses[0].Metadata.Source.Id,
-					Email:         p.EmailAddresses[0].Value,
-					VerifiedEmail: p.EmailAddresses[0].Metadata.Verified,
-					Name:          p.Names[0].DisplayName,
-					GivenName:     p.Names[0].GivenName,
-					FamilyName:    p.Names[0].FamilyName,
-				}
-				if len(p.Photos) > 0 {
-					resp.Picture = p.Photos[0].Url
+					// Build response from workspace provider data
+					resp = MeGetResponse{
+						ID:            p.EmailAddresses[0].Metadata.Source.Id,
+						Email:         p.EmailAddresses[0].Value,
+						VerifiedEmail: p.EmailAddresses[0].Metadata.Verified,
+						Name:          p.Names[0].DisplayName,
+						GivenName:     p.Names[0].GivenName,
+						FamilyName:    p.Names[0].FamilyName,
+					}
+					if len(p.Photos) > 0 {
+						resp.Picture = p.Photos[0].Url
+					}
 				}
 			}
 
