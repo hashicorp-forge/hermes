@@ -36,6 +36,42 @@ func TestParseSearchIndexFromURLPath(t *testing.T) {
 			path:      "/api/v2/search/docs/",
 			wantIndex: "docs",
 		},
+		"docs with createdTime desc sorting": {
+			path:      "/api/v2/search/docs_createdTime_desc",
+			wantIndex: "docs",
+		},
+		"docs with createdTime asc sorting": {
+			path:      "/api/v2/search/docs_createdTime_asc",
+			wantIndex: "docs",
+		},
+		"docs with modifiedTime desc sorting": {
+			path:      "/api/v2/search/docs_modifiedTime_desc",
+			wantIndex: "docs",
+		},
+		"docs with modifiedTime asc sorting": {
+			path:      "/api/v2/search/docs_modifiedTime_asc",
+			wantIndex: "docs",
+		},
+		"drafts with createdTime desc sorting": {
+			path:      "/api/v2/search/drafts_createdTime_desc",
+			wantIndex: "drafts",
+		},
+		"drafts with createdTime asc sorting": {
+			path:      "/api/v2/search/drafts_createdTime_asc",
+			wantIndex: "drafts",
+		},
+		"drafts with modifiedTime desc sorting": {
+			path:      "/api/v2/search/drafts_modifiedTime_desc",
+			wantIndex: "drafts",
+		},
+		"drafts with modifiedTime asc sorting": {
+			path:      "/api/v2/search/drafts_modifiedTime_asc",
+			wantIndex: "drafts",
+		},
+		"projects with createdTime desc sorting": {
+			path:      "/api/v2/search/projects_createdTime_desc",
+			wantIndex: "projects",
+		},
 	}
 
 	for name, c := range cases {
@@ -104,6 +140,37 @@ func TestConvertFiltersToMap(t *testing.T) {
 			input:  []interface{}{"invalidfilter"},
 			want:   map[string][]string{},
 			errMsg: "invalid filter format",
+		},
+		"approvedBy should be mapped to approvers": {
+			input: []interface{}{"approvedBy:user@example.com"},
+			want: map[string][]string{
+				"approvers": {"user@example.com"},
+			},
+		},
+		"multiple approvedBy filters mapped to approvers": {
+			input: []interface{}{"approvedBy:user1@example.com", "approvedBy:user2@example.com"},
+			want: map[string][]string{
+				"approvers": {"user1@example.com", "user2@example.com"},
+			},
+		},
+		"string format with approvedBy mapped to approvers": {
+			input: "approvedBy:user@example.com AND status:approved",
+			want: map[string][]string{
+				"approvers": {"user@example.com"},
+				"status":    {"approved"},
+			},
+		},
+		"complex filter with approvedBy and appCreated": {
+			input: []interface{}{
+				"approvedBy:test@hermes.local",
+				"appCreated:true",
+				"status:In-Review",
+			},
+			want: map[string][]string{
+				"approvers":  {"test@hermes.local"},
+				"appCreated": {"true"},
+				"status":     {"In-Review"},
+			},
 		},
 	}
 

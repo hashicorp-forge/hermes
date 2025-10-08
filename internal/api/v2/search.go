@@ -153,8 +153,24 @@ type SearchRequest struct {
 // Supports both:
 // - String format: "status:In-Review AND docType:RFC"
 // - Array format: ["status:In-Review", "docType:RFC"]
+//
+// This function also performs attribute mapping for compatibility between
+// frontend (Algolia-style) and backend (Meilisearch) search providers:
+// - "approvedBy" -> "approvers" (Meilisearch uses "approvers" as filterable attribute)
 func convertFiltersToMap(filters interface{}) map[string][]string {
 	result := make(map[string][]string)
+
+	// Attribute mapping for Algolia -> Meilisearch compatibility
+	attributeMap := map[string]string{
+		"approvedBy": "approvers",
+	}
+
+	mapAttribute := func(key string) string {
+		if mapped, ok := attributeMap[key]; ok {
+			return mapped
+		}
+		return key
+	}
 
 	switch f := filters.(type) {
 	case string:
@@ -165,7 +181,8 @@ func convertFiltersToMap(filters interface{}) map[string][]string {
 			if idx := strings.Index(part, ":"); idx > 0 {
 				key := part[:idx]
 				value := strings.Trim(part[idx+1:], "'\"")
-				result[key] = append(result[key], value)
+				mappedKey := mapAttribute(key)
+				result[mappedKey] = append(result[mappedKey], value)
 			}
 		}
 	case []interface{}:
@@ -175,7 +192,8 @@ func convertFiltersToMap(filters interface{}) map[string][]string {
 				if idx := strings.Index(str, ":"); idx > 0 {
 					key := str[:idx]
 					value := strings.Trim(str[idx+1:], "'\"")
-					result[key] = append(result[key], value)
+					mappedKey := mapAttribute(key)
+					result[mappedKey] = append(result[mappedKey], value)
 				}
 			}
 		}
@@ -186,12 +204,31 @@ func convertFiltersToMap(filters interface{}) map[string][]string {
 
 // parseSearchIndexFromURLPath extracts the index name from the URL path.
 // Expected format: /api/v2/search/{index}
+// Supports Algolia-style sorting suffixes (e.g., docs_createdTime_desc)
+// and strips them to return the base index name.
 func parseSearchIndexFromURLPath(path string) (string, error) {
 	pathParts := strings.Split(strings.Trim(path, "/"), "/")
 	if len(pathParts) < 4 {
 		return "", nil
 	}
-	return pathParts[3], nil
+	indexName := pathParts[3]
+
+	// Strip Algolia-style sorting suffixes
+	// Examples: docs_createdTime_desc -> docs, drafts_modifiedTime_asc -> drafts
+	sortingSuffixes := []string{
+		"_createdTime_desc",
+		"_createdTime_asc",
+		"_modifiedTime_desc",
+		"_modifiedTime_asc",
+	}
+
+	for _, suffix := range sortingSuffixes {
+		if strings.HasSuffix(indexName, suffix) {
+			return strings.TrimSuffix(indexName, suffix), nil
+		}
+	}
+
+	return indexName, nil
 }
 
 // Helper function to parse page number from query parameter
