@@ -2,6 +2,8 @@
 
 This directory contains a **full-stack containerized environment** for acceptance testing and manual QA of Hermes. This is distinct from the integration testing setup in the root directory.
 
+**🆕 Now uses Local Workspace Provider**: This environment uses the local filesystem adapter for document storage instead of Google Workspace, with test users mirroring Dex identities. See [README-local-workspace.md](./README-local-workspace.md) for details.
+
 ## Testing Environments Comparison
 
 | Aspect | Integration Testing (`/docker-compose.yml`) | Acceptance Testing (`/testing/docker-compose.yml`) |
@@ -81,6 +83,25 @@ This will:
    - Email: `test@hermes.local`
    - Password: `password`
 5. After successful login, API requests include Bearer token
+
+**Available Test Users** (see [users.json](./users.json)):
+- `test@hermes.local` / `password` - Test user with tester permissions
+- `admin@hermes.local` / `password` - Admin user
+- `user@hermes.local` / `password` - Regular user
+
+### 3a. Verify Local Workspace Setup
+
+Run the verification script to ensure local workspace is properly configured:
+
+```bash
+./verify-local-workspace.sh
+```
+
+This checks:
+- ✓ Provider configuration in config.hcl
+- ✓ users.json exists and matches Dex identities
+- ✓ Volume mounts are correct
+- ✓ Dex and workspace users are aligned
 
 ### 4. Stop Services
 
