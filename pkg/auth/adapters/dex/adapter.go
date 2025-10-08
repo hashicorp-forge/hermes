@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/hashicorp-forge/hermes/pkg/auth"
 	"github.com/hashicorp/go-hclog"
 	"golang.org/x/oauth2"
 )
@@ -67,29 +68,34 @@ func NewAdapter(cfg Config, log hclog.Logger) (*Adapter, error) {
 	}, nil
 }
 
-// Authenticate validates the OIDC token from the Authorization header
-// and returns the authenticated user's email address.
-func (a *Adapter) Authenticate(r *http.Request) (string, error) {
+// extractIDToken is a helper to extract and verify the ID token from the request.
+func (a *Adapter) extractIDToken(r *http.Request) (*oidc.IDToken, error) {
 	// Get the bearer token from the Authorization header
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
-		return "", fmt.Errorf("no Authorization header found")
+		return nil, fmt.Errorf("no Authorization header found")
 	}
 
 	// Extract the token from "Bearer <token>"
 	parts := strings.Split(authHeader, " ")
 	if len(parts) != 2 || parts[0] != "Bearer" {
-		return "", fmt.Errorf("invalid Authorization header format")
+		return nil, fmt.Errorf("invalid Authorization header format")
 	}
 	rawIDToken := parts[1]
 
 	// Verify the ID token
-	idToken, err := a.verifier.Verify(r.Context(), rawIDToken)
+	return a.verifier.Verify(r.Context(), rawIDToken)
+}
+
+// Authenticate validates the OIDC token from the Authorization header
+// and returns the authenticated user's email address.
+func (a *Adapter) Authenticate(r *http.Request) (string, error) {
+	idToken, err := a.extractIDToken(r)
 	if err != nil {
-		return "", fmt.Errorf("failed to verify ID token: %w", err)
+		return "", err
 	}
 
-	// Extract claims
+	// Extract email claim
 	var claims struct {
 		Email         string `json:"email"`
 		EmailVerified bool   `json:"email_verified"`
@@ -110,6 +116,51 @@ func (a *Adapter) Authenticate(r *http.Request) (string, error) {
 	return claims.Email, nil
 }
 
+// GetClaims extracts all available user claims from the OIDC token.
+// This implements the auth.ClaimsProvider interface.
+func (a *Adapter) GetClaims(r *http.Request) (*auth.UserClaims, error) {
+	idToken, err := a.extractIDToken(r)
+	if err != nil {
+		return nil, err
+	}
+
+	// Extract all available claims
+	var oidcClaims struct {
+		Email             string   `json:"email"`
+		EmailVerified     bool     `json:"email_verified"`
+		Name              string   `json:"name"`
+		GivenName         string   `json:"given_name"`
+		FamilyName        string   `json:"family_name"`
+		PreferredUsername string   `json:"preferred_username"`
+		Groups            []string `json:"groups"`
+	}
+
+	if err := idToken.Claims(&oidcClaims); err != nil {
+		return nil, fmt.Errorf("failed to parse ID token claims: %w", err)
+	}
+
+	if oidcClaims.Email == "" {
+		return nil, fmt.Errorf("email claim not found in ID token")
+	}
+
+	claims := &auth.UserClaims{
+		Email:             oidcClaims.Email,
+		Name:              oidcClaims.Name,
+		GivenName:         oidcClaims.GivenName,
+		FamilyName:        oidcClaims.FamilyName,
+		PreferredUsername: oidcClaims.PreferredUsername,
+		Groups:            oidcClaims.Groups,
+	}
+
+	a.log.Debug("successfully extracted user claims via Dex",
+		"email", claims.Email,
+		"name", claims.Name,
+		"preferred_username", claims.PreferredUsername,
+		"groups", claims.Groups)
+
+	return claims, nil
+}
+
 // Name returns the provider name for logging.
 func (a *Adapter) Name() string {
 	return "dex"
@@ -119,7 +170,7 @@ func (a *Adapter) Name() string {
 // This is useful for web applications that need to redirect users to the Dex login page.
 func (a *Adapter) GetAuthCodeURL(state string) string {
 	endpoint := a.provider.Endpoint()
-	return fmt.Sprintf("%s?client_id=%s&redirect_uri=%s&response_type=code&scope=openid+email+profile&state=%s",
+	return fmt.Sprintf("%s?client_id=%s&redirect_uri=%s&response_type=code&scope=openid+email+profile+groups&state=%s",
 		endpoint.AuthURL,
 		a.cfg.ClientID,
 		a.cfg.RedirectURL,
@@ -136,7 +187,7 @@ func (a *Adapter) ExchangeCode(ctx context.Context, code string) (string, error)
 		ClientSecret: a.cfg.ClientSecret,
 		RedirectURL:  a.cfg.RedirectURL,
 		Endpoint:     a.provider.Endpoint(),
-		Scopes:       []string{oidc.ScopeOpenID, "email", "profile"},
+		Scopes:       []string{oidc.ScopeOpenID, "email", "profile", "groups"},
 	}
 
 	oauth2Token, err := oauth2Config.Exchange(ctx, code)
