@@ -42,18 +42,6 @@ make docker/postgres/stop               # Cleanup
 
 **Web Build Environment Variables**: The web build shows ~10 env var warnings for optional configuration. This is **expected** and **not an error** - defaults are applied. Note: As of October 2025, `HERMES_WEB_ALGOLIA_APP_ID` and `HERMES_WEB_ALGOLIA_SEARCH_API_KEY` are **no longer needed** (search proxies through backend). `HERMES_WEB_GOOGLE_OAUTH2_CLIENT_ID` is **optional** (only needed for Google auth provider).
 
-**Web Tests Status** (Updated October 6, 2025):
-- **Unit Tests**: 32 passing / 5 failing (86.5% pass rate) ✅
-- **Integration Tests**: Verified working, deprecation warnings silenced ✅  
-- **Acceptance Tests**: 2 immediate failures (API mocking issues) ⚠️
-- **Test Output**: Clean and readable (external deprecations silenced) ✅
-
-**Test Failures**:
-1. Config service version check (1 failure) - needs build-time variable mocking
-2. Algolia/recently-viewed Mirage routes (3 failures) - needs route configuration
-3. Blink-element timing (1 failure) - needs fake timers or timeout adjustment
-
-**Deprecation Warnings Fixed**: 12 Ember 7.0 deprecation warnings from external libraries now silenced via `web/config/deprecation-workflow.js`. Test output is clean and focused on actual test results.
 
 See `docs-internal/testing/` for detailed test analysis and fix strategies.
 
@@ -73,7 +61,7 @@ make docker/postgres/stop && make docker/postgres/start
 - **`go.mod`**: Go 1.25.0, main deps: gorm, google.golang.org/api, algolia, datadog
 - **`docker-compose.yml`**: PostgreSQL 17.1-alpine (port 5432)
 - **`config.hcl`**: Runtime config (copy from `configs/config.hcl`, gitignored)
-- **`.gitignore`**: Excludes `/config.hcl`, `/hermes` binary, `/credentials.json`, `/token.json`
+- **`.gitignore`**: Excludes
 
 ### Backend Structure (`cmd/`, `internal/`, `pkg/`)
 - **`cmd/hermes/main.go`**: Entry point
@@ -99,17 +87,6 @@ make docker/postgres/stop && make docker/postgres/start
 
 **Workflow**: `.github/workflows/ci.yml` (runs on PRs and main branch pushes)
 
-**Steps** (Ubuntu, Node 16 - NOTE: Outdated, local uses Node 24):
-1. Setup Node 16 + cache yarn.lock
-2. `make web/set-yarn-version` (workaround for Yarn/Corepack)
-3. Setup Go 1.18 (NOTE: Outdated, go.mod requires 1.25.0)
-4. `make web/build`
-5. `make web/test` ⚠️ **FAILS** due to test syntax error
-6. `make bin/linux`
-7. `make go/test`
-
-**CI Will Fail** on `make web/test` - this is a known issue documented above.
-
 ## Code Patterns & Standards
 
 ### Go Conventions
@@ -129,7 +106,6 @@ make docker/postgres/stop && make docker/postgres/start
 - **API**: Ember Data or `fetch` for backend communication
 
 ### Common Patterns in Codebase
-- **TODO comments**: 20+ across codebase (see `internal/indexer/`, `pkg/hashicorpdocs/`, `internal/api/`)
 - **Document types**: RFC, PRD, FRD with custom header replacement logic
 - **Multi-provider auth**: Supports Google OAuth, Okta OIDC, and Dex OIDC with runtime selection
 - **Backend-only search**: All Algolia search operations proxy through backend at `/1/indexes/*`
@@ -172,21 +148,9 @@ yarn start:with-proxy  # Runs on localhost:4200, proxies to :8000
 make build  # Should complete successfully with warnings
 ```
 
-## Environment Variables (Build-Time for Web)
-
-These are **optional** and have sensible defaults:
-- `HERMES_WEB_GOOGLE_OAUTH2_CLIENT_ID`: Google OAuth client ID (only needed if using Google auth)
-- ~~`HERMES_WEB_ALGOLIA_APP_ID`~~: **REMOVED** - No longer needed (search proxies through backend)
-- ~~`HERMES_WEB_ALGOLIA_SEARCH_API_KEY`~~: **REMOVED** - No longer needed (search proxies through backend)
-- `HERMES_WEB_ALGOLIA_*_INDEX_NAME`: Index names (docs, drafts, internal, projects) with defaults
-- `HERMES_WEB_SHORT_LINK_BASE_URL`: Base URL for short links
-- `HERMES_WEB_GOOGLE_ANALYTICS_TAG_ID`: GA tracking ID
-
-**Note**: As of October 2025, the web frontend no longer requires Algolia credentials or Google OAuth client ID for non-Google auth providers. Authentication provider and search configuration are determined at runtime via `/api/v2/web/config`.
-
 ## What Not To Do
 
-❌ **Don't** commit `config.hcl`, `credentials.json`, or `token.json` (gitignored)
+❌ **Don't** commit `credentials.json`, or `token.json` (gitignored)
 ❌ **Don't** run PostgreSQL tests without starting the Docker container first
 ❌ **Don't** commit without documenting the prompt used (see Commit Standards below)
 
@@ -356,33 +320,6 @@ context per EXISTING_PATTERNS.md, not returned directly.
 - Include verification steps in prompt
 - Reference design/strategy documents when applicable
 - Show expected output format if non-standard
-
-### Benefits Observed in Hermes Project
-
-The Hermes provider migration (October 2025) achieved **10-15x productivity** gains using AI agents with structured prompts. Analysis showed:
-
-- **Low rework rate** (5-7% vs 20-30% traditional): Detailed prompts with patterns/constraints led to correct-first-time implementations
-- **High test coverage** (sustained 80-85%): TDD prompts embedded testing from start
-- **Consistent code quality**: Pattern-following prompts ensured codebase consistency
-- **Fast onboarding**: New sessions resumed in <15 min using documented prompts
-- **Knowledge preservation**: Prompts captured reasoning that code alone doesn't show
-
-**See**: `docs-internal/PROMPT_TEMPLATES.md` for 16 proven prompt templates
-**See**: `docs-internal/AGENT_USAGE_ANALYSIS.md` for methodology and best practices
-
-## Quick Reference - Make Targets
-
-| Target | Description | Speed | Requirements |
-|--------|-------------|-------|--------------|
-| `make bin` | Build Go binary only | Fast | Go 1.25+ |
-| `make build` | Full build (web + Go) | Slow | Node 20, Yarn 4, Go 1.25+ |
-| `make go/test` | Go tests without DB | Fast | Go 1.25+ |
-| `make go/test/with-docker-postgres` | Go tests with DB | Medium | Docker, PostgreSQL running |
-| `make web/build` | Build Ember production | Slow | Node 20, Yarn 4 |
-| `make web/test` | Run Ember tests | N/A | ❌ Currently broken |
-| `make docker/postgres/start` | Start PostgreSQL | Fast | Docker |
-| `make docker/postgres/stop` | Stop PostgreSQL | Fast | Docker |
-| `make docker/postgres/clear` | Stop + clear data | Fast | Docker |
 
 ## Trust These Instructions
 

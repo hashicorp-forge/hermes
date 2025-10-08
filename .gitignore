@@ -1,4 +1,3 @@
-/config.hcl
 /hermes
 
 # Build artifacts
@@ -65,3 +64,7 @@ test_*.log
 
 # Playwright MCP screenshots and artifacts
 .playwright-mcp/
+
+# Volume data
+/workspace_data/
+
