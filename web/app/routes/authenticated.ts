@@ -37,9 +37,10 @@ export default class AuthenticatedRoute extends Route {
     const authProvider = this.configSvc.config.auth_provider;
     if (authProvider === "dex") {
       // For Dex, check if user is authenticated by trying to access the ME endpoint
+      // Use GET instead of HEAD so we can retrieve the user data
       try {
         const response = await fetch("/api/v2/me", {
-          method: "HEAD",
+          method: "GET",
           credentials: "include", // Include cookies
         });
         
@@ -70,28 +71,27 @@ export default class AuthenticatedRoute extends Route {
     const authProvider = this.configSvc.config.auth_provider;
 
     /**
-     * For Dex, skip loading user info and product areas since the backend
-     * doesn't have OIDC authorization code flow endpoints yet. The backend
-     * serves web endpoints as unauthenticated when using Dex, which causes
-     * API endpoints to return HTML instead of JSON.
+     * Load user info and product areas for authenticated users.
+     * For Dex, this loads user data from the local workspace provider.
+     * For Google and Okta, this loads user data from OIDC claims.
      * 
-     * For Google and Okta, check if the session is authenticated in the back end.
      * If the `loadInfo` task returns a 401, it will bubble up to the
      * application error method which invalidates the session
      * and redirects to the auth screen.
      */
-    if (authProvider !== "dex") {
-      /**
-       * Load user info and product areas in parallel for authenticated providers.
-       */
-      await Promise.all([
-        this.authenticatedUser.loadInfo.perform(),
-        this.productAreas.fetch.perform(),
-      ]);
+    /**
+     * Load user info and product areas in parallel for authenticated providers.
+     */
+    await Promise.all([
+      this.authenticatedUser.loadInfo.perform(),
+      this.productAreas.fetch.perform(),
+    ]);
 
-      /**
-       * Kick off the task to poll for expired auth.
-       */
+    /**
+     * Kick off the task to poll for expired auth.
+     * Note: For Dex, this may not be needed as sessions are managed via cookies.
+     */
+    if (authProvider !== "dex") {
       void this.session.pollForExpiredAuth.perform();
     }
   }

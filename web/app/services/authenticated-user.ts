@@ -57,19 +57,46 @@ export default class AuthenticatedUserService extends Service {
   }
 
   /**
-   * Loads the user's info from the Google API.
+   * Loads the user's info from the API endpoint.
    * Called by `session.handleAuthentication` and `authenticated.afterModel`.
    * Ensures `authenticatedUser.info` is always defined and up-to-date
    * in any route that needs it. On error, bubbles up to the application route.
    */
   loadInfo = task(async () => {
     try {
-      const mes = await this.store.findAll("me");
-      const me = mes.firstObject;
+      // Fetch user info directly from the /me endpoint
+      const response = await fetch(
+        `/api/${this.configSvc.config.api_version}/me`,
+        {
+          method: "GET",
+          credentials: "include", // Include session cookies for Dex auth
+        },
+      );
 
-      // Grab the person record created by the serializer
-      const person = this.store.peekRecord("person", me.id);
-      assert("person must exist", person);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch user info: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      // Create or update the person record in the store
+      let person = this.store.peekRecord("person", data.email);
+      if (!person) {
+        person = this.store.createRecord("person", {
+          id: data.email,
+          email: data.email,
+          name: data.name,
+          firstName: data.given_name,
+          picture: data.picture,
+        });
+      } else {
+        // Update existing record
+        person.setProperties({
+          name: data.name,
+          firstName: data.given_name,
+          picture: data.picture,
+        });
+      }
 
       this._info = person;
     } catch (e: unknown) {
