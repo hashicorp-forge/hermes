@@ -508,8 +508,17 @@ func DraftsHandler(srv server.Server) http.Handler {
 			maxValuesPerFacetStr := q.Get("maxValuesPerFacet")
 			pageStr := q.Get("page")
 
-			facetFilters := strings.Split(facetFiltersStr, ",")
-			facets := strings.Split(facetsStr, ",")
+			// Parse facetFilters, handling empty strings
+			var facetFilters []string
+			if facetFiltersStr != "" {
+				facetFilters = strings.Split(facetFiltersStr, ",")
+			}
+
+			// Parse facets, handling empty strings
+			var facets []string
+			if facetsStr != "" {
+				facets = strings.Split(facetsStr, ",")
+			}
 			hitsPerPage, err := strconv.Atoi(hitsPerPageStr)
 			if err != nil {
 				srv.Logger.Error("error converting to int",
