@@ -5,7 +5,7 @@ import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { task } from "ember-concurrency";
-import { SearchOptions, SearchResponse } from "instantsearch.js";
+import { SearchOptions, SearchResponse } from "hermes/services/search";
 import { HermesDocument } from "hermes/types/document";
 import { createDraftURLSearchParams } from "hermes/utils/create-draft-url-search-params";
 import { SortByValue } from "hermes/components/header/toolbar";
@@ -91,7 +91,7 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
         page,
         facetFilters:
           params.includeSharedDrafts === false
-            ? [`owners:${this.authenticatedUser.info?.email ?? ""}`]
+            ? [[`owners:${this.authenticatedUser.info?.email ?? ""}`]]
             : undefined,
       }),
       this.search.getDocResults.perform(

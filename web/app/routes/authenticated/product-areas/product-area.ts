@@ -9,7 +9,7 @@ import HermesFlashMessagesService from "hermes/services/flash-messages";
 import ProductAreasService from "hermes/services/product-areas";
 import StoreService from "hermes/services/store";
 import { HermesDocument } from "hermes/types/document";
-import { SearchResponse } from "instantsearch.js";
+import { SearchResponse } from "hermes/services/search";
 
 export default class AuthenticatedProductAreasProductAreaRoute extends Route {
   @service("config") declare configSvc: ConfigService;

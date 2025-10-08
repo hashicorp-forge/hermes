@@ -1,12 +1,8 @@
 import Service from "@ember/service";
-import algoliaSearch, { SearchClient, SearchIndex } from "algoliasearch";
-import { SearchForFacetValuesResponse } from "@algolia/client-search";
 import config from "hermes/config/environment";
 import { service } from "@ember/service";
 import { restartableTask, task } from "ember-concurrency";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
-import { RequestOptions } from "@algolia/transporter";
-import { SearchOptions, SearchResponse } from "@algolia/client-search";
 import { assert } from "@ember/debug";
 import ConfigService from "./config";
 import {
@@ -25,6 +21,56 @@ export const HITS_PER_PAGE = 12;
 export const MAX_VALUES_PER_FACET = 100;
 export const DOC_FACET_NAMES = ["docType", "owners", "product", "status"];
 export const PROJECT_FACET_NAMES = ["status"];
+
+/**
+ * SearchResponse interface matching the backend response format from /api/v2/search/{index}
+ */
+export interface SearchResponse<T = unknown> {
+  hits: T[];
+  nbHits: number;
+  page: number;
+  nbPages: number;
+  hitsPerPage: number;
+  facets?: Record<string, Record<string, number>>;
+  processingTimeMS?: number;
+}
+
+/**
+ * SearchForFacetValuesResponse interface for facet value searches
+ */
+export interface SearchForFacetValuesResponse {
+  facetHits: Array<{ value: string; count: number; highlighted: string }>;
+}
+
+/**
+ * SearchOptions for search requests
+ */
+export interface SearchOptions {
+  facetFilters?: string[][];
+  facets?: string[];
+  hitsPerPage?: number;
+  maxValuesPerFacet?: number;
+  page?: number;
+  filters?: string;
+  optionalFilters?: string | string[];
+  attributesToRetrieve?: string[];
+}
+
+/**
+ * RequestOptions for additional search parameters
+ */
+export interface RequestOptions {
+  [key: string]: unknown;
+  q?: string;
+  scope?: SearchScope;
+  page?: number;
+  hitsPerPage?: number;
+  filters?: string;
+  docType?: string[];
+  owners?: string[];
+  product?: string[];
+  status?: string[];
+}
 
 export interface SearchHit {
   objectID: string;
@@ -52,12 +98,6 @@ export default class SearchService extends Service {
   }
 
   /**
-   * Cached search client instance.
-   * Created lazily to ensure auth provider config is loaded.
-   */
-  private _client?: SearchClient;
-
-  /**
    * Returns the appropriate authorization header based on the auth provider.
    */
   private getAuthHeaders(): Record<string, string> {
@@ -73,45 +113,62 @@ export default class SearchService extends Service {
   }
 
   /**
-   * Returns a search client configured to proxy all requests through the backend.
-   * This ensures all search operations go through the Hermes API at /1/indexes/*
-   * rather than directly to the search provider's infrastructure.
-   * 
-   * The client is created lazily to ensure the auth provider configuration
-   * is loaded from the backend before setting up auth headers.
+   * Returns the default index name for document searches.
    */
-  private get client(): SearchClient {
-    if (!this._client) {
-      const protocol =
-        window.location.hostname === "127.0.0.1" ||
-        window.location.hostname === "localhost"
-          ? "http"
-          : "https";
-
-      const authProvider = this.configSvc.config.auth_provider;
-      console.log(
-        `Search client configured to proxy all requests through Hermes backend (${authProvider} auth) at ${protocol}://${window.location.hostname}:${window.location.port}/1/indexes/*`,
-      );
-
-      // Create client with auth headers that update dynamically
-      this._client = algoliaSearch("", "", {
-        headers: this.getAuthHeaders(),
-        hosts: [
-          {
-            protocol: protocol,
-            url: window.location.hostname + ":" + window.location.port,
-          },
-        ],
-      });
-    }
-    return this._client;
+  private get defaultIndexName(): string {
+    return this.configSvc.config.algolia_docs_index_name;
   }
 
   /**
-   * A search index scoped to the environment.
+   * Performs a search request to the backend API at /api/v2/search/{index}.
+   * Transforms SearchOptions to the backend's expected format and transforms
+   * the response to match the expected SearchResponse interface.
    */
-  private get index(): SearchIndex {
-    return this.client.initIndex(this.configSvc.config.algolia_docs_index_name);
+  private async performSearch<T = unknown>(
+    indexName: string,
+    query: string,
+    options: SearchOptions = {},
+  ): Promise<SearchResponse<T>> {
+    const url = `/api/v2/search/${indexName}`;
+    
+    // Transform options to backend format
+    const body = {
+      query: query,
+      facetFilters: options.facetFilters || [],
+      facets: options.facets || [],
+      hitsPerPage: options.hitsPerPage || HITS_PER_PAGE,
+      maxValuesPerFacet: options.maxValuesPerFacet || MAX_VALUES_PER_FACET,
+      page: options.page || 0,
+      filters: options.filters || "",
+      optionalFilters: options.optionalFilters || "",
+    };
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...this.getAuthHeaders(),
+      },
+      body: JSON.stringify(body),
+      credentials: "include", // Include cookies for Dex auth
+    });
+
+    if (!response.ok) {
+      throw new Error(`Search request failed: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    // Transform backend response to expected format
+    return {
+      hits: data.Hits || [],
+      nbHits: data.TotalHits || 0,
+      page: data.Page || 0,
+      nbPages: data.TotalPages || 0,
+      hitsPerPage: data.PerPage || HITS_PER_PAGE,
+      facets: data.Facets || {},
+      processingTimeMS: data.QueryTime || 0,
+    };
   }
 
   /**
@@ -211,39 +268,41 @@ export default class SearchService extends Service {
     async (
       indexName: string,
       query: string,
-      params: SearchParams,
+      params: SearchOptions,
     ): Promise<SearchResponse<unknown>> => {
-      let index: SearchIndex = this.client.initIndex(indexName);
-      return await index.search(query, params);
+      return await this.performSearch(indexName, query, params);
     },
   );
 
   /**
    * Clears the search cache.
    * Called by the dashboard to ensure an up-to-date index.
+   * No-op for the new backend-based search (cache handled by backend).
    */
   clearCache = task(async () => {
-    await this.client.clearCache();
+    // No-op: Backend handles caching
+    return;
   });
 
   /**
    * Returns an array of facet filters based on the current parameters,
    * and whether the owner is looking at their own docs.
    */
-  buildFacetFilters(params: SearchParams, userIsOwner = false) {
+  buildFacetFilters(params: SearchParams, userIsOwner = false): string[][] {
     let facets = DOC_FACET_NAMES;
 
-    let facetFilters = [];
+    let facetFilters: string[][] = [];
 
     // if params.facetFilters is an empty array, it means we're intentionally
     // requesting no facet filters
     if (!(params.facetFilters && params.facetFilters.length === 0)) {
       for (let facet of facets) {
-        let facetValues = [];
+        let facetValues: string[] = [];
 
-        if (!params[facet]) continue;
+        const paramValue = params[facet as keyof RequestOptions];
+        if (!paramValue || !Array.isArray(paramValue)) continue;
 
-        for (let val of params[facet]) {
+        for (let val of paramValue) {
           facetValues.push(`${facet}:${val}`);
         }
 
@@ -254,7 +313,7 @@ export default class SearchService extends Service {
     }
 
     if (userIsOwner && this.userEmail) {
-      facetFilters.push(`owners:${this.userEmail}`);
+      facetFilters.push([`owners:${this.userEmail}`]);
     }
     return facetFilters;
   }
@@ -263,13 +322,22 @@ export default class SearchService extends Service {
    * Returns an object for a given ID and an optional indexName.
    * If no match is found, an error is returned.
    * Used by the `RelatedResources` component to find docs from first-party URLs.
-   *
-   * https://www.algolia.com/doc/api-reference/api-methods/get-objects/
+   * 
+   * Note: This searches for the exact objectID using filters.
    */
   getObject = restartableTask(
     async (objectID: string, indexName?: string): Promise<unknown> => {
-      const index = indexName ? this.client.initIndex(indexName) : this.index;
-      return await index.getObject(objectID);
+      const index = indexName || this.defaultIndexName;
+      const response = await this.performSearch(index, "", {
+        filters: `objectID:${objectID}`,
+        hitsPerPage: 1,
+      });
+      
+      if (response.hits.length === 0) {
+        throw new Error(`Object with ID ${objectID} not found in index ${index}`);
+      }
+      
+      return response.hits[0];
     },
   );
 
@@ -280,12 +348,10 @@ export default class SearchService extends Service {
   search = restartableTask(
     async (
       query: string,
-      params,
+      params: SearchOptions,
     ): Promise<SearchResponse<unknown> | undefined> => {
       try {
-        return await this.index
-          .search(query, params)
-          .then((response) => response);
+        return await this.performSearch(this.defaultIndexName, query, params);
       } catch (e: unknown) {
         console.error(e);
       }
@@ -322,7 +388,8 @@ export default class SearchService extends Service {
          * e.g., name === "owner"
          * e.g., facet === { "meg@hashicorp.com": { count: 1, isSelected: false }}
          */
-        this.markSelected(facet, params[name]);
+        const paramValue = params[name as keyof RequestOptions];
+        this.markSelected(facet, Array.isArray(paramValue) ? paramValue : undefined);
       });
 
       return facets;
@@ -385,6 +452,8 @@ export default class SearchService extends Service {
   /**
    * Searches the values of a given index and facet.
    * Used by the search input to query productAreas.
+   * 
+   * Note: Implemented by performing a search and filtering facet values by query.
    */
   searchForFacetValues = restartableTask(
     async (
@@ -394,20 +463,40 @@ export default class SearchService extends Service {
       params?: RequestOptions,
     ): Promise<SearchForFacetValuesResponse | undefined> => {
       try {
-        let index = this.client.initIndex(indexName);
-        const results = await index.searchForFacetValues(
-          facetName,
-          query,
-          params,
-        );
+        // Perform a search to get facets
+        const searchOptions: SearchOptions = {
+          facets: [facetName],
+          hitsPerPage: 0, // We only need facets, not hits
+          maxValuesPerFacet: MAX_VALUES_PER_FACET,
+          ...params,
+        };
+        
+        const results = await this.performSearch(indexName, "", searchOptions);
+        
+        if (!results.facets || !results.facets[facetName]) {
+          return { facetHits: [] };
+        }
+
+        // Filter facet values by query and transform to SearchForFacetValuesResponse format
+        const facetData = results.facets[facetName];
+        const queryLower = query.toLowerCase();
+        
+        const facetHits = Object.entries(facetData)
+          .filter(([value]) => value.toLowerCase().includes(queryLower))
+          .map(([value, count]) => ({
+            value,
+            count,
+            highlighted: value, // TODO: Could add highlighting here
+          }))
+          .sort((a, b) => b.count - a.count);
 
         if (facetName === FacetName.Owners) {
           await this.store.maybeFetchPeople.perform(
-            results.facetHits.map((hit) => hit.value),
+            facetHits.map((hit: { value: string }) => hit.value),
           );
         }
 
-        return results;
+        return { facetHits };
       } catch (e: unknown) {
         console.error(e);
       }

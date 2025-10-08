@@ -7,7 +7,7 @@ import { restartableTask, timeout } from "ember-concurrency";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { XDropdownListAnchorAPI } from "./x/dropdown-list";
-import { SearchOptions } from "instantsearch.js";
+import { SearchOptions } from "hermes/services/search";
 import { next } from "@ember/runloop";
 import { isTesting } from "@embroider/macros";
 import StoreService from "hermes/services/store";

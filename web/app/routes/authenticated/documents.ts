@@ -7,7 +7,7 @@ import ActiveFiltersService from "hermes/services/active-filters";
 import { SortByValue } from "hermes/components/header/toolbar";
 import StoreService from "hermes/services/store";
 import { HermesDocument } from "hermes/types/document";
-import { SearchResponse } from "instantsearch.js";
+import { SearchResponse } from "hermes/services/search";
 
 export default class AuthenticatedDocumentsRoute extends Route {
   @service("config") declare configSvc: ConfigService;
@@ -45,8 +45,8 @@ export default class AuthenticatedDocumentsRoute extends Route {
         : this.configSvc.config.algolia_docs_index_name + "_createdTime_desc";
 
     const [facets, results] = await Promise.all([
-      this.search.getFacets.perform(searchIndex, params),
-      this.search.getDocResults.perform(searchIndex, params),
+      this.search.getFacets.perform(searchIndex, params as unknown as import("hermes/services/search").SearchParams),
+      this.search.getDocResults.perform(searchIndex, params as unknown as import("hermes/services/search").SearchParams),
     ]);
 
     const typedResults = results as SearchResponse<HermesDocument>;

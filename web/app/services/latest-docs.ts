@@ -45,7 +45,7 @@ export default class LatestDocsService extends Service {
 
     this.index = response.hits.map((hit) => {
       return {
-        ...hit,
+        ...(hit as HermesDocument),
         // We use summary instead of snippet on the dashboard
         _snippetResult: undefined,
       };

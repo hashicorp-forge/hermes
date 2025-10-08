@@ -14,7 +14,7 @@ import {
 import isValidURL from "hermes/utils/is-valid-u-r-l";
 import FetchService from "hermes/services/fetch";
 import { XDropdownListAnchorAPI } from "hermes/components/x/dropdown-list";
-import { SearchOptions } from "instantsearch.js";
+import { SearchOptions } from "hermes/services/search";
 import { RelatedResourcesScope } from "../related-resources";
 import { guidFor } from "@ember/object/internals";
 import HermesFlashMessagesService from "hermes/services/flash-messages";

@@ -7,7 +7,7 @@ import ActiveFiltersService from "hermes/services/active-filters";
 import StoreService from "hermes/services/store";
 import { HermesDocument } from "hermes/types/document";
 import { HermesProject, HermesProjectHit } from "hermes/types/project";
-import { SearchResponse } from "instantsearch.js";
+import { SearchResponse } from "hermes/services/search";
 import FetchService from "hermes/services/fetch";
 
 export enum SearchScope {
@@ -69,19 +69,19 @@ export default class AuthenticatedResultsRoute extends Route {
       : undefined;
     let docFacetsPromise = scopeIsProjects
       ? undefined
-      : this.search.getFacets.perform(docsIndex, params);
+      : this.search.getFacets.perform(docsIndex, params as unknown as import("hermes/services/search").SearchParams);
 
     let docResultsPromise = scopeIsProjects
       ? undefined
-      : this.search.getDocResults.perform(docsIndex, params);
+      : this.search.getDocResults.perform(docsIndex, params as unknown as import("hermes/services/search").SearchParams);
 
     let projectFacetsPromise = scopeIsDocs
       ? undefined
-      : this.search.getFacets.perform(projectsIndex, params);
+      : this.search.getFacets.perform(projectsIndex, params as unknown as import("hermes/services/search").SearchParams);
 
     let projectResultsPromise = scopeIsDocs
       ? undefined
-      : this.search.getProjectResults.perform(params);
+      : this.search.getProjectResults.perform(params as unknown as import("hermes/services/search").SearchParams);
     const [
       docFacets,
       docResults,
@@ -100,7 +100,7 @@ export default class AuthenticatedResultsRoute extends Route {
     let typedProjectResults = projectResults as SearchResponse<HermesProject>;
 
     if (docResults) {
-      const docHits = typedDocResults.hits;
+      let { hits: docHits } = typedDocResults;
 
       if (docHits) {
         // Load owner information
@@ -116,7 +116,7 @@ export default class AuthenticatedResultsRoute extends Route {
          * Replace the hits with the full project models
          */
         typedProjectResults.hits = await Promise.all(
-          hits.map(
+          (hits as unknown as HermesProjectHit[]).map(
             async (hit: HermesProjectHit) =>
               await this.fetchSvc
                 .fetch(
@@ -126,9 +126,7 @@ export default class AuthenticatedResultsRoute extends Route {
           ),
         );
       }
-    }
-
-    this.activeFilters.update(params);
+    }    this.activeFilters.update(params);
 
     return {
       docFacets,

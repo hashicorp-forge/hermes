@@ -17,7 +17,7 @@ import { restartableTask, task } from "ember-concurrency";
 import { XDropdownListAnchorAPI } from "../x/dropdown-list";
 import SearchService from "hermes/services/search";
 import ConfigService from "hermes/services/config";
-import { SearchForFacetValuesResponse } from "instantsearch.js";
+import { SearchForFacetValuesResponse } from "hermes/services/search";
 import { isTesting } from "@embroider/macros";
 import { ProjectStatus } from "hermes/types/project-status";
 import StoreService from "hermes/services/_store";
