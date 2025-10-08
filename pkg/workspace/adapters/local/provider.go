@@ -7,9 +7,14 @@ import (
 	"time"
 
 	"github.com/hashicorp-forge/hermes/pkg/workspace"
+	admin "google.golang.org/api/admin/directory/v1"
+	"google.golang.org/api/docs/v1"
 	"google.golang.org/api/drive/v3"
 	"google.golang.org/api/people/v1"
 )
+
+// Compile-time check that ProviderAdapter implements workspace.Provider
+var _ workspace.Provider = (*ProviderAdapter)(nil)
 
 // ProviderAdapter adapts the local Adapter (which implements StorageProvider)
 // to the workspace.Provider interface used by API handlers.
@@ -56,6 +61,37 @@ func (p *ProviderAdapter) CopyFile(srcID, destFolderID, name string) (*drive.Fil
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy document: %w", err)
 	}
+
+	return documentToDriveFile(newDoc), nil
+}
+
+// CreateFileAsUser creates a file by copying a template, with the specified user as owner.
+// In the local adapter, this behaves the same as CopyFile.
+// In Google Workspace, this would use domain-wide delegation to impersonate the user.
+// For the local adapter, we simply copy the template and set owner in metadata.
+func (p *ProviderAdapter) CreateFileAsUser(templateID, destFolderID, name, userEmail string) (*drive.File, error) {
+	// Copy the template
+	newDoc, err := p.adapter.DocumentStorage().CopyDocument(p.ctx, templateID, destFolderID, name)
+	if err != nil {
+		return nil, fmt.Errorf("failed to copy template: %w", err)
+	}
+
+	// Store the owner information in metadata
+	if newDoc.Metadata == nil {
+		newDoc.Metadata = make(map[string]any)
+	}
+	newDoc.Metadata["created_as_user"] = userEmail
+
+	// Update metadata to persist the owner info
+	_, err = p.adapter.DocumentStorage().UpdateDocument(p.ctx, newDoc.ID, &workspace.DocumentUpdate{
+		Metadata: newDoc.Metadata,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to set owner metadata: %w", err)
+	}
+
+	// Update the owner field in the returned document
+	newDoc.Owner = userEmail
 
 	return documentToDriveFile(newDoc), nil
 }
@@ -206,11 +242,19 @@ func (p *ProviderAdapter) SearchPeople(email string, fields string) ([]*people.P
 			}
 		}
 
-		// Add email
+		// Add email with metadata (required by /me endpoint)
 		person.EmailAddresses = []*people.EmailAddress{
 			{
 				Value: user.Email,
 				Type:  "work",
+				Metadata: &people.FieldMetadata{
+					Primary:  true,
+					Verified: true,
+					Source: &people.Source{
+						Id:   user.Email, // Use email as ID since User struct doesn't have separate ID field
+						Type: "DOMAIN_PROFILE",
+					},
+				},
 			},
 		}
 
@@ -266,11 +310,19 @@ func (p *ProviderAdapter) SearchDirectory(opts workspace.PeopleSearchOptions) ([
 			}
 		}
 
-		// Add email
+		// Add email with metadata
 		person.EmailAddresses = []*people.EmailAddress{
 			{
 				Value: user.Email,
 				Type:  "work",
+				Metadata: &people.FieldMetadata{
+					Primary:  true,
+					Verified: true,
+					Source: &people.Source{
+						Id:   user.Email,
+						Type: "DOMAIN_PROFILE",
+					},
+				},
 			},
 		}
 
@@ -386,4 +438,176 @@ func (p *ProviderAdapter) loadPermissionsFromMetadata(doc *workspace.Document) {
 	}
 
 	doc.Permissions = permissions
+}
+
+// ShareFileWithDomain shares a file with all users in a domain.
+// In the local adapter, this is a no-op since domain sharing doesn't apply.
+func (p *ProviderAdapter) ShareFileWithDomain(fileID, domain, role string) error {
+	// Local adapter doesn't support domain-wide sharing
+	// This is primarily used in Google Workspace
+	return nil
+}
+
+// CreateFolder creates a new folder.
+func (p *ProviderAdapter) CreateFolder(name, parentID string) (*drive.File, error) {
+	folder, err := p.adapter.DocumentStorage().CreateFolder(p.ctx, name, parentID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create folder: %w", err)
+	}
+
+	parents := []string{}
+	if folder.ParentID != "" {
+		parents = []string{folder.ParentID}
+	}
+
+	return &drive.File{
+		Id:       folder.ID,
+		Name:     folder.Name,
+		MimeType: "application/vnd.google-apps.folder",
+		Parents:  parents,
+	}, nil
+}
+
+// CreateShortcut creates a shortcut to a target file.
+// In the local adapter, shortcuts are stored as metadata references.
+func (p *ProviderAdapter) CreateShortcut(targetID, parentID string) (*drive.File, error) {
+	// Get target document to determine its mime type
+	target, err := p.adapter.DocumentStorage().GetDocument(p.ctx, targetID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get target document: %w", err)
+	}
+
+	// Determine target mime type
+	targetMimeType := "application/vnd.google-apps.document"
+	if target.Metadata != nil {
+		if mt, ok := target.Metadata["mime_type"].(string); ok {
+			targetMimeType = mt
+		}
+	}
+
+	// Create a document that acts as a shortcut
+	shortcut, err := p.adapter.DocumentStorage().CreateDocument(p.ctx, &workspace.DocumentCreate{
+		Name:           "Shortcut",
+		ParentFolderID: parentID,
+		Content:        fmt.Sprintf("Shortcut to: %s", targetID),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create shortcut: %w", err)
+	}
+
+	// Store the target ID and mime type in metadata
+	if shortcut.Metadata == nil {
+		shortcut.Metadata = make(map[string]any)
+	}
+	shortcut.Metadata["shortcut_target"] = targetID
+	shortcut.Metadata["shortcut_target_mime_type"] = targetMimeType
+
+	_, err = p.adapter.DocumentStorage().UpdateDocument(p.ctx, shortcut.ID, &workspace.DocumentUpdate{
+		Metadata: shortcut.Metadata,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to set shortcut metadata: %w", err)
+	}
+
+	return &drive.File{
+		Id:       shortcut.ID,
+		Name:     shortcut.Name,
+		MimeType: "application/vnd.google-apps.shortcut",
+		Parents:  []string{parentID},
+		ShortcutDetails: &drive.FileShortcutDetails{
+			TargetId:       targetID,
+			TargetMimeType: targetMimeType,
+		},
+	}, nil
+}
+
+// GetDoc retrieves document content in Google Docs format.
+// For the local adapter, this converts markdown content to a simplified docs structure.
+func (p *ProviderAdapter) GetDoc(fileID string) (*docs.Document, error) {
+	doc, err := p.adapter.DocumentStorage().GetDocument(p.ctx, fileID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get document: %w", err)
+	}
+
+	// Convert to Google Docs format (simplified)
+	return &docs.Document{
+		DocumentId: doc.ID,
+		Title:      doc.Name,
+		Body: &docs.Body{
+			Content: []*docs.StructuralElement{
+				{
+					Paragraph: &docs.Paragraph{
+						Elements: []*docs.ParagraphElement{
+							{
+								TextRun: &docs.TextRun{
+									Content: doc.Content,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}, nil
+}
+
+// UpdateDoc updates document content using Google Docs API requests.
+// For the local adapter, this is simplified - we only support basic text updates.
+func (p *ProviderAdapter) UpdateDoc(fileID string, requests []*docs.Request) (*docs.BatchUpdateDocumentResponse, error) {
+	// For local adapter, we don't fully implement Docs API requests
+	// This is a placeholder that would need expansion for full compatibility
+	return &docs.BatchUpdateDocumentResponse{
+		DocumentId: fileID,
+	}, fmt.Errorf("UpdateDoc not fully implemented for local adapter")
+}
+
+// GetLatestRevision retrieves the latest revision of a document.
+// The local adapter doesn't support revisions, so this returns a placeholder.
+func (p *ProviderAdapter) GetLatestRevision(fileID string) (*drive.Revision, error) {
+	doc, err := p.adapter.DocumentStorage().GetDocument(p.ctx, fileID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get document: %w", err)
+	}
+
+	// Return a placeholder revision
+	return &drive.Revision{
+		Id:           "1",
+		ModifiedTime: doc.ModifiedTime.Format(time.RFC3339),
+		KeepForever:  false,
+	}, nil
+}
+
+// KeepRevisionForever marks a revision to be kept forever.
+// The local adapter doesn't support revisions, so this is a no-op.
+func (p *ProviderAdapter) KeepRevisionForever(fileID, revisionID string) (*drive.Revision, error) {
+	return &drive.Revision{
+		Id:          revisionID,
+		KeepForever: true,
+	}, nil
+}
+
+// UpdateKeepRevisionForever updates the KeepForever flag on a revision.
+// The local adapter doesn't support revisions, so this is a no-op.
+func (p *ProviderAdapter) UpdateKeepRevisionForever(fileID, revisionID string, keepForever bool) error {
+	return nil
+}
+
+// SendEmail sends an email notification.
+// This delegates to the adapter's notification service.
+func (p *ProviderAdapter) SendEmail(to []string, from, subject, body string) error {
+	return p.adapter.NotificationService().SendEmail(p.ctx, to, from, subject, body)
+}
+
+// ListGroups lists groups matching a query in a domain.
+// The local adapter doesn't support groups, so this returns an empty list.
+func (p *ProviderAdapter) ListGroups(domain, query string, maxResults int64) ([]*admin.Group, error) {
+	// Local adapter doesn't support group management
+	return []*admin.Group{}, nil
+}
+
+// ListUserGroups lists all groups a user is a member of.
+// The local adapter doesn't support groups, so this returns an empty list.
+func (p *ProviderAdapter) ListUserGroups(userEmail string) ([]*admin.Group, error) {
+	// Local adapter doesn't support group management
+	return []*admin.Group{}, nil
 }
