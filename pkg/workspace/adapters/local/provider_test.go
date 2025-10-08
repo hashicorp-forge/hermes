@@ -2,10 +2,10 @@ package local
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	"github.com/hashicorp-forge/hermes/pkg/workspace"
+	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -272,7 +272,7 @@ func TestProviderCompliance_SearchPeople_Initial(t *testing.T) {
 			"isActive": true
 		}
 	}`
-	err := os.WriteFile(adapter.usersPath, []byte(usersJSON), 0644)
+	err := afero.WriteFile(adapter.fs, adapter.usersPath, []byte(usersJSON), 0644)
 	require.NoError(t, err)
 
 	// Test SearchPeople
@@ -282,20 +282,19 @@ func TestProviderCompliance_SearchPeople_Initial(t *testing.T) {
 	assert.Equal(t, "user@example.com", people[0].EmailAddresses[0].Value)
 }
 
-// setupTestAdapter creates a test adapter with a temporary directory.
+// setupTestAdapter creates a test adapter with an in-memory filesystem.
 func setupTestAdapter(t *testing.T) (*Adapter, func()) {
 	t.Helper()
 
-	tempDir, err := os.MkdirTemp("", "hermes-test-*")
-	require.NoError(t, err)
-
+	fs := afero.NewMemMapFs()
 	adapter, err := NewAdapter(&Config{
-		BasePath: tempDir,
+		BasePath:   "/workspace",
+		FileSystem: fs,
 	})
 	require.NoError(t, err)
 
 	cleanup := func() {
-		os.RemoveAll(tempDir)
+		// No cleanup needed for in-memory filesystem
 	}
 
 	return adapter, cleanup
@@ -492,7 +491,7 @@ func TestProviderCompliance_SearchPeople(t *testing.T) {
 			"isActive": true
 		}
 	}`
-	err := os.WriteFile(adapter.usersPath, []byte(usersJSON), 0644)
+	err := afero.WriteFile(adapter.fs, adapter.usersPath, []byte(usersJSON), 0644)
 	require.NoError(t, err)
 
 	// Test search by email
@@ -549,7 +548,7 @@ func TestProviderCompliance_SearchDirectory(t *testing.T) {
 			"isActive": false
 		}
 	}`
-	err := os.WriteFile(adapter.usersPath, []byte(usersJSON), 0644)
+	err := afero.WriteFile(adapter.fs, adapter.usersPath, []byte(usersJSON), 0644)
 	require.NoError(t, err)
 
 	// Test basic query
@@ -688,10 +687,12 @@ func TestProviderCompliance_UpdateDoc(t *testing.T) {
 	doc, err := adapter.DocumentStorage().CreateDocument(ctx, testDocumentCreate("Test Document", ""))
 	require.NoError(t, err)
 
-	// Test UpdateDoc - should return error as it's not fully implemented
-	_, err = provider.UpdateDoc(doc.ID, nil)
-	assert.Error(t, err, "UpdateDoc should return not implemented error")
-	assert.Contains(t, err.Error(), "not fully implemented")
+	// Test UpdateDoc - local adapter returns success to allow document creation to proceed
+	// Headers in markdown are managed differently than Google Docs tables
+	resp, err := provider.UpdateDoc(doc.ID, nil)
+	require.NoError(t, err, "UpdateDoc should succeed for local adapter")
+	assert.NotNil(t, resp, "Should return response")
+	assert.Equal(t, doc.ID, resp.DocumentId, "Should return same document ID")
 }
 
 // TestProviderCompliance_RevisionManagement tests revision-related methods.
@@ -1004,7 +1005,7 @@ func TestProviderCompliance_SearchDirectory_MaxResults(t *testing.T) {
 		"user4@example.com": {"email": "user4@example.com", "name": "User Four", "givenName": "User", "familyName": "Four", "isActive": true},
 		"user5@example.com": {"email": "user5@example.com", "name": "User Five", "givenName": "User", "familyName": "Five", "isActive": true}
 	}`
-	err := os.WriteFile(adapter.usersPath, []byte(usersJSON), 0644)
+	err := afero.WriteFile(adapter.fs, adapter.usersPath, []byte(usersJSON), 0644)
 	require.NoError(t, err)
 
 	// Test with max results

@@ -3,13 +3,11 @@ package local
 import (
 	"context"
 	"fmt"
-	"os"
-	"path/filepath"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/hashicorp-forge/hermes/pkg/workspace"
+	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -468,17 +466,17 @@ func TestDocumentStorage_Templates(t *testing.T) {
 
 // createTestAdapter creates a test adapter with a temporary storage directory.
 func createTestAdapter(t *testing.T) (*Adapter, func()) {
-	storageDir := filepath.Join(os.TempDir(), fmt.Sprintf("hermes-test-%d-%d", os.Getpid(), time.Now().UnixNano()))
-	err := os.MkdirAll(storageDir, 0755)
-	require.NoError(t, err, "Failed to create storage directory")
+	t.Helper()
 
+	fs := afero.NewMemMapFs()
 	adapter, err := NewAdapter(&Config{
-		BasePath: storageDir,
+		BasePath:   "/workspace",
+		FileSystem: fs,
 	})
 	require.NoError(t, err, "Failed to create adapter")
 
 	cleanup := func() {
-		os.RemoveAll(storageDir)
+		// No cleanup needed for in-memory filesystem
 	}
 
 	return adapter, cleanup

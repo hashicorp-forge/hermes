@@ -2,27 +2,27 @@ package local_test
 
 import (
 	"context"
-	"os"
 	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/hashicorp-forge/hermes/pkg/workspace"
 	"github.com/hashicorp-forge/hermes/pkg/workspace/adapters/local"
+	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestFilesystemAdapter(t *testing.T) {
-	// Create temporary directory for testing
-	tempDir := t.TempDir()
+	// Create in-memory filesystem for testing
+	fs := afero.NewMemMapFs()
 
 	// Create adapter
 	adapter, err := local.NewAdapter(&local.Config{
-		BasePath: tempDir,
+		BasePath:   "/workspace",
+		FileSystem: fs,
 	})
-	if err != nil {
-		t.Fatalf("Failed to create adapter: %v", err)
-	}
+	require.NoError(t, err, "Failed to create adapter")
 
 	docStorage := adapter.DocumentStorage()
 	ctx := context.Background()
@@ -48,10 +48,10 @@ func TestFilesystemAdapter(t *testing.T) {
 		}
 
 		// Verify file was created
-		docPath := filepath.Join(tempDir, "docs", doc.ID+".md")
-		if _, err := os.Stat(docPath); os.IsNotExist(err) {
-			t.Error("Document file was not created")
-		}
+		docPath := filepath.Join("/workspace", "docs", doc.ID+".md")
+		exists, err := afero.Exists(fs, docPath)
+		require.NoError(t, err)
+		assert.True(t, exists, "Document file was not created")
 	})
 
 	t.Run("GetDocument", func(t *testing.T) {
@@ -360,32 +360,30 @@ func TestFilesystemAdapterErrors(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Create temporary directory for testing
-			tempDir := t.TempDir()
+			// Create in-memory filesystem for testing
+			fs := afero.NewMemMapFs()
 
 			// Create adapter
 			adapter, err := local.NewAdapter(&local.Config{
-				BasePath: tempDir,
+				BasePath:   "/workspace",
+				FileSystem: fs,
 			})
-			if err != nil {
-				t.Fatalf("Failed to create adapter: %v", err)
-			}
+			require.NoError(t, err, "Failed to create adapter")
 			tt.test(t, adapter)
 		})
 	}
 }
 
 func TestAdapterServiceGetters(t *testing.T) {
-	// Create temporary directory for testing
-	tempDir := t.TempDir()
+	// Create in-memory filesystem for testing
+	fs := afero.NewMemMapFs()
 
 	// Create adapter
 	adapter, err := local.NewAdapter(&local.Config{
-		BasePath: tempDir,
+		BasePath:   "/workspace",
+		FileSystem: fs,
 	})
-	if err != nil {
-		t.Fatalf("Failed to create adapter: %v", err)
-	}
+	require.NoError(t, err, "Failed to create adapter")
 
 	// Test that service getters return non-nil implementations
 	t.Run("DocumentStorage", func(t *testing.T) {
