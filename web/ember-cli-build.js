@@ -17,7 +17,9 @@ module.exports = function (defaults) {
         resolve: {
           alias: {
             // Explicitly resolve @ember/test-waiters for ember-app-scheduler
-            '@ember/test-waiters': require.resolve('@ember/test-waiters')
+            '@ember/test-waiters': require.resolve('@ember/test-waiters'),
+            // Fix ember-concurrency async-arrow-runtime import for ember-power-select
+            'ember-concurrency/async-arrow-runtime': require.resolve('ember-concurrency/addon/-private/async-arrow-runtime')
           }
         }
       }
