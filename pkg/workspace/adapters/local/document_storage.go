@@ -121,11 +121,14 @@ func (ds *documentStorage) UpdateDocument(ctx context.Context, id string, update
 		return nil, err
 	}
 
-	// Load metadata
-	meta, err := ds.adapter.metadataStore.Get(docPath)
+	// Load current metadata and content
+	meta, currentContent, err := ds.adapter.metadataStore.GetWithContent(docPath)
 	if err != nil {
 		return nil, workspace.NotFoundError("document", id)
 	}
+
+	// Track the content to save (start with current content)
+	contentToSave := currentContent
 
 	// Update fields
 	if updates.Name != nil {
@@ -147,11 +150,7 @@ func (ds *documentStorage) UpdateDocument(ctx context.Context, id string, update
 		isDraft = newIsDraft
 	}
 	if updates.Content != nil {
-		currentPath := ds.adapter.getDocumentPath(id, isDraft)
-		if err := afero.WriteFile(ds.adapter.fs, currentPath, []byte(*updates.Content), 0644); err != nil {
-			return nil, fmt.Errorf("failed to update document content: %w", err)
-		}
-		docPath = currentPath // Update docPath in case it moved
+		contentToSave = *updates.Content
 	}
 	if updates.Metadata != nil {
 		if meta.Metadata == nil {
@@ -164,16 +163,12 @@ func (ds *documentStorage) UpdateDocument(ctx context.Context, id string, update
 
 	meta.ModifiedTime = time.Now()
 
-	// Read current content to preserve it when updating metadata
+	// Update the final path in case it changed
 	finalPath := ds.adapter.getDocumentPath(id, isDraft)
-	contentBytes, err := afero.ReadFile(ds.adapter.fs, finalPath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read document content: %w", err)
-	}
-	docPath = finalPath
 
-	if err := ds.adapter.metadataStore.Set(docPath, meta, string(contentBytes)); err != nil {
-		return nil, fmt.Errorf("failed to update metadata: %w", err)
+	// Write metadata and content together atomically
+	if err := ds.adapter.metadataStore.Set(finalPath, meta, contentToSave); err != nil {
+		return nil, fmt.Errorf("failed to update document: %w", err)
 	}
 
 	// Reload full document
