@@ -11,6 +11,40 @@ Each template is a markdown file that gets stored as a document in the local wor
 - `template-adr` - ADR (Architectural Decision Record) template
 - `template-frd` - FRD (Functional Requirements Document) template
 - `template-memo` - Memo template
+- `template-path` - PATH (Golden Path) template
+
+## Available Templates
+
+### RFC (Request for Comments)
+Traditional technical design document format used for proposing and documenting technical decisions, system designs, and architecture changes.
+
+### PRD (Product Requirements Document)
+Product requirements documentation including problem statements, user stories, success metrics, and feature specifications.
+
+### ADR (Architectural Decision Record)
+Captures important architectural decisions, including context, decision, consequences, and alternatives considered.
+
+### FRD (Functional Requirements Document)
+Detailed functional specifications including technical requirements, system behaviors, and implementation details.
+
+### Memo
+General-purpose memo format for internal communications, updates, and announcements.
+
+### PATH (Golden Path)
+**NEW**: Step-by-step workflow guide format for documenting repeatable processes. Includes:
+- Overview and prerequisites
+- Step-by-step instructions with time estimates
+- Final deliverables and success criteria
+- Working examples and tips
+- Common pitfalls and related paths
+
+Example use cases for PATH documents:
+- AI-Assisted Engineering Breakdown (PRD → Jira)
+- Product Management PRD Creation workflows
+- Technical Program Management delivery processes
+- Training and onboarding workflows
+
+See `path-example.md` for a complete working example based on GP-003 Engineering Breakdown.
 
 ## How Templates Work
 
