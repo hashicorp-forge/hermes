@@ -11,8 +11,8 @@ import { test, expect, Page } from '@playwright/test';
  * 5. Verifies document was created successfully
  * 
  * Test Environment:
- * - Backend API: http://localhost:8001
- * - Frontend: http://localhost:4201 (Ember dev server proxying to backend)
+ * - Backend API: http://localhost:8000
+ * - Frontend: http://localhost:4200 (Ember dev server proxying to backend)
  * - Dex OIDC: http://localhost:5558
  * - Test User: test@hermes.local / password
  */
@@ -30,8 +30,8 @@ test.describe('Document Creation Flow', () => {
     // Start at the Hermes homepage
     await page.goto('/');
 
-    // Should be redirected to Dex login page
-    await page.waitForURL(/5558.*\/auth/, { timeout: 10000 });
+    // Should be redirected to Dex login page (port 5556 is the issuer/connector port)
+    await page.waitForURL(/5556.*\/auth/, { timeout: 10000 });
     
     // Verify we're on the Dex login page
     await expect(page.locator('text=Log in to Your Account')).toBeVisible();
@@ -44,7 +44,7 @@ test.describe('Document Creation Flow', () => {
     await page.click('button[type="submit"]');
 
     // Should be redirected back to Hermes after successful authentication
-    await page.waitForURL('http://localhost:4201/**', { timeout: 10000 });
+    await page.waitForURL('http://localhost:4200/**', { timeout: 10000 });
     await page.waitForLoadState('networkidle');
 
     console.log(`✓ User ${email} authenticated successfully`);
@@ -83,7 +83,7 @@ test.describe('Document Creation Flow', () => {
 
     // If no button found, try direct navigation
     if (!navigatedToNewDoc) {
-      await page.goto('http://localhost:4201/new');
+      await page.goto('http://localhost:4200/new');
       console.log('✓ Navigated directly to /new');
     }
 
@@ -272,7 +272,7 @@ test.describe('Document Creation Flow', () => {
     try {
       await page.locator('text=/new.*document/i').first().click({ timeout: 3000 });
     } catch (e) {
-      await page.goto('http://localhost:4201/new');
+      await page.goto('http://localhost:4200/new');
     }
 
     await page.waitForLoadState('networkidle');

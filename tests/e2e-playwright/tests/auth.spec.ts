@@ -21,8 +21,8 @@ test.describe('Authentication Flow', () => {
     // Start at the Hermes homepage
     await page.goto('/');
 
-    // Should be redirected to Dex login page (port 5558 is the connector port)
-    await page.waitForURL(/5558.*\/auth/, { timeout: 10000 });
+    // Should be redirected to Dex login page (port 5556 is the issuer/connector port)
+    await page.waitForURL(/5556.*\/auth/, { timeout: 10000 });
     
     // Verify we're on the Dex login page
     await expect(page).toHaveTitle(/dex/i);
@@ -83,8 +83,8 @@ test.describe('Authentication Flow', () => {
     // Start at the Hermes homepage
     await page.goto('/');
 
-    // Wait for redirect to Dex (port 5558 is the connector port)
-    await page.waitForURL(/5558.*\/auth/, { timeout: 10000 });
+    // Wait for redirect to Dex (port 5556 is the issuer/connector port)
+    await page.waitForURL(/5556.*\/auth/, { timeout: 10000 });
 
     // Try to login with invalid credentials
     await page.fill('input[name="login"]', 'invalid@hermes.local');

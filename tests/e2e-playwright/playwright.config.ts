@@ -2,9 +2,13 @@ import { defineConfig, devices } from '@playwright/test';
 
 /**
  * Playwright configuration for Hermes E2E acceptance tests
- * Tests run against containerized testing environment (testing/docker-compose.yml)
- * Web UI accessible at: http://localhost:4201
- * Backend API at: http://localhost:8001
+ * Tests run against local development environment:
+ * - Backend: ./hermes server -config=config.hcl (port 8000)
+ * - Frontend: Ember dev server in proxy mode (port 4200)
+ * - Dex OIDC: docker compose up -d dex (port 5558)
+ * 
+ * Web UI accessible at: http://localhost:4200
+ * Backend API at: http://localhost:8000
  * Dex OIDC at: http://localhost:5558
  */
 export default defineConfig({
@@ -22,7 +26,7 @@ export default defineConfig({
   outputDir: 'test-results',
   
   use: {
-    baseURL: 'http://localhost:4201',
+    baseURL: 'http://localhost:4200',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -35,10 +39,11 @@ export default defineConfig({
     },
   ],
 
-  webServer: {
-    command: 'cd ../../testing && docker compose up -d hermes-web',
-    url: 'http://localhost:4201',
-    reuseExistingServer: true,
-    timeout: 120 * 1000,
-  },
+  // Disable webServer since we're running servers manually
+  // webServer: {
+  //   command: 'cd ../../testing && docker compose up -d hermes-web',
+  //   url: 'http://localhost:4201',
+  //   reuseExistingServer: true,
+  //   timeout: 120 * 1000,
+  // },
 });
