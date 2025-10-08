@@ -89,7 +89,13 @@ func (a *Adapter) initializeIndexes(ctx context.Context) error {
 	}
 
 	// Configure filterable attributes
-	filterableAttrs := []interface{}{"product", "docType", "status", "owners", "contributors", "approvers", "createdTime", "modifiedTime"}
+	// Include all attributes that might be used in queries by the API handlers
+	filterableAttrs := []interface{}{
+		"product", "docType", "status",
+		"owners", "contributors", "approvers",
+		"createdTime", "modifiedTime",
+		"appCreated", "approvedBy", // Used by approval workflow queries
+	}
 	if _, err := docsIdx.UpdateFilterableAttributesWithContext(ctx, &filterableAttrs); err != nil {
 		return fmt.Errorf("failed to update filterable attributes: %w", err)
 	}
