@@ -113,7 +113,7 @@ document_types {
   document_type "ADR" {
     long_name   = "Architectural Decision Record"
     description = "Document an architectural decision including context, alternatives considered, and rationale for the chosen solution."
-    flight_icon = "building"
+    flight_icon = "layers"
     
     template = "template-adr"
 
@@ -228,7 +228,7 @@ document_types {
     }
     custom_field {
       name = "Steps"
-      type = "number"
+      type = "string"
       read_only = false
     }
     custom_field {
