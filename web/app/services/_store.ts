@@ -2,7 +2,6 @@ import { task } from "ember-concurrency";
 import Store from "@ember-data/store";
 import { HermesDocument } from "hermes/types/document";
 import { RelatedHermesDocument } from "hermes/components/related-resources";
-import { withTimeout } from "hermes/utils/promise-timeout";
 
 export default class StoreService extends Store {
   /**
@@ -80,16 +79,11 @@ export default class StoreService extends Store {
         /**
          * Queue a promise request to `/api/v2/person?emails=${email}`
          * to return a GoogleUser when resolved.
-         * Wrap with timeout to prevent indefinite hangs.
          */
         promises.push(
-          withTimeout(
-            this.queryRecord("person", {
-              emails: email,
-            }),
-            15000, // 15 second timeout per person
-            `Fetching person record for ${email}`
-          ).catch((error) => {
+          this.queryRecord("person", {
+            emails: email,
+          }).catch((error) => {
             /**
              * Errors here are not necessarily indicative of a problem;
              * for example, we get a 404 if a once-valid user is no longer in
@@ -109,15 +103,10 @@ export default class StoreService extends Store {
           }),
           /**
            * Groups API doesn't have a `findRecord` equivalent, so we query instead.
-           * Wrap with timeout to prevent indefinite hangs.
            */
-          withTimeout(
-            this.query("group", {
-              query: email,
-            }),
-            15000, // 15 second timeout per group
-            `Fetching group record for ${email}`
-          ).catch((error) => {
+          this.query("group", {
+            query: email,
+          }).catch((error) => {
             /**
              * Errors here are not necessarily indicative of a problem;
              * for example, we get a 404 if a once-valid user is no longer in

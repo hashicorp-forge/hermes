@@ -1,5 +1,4 @@
 import Service from "@ember/service";
-import fetch from "fetch";
 import { service } from "@ember/service";
 import ConfigService from "hermes/services/config";
 import SessionService from "./session";
