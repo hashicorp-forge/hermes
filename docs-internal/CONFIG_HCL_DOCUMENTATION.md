@@ -1,17 +1,17 @@
-# config.hcl Documentation Enhancement
+# config-example.hcl Documentation Enhancement
 
 **Date**: October 8, 2025  
 **Status**: Complete  
-**Files Modified**: `config.hcl`  
+**Files Modified**: `config-example.hcl`  
 
 ## Overview
 
-The root-level `config.hcl` file has been comprehensively documented to serve as:
+The root-level `config-example.hcl` file has been comprehensively documented to serve as:
 1. **Production-ready example configuration** showing all available options
 2. **Self-documenting reference** for all configuration sections
 3. **Quick-start guide** for different deployment scenarios
 
-The file has been **added to git tracking** (was previously in `.gitignore` pattern but now tracked).
+The file has been **added to git tracking** as an example configuration that users can copy to `config.hcl` for their local development.
 
 ## Changes Made
 
@@ -123,6 +123,7 @@ Each example includes:
 
 ✅ **Syntax Valid**: Config file parses correctly
 ```bash
+cp config-example.hcl config.hcl
 ./hermes server -config=config.hcl -help
 ```
 
@@ -134,10 +135,10 @@ Each example includes:
 # Output: "listening on 127.0.0.1:8000..."
 ```
 
-✅ **Git Tracked**: File is now under version control
+✅ **Git Tracked**: Example file is now under version control
 ```bash
-git status config.hcl
-# Output: "new file:   config.hcl"
+git status config-example.hcl
+# Output: "new file:   config-example.hcl"
 ```
 
 ## Benefits
@@ -160,20 +161,21 @@ git status config.hcl
 ## Relationship to Other Config Files
 
 - **`configs/config.hcl`**: Template with minimal comments (246 lines)
-- **`./config.hcl`**: Fully documented working example (652 lines) ← **THIS FILE**
+- **`./config-example.hcl`**: Fully documented working example (652 lines) ← **THIS FILE** (copy to `config.hcl` for use)
+- **`./config.hcl`**: Your local configuration (gitignored, create from example)
 - **`dex-config.yaml`**: Dex OIDC provider configuration (separate file)
 - **`docker-compose.yml`**: Service definitions (PostgreSQL, Dex, Meilisearch)
 
 ## Usage Guidelines
 
 ### For Local Development
-1. Copy this file to `config.hcl` (already done)
+1. Copy the example file: `cp config-example.hcl config.hcl`
 2. Adjust database credentials if needed
 3. Start services: `docker compose up -d postgres dex meilisearch`
 4. Run server: `./hermes server -config=config.hcl`
 
 ### For Production Deployment
-1. Start with this file as template
+1. Copy the example file as your starting point: `cp config-example.hcl config.hcl`
 2. Enable appropriate authentication provider (Google/Okta)
 3. Configure workspace provider (typically Google Workspace)
 4. Configure search provider (Algolia or Meilisearch)
@@ -183,10 +185,11 @@ git status config.hcl
 8. Set `log_format = "json"` for structured logging
 
 ### For Testing/CI
-1. Use `local_workspace` provider for filesystem-based testing
-2. Use `meilisearch` for search (faster than Algolia setup)
-3. Use `dex` for authentication (no external dependencies)
-4. Set `email.enabled = false` or configure SMTP
+1. Copy the example file: `cp config-example.hcl config.hcl`
+2. Use `local_workspace` provider for filesystem-based testing
+3. Use `meilisearch` for search (faster than Algolia setup)
+4. Use `dex` for authentication (no external dependencies)
+5. Set `email.enabled = false` or configure SMTP
 
 ## Future Enhancements
 
