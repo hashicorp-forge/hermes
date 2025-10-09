@@ -1,0 +1,87 @@
+ID,Filename,Title,Type,Notes
+001,ADMIN_LOGIN_HANG_ROOT_CAUSE_2025_10_08.md,Admin Login Loading Spinner Issue - Root Cause Found,Memo,Investigation findings for dashboard loading hang in Promise.all()
+002,ADMIN_LOGIN_INVESTIGATION_2025_10_08.md,Admin Login Investigation,Memo,Investigation session documentation for admin login issues
+003,AGENT_INSTRUCTIONS_SIMPLIFIED_2025_10_08.md,Agent Instructions Simplified,Memo,Simplified agent workflow instructions
+004,AGENT_USAGE_ANALYSIS.md,Agent Usage Analysis,Memo,Analysis of agent tool usage patterns and effectiveness
+005,ANALYSIS_CLARIFICATIONS.md,Analysis Clarifications,Memo,Clarifications from various analysis sessions
+006,ANIMATED_COMPONENTS_FIX_2025_10_08.md,Animated Components Fix,ADR,Decision to fix animated-if-loaded directive loading states
+007,AUTH_ARCHITECTURE_DIAGRAMS.md,Multi-Provider Auth Architecture (Current State),RFC,Architecture diagrams for Google/Okta/Dex authentication flows
+008,AUTH_PROVIDER_QUICK_REF.md,Auth Provider Quick Reference,Memo,Quick reference for auth provider configuration
+009,AUTH_PROVIDER_SELECTION.md,Auth Provider Selection,RFC,Design for runtime auth provider selection mechanism
+010,BACKEND_SEARCH_FIXES_2025_10_08.md,Backend Search Fixes,Memo,Summary of backend search proxy fixes
+011,COMMIT_MESSAGE_AUTH_FIX_2025_10_08.md,Commit Message Auth Fix,Memo,Commit message template for auth bug fix
+012,COMMIT_MESSAGE_AUTH_PROVIDER_SELECTION.md,Commit Message Auth Provider Selection,Memo,Commit message template for provider selection feature
+013,CONFIG_CLEANUP_2025_10_08.md,Config Cleanup,Memo,Configuration file cleanup session summary
+014,CONFIG_HCL_DOCUMENTATION.md,Config HCL Documentation,Memo,Documentation of config.hcl structure and options
+015,COVERAGE_COMPARISON.md,Coverage Comparison,Memo,Test coverage comparison before/after changes
+016,DELIVERABLES_SUMMARY.md,Deliverables Summary,Memo,Summary of project deliverables and milestones
+017,DEV_QUICK_REFERENCE.md,Dev Quick Reference,Memo,Quick reference for development workflows
+018,DEV_TIMELINE_VISUAL.md,Dev Timeline Visual,Memo,Visual timeline of development progress
+019,DEV_VELOCITY_ANALYSIS.md,Dev Velocity Analysis,Memo,Analysis of development velocity metrics
+020,DEX_AUTHENTICATION_IMPLEMENTATION.md,Dex Authentication Flow - Implementation Complete,RFC,Complete implementation of Dex OIDC authentication
+021,DEX_AUTHENTICATION.md,Dex Authentication,RFC,Dex authentication design and integration
+022,DEX_IMPLEMENTATION_SUMMARY.md,Dex Implementation Summary,Memo,Summary of Dex authentication implementation
+023,DEX_QUICK_START.md,Dex Quick Start,Memo,Quick start guide for Dex setup
+024,DOCUMENT_CONTENT_API_VALIDATION_SUMMARY.md,Document Content API Validation Summary,Memo,Validation results for document content API
+025,DOCUMENT_CONTENT_INTEGRATION_TEST_COMPLETE.md,Document Content Integration Test Complete,Memo,Completion summary for integration tests
+026,DOCUMENT_EDITOR_IMPLEMENTATION.md,Document Editor Implementation,RFC,Implementation design for document editor features
+027,DOCUMENT_EDITOR_TESTING_COMPLETE.md,Document Editor Testing Complete,Memo,Testing completion summary for editor
+028,E2E_TEST_FIXES_2025_10_08_SESSION.md,E2E Test Fixes Session,Memo,Session notes for E2E test debugging and fixes
+029,EMBER_CONCURRENCY_COMPATIBILITY_ISSUE.md,Ember Concurrency Compatibility Issue,ADR,Decision on handling ember-concurrency version conflicts
+030,EMBER_CONCURRENCY_FIX_2025_10_08_COMPLETE.md,Ember Concurrency Fix Complete,Memo,Completion summary for concurrency fix
+031,EMBER_CONCURRENCY_FIX_2025_10_08.md,Ember Concurrency Fix,Memo,Implementation notes for concurrency fix
+032,EMBER_DATA_STORE_ERROR_FIX_2025_10_08.md,Ember Data Store Error Fix,ADR,Decision to fix store.unloadAll() timing issues
+033,EMBER_DEV_SERVER_MIGRATION.md,Ember Dev Server Migration,RFC,Migration from Mirage to backend proxy for development
+034,EMBER_UPGRADE_STRATEGY.md,Ember Upgrade Strategy,RFC,Strategy for upgrading Ember.js version
+035,ENV_SETUP.md,Environment Setup,Memo,Development environment setup instructions
+036,FIX_LOCATION_TYPE_2025_10_07.md,Fix Location Type,ADR,Decision to fix location type handling in routing
+037,FRONTEND_PROXY_CONFIGURATION.md,Frontend Proxy Configuration,RFC,Configuration design for frontend-to-backend proxy
+038,FRONTEND_PROXY_SESSION_SUMMARY_2025_10_08.md,Frontend Proxy Session Summary,Memo,Session summary for proxy configuration work
+039,FRONTEND_SEARCH_VALIDATION_2025_10_08.md,Frontend Search Validation,Memo,Validation results for frontend search functionality
+040,FRONTEND_SPINNER_ISSUE_2025_10_07.md,Frontend Spinner Issue,Memo,Investigation of spinner loading issues
+041,FRONTEND_VALIDATION_ACTION_PLAN.md,Frontend Validation Action Plan,Memo,Action plan for frontend validation work
+042,IMPLEMENTATION_COMPLETE.md,Implementation Complete,Memo,Overall implementation completion summary
+043,INTEGRATION_TEST_FINDINGS_2025_10_08.md,Integration Test Findings,Memo,Findings from integration test execution
+044,LOCAL_ADAPTER_TEST_MIGRATION_SUMMARY.md,Local Adapter Test Migration Summary,Memo,Summary of test migration for local adapter
+045,LOCAL_WORKSPACE_PROVIDER_COMPLETE.md,Local Workspace Provider Complete,Memo,Completion summary for local workspace implementation
+046,LOCAL_WORKSPACE_PROVIDER_COMPLETION_2025_10_08.md,Local Workspace Provider Completion,Memo,Final completion notes for local workspace
+047,LOCAL_WORKSPACE_SETUP_SUMMARY.md,Local Workspace Setup Summary,RFC,Setup design for local workspace provider
+048,LOCAL_WORKSPACE_USER_INFO_FIX.md,Local Workspace User Info Fix,ADR,Decision to fix user info handling in local workspace
+049,ME_ENDPOINT_VALIDATION_2025_10_08.md,Me Endpoint Validation,Memo,Validation results for /me endpoint
+050,OAUTH_REDIRECT_BASEURL_CONFIG.md,OAuth Redirect BaseURL Config,RFC,Configuration design for OAuth redirect URLs
+051,OUTBOX_PATTERN_DESIGN.md,Document Search Index Outbox Pattern - Design Document,RFC,Comprehensive design for outbox pattern with person/identity tracking
+052,OUTBOX_PATTERN_QUICK_REF.md,Document Tracking & Outbox Pattern - Quick Reference,Memo,Quick reference for outbox pattern implementation
+053,PLAYWRIGHT_AUTH_TEST_2025_10_08_SUCCESS.md,Playwright Auth Test Success,Memo,Successful auth test execution results
+054,PLAYWRIGHT_AUTH_TEST_2025_10_08.md,Playwright Auth Test,Memo,Auth test implementation notes
+055,PLAYWRIGHT_DOCUMENT_CREATION_2025_10_08.md,Playwright Document Creation,Memo,Document creation test implementation
+056,PLAYWRIGHT_DOCUMENT_CREATION_COMPLETE.md,Playwright Document Creation Complete,Memo,Completion summary for document creation tests
+057,PLAYWRIGHT_DOCUMENT_CREATION_TEST_2025_10_08.md,Playwright Document Creation Test,Memo,Test results for document creation flow
+058,PLAYWRIGHT_E2E_AGENT_GUIDE.md,Playwright E2E Agent Guide,Memo,Guide for agents using Playwright for E2E testing
+059,PLAYWRIGHT_E2E_REEVALUATION_2025_10_08.md,Playwright E2E Reevaluation,Memo,Reevaluation of E2E testing approach
+060,PLAYWRIGHT_INTEGRATION_SUMMARY.md,Frontend Integration Validation Summary,Memo,Summary of Playwright integration validation
+061,PLAYWRIGHT_VALIDATION_2025_10_08_COMPLETE.md,Playwright Validation Complete,Memo,Completion summary for validation tests
+062,PLAYWRIGHT_VALIDATION_SUCCESS_2025_10_08.md,Playwright Validation Success,Memo,Success report for validation tests
+063,playwright-validation-results.md,Playwright Validation Results,Memo,Detailed test results from validation run
+064,playwright-validation.md,Playwright Validation,Memo,Validation test documentation
+065,PROMISE_TIMEOUT_HANG_FIX_2025_10_08.md,Promise Timeout Hang Fix,ADR,Decision to add timeout handling for hanging promises
+066,PROMPT_TEMPLATES.md,Prompt Templates,Memo,Templates for AI agent prompts
+067,PROVIDER_SELECTION_QUICKSTART.md,Provider Selection Quickstart,Memo,Quick start for auth provider selection
+068,PROVIDER_SELECTION.md,Provider Selection,RFC,Design for workspace provider selection
+069,QUICK_ITERATION_INTEGRATION_2025_10_08.md,Quick Iteration Model Integration - Session Summary,Memo,Session summary for quick iteration workflow
+070,QUICK_ITERATION_REFERENCE.md,Quick Iteration Reference,Memo,Reference guide for quick iteration development
+071,README-auth-providers.md,Auth Providers README,Memo,Documentation for authentication providers
+072,README-local-workspace.md,Local Workspace README,Memo,Documentation for local workspace setup
+073,README.md,Docs Internal README,Memo,Main README for docs-internal directory
+074,REORGANIZATION_2025_10_05.md,Reorganization,Memo,Documentation reorganization summary
+075,ROOT_CAUSE_MAYBEFETCHPEOPLE_HANG_2025_10_08.md,ROOT CAUSE FOUND: Admin Login Spinner Issue,Memo,Root cause analysis for maybeFetchPeople hang
+076,SEARCH_AND_AUTH_REFACTORING.md,Search and Authentication Refactoring,RFC,Refactoring design for backend-only search and multi-provider auth
+077,SEARCH_ENDPOINT_IMPLEMENTATION_2025_10_08.md,Search Endpoint Implementation,RFC,Implementation design for search endpoint
+078,SEARCH_SERVICE_MIGRATION_2025_10_08.md,Search Service Migration,RFC,Migration design for search service architecture
+079,SESSION_AUTHENTICATION_FIX.md,Session Authentication Flow - Fixed Implementation,RFC,Fixed implementation for session-based auth
+080,TEMPLATE_COPY_FIX_COMPLETE_2025_10_08.md,Template Copy Fix Complete,Memo,Completion summary for template copy fix
+081,TEST_COVERAGE_PROGRESS.md,Test Coverage Progress,Memo,Progress report on test coverage improvements
+082,TEST_REORGANIZATION_2025_10_07.md,Test Reorganization,Memo,Test suite reorganization summary
+083,TESTING_DOCKER_COMPOSE_DEBUG_2025_10_08.md,Testing Docker Compose Debug,Memo,Debugging notes for Docker Compose setup
+084,TESTING_ENV_COMPLETE.md,Testing Environment Complete,Memo,Testing environment setup completion
+085,TORII_AUTH_ANALYSIS.md,Torii Auth Analysis,Memo,Analysis of Torii authentication library
+086,WEB_EXTERNAL_DEPENDENCIES_ANALYSIS.md,Web External Dependencies Analysis,Memo,Analysis of frontend external dependencies
