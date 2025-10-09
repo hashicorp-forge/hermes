@@ -97,7 +97,7 @@ services:
       # Mount workspace data (persists across restarts - runtime data)
       - hermes_workspace:/app/workspace_data
     environment:
-      HERMES_BASE_URL: http://localhost:4200  # Frontend dev server port (native Ember)
+      HERMES_BASE_URL: http://localhost:4201  # Frontend in testing environment
       HERMES_SEARCH_PROVIDER: meilisearch
       HERMES_MEILISEARCH_URL: http://meilisearch:7700
       HERMES_MEILISEARCH_KEY: masterKey123

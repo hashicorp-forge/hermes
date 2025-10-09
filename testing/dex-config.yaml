@@ -43,14 +43,8 @@ connectors:
 - type: mockCallback
   id: mock
   name: Mock
-- type: mockPassword
-  id: mock-password
-  name: Email
-  config:
-    username: test@hermes.local
-    password: password
 
-# Enable password grants
+# Enable password grants - this allows staticPasswords to work via local login
 enablePasswordDB: true
 
 # Static passwords for testing
