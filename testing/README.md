@@ -1,377 +1,323 @@
 # Hermes Testing Environment
 
-This directory contains a **full-stack containerized environment** for testing and manual QA of Hermes. This is distinct from the integration testing setup in the root directory.
+> **📍 Location**: `./testing/` directory  
+> **Purpose**: Complete containerized full-stack environment for testing, development, and manual QA
 
-**🆕 Now uses Local Workspace Provider**: This environment uses the local filesystem adapter for document storage instead of Google Workspace, with test users mirroring Dex identities. See [README-local-workspace.md](./README-local-workspace.md) for details.
+This directory contains a **fully containerized testing environment** with all services needed to run Hermes:
+- PostgreSQL database
+- Meilisearch for search
+- Dex for OIDC authentication
+- Hermes backend API
+- Ember web frontend
 
-## Testing Environments Comparison
+## 🚀 Quick Start
 
-| Aspect | Integration Testing (`/docker-compose.yml`) | Testing Environment (`/testing/docker-compose.yml`) |
-|--------|---------------------------------------------|---------------------------------------------------|
-| **Purpose** | Backend integration tests | Full-stack testing & manual QA |
-| **Scope** | Infrastructure only (DB, search) | Complete application (backend + frontend + infra) |
-| **Hermes** | Runs natively on host | Containerized |
-| **Frontend** | Not included | Containerized Nginx + Ember app |
-| **Usage** | `make go/test/with-docker-postgres` | Manual testing via browser |
-| **Ports** | 5432 (PG), 7700 (Meili) | 5433 (PG), 7701 (Meili), 8001 (API), 4201 (Web) |
+```bash
+# From project root
+cd testing
+./quick-test.sh
+
+# Or use Make targets
+make testing/up        # Start everything
+make testing/test      # Run canary test
+make testing/down      # Stop everything
+
+# From within testing directory
+make up                # Start all services
+make canary            # Run canary test
+make down              # Stop all services
+```
+
+## When to Use This Environment
+
+- ✅ **Integration testing** - Test full stack together
+- ✅ **CI/CD pipelines** - Automated testing
+- ✅ **Production-like environment** - Realistic deployment simulation
+- ✅ **End-to-end testing** - Complete user workflows with playwright-mcp
+- ✅ **Manual QA** - Interactive testing via browser
+- ✅ **Demonstrations** - Show the full application
+
+## Service Ports
+
+All services use non-standard ports to avoid conflicts with local development:
+
+- **PostgreSQL**: `5433` (container) / `5433` (host)
+- **Meilisearch**: `7701` (container) / `7701` (host)
+- **Dex OIDC**: `5558` (container) / `5558` (host)
+- **Hermes API**: `8000` (container) / `8001` (host)
+- **Web UI**: `4200` (container) / `4201` (host)
+
+**Access the application**: Open http://localhost:4201 in your browser
+
+---
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────┐
-│  Browser: http://localhost:4201         │
-└────────────────┬────────────────────────┘
-                 │
-         ┌───────▼─────────────┐
-         │  Web (Ember Dev)    │  Port 4201 → 4200
-         │  ember serve        │  (hermes-web)
-         │  --proxy backend    │  Live reload enabled
-         └───────┬─────────────┘
-                 │ /api/* proxied to backend
-         ┌───────▼────────┐
-         │  Hermes API    │  Port 8001 → 8000
-         │  Go Backend    │  (hermes-server)
-         │  + Meilisearch │  Auth: Dex OIDC
-         │  + Workspace   │  Search: Algolia
-         └───┬───┬───┬────┘
-             │   │   │
-    ┌────────▼┐ ┌▼──────────┐ ┌▼────────────┐
-    │ PG 5433 │ │ Meili 7701│ │ Dex 5558    │
-    └─────────┘ └───────────┘ └─────────────┘
+┌─────────────┐     ┌──────────────────┐
+│  Browser    │────▶│  Web (Ember Dev) │
+│ :4201       │     │  Docker :4201    │
+└─────────────┘     └──────┬───────────┘
+                           │ /api/* proxied
+                    ┌──────▼────────────┐
+                    │  Hermes Backend   │
+                    │  Docker :8001     │
+                    └──┬─────────────┬──┘
+                       │             │
+        ┌──────────────▼──┐  ┌──────▼────────┐
+        │  PostgreSQL     │  │  Meilisearch  │
+        │  Docker :5433   │  │  Docker :7701 │
+        └─────────────────┘  └───────────────┘
+        
+        All in isolated hermes-test network
 ```
 
-## Prerequisites
+---
 
-**No pre-build required!** The web container runs Ember's development server, which:
-- Builds assets on-demand (live reload)
-- Proxies API requests to the backend
-- Runs in development mode for easier debugging
+## Recommended Workflows
 
-## Quick Start
-
-### 1. Start All Services
-
+### Daily Development (Local)
 ```bash
+# From project root - for fast iteration
+make bin                   # Build Hermes binary
+cd testing && make up      # Start supporting services
+cd .. && ./hermes server -config=testing/config.hcl
+./hermes server -config=config.hcl
+
+# In another terminal: Run web dev server
+cd web
+yarn start:with-proxy
+
+# Validate setup
+make canary
+```
+
+### Pre-Commit Testing
+```bash
+# Test with containerized environment
 cd testing
-docker compose up -d --build
+make test
+
+# Or from root
+make testing/test
 ```
 
-This will:
-1. Build the Hermes backend container (from `/Dockerfile`)
-2. Build the web frontend container (from `/web/Dockerfile`) - **installs dependencies in container**
-3. Start PostgreSQL, Meilisearch, and Dex
-4. Wait for services to be healthy
-5. Start Hermes backend configured for Dex authentication
-6. Start web frontend with Ember dev server (`ember serve --proxy http://hermes:8000`)
-
-**Note**: First build takes 3-5 minutes as it installs Node modules. Subsequent builds use Docker layer caching.
-
-### 2. Access the Application
-
-- **Web UI**: http://localhost:4201 (Ember dev server with hot reload)
-- **API**: http://localhost:8001 (Hermes backend)
-- **Dex**: http://localhost:5558 (OIDC provider)
-- **PostgreSQL**: localhost:5433
-- **Meilisearch**: http://localhost:7701
-
-### 3. Test Authentication
-
-1. Navigate to http://localhost:4201
-2. Frontend will detect `auth_provider: "dex"` from backend config
-3. Click login → redirects to Dex
-4. Use test credentials:
-   - Email: `test@hermes.local`
-   - Password: `password`
-5. After successful login, API requests include Bearer token
-
-**Available Test Users** (see [users.json](./users.json)):
-- `test@hermes.local` / `password` - Test user with tester permissions
-- `admin@hermes.local` / `password` - Admin user
-- `user@hermes.local` / `password` - Regular user
-
-### 3a. Verify Local Workspace Setup
-
-Run the verification script to ensure local workspace is properly configured:
-
+### CI/CD Pipeline
 ```bash
-./verify-local-workspace.sh
+# In .github/workflows or similar
+- name: Run integration tests
+  run: |
+    cd testing
+    make up
+    make canary
+    make down
 ```
 
-This checks:
-- ✓ Provider configuration in config.hcl
-- ✓ users.json exists and matches Dex identities
-- ✓ Volume mounts are correct
-- ✓ Dex and workspace users are aligned
-
-### 4. Stop Services
-
+### Demonstrating Features
 ```bash
-docker compose down
+# Start complete stack
+cd testing
+./quick-test.sh
+
+# Open http://localhost:4201 in browser
+# Show full application running
 ```
 
-### 5. Clean Up (Remove Volumes)
+---
 
+## Quick Command Reference
+
+### Local Development
 ```bash
-docker compose down -v
+# Services
+docker-compose up -d              # Start services
+docker-compose down               # Stop services
+docker-compose ps                 # Check status
+
+# Build and test
+make bin                          # Build Hermes binary
+make canary                       # Test local setup
+./hermes server                   # Run server locally
 ```
 
-## Service Details
-
-### PostgreSQL
-- **Image**: postgres:17.1-alpine
-- **Port**: 5433 (mapped from 5432)
-- **Database**: hermes_test
-- **User/Password**: postgres/postgres
-- **Volume**: postgres_test
-
-### Meilisearch
-- **Image**: getmeili/meilisearch:v1.11
-- **Port**: 7701 (mapped from 7700)
-- **API Key**: masterKey123
-- **Volume**: meilisearch_test
-
-### Hermes Backend
-- **Build**: Multi-stage Dockerfile (golang:1.25-alpine → alpine:3.19)
-- **Port**: 8001 (mapped from 8000)
-- **Config**: Uses environment variables + config.hcl
-- **Auth**: Disabled (HERMES_SERVER_OKTA_DISABLED=true)
-- **Health Check**: /api/v1/me endpoint
-
-### Web Frontend
-- **Build**: Multi-stage Dockerfile (node:20-alpine → nginx:alpine)
-- **Port**: 4201 (mapped from 4200)
-- **Server**: Nginx with API proxy
-- **API Proxy**: /api/* → http://hermes:8000
-
-## Development Workflow
-
-### Rebuild After Code Changes
-
+### Containerized Testing
 ```bash
-# Rebuild specific service
-docker-compose build hermes
-docker-compose build web
+# From root
+make testing/up                   # Start containers
+make testing/test                 # Run tests
+make testing/down                 # Stop containers
+make testing/clean                # Stop and remove volumes
 
-# Restart service
-docker-compose up -d hermes
-docker-compose up -d web
-
-# Or rebuild and restart everything
-docker-compose up --build -d
+# From testing/
+make up                           # Start with auto-build
+make build                        # Rebuild containers
+make logs                         # View logs
+make canary                       # Run canary test
+make open                         # Open in browser
+make clean                        # Full cleanup
 ```
 
-### View Logs
-
-```bash
-# All services
-docker-compose logs -f
-
-# Specific service
-docker-compose logs -f hermes
-docker-compose logs -f web
-docker-compose logs -f postgres
-docker-compose logs -f meilisearch
-```
-
-### Run Commands in Containers
-
-```bash
-# Execute hermes CLI commands
-docker-compose exec hermes /app/hermes version
-docker-compose exec hermes /app/hermes canary -search-backend=meilisearch
-
-# Access PostgreSQL
-docker-compose exec postgres psql -U postgres -d hermes_test
-
-# Check Meilisearch health
-docker-compose exec meilisearch wget -qO- http://localhost:7700/health
-```
-
-### Database Management
-
-```bash
-# Create database dump
-docker-compose exec postgres pg_dump -U postgres hermes_test > dump.sql
-
-# Restore database dump
-docker-compose exec -T postgres psql -U postgres hermes_test < dump.sql
-
-# Reset database (clear all data)
-docker-compose down -v
-docker-compose up -d
-```
-
-## Configuration
-
-### Environment Variables
-
-Edit `docker-compose.yml` to change:
-- Database credentials
-- Port mappings
-- Meilisearch API key
-- Hermes configuration
-
-### Custom Config File
-
-The Hermes service mounts `./config.hcl` as a volume. You can edit this file to customize:
-- Document types
-- Products
-- Feature flags
-- Search configuration
-
-Changes require restarting the service:
-```bash
-docker-compose restart hermes
-```
+---
 
 ## Troubleshooting
 
-### Services Won't Start
-
-Check service health:
-```bash
-docker-compose ps
-```
-
-All services should show "Up (healthy)" status.
-
-### Database Connection Errors
-
-Ensure PostgreSQL is healthy before Hermes starts:
-```bash
-docker-compose logs postgres
-```
-
-The `depends_on` configuration waits for health checks, but you may need to restart:
-```bash
-docker-compose restart hermes
-```
-
-### Web Frontend Can't Reach API
-
-Check nginx configuration and backend health:
-```bash
-docker-compose logs web
-docker-compose exec web wget -qO- http://hermes:8000/api/v1/me
-```
-
 ### Port Conflicts
+If you get "port already in use" errors:
+- **Local dev**: Check if containerized env is running (`cd testing && make down`)
+- **Containerized**: Ports are different (5433, 7701, 8001, 4201) to avoid conflicts
 
-If ports are already in use, edit `docker-compose.yml`:
-- PostgreSQL: Change `5433:5432`
-- Meilisearch: Change `7701:7700`
-- Hermes: Change `8001:8000`
-- Web: Change `4201:4200`
-
-### Rebuild Issues
-
-Clear Docker build cache:
+### Services Not Healthy
 ```bash
-docker-compose build --no-cache
+# Local dev
+docker-compose logs postgres
+docker-compose logs meilisearch
+
+# Containerized
+cd testing
+make logs-postgres
+make logs-meilisearch
 ```
 
-### Permission Errors
-
-All services run as non-root users. If you encounter permission issues with volumes:
+### Build Failures
 ```bash
-docker-compose down -v  # Clear volumes
-docker-compose up -d    # Recreate with correct permissions
+# Containerized: Rebuild without cache
+cd testing
+make rebuild
 ```
 
-## Testing
-
-### Manual Testing
-
-1. Start services: `docker-compose up -d`
-2. Wait for healthy status: `docker-compose ps`
-3. Open browser: http://localhost:4201
-4. Test API: `curl http://localhost:8001/api/v1/me`
-
-### Automated Testing
-
-Run canary test inside container:
+### Database Issues
 ```bash
-docker-compose exec hermes /app/hermes canary -search-backend=meilisearch
+# Local dev: Reset database
+docker-compose down -v
+docker-compose up -d
+
+# Containerized: Reset all data
+cd testing
+make clean
+make up
 ```
 
-### Integration Tests
+---
 
-The complete stack is suitable for integration testing:
-- Database migrations automatically run on startup
-- Search indexes are created automatically
-- Services wait for dependencies via health checks
+## Architecture Diagrams
 
-## Differences from Root docker-compose.yml
-
-The root `docker-compose.yml` provides only PostgreSQL and Meilisearch for local development.
-
-This testing setup provides the complete stack:
-- ✅ Full containerization
-- ✅ Isolated network
-- ✅ Different ports (no conflicts)
-- ✅ Separate volumes (hermes_test)
-- ✅ Web frontend included
-- ✅ Production-like nginx setup
-
-## Network Architecture
-
-All services are on the `hermes-test` bridge network:
-- Services communicate by name (e.g., `http://hermes:8000`)
-- No need for `host.docker.internal` or localhost
-- Isolated from other Docker networks
-
-## Performance Notes
-
-### Build Times
-- **First build**: ~5-10 minutes (downloads dependencies)
-- **Subsequent builds**: ~1-2 minutes (cached layers)
-- **Code-only changes**: ~30 seconds (cached dependencies)
-
-### Resource Usage
-- **CPU**: ~2 cores during build, <1 core running
-- **Memory**: ~2-3 GB total
-- **Disk**: ~1.5 GB images + volumes
-
-### Optimization Tips
-- Keep `go.mod` and `package.json` unchanged for better caching
-- Use `.dockerignore` to exclude unnecessary files
-- Consider multi-stage builds (already implemented)
-
-## CI/CD Integration
-
-This setup is suitable for CI/CD pipelines:
-
-```yaml
-# Example GitHub Actions
-- name: Start test environment
-  run: |
-    cd testing
-    docker-compose up -d
-    docker-compose exec -T hermes /app/hermes canary
-
-- name: Run tests
-  run: |
-    # Your test commands here
-    
-- name: Teardown
-  run: docker-compose down -v
+### Local Development
+```
+┌─────────────┐     ┌──────────────┐
+│  Browser    │────▶│  Web (Yarn)  │
+│ :4200       │     │  localhost   │
+└─────────────┘     └──────┬───────┘
+                           │
+                    ┌──────▼────────┐
+                    │  Hermes (Go)  │
+                    │  ./hermes     │
+                    │  localhost    │
+                    └──┬─────────┬──┘
+                       │         │
+        ┌──────────────▼┐  ┌────▼──────────┐
+        │  PostgreSQL   │  │  Meilisearch  │
+        │  Docker :5432 │  │  Docker :7700 │
+        └───────────────┘  └───────────────┘
 ```
 
-## Production Notes
+### Containerized Testing
+```
+┌─────────────┐     ┌──────────────────┐
+│  Browser    │────▶│  Web (Nginx)     │
+│ :4201       │     │  Docker :4201    │
+└─────────────┘     └──────┬───────────┘
+                           │ /api/*
+                    ┌──────▼────────────┐
+                    │  Hermes Backend   │
+                    │  Docker :8001     │
+                    └──┬─────────────┬──┘
+                       │             │
+        ┌──────────────▼──┐  ┌──────▼────────┐
+        │  PostgreSQL     │  │  Meilisearch  │
+        │  Docker :5433   │  │  Docker :7701 │
+        └─────────────────┘  └───────────────┘
+        
+        All in isolated hermes-test network
+```
 
-⚠️ **This is a testing environment, not production-ready:**
-- Uses hardcoded credentials
-- Auth is disabled
-- No SSL/TLS
-- No load balancing
-- No backup strategy
-- No monitoring/alerting
+---
 
-For production deployment, consider:
-- Kubernetes or ECS
-- Managed database (RDS, Cloud SQL)
-- Managed search (Elasticsearch, Algolia)
-- Proper secrets management
-- SSL/TLS termination
-- CDN for static assets
-- Monitoring and logging
+## Files and Directories
+
+```
+hermes/
+├── docker-compose.yml          # Local dev services
+├── Makefile                    # Root make targets
+├── scripts/
+│   ├── canary-local.sh        # Local canary test
+│   └── README.md
+└── testing/                    # Complete containerized environment
+    ├── docker-compose.yml     # Full stack definition
+    ├── Dockerfile.hermes      # Backend container
+    ├── Dockerfile.web         # Frontend container
+    ├── nginx.conf             # Web server config
+    ├── config.hcl             # Test configuration
+    ├── Makefile               # Testing commands
+    ├── quick-test.sh          # One-command startup
+    └── README.md              # Detailed documentation
+```
+
+---
+
+## Current Status
+
+### ✅ Working
+- **Local Development Environment**: Fully functional
+  - PostgreSQL and Meilisearch services run in Docker
+  - Hermes binary runs locally with hot reload
+  - Web dev server with live updates
+  - Canary test validates end-to-end functionality
+
+### 🚧 In Progress
+- **Containerized Testing Environment**: Build infrastructure complete, runtime blocked
+  - ✅ Docker builds complete successfully (11.5s)
+  - ✅ PostgreSQL container starts and passes health checks
+  - ✅ Meilisearch container starts and passes health checks
+  - ✅ Web container builds with pre-built assets
+  - ❌ Hermes container fails at runtime (Algolia dependency)
+
+### 🔴 Known Issues
+
+**Hermes Server Requires Algolia Connection**
+
+The Hermes server command currently requires a working Algolia connection even in test/development mode. This blocks the containerized testing environment from starting.
+
+**Error**: `error initializing Algolia write client: all hosts have been contacted unsuccessfully`
+
+**Root Cause**: Server initialization unconditionally connects to Algolia for search indexing, unlike the canary command which supports `-search-backend` flag.
+
+**Workarounds**:
+1. **Use Local Development** (recommended): Run hermes locally with local/meilisearch adapter
+2. **Mock Algolia**: Set up mock Algolia service in docker-compose
+3. **Code Change**: Add `-search-backend` flag to server command (like canary has)
+
+## Next Steps
+
+1. **For Development** (✅ RECOMMENDED): Use local dev environment
+   ```bash
+   docker-compose up -d
+   make bin
+   make canary
+   ```
+
+2. **For Testing** (🚧 BLOCKED): Containerized environment needs fix
+   ```bash
+   # Blocked: Requires Algolia or search backend abstraction
+   cd testing
+   ./quick-test.sh  # Will fail at hermes startup
+   ```
+
+3. **For Contributors**: Fix the Algolia dependency
+   - Add search backend selection to server command
+   - Or add conditional Algolia initialization
+   - Reference: `internal/cmd/commands/canary/canary.go` (has `-search-backend` flag)
+
+4. **Read the Docs**:
+   - `scripts/README.md` - Canary test details
+   - `testing/README.md` - Full containerized setup guide
+   - `.github/copilot-instructions.md` - Build standards and workflows

@@ -11,6 +11,16 @@ Hermes was created and is currently maintained by HashiCorp Labs, a small team i
 
 **Please note**: While this is not an official HashiCorp project, security is still very important to us! If you think that you've found a security issue, please contact us via email at security@hashicorp.com instead of filing a GitHub issue.
 
+## 📚 Documentation
+
+- **[Testing Environment](testing/README.md)** - Complete containerized testing setup
+- **[Internal Documentation](docs-internal/)** - Architecture decisions, RFCs, memos, and TODOs
+  - [ADRs (Architecture Decision Records)](docs-internal/adr/README.md) - System architecture decisions
+  - [RFCs (Request for Comments)](docs-internal/rfc/README.md) - Technical proposals and designs
+  - [MEMOs](docs-internal/memo/README.md) - Internal communications and guides
+  - [TODOs](docs-internal/todos/README.md) - Tracked development tasks
+- **[Agent Instructions](.github/copilot-instructions.md)** - Guidelines for AI-assisted development
+
 # Usage
 
 ## Setup
