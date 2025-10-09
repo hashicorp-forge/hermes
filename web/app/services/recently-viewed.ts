@@ -8,6 +8,7 @@ import { HermesDocument } from "hermes/types/document";
 import SessionService from "hermes/services/session";
 import StoreService from "hermes/services/store";
 import { HermesProject } from "hermes/types/project";
+import { withTimeout } from "hermes/utils/promise-timeout";
 
 /**
  * The document format returned by /me/recently-viewed-docs
@@ -71,25 +72,36 @@ export default class RecentlyViewedService extends Service {
    * and called in the background when viewing docs and projects.
    */
   fetchAll = keepLatestTask(async () => {
+    console.log('[RecentlyViewed] 🔄 Starting fetchAll task...');
     try {
       // Set a promise to fetch the recently viewed docs
+      console.log('[RecentlyViewed] 📡 Fetching recently viewed docs...');
       const recentlyViewedDocsPromise = this.fetchSvc
         .fetch(
           `/api/${this.configSvc.config.api_version}/me/recently-viewed-docs`,
         )
-        .then((resp) => resp?.json());
+        .then((resp) => {
+          console.log('[RecentlyViewed] 📬 Recently viewed docs response received');
+          return resp?.json();
+        });
       // Set a promise to fetch the recently viewed projects
+      console.log('[RecentlyViewed] 📡 Fetching recently viewed projects...');
       const recentlyViewedProjectsPromise = this.fetchSvc
         .fetch(
           `/api/${this.configSvc.config.api_version}/me/recently-viewed-projects`,
         )
-        .then((resp) => resp?.json());
+        .then((resp) => {
+          console.log('[RecentlyViewed] 📬 Recently viewed projects response received');
+          return resp?.json();
+        });
 
       // Await both promises
+      console.log('[RecentlyViewed] ⏳ Waiting for both requests to complete...');
       const [recentlyViewedDocs, recentlyViewedProjects] = await Promise.all([
         recentlyViewedDocsPromise,
         recentlyViewedProjectsPromise,
       ]);
+      console.log('[RecentlyViewed] ✅ Both requests complete. Docs:', recentlyViewedDocs?.length, 'Projects:', recentlyViewedProjects?.length);
 
       // Create a placeholder array for the full item promises
       let fullItemPromises: Promise<
@@ -137,23 +149,31 @@ export default class RecentlyViewedService extends Service {
       });
 
       // Await the full item promises
+      console.log('[RecentlyViewed] ⏳ Awaiting', fullItemPromises.length, 'full item promises...');
       const formattedItems = await Promise.all(fullItemPromises);
+      console.log('[RecentlyViewed] ✅ Full items loaded:', formattedItems.length);
 
-      // Load doc owners into the store
-      await this.store.maybeFetchPeople.perform(
-        formattedItems.map((d) => {
-          if (!d) return;
-          if ("doc" in d) {
-            return d.doc;
-          }
-        }),
+      // Load doc owners into the store with timeout
+      console.log('[RecentlyViewed] 👥 Loading doc owners into store...');
+      await withTimeout(
+        this.store.maybeFetchPeople.perform(
+          formattedItems.map((d) => {
+            if (!d) return;
+            if ("doc" in d) {
+              return d.doc;
+            }
+          }),
+        ),
+        30000, // 30 second timeout
+        'Fetching people for recently viewed docs'
       );
 
       // Update the local array to recompute the getter
       this._index = formattedItems.filter((item): item is RecentlyViewedDoc | RecentlyViewedProject => item != null);
+      console.log('[RecentlyViewed] ✅ FetchAll complete, index size:', this._index.length);
     } catch (e) {
       // Log an error if the fetch fails
-      console.error("Error fetching recently viewed docs", e);
+      console.error("[RecentlyViewed] ❌ Error fetching recently viewed docs:", e);
 
       // Cause the dashboard to show an error message.
       this._index = null;
