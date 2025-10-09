@@ -95,6 +95,30 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
   }
 
   /**
+   * Get workspace-aware button text for creating documents.
+   * Returns "Create draft in Google Drive" for Google workspace,
+   * or just "Create draft" for local workspace.
+   */
+  protected get createButtonText(): string {
+    if (this.configSvc.config.workspace_provider === "google") {
+      return "Create draft in Google Drive";
+    }
+    return "Create draft";
+  }
+
+  /**
+   * Get workspace-aware task running headline.
+   * Returns "Creating draft in Google Drive..." for Google workspace,
+   * or just "Creating draft..." for local workspace.
+   */
+  protected get taskRunningHeadline(): string {
+    if (this.configSvc.config.workspace_provider === "google") {
+      return "Creating draft in Google Drive...";
+    }
+    return "Creating draft...";
+  }
+
+  /**
    * Validates the form if `validateEagerly` is true.
    */
   private maybeValidate() {

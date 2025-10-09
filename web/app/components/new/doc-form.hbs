@@ -3,9 +3,9 @@
   @icon={{or this.docTypeIcon "file-text"}}
   @headline="Create your {{@docType}}"
   @buttonIsActive={{this.buttonIsActive}}
-  @taskIsRunningHeadline="Creating draft in Google Drive..."
+  @taskIsRunningHeadline={{this.taskRunningHeadline}}
   @taskIsRunningDescription="This usually takes 10-20 seconds."
-  @buttonText="Create Draft"
+  @buttonText={{this.createButtonText}}
   {{did-insert this.registerForm}}
   {{on "submit" this.submit}}
   data-test-new-doc-form
