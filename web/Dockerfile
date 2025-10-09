@@ -23,4 +23,5 @@ EXPOSE 4200
 
 # Start Ember development server with proxy to backend
 # The proxy URL is passed via HERMES_API_URL environment variable
-CMD ["sh", "-c", "yarn ember server --proxy ${HERMES_API_URL:-http://hermes:8000} --port 4200 --host 0.0.0.0"]
+# Uses yarn start:proxy which includes MIRAGE_ENABLED=false
+CMD ["sh", "-c", "MIRAGE_ENABLED=false yarn ember server --proxy ${HERMES_API_URL:-http://hermes:8000} --port 4200 --host 0.0.0.0"]

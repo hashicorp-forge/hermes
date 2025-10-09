@@ -26,8 +26,7 @@ export default class AuthenticateController extends Controller {
   protected authenticateOIDC = dropTask(async () => {
     // For OIDC providers (Okta/Dex), redirect to the backend auth endpoint
     // which will handle the OIDC flow
-    const authProvider = this.authProvider;
-    window.location.href = `/api/v2/auth/${authProvider}/login`;
+    window.location.href = `/auth/login`;
   });
 }
 declare module "@ember/controller" {
