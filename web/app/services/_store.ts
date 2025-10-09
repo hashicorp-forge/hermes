@@ -79,11 +79,22 @@ export default class StoreService extends Store {
         /**
          * Queue a promise request to `/api/v2/person?emails=${email}`
          * to return a GoogleUser when resolved.
+         * 
+         * WORKAROUND: Directly call adapter methods instead of Store.queryRecord()
+         * to avoid Ember Data 4.12 RequestManager initialization issues.
          */
+        const personAdapter = this.adapterFor("person" as never) as any;
+        const groupAdapter = this.adapterFor("group" as never) as any;
+        
         promises.push(
-          this.queryRecord("person", {
+          personAdapter.queryRecord(this, this.modelFor("person"), {
             emails: email,
-          }).catch((error) => {
+          }).then((result: any) => {
+            if (result) {
+              // Manually push the result into the store
+              this.push(this.normalize("person", result));
+            }
+          }).catch((error: any) => {
             /**
              * Errors here are not necessarily indicative of a problem;
              * for example, we get a 404 if a once-valid user is no longer in
@@ -104,9 +115,16 @@ export default class StoreService extends Store {
           /**
            * Groups API doesn't have a `findRecord` equivalent, so we query instead.
            */
-          this.query("group", {
+          groupAdapter.query(this, this.modelFor("group"), {
             query: email,
-          }).catch((error) => {
+          }).then((result: any) => {
+            if (result && result.results) {
+              // Manually push each result into the store
+              result.results.forEach((item: any) => {
+                this.push(this.normalize("group", item));
+              });
+            }
+          }).catch((error: any) => {
             /**
              * Errors here are not necessarily indicative of a problem;
              * for example, we get a 404 if a once-valid user is no longer in
