@@ -7,6 +7,23 @@ TEST_DIR := $(BUILD_DIR)/test
 .PHONY: default
 default: help
 
+.PHONY: up
+up: ## Start full testing environment (all services in Docker)
+	@echo "Starting containerized testing environment..."
+	@cd testing && docker compose up --build -d
+	@echo "Waiting for services to be healthy..."
+	@sleep 5
+	@cd testing && docker compose ps
+	@echo ""
+	@echo "✓ Testing environment ready!"
+	@echo "  Frontend: http://localhost:4201"
+	@echo "  Backend:  http://localhost:8001"
+	@echo "  Dex:      http://localhost:5558"
+
+.PHONY: down
+down: ## Stop testing environment
+	@cd testing && docker compose down
+
 .PHONY: build
 build: web/build
 	@mkdir -p $(BIN_DIR)
@@ -228,6 +245,23 @@ web/run: ## Run web application while proxying backend requests
 web/run: web/install-deps
 	cd web \
 		&& yarn start:with-proxy
+
+.PHONY: web/proxy
+web/proxy: ## Start web with proxy to backend (native: port 8000, testing: port 8001)
+web/proxy: web/install-deps
+	@echo "Starting web frontend with proxy..."
+	@echo "Detecting backend..."
+	@if lsof -i :8001 > /dev/null 2>&1; then \
+		echo "✓ Using testing backend at http://localhost:8001"; \
+		cd web && MIRAGE_ENABLED=false yarn ember server --port 4200 --proxy http://127.0.0.1:8001; \
+	elif lsof -i :8000 > /dev/null 2>&1; then \
+		echo "✓ Using native backend at http://localhost:8000"; \
+		cd web && MIRAGE_ENABLED=false yarn ember server --port 4200 --proxy http://127.0.0.1:8000; \
+	else \
+		echo "❌ No backend detected on port 8000 or 8001"; \
+		echo "Start backend first with: make run (native) or make up (testing)"; \
+		exit 1; \
+	fi
 
 web/set-yarn-version: ## Set yarn version
 	cd web \

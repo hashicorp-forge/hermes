@@ -31,12 +31,6 @@ yarn build            # Production build with env var warnings (expected)
 make build            # Builds web (yarn install + build) then Go binary
 ```
 
-#### 4. **Database Tests (Optional - Requires PostgreSQL)**
-```bash
-make docker/postgres/start              # Start PostgreSQL 17.1
-make go/test/with-docker-postgres       # Run DB-dependent tests
-make docker/postgres/stop               # Cleanup
-```
 
 ### ⚠️ Known Build Behaviors & Workarounds
 
@@ -59,9 +53,10 @@ make docker/postgres/stop && make docker/postgres/start
 ### Root Level Configuration
 - **`Makefile`**: Primary build orchestration (25+ targets)
 - **`go.mod`**: Go 1.25.0, main deps: gorm, google.golang.org/api, algolia, datadog
-- **`docker-compose.yml`**: PostgreSQL 17.1-alpine (port 5432)
-- **`config.hcl`**: **Fully documented runtime config** (tracked in git, 652 lines with comprehensive examples)
-- **`configs/config.hcl`**: Minimal config template (246 lines, for reference)
+- **`testing/`**: Complete containerized testing environment (see `testing/README.md`)
+- **`config.hcl`**: **Fully documented runtime config** (tracked in git, 828 lines with comprehensive examples)
+- **`configs/config.hcl`**: Minimal config template (246 lines, for reference only)
+- **`testing/dex-config.yaml`**: Dex OIDC provider configuration for testing environment
 - **`.gitignore`**: Excludes `credentials.json`, `token.json`, but NOT `config.hcl`
 
 ### Backend Structure (`cmd/`, `internal/`, `pkg/`)
@@ -113,30 +108,60 @@ make docker/postgres/stop && make docker/postgres/start
 
 ## Development Workflow
 
+### Quick Start Commands
+
+```bash
+# Start full testing environment (all services in Docker)
+make up
+
+# Start native backend
+make bin && ./hermes server -config=config.hcl
+
+# Start frontend with auto-detected proxy (8001 or 8000)
+make web/proxy
+
+# Run canary test to validate environment
+make canary
+
+# Stop testing environment
+make down
+```
+
 **Testing Backend (Docker) + Native Frontend** (stable backend, fast frontend changes, good for playwright-mcp iteration)
 ```bash
-# From repo root - start full testing environment
-cd testing
-docker compose up -d
+# Start full testing environment
+make up
 
-# Frontend in another terminal (port 4200 → 8001)
-cd web
-yarn start:proxy
+# Frontend in another terminal (auto-detects port 8001)
+make web/proxy
 ```
 
 **Fully Containerized** (complete integration testing)
 ```bash
-# From repo root - everything in containers
-cd testing
-docker compose up -d
+# Everything in containers
+make up
 
 # Access at http://localhost:4201
 # Backend at http://localhost:8001
+
+# Validate with canary test
+make canary
+```
+
+**Native Development** (fastest iteration)
+```bash
+# Terminal 1: Backend
+make bin && ./hermes server -config=config.hcl
+
+# Terminal 2: Frontend (auto-detects port 8000)
+make web/proxy
 ```
 
 **Port Conventions**:
 - Native: Frontend 4200, Backend 8000, Postgres 5432, Meilisearch 7700, Dex 5556/5557
 - Testing (in `./testing`): Frontend 4201, Backend 8001, Postgres 5433, Meilisearch 7701, Dex 5558/5559
+
+**See**: `docs-internal/MAKEFILE_ROOT_TARGETS.md` for comprehensive workflow examples
 
 ### E2E Testing with Playwright
 
@@ -207,7 +232,7 @@ cd testing && docker compose down      # All testing containers
 **Iteration Cycle** (Native mode):
 ```bash
 # Backend changes
-make bin && pkill -f "./hermes server" && ./hermes server -config=config.hcl &
+make bin && pkill -f "./hermes server" && ./hermes server -config=testing=/config.hcl &
 
 # Frontend auto-reloads (no action needed)
 
