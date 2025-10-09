@@ -1,9 +1,17 @@
-# RFC-026: Document Editor Implementation
+---
+id: RFC-026
+title: Document Editor Implementation
+date: 2025-10-08
+type: RFC
+subtype: Feature Implementation
+status: Implemented
+tags: [document-editor, feature, implementation, workspace]
+related:
+  - RFC-047
+  - RFC-051
+---
 
-**Status**: Implemented  
-**Date**: October 8, 2025  
-**Type**: RFC (Feature Implementation)  
-**Related**: RFC-047 (Local Workspace Setup), RFC-051 (Outbox Pattern)
+# Document Editor Implementation
 
 ## Context
 

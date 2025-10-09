@@ -1,9 +1,17 @@
-# RFC-009: Auth Provider Command-Line Selection
+---
+id: RFC-009
+title: Auth Provider Command-Line Selection
+date: 2025-10-06
+type: RFC
+subtype: Configuration
+status: Implemented
+tags: [authentication, configuration, cli, dex, okta, google]
+related:
+  - RFC-007
+  - RFC-020
+---
 
-**Status**: Implemented  
-**Date**: October 6, 2025  
-**Type**: RFC (Configuration)  
-**Related**: RFC-007 (Multi-Provider Auth), RFC-020 (Dex Authentication)
+# Auth Provider Command-Line Selection
 
 ## Context
 

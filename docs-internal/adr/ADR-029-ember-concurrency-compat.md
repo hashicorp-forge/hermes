@@ -1,9 +1,17 @@
-# ADR-029: Ember Concurrency Compatibility
+---
+id: ADR-029
+title: Ember Concurrency Compatibility
+date: 2025-10-08
+type: ADR
+subtype: Dependency Decision
+status: Accepted
+tags: [ember, dependencies, concurrency, compatibility, upgrade]
+related:
+  - ADR-006
+  - RFC-034
+---
 
-**Status**: Accepted  
-**Date**: October 8, 2025  
-**Type**: ADR (Dependency Decision)  
-**Related**: ADR-006 (Animated Components), RFC-034 (Ember Upgrade)
+# Ember Concurrency Compatibility
 
 ## Context
 

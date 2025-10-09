@@ -1,9 +1,18 @@
-# ADR-070: Testing Docker Compose Environment
+---
+id: ADR-070
+title: Testing Docker Compose Environment
+date: 2025-10-09
+type: ADR
+subtype: Infrastructure
+status: Accepted
+tags: [infrastructure, docker, testing, environment, dex, meilisearch]
+related:
+  - RFC-020
+  - RFC-047
+  - RFC-076
+---
 
-**Status**: Accepted  
-**Date**: October 9, 2025  
-**Type**: ADR (Infrastructure)  
-**Related**: RFC-020 (Dex Auth), RFC-047 (Local Workspace), RFC-076 (Search Refactoring)
+# Testing Docker Compose Environment
 
 ## Context
 

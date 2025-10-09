@@ -1,9 +1,17 @@
-# RFC-076: Search and Authentication Refactoring
+---
+id: RFC-076
+title: Search and Authentication Refactoring
+date: 2025-10-06
+type: RFC
+subtype: Architecture Refactoring
+status: Implemented
+tags: [refactoring, search, authentication, architecture]
+related:
+  - RFC-007
+  - RFC-009
+---
 
-**Status**: Implemented  
-**Date**: October 6, 2025  
-**Type**: RFC (Architecture Refactoring)  
-**Related**: RFC-007 (Multi-Provider Auth), RFC-009 (Provider Selection)
+# Search and Authentication Refactoring
 
 ## Context
 

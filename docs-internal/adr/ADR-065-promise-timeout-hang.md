@@ -1,9 +1,17 @@
-# ADR-065: Promise Timeout Hang Fix
+---
+id: ADR-065
+title: Promise Timeout Hang Fix
+date: 2025-10-08
+type: ADR
+subtype: Frontend Decision
+status: Accepted
+tags: [frontend, promise, timeout, bug-fix, admin-login]
+related:
+  - memo/001
+  - memo/075
+---
 
-**Status**: Accepted  
-**Date**: October 8, 2025  
-**Type**: ADR (Frontend Decision)  
-**Related**: memo/001 (Admin Login Hang), memo/075 (Root Cause Analysis)
+# Promise Timeout Hang Fix
 
 ## Context
 

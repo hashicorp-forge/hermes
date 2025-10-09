@@ -1,9 +1,17 @@
-# ADR-071: Local File Workspace System
+---
+id: ADR-071
+title: Local File Workspace System
+date: 2025-10-09
+type: ADR
+subtype: Backend Architecture
+status: Accepted
+tags: [backend, architecture, workspace, local-workspace, filesystem]
+related:
+  - RFC-047
+  - ADR-070
+---
 
-**Status**: Accepted  
-**Date**: October 9, 2025  
-**Type**: ADR (Backend Architecture)  
-**Related**: RFC-047 (Local Workspace), ADR-070 (Testing Environment)
+# Local File Workspace System
 
 ## Context
 

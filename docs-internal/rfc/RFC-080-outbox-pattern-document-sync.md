@@ -1,9 +1,18 @@
-# RFC-080: Outbox Pattern for Document Synchronization
+---
+id: RFC-080
+title: Outbox Pattern for Document Synchronization
+date: 2025-10-09
+type: RFC
+subtype: Architecture Proposal
+status: Proposed
+tags: [outbox-pattern, document-sync, architecture, meilisearch, search]
+related:
+  - ADR-073
+  - ADR-075
+  - RFC-076
+---
 
-**Status**: Proposed  
-**Date**: October 9, 2025  
-**Type**: RFC (Architecture Proposal)  
-**Related**: ADR-073 (Provider Abstraction), ADR-075 (Meilisearch), RFC-076 (Search Refactoring)
+# Outbox Pattern for Document Synchronization
 
 ## Summary
 

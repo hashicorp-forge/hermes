@@ -1,9 +1,18 @@
-# RFC-007: Multi-Provider Auth Architecture
+---
+id: RFC-007
+title: Multi-Provider Auth Architecture
+date: 2025-10-06
+type: RFC
+subtype: Architecture
+status: Implemented
+tags: [authentication, architecture, multi-provider, dex, okta, google]
+related:
+  - ADR-029
+  - RFC-009
+  - RFC-020
+---
 
-**Status**: Implemented  
-**Date**: October 6, 2025  
-**Type**: RFC (Architecture)  
-**Related**: ADR-029 (Ember Concurrency), RFC-009 (Provider Selection), RFC-020 (Dex Implementation)
+# Multi-Provider Auth Architecture
 
 ## Context
 

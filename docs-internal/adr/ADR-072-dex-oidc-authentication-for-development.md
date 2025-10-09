@@ -1,9 +1,18 @@
-# ADR-072: Dex OIDC Authentication for Development
+---
+id: ADR-072
+title: Dex OIDC Authentication for Development
+date: 2025-10-09
+type: ADR
+subtype: Authentication
+status: Accepted
+tags: [authentication, dex, oidc, development, testing]
+related:
+  - RFC-020
+  - RFC-007
+  - ADR-070
+---
 
-**Status**: Accepted  
-**Date**: October 9, 2025  
-**Type**: ADR (Authentication)  
-**Related**: RFC-020 (Dex Implementation), RFC-007 (Multi-Provider Auth), ADR-070 (Testing Environment)
+# Dex OIDC Authentication for Development
 
 ## Context
 

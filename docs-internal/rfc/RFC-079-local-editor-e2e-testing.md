@@ -1,9 +1,18 @@
-# RFC-079: Local In-Browser Editor for E2E Testing
+---
+id: RFC-079
+title: Local In-Browser Editor for E2E Testing
+date: 2025-10-09
+type: RFC
+subtype: Feature Proposal
+status: Proposed
+tags: [e2e-testing, local-editor, playwright, testing, workspace]
+related:
+  - ADR-071
+  - ADR-074
+  - RFC-047
+---
 
-**Status**: Proposed  
-**Date**: October 9, 2025  
-**Type**: RFC (Feature Proposal)  
-**Related**: ADR-071 (Local Workspace), ADR-074 (Playwright), RFC-047 (Local Workspace Provider)
+# Local In-Browser Editor for E2E Testing
 
 ## Summary
 

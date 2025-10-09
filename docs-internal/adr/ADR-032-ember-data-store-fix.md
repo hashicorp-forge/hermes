@@ -1,9 +1,17 @@
-# ADR-032: Ember Data Store Error Fix
+---
+id: ADR-032
+title: Ember Data Store Error Fix
+date: 2025-10-08
+type: ADR
+subtype: Frontend Decision
+status: Accepted
+tags: [ember, frontend, ember-data, bug-fix, authentication]
+related:
+  - RFC-020
+  - RFC-007
+---
 
-**Status**: Accepted  
-**Date**: October 8, 2025  
-**Type**: ADR (Frontend Decision)  
-**Related**: RFC-020 (Dex Authentication), RFC-007 (Multi-Provider Auth)
+# Ember Data Store Error Fix
 
 ## Context
 

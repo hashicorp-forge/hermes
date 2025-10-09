@@ -1,9 +1,17 @@
-# ADR-074: Playwright for Local Development Iteration
+---
+id: ADR-074
+title: Playwright for Local Development Iteration
+date: 2025-10-09
+type: ADR
+subtype: Development Tooling
+status: Accepted
+tags: [playwright, testing, e2e, development, tooling]
+related:
+  - ADR-070
+  - RFC-079
+---
 
-**Status**: Accepted  
-**Date**: October 9, 2025  
-**Type**: ADR (Development Tooling)  
-**Related**: ADR-070 (Testing Environment), RFC-079 (Local Editor Flow)
+# Playwright for Local Development Iteration
 
 ## Context
 

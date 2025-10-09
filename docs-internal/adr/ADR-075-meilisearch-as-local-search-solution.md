@@ -1,9 +1,17 @@
-# ADR-075: Meilisearch as Local Search Solution
+---
+id: ADR-075
+title: Meilisearch as Local Search Solution
+date: 2025-10-09
+type: ADR
+subtype: Infrastructure
+status: Accepted
+tags: [infrastructure, search, meilisearch, local-search, testing]
+related:
+  - ADR-070
+  - RFC-076
+---
 
-**Status**: Accepted  
-**Date**: October 9, 2025  
-**Type**: ADR (Infrastructure)  
-**Related**: ADR-070 (Testing Environment), RFC-076 (Search Refactoring)
+# Meilisearch as Local Search Solution
 
 ## Context
 

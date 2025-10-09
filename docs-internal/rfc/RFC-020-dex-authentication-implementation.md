@@ -1,9 +1,17 @@
-# RFC-020: Dex OIDC Authentication Implementation
+---
+id: RFC-020
+title: Dex OIDC Authentication Implementation
+date: 2025-10
+type: RFC
+subtype: Implementation
+status: Implemented
+tags: [authentication, dex, oidc, implementation]
+related:
+  - RFC-007
+  - RFC-009
+---
 
-**Status**: Implemented  
-**Date**: October 2025  
-**Type**: RFC (Implementation)  
-**Related**: RFC-007 (Multi-Provider Auth), RFC-009 (Provider Selection)
+# Dex OIDC Authentication Implementation
 
 ## Context
 

@@ -1,9 +1,18 @@
-# ADR-073: Provider Abstraction Architecture
+---
+id: ADR-073
+title: Provider Abstraction Architecture
+date: 2025-10-09
+type: ADR
+subtype: System Architecture
+status: Accepted
+tags: [architecture, abstraction, providers, workspace, authentication, search]
+related:
+  - RFC-007
+  - RFC-047
+  - RFC-076
+---
 
-**Status**: Accepted  
-**Date**: October 9, 2025  
-**Type**: ADR (System Architecture)  
-**Related**: RFC-007 (Multi-Provider Auth), RFC-047 (Local Workspace), RFC-076 (Search Refactoring)
+# Provider Abstraction Architecture
 
 ## Context
 

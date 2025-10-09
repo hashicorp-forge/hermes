@@ -1,9 +1,16 @@
-# ADR-006: Animated Components Fix
+---
+id: ADR-006
+title: Animated Components Fix
+date: 2025-10-08
+type: ADR
+subtype: Frontend Decision
+status: Accepted
+tags: [ember, frontend, animation, components, migration]
+related:
+  - RFC-034
+---
 
-**Status**: Accepted  
-**Date**: October 8, 2025  
-**Type**: ADR (Frontend Decision)  
-**Related**: RFC-034 (Ember Upgrade Strategy)
+# Animated Components Fix
 
 ## Context
 

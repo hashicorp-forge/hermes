@@ -1,9 +1,17 @@
-# RFC-078: New Document Types for HashiCorp Documentation
+---
+id: RFC-078
+title: New Document Types for HashiCorp Documentation
+date: 2025-10-09
+type: RFC
+subtype: Feature Proposal
+status: Proposed
+tags: [document-types, adr, memo, frd, path, feature-proposal]
+related:
+  - ADR-073
+  - RFC-047
+---
 
-**Status**: Proposed  
-**Date**: October 9, 2025  
-**Type**: RFC (Feature Proposal)  
-**Related**: ADR-073 (Provider Abstraction), RFC-047 (Local Workspace)
+# New Document Types for HashiCorp Documentation
 
 ## Summary
 

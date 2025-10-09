@@ -1,9 +1,17 @@
-# ADR-048: Local Workspace User Info Fix
+---
+id: ADR-048
+title: Local Workspace User Info Fix
+date: 2025-10-08
+type: ADR
+subtype: Backend Decision
+status: Accepted
+tags: [backend, workspace, user-info, local-workspace, bug-fix]
+related:
+  - RFC-047
+  - RFC-020
+---
 
-**Status**: Accepted  
-**Date**: October 8, 2025  
-**Type**: ADR (Backend Decision)  
-**Related**: RFC-047 (Local Workspace Setup), RFC-020 (Dex Authentication)
+# Local Workspace User Info Fix
 
 ## Context
 

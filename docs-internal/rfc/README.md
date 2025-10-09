@@ -8,6 +8,27 @@ Architecture proposals, design documents, and implementation specifications for 
 - **Status**: 14 Implemented, 1 Design Phase, 1 Partially Complete
 - **Categories**: Authentication (5), Search (4), Documents (2), Frontend (3), Configuration (2)
 
+## Current Patterns
+
+**Key Architectural Patterns** (as of October 2025):
+- **Provider Abstraction**: All external services (search, workspace, auth) use adapter pattern
+- **Backend Proxy**: Frontend proxies all API/search requests through backend (no direct Algolia)
+- **Multi-Auth Support**: Runtime selection of auth provider (Google/Okta/Dex) via flag/env var
+- **Profile-Based Config**: Single HCL file with multiple named environments
+- **Docker Testing**: Full containerized environment with Ember dev server + proxy
+
+**Frontend Development**:
+- Ember 6.7.0 with TypeScript and strict mode templates
+- Development server with `--proxy` flag (no nginx required)
+- MIRAGE_ENABLED=false for backend integration
+- Hot reload via Ember CLI dev server
+
+**Backend Development**:
+- Go 1.25.0+ with provider interfaces
+- Config via HCL with profile support (`-profile=testing`)
+- PostgreSQL + Meilisearch (local) or Algolia (production)
+- Dex OIDC for local auth, Google/Okta for production
+
 ## Index by Category
 
 ### Authentication & Authorization (5 RFCs)
@@ -98,3 +119,15 @@ When adding new RFCs:
 3. Include comprehensive front matter
 4. Link related RFCs and ADRs
 5. Update this README index
+
+## Implementation References
+
+For practical implementation guidance, see:
+- **Session Notes**: `docs-internal/sessions/` - Detailed implementation journals
+- **Memos**: `docs-internal/memo/` - Quick reference guides and summaries
+- **Copilot Instructions**: `.github/copilot-instructions.md` - Current project patterns
+
+**Key Implementation Docs**:
+- [MEMO-010: Ember Upgrade & Dev Server](../memo/MEMO-010-ember-dev-server.md) - Frontend development setup
+- [DEX_QUICK_START.md](../DEX_QUICK_START.md) - Local auth setup
+- [TESTING_ENVIRONMENTS.md](../TESTING_ENVIRONMENTS.md) - Docker vs native development

@@ -1,9 +1,16 @@
-# ADR-036: Fix Location Type
+---
+id: ADR-036
+title: Fix Location Type
+date: 2025-10-07
+type: ADR
+subtype: Configuration Decision
+status: Accepted
+tags: [ember, configuration, routing, location-type]
+related:
+  - RFC-034
+---
 
-**Status**: Accepted  
-**Date**: October 7, 2025  
-**Type**: ADR (Configuration Decision)  
-**Related**: RFC-034 (Ember Upgrade Strategy)
+# Fix Location Type
 
 ## Context
 

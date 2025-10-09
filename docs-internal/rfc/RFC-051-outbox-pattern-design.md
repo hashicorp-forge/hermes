@@ -1,9 +1,17 @@
-# RFC-051: Document Search Index Outbox Pattern
+---
+id: RFC-051
+title: Document Search Index Outbox Pattern
+date: 2025-10-08
+type: RFC
+subtype: Architecture Design
+status: Design Phase
+tags: [outbox-pattern, search, architecture, design, meilisearch]
+related:
+  - RFC-047
+  - RFC-026
+---
 
-**Status**: Design Phase  
-**Date**: October 8, 2025  
-**Type**: RFC (Architecture Design)  
-**Related**: RFC-047 (Local Workspace), RFC-026 (Document Editor)
+# Document Search Index Outbox Pattern
 
 ## Context
 
