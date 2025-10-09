@@ -10,8 +10,11 @@ Status updates, investigation findings, session summaries, quick reference guide
 - **MEMO-010-ember-dev-server.md** - Ember development server, proxy configuration, and upgrade strategy
 - **MEMO-017-dev-quickref.md** - Development workflow quick reference (build, test, deploy)
 - **MEMO-023-dex-quickstart.md** - Dex OIDC authentication quick start guide
+- **MEMO-035-env-setup.md** - **NEW!** Complete environment setup guide for new developers (10-minute quick start)
 - **MEMO-052-outbox-pattern-quickref.md** - Outbox pattern implementation quick reference with SQL queries and patterns
 - **MEMO-058-playwright-agent-guide.md** - Comprehensive guide for AI agents using Playwright for E2E testing
+- **MEMO-071-auth-providers-guide.md** - **NEW!** Complete authentication providers guide (Google, Okta, Dex)
+- **MEMO-073-docs-internal-hub.md** - **NEW!** Documentation hub and navigation guide
 
 ### Analysis & Metrics ✅
 
@@ -36,11 +39,11 @@ Status updates, investigation findings, session summaries, quick reference guide
 - **MEMO-045-local-workspace-complete.md** - Local workspace provider implementation completion report
 - **MEMO-084-testing-env-complete.md** - Testing environment setup and configuration completion
 
-### README Files 🔜
+### README Files
 
-- **MEMO-071-auth-providers-readme.md** - Authentication providers documentation (Google, Okta, Dex)
-- **MEMO-072-local-workspace-readme.md** - Local workspace provider setup and usage documentation
-- **MEMO-073-main-readme.md** - Main README for docs-internal directory structure
+- ✅ **MEMO-071-auth-providers-guide.md** - Authentication providers guide (Google, Okta, Dex)
+- 🔜 **MEMO-072-local-workspace-readme.md** - Local workspace provider setup and usage documentation
+- ✅ **MEMO-073-docs-internal-hub.md** - Main documentation hub for docs-internal directory structure
 
 ## Document Organization
 

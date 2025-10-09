@@ -1,8 +1,18 @@
 # Hermes Internal Documentation
 
+> **👉 NEW: See [MEMO-073: Documentation Hub](memo/MEMO-073-docs-internal-hub.md) for the complete documentation index and quick start guides!**
+
 **Purpose**: Organized reference for completed work, ongoing initiatives, and development processes  
-**Last Updated**: October 5, 2025  
-**Organization**: Categorized by project type with executive summaries
+**Last Updated**: October 9, 2025  
+**Organization**: Structured by document type with YAML frontmatter for searchability
+
+## 🚀 Quick Start
+
+**New to Hermes?** Start here:
+1. **[MEMO-035: Environment Setup](memo/MEMO-035-env-setup.md)** - Get running in 10 minutes
+2. **[MEMO-017: Dev Quick Reference](memo/MEMO-017-dev-quickref.md)** - Essential workflows
+3. **[MEMO-023: Dex Quick Start](memo/MEMO-023-dex-quickstart.md)** - Local authentication
+4. **[MEMO-073: Documentation Hub](memo/MEMO-073-docs-internal-hub.md)** - Complete documentation index
 
 ## 📂 Documentation Structure
 
