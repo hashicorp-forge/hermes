@@ -30,11 +30,11 @@ test.describe('Authentication Flow', () => {
     // Look for the Dex login heading
     await expect(page.locator('text=Log in to dex')).toBeVisible();
 
-    // Click on the first "Log in with Email" button (mock-password connector)
+    // Click on "Log in with Email" button to use local password database
     await page.click('button:has-text("Log in with Email")');
     
-    // Wait for the password form
-    await page.waitForURL(/5558.*\/auth\/mock-password/, { timeout: 5000 });
+    // Wait for the password form (local auth, not mock-password)
+    await page.waitForURL(/5558.*\/auth\/local/, { timeout: 5000 });
 
     // Fill in test credentials
     await page.fill('input[name="login"]', 'test@hermes.local');
@@ -89,14 +89,14 @@ test.describe('Authentication Flow', () => {
     // Start at the Hermes homepage
     await page.goto('/');
 
-    // Wait for redirect to Dex (port 5558 is the issuer/connector port for testing)
+    // Should be redirected to Dex login page
     await page.waitForURL(/5558.*\/auth/, { timeout: 10000 });
 
-    // Click on the first "Log in with Email" button (mock-password connector)
+    // Click on the "Log in with Email" button to use local password database
     await page.click('button:has-text("Log in with Email")');
     
-    // Wait for the password form
-    await page.waitForURL(/5558.*\/auth\/mock-password/, { timeout: 5000 });
+    // Wait for the password form (local auth)
+    await page.waitForURL(/5558.*\/auth\/local/, { timeout: 5000 });
 
     // Try to login with invalid credentials
     await page.fill('input[name="login"]', 'invalid@hermes.local');
@@ -116,11 +116,11 @@ test.describe('Authentication Flow', () => {
     // Wait for redirect to Dex (port 5558 is the connector port)
     await page.waitForURL(/5558.*\/auth/, { timeout: 10000 });
 
-    // Click on the first "Log in with Email" button (mock-password connector)
+    // Click on "Log in with Email" button to use local password database
     await page.click('button:has-text("Log in with Email")');
     
-    // Wait for the password form
-    await page.waitForURL(/5558.*\/auth\/mock-password/, { timeout: 5000 });
+    // Wait for the password form (local auth)
+    await page.waitForURL(/5558.*\/auth\/local/, { timeout: 5000 });
 
     // Login with admin credentials
     await page.fill('input[name="login"]', 'admin@hermes.local');

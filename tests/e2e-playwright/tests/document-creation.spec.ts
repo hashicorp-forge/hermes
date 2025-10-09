@@ -36,11 +36,11 @@ test.describe('Document Creation Flow', () => {
     // Verify we're on the Dex login page
     await expect(page.locator('text=Log in to dex')).toBeVisible();
 
-    // Click on the first "Log in with Email" button (mock-password connector)
+    // Click on "Log in with Email" button to use local password database
     await page.click('button:has-text("Log in with Email")');
     
-    // Wait for the password form
-    await page.waitForURL(/5558.*\/auth\/mock-password/, { timeout: 5000 });
+    // Wait for the password form (local auth)
+    await page.waitForURL(/5558.*\/auth\/local/, { timeout: 5000 });
 
     // Fill in credentials
     await page.fill('input[name="login"]', email);
@@ -89,13 +89,24 @@ test.describe('Document Creation Flow', () => {
 
     // If no button found, try direct navigation
     if (!navigatedToNewDoc) {
-      await page.goto('http://localhost:4200/new');
+      await page.goto('/new');
       console.log('✓ Navigated directly to /new');
     }
 
-    // Wait for the new document form to load
+    // Wait for the template chooser to load
     await page.waitForLoadState('networkidle');
     await page.screenshot({ path: 'test-results/02-new-document-page.png', fullPage: true });
+
+    // Step 2a: Click on the RFC template to get to the document creation form
+    const rfcTemplateLink = page.locator('a[href*="new/doc?docType=RFC"]').first();
+    await rfcTemplateLink.waitFor({ timeout: 5000 });
+    await rfcTemplateLink.click();
+    console.log('✓ Clicked RFC template');
+
+    // Wait for the document creation form to load
+    await page.waitForURL(/new\/doc/, { timeout: 5000 });
+    await page.waitForLoadState('networkidle');
+    await page.screenshot({ path: 'test-results/02b-document-form.png', fullPage: true });
 
     // Step 3: Fill in document details
     const timestamp = Date.now();

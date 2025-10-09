@@ -33,7 +33,7 @@ test.describe('Document Content Editor - Local Workspace', () => {
    */
   async function authenticateUser(page: Page, email: string = 'test@hermes.local', password: string = 'password') {
     // Start at the Hermes homepage
-    await page.goto('http://localhost:4200/');
+    await page.goto('/');
 
     // Should be redirected to Dex login page (port 5558 for testing)
     await page.waitForURL(/5558.*\/auth/, { timeout: 10000 });
@@ -41,9 +41,9 @@ test.describe('Document Content Editor - Local Workspace', () => {
     // Verify we're on the Dex login page
     await expect(page.locator('text=Log in to dex')).toBeVisible();
 
-    // Click on "Log in with Email" to get to the password form
+    // Click on "Log in with Email" to use local password database
     await page.click('text=Log in with Email');
-    await page.waitForURL(/5558.*\/auth\/mock-password/);
+    await page.waitForURL(/5558.*\/auth\/local/);
 
     // Fill in credentials
     await page.fill('input[name="login"]', email);
@@ -53,7 +53,7 @@ test.describe('Document Content Editor - Local Workspace', () => {
     await page.click('button[type="submit"]');
 
     // Should be redirected back to Hermes after successful authentication
-    await page.waitForURL('http://localhost:4200/**', { timeout: 10000 });
+    await page.waitForURL(/localhost:420[01]\//, { timeout: 10000 });
     await page.waitForLoadState('networkidle');
 
     console.log(`✓ User ${email} authenticated successfully`);
