@@ -17,6 +17,13 @@ type PeopleSearchOptions struct {
 	PageToken  string   // Pagination token
 }
 
+// ProviderCapabilities defines optional features that a workspace provider may support.
+type ProviderCapabilities interface {
+	// SupportsContentEditing returns true if the provider supports direct content editing
+	// via GetDocumentContent/UpdateDocumentContent operations.
+	SupportsContentEditing() bool
+}
+
 // Provider defines the interface for workspace operations (Google Drive, local storage, etc).
 // This is a simplified interface focusing on the methods actually used by Hermes handlers.
 type Provider interface {

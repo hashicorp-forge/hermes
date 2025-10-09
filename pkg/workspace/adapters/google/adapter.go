@@ -151,3 +151,10 @@ func (a *Adapter) ListUserGroups(userEmail string) ([]*admin.Group, error) {
 	}
 	return groups.Groups, nil
 }
+
+// SupportsContentEditing returns false as the Google workspace provider does not
+// support direct content editing through the content API. Google Docs should be
+// edited through the embedded iframe interface.
+func (a *Adapter) SupportsContentEditing() bool {
+	return false
+}

@@ -24,6 +24,7 @@ export default class ConfigService extends Service {
     version: config.version,
     short_revision: config.shortRevision,
     group_approvals: config.groupApprovals,
+    workspace_provider: "google" as "google" | "local", // Runtime workspace provider selection
   };
 
   setConfig(param: HermesConfig) {

@@ -128,27 +128,85 @@ cd web
 yarn start:with-proxy  # Runs on localhost:4200, proxies to :8000
 ```
 
-### Making Changes
+### E2E Testing with Playwright
 
-**Go Changes**:
-1. Make code changes
-2. Run `make bin` to verify compilation
-3. Run `make go/test` to verify tests
-4. For DB changes, ensure models in `pkg/models/` are updated
-5. Run `make go/test/with-docker-postgres` if touching DB code
+**Guide**: See `docs-internal/PLAYWRIGHT_E2E_AGENT_GUIDE.md` for comprehensive instructions
 
-**Ember/TypeScript Changes**:
-1. Make code changes
-2. Run `yarn test:types` to catch type errors early
-3. Run `yarn lint:hbs` if modifying templates
-4. Run `yarn build` to verify production build
-5. Run `yarn test:unit` to verify unit tests (should pass, 5 known failures)
-6. Test manually in browser with `yarn start:with-proxy`
+**Quick Reference**:
 
-**Full Build Verification**:
+**For Interactive Exploration** (preferred for agents):
+- Use `playwright-mcp` browser tools: `mcp_microsoft_pla_browser_navigate`, `mcp_microsoft_pla_browser_snapshot`, etc.
+- Take snapshots to see page state
+- Take screenshots for documentation
+- Click, type, fill forms interactively
+
+**For Validation/CI** (headless test execution):
 ```bash
-make build  # Should complete successfully with warnings
+# Verify environment first
+curl -I http://localhost:8000/health
+curl -I http://localhost:4200/
+curl -s http://localhost:5556/dex/.well-known/openid-configuration | jq '.'
+
+# Run tests (headless, agent-friendly)
+cd tests/e2e-playwright
+npx playwright test document-content-editor.spec.ts --reporter=line --max-failures=1
 ```
+
+**Key Points**:
+- ✅ **Always use headless mode** with `--reporter=line` for programmatic execution
+- ❌ **Never use `--headed`** when running tests as an agent (hangs terminal, starts interactive server)
+- ✅ **Check prerequisites** before running (backend, frontend, Dex must be running)
+- ✅ **Use playwright-mcp** for exploration and debugging
+- ✅ **Parse exit codes**: 0 = success, 1 = failure
+- ✅ **Read screenshots** from `test-results/` on failures
+
+**Common Commands**:
+```bash
+# Single test file (recommended)
+npx playwright test file.spec.ts --reporter=line --max-failures=1
+
+# Grep for specific test
+npx playwright test -g "should edit document" --reporter=line
+
+# JSON output for parsing
+npx playwright test --reporter=json > results.json
+
+# Check test status
+echo $?  # 0 = pass, 1 = fail
+```
+
+### Quick Iteration Workflow
+
+**Native Backend (Recommended)**: Fast rebuilds (1-2s), instant frontend hot-reload
+```bash
+# Start environment (once)
+docker compose up -d dex postgres meilisearch
+make bin && ./hermes server -config=config.hcl &
+cd web && MIRAGE_ENABLED=false yarn ember server --port 4200 --proxy http://127.0.0.1:8000 &
+
+# Iteration cycle
+# Backend: make bin && pkill -f "./hermes server" && ./hermes server -config=config.hcl &
+# Frontend: Auto-reloads
+# Validate: cd tests/e2e-playwright && npx playwright test --reporter=line --max-failures=1
+```
+
+**Docker Backend**: For testing `./testing` environment (slower, 10-15s rebuilds)
+```bash
+cd testing && docker compose build hermes && docker compose up -d hermes  # Port 8001
+cd web && MIRAGE_ENABLED=false yarn ember server --port 4200 --proxy http://127.0.0.1:8001
+```
+
+**Verification**:
+```bash
+curl -I http://localhost:8000/health  # Backend
+curl -I http://localhost:4200/        # Frontend
+lsof -i :4200 :8000 :8001             # Check ports
+```
+
+**Troubleshooting**:
+- Port conflicts: `pkill -f "ember server"` or `pkill -f "./hermes server"`
+- Dependencies: `docker compose ps | grep -E "dex|postgres|meilisearch"`
+- Backend restart: `pkill -f "./hermes server" && make bin && ./hermes server -config=config.hcl`
 
 ## What Not To Do
 
@@ -193,144 +251,29 @@ This enables:
 - [Coverage/metrics if applicable]
 ```
 
-### Example Commit Messages
+### Example Commit by Category
 
-**Example 1: Feature Implementation**
 ```
-feat: implement Meilisearch adapter for search provider
+[type]: [short description]
 
-**Prompt Used**:
-Implement Meilisearch adapter for search.Provider interface following TDD.
-Design doc: docs-internal/design/SEARCH_ABSTRACTION_DESIGN.md
-Test strategy: docs-internal/testing/SEARCH_TEST_STRATEGY.md
-Pattern reference: docs-internal/EXISTING_PATTERNS.md
-
-Steps:
-1. Create adapter_test.go with test cases from strategy
-2. Implement adapter.go to pass tests
-3. Add integration tests with testcontainers
-4. Verify coverage meets 80% target
+**Prompt Used**: [exact prompt with context/references]
 
 **AI Implementation Summary**:
-- adapter.go: 528 lines implementing search.Provider interface
-- adapter_test.go: 284 lines of unit tests (12 test functions)
-- integration_test.go: 327 lines testing real Meilisearch
-- Followed error wrapping pattern: fmt.Errorf("operation: %w", err)
-- Implemented retry logic for eventual consistency
-- Used shared container pattern for test performance
+- [What was generated/modified]
+- [Key decisions and patterns followed]
 
-**Verification**:
-- make bin: ✅ Success
-- go test ./pkg/search/adapters/meilisearch/...: ✅ All pass
-- Coverage: 85% (target: 80%) ✅
-- Integration tests: 15/15 passing in 12s
+**Human Review Notes** (optional): [Modifications, validation, issues]
+
+**Verification**: [Commands, test results, metrics]
 ```
 
-**Example 2: Refactoring**
-```
-refactor(api): migrate V2 handlers to workspace provider
+**Examples by Type**:
+- **feat**: `feat: implement Meilisearch adapter` - New feature with TDD, integration tests, 85% coverage
+- **refactor**: `refactor(api): migrate V2 to workspace provider` - Replace 47 gw.Service calls, backend-agnostic
+- **fix**: `fix: correct error wrapping in validation` - Apply fmt.Errorf("context: %w", err) pattern
+- **docs**: `docs: add migration summary` - Architecture diagrams, statistics, code examples
+- **test**: `test: add E2E document editor tests` - Playwright tests with playwright-mcp validation
 
-**Prompt Used**:
-Refactor internal/api/v2/*.go to use workspace.Provider instead of direct gw.Service calls.
-Pattern: Same as completed V2/documents.go migration
-Files: drafts.go, reviews.go, approvals.go
-Verification: go test ./internal/api/v2/...
+**Store prompts for**: features, refactoring, tests, docs, architecture, bug fixes. Skip for trivial changes (typos, formatting).
 
-**AI Implementation Summary**:
-- Replaced 47 gw.Service calls with workspace.Provider methods
-- Updated error handling to use wrapped errors
-- Removed direct Google Workspace API dependencies
-- All handlers now backend-agnostic
-
-Files changed:
-- drafts.go: -198 lines (removed direct API calls)
-- reviews.go: -156 lines (removed direct API calls)  
-- approvals.go: -89 lines (removed direct API calls)
-
-**Human Review Notes**:
-- Verified error messages still provide useful context
-- Checked that retry logic is preserved in provider layer
-- Confirmed no behavioral changes (drop-in replacement)
-
-**Verification**:
-- make bin: ✅ Success
-- go test ./internal/api/v2/...: ✅ 23/23 tests passing
-- Integration tests: ✅ No regressions
-```
-
-**Example 3: Documentation**
-```
-docs: add comprehensive API migration documentation
-
-**Prompt Used**:
-Generate documentation for completed provider migration following template:
-- docs-internal/completed/MIGRATION_COMPLETE_SUMMARY.md
-- Include before/after architecture comparison
-- List all migrated handlers and statistics
-- Document patterns used and best practices
-- Create quick reference guide
-
-Reference: docs-internal/PROMPT_TEMPLATES.md (prompt #10)
-
-**AI Implementation Summary**:
-- MIGRATION_COMPLETE_SUMMARY.md: 645 lines comprehensive summary
-- MIGRATION_STATUS.md: 89 lines quick reference
-- MIGRATION_CHECKLIST.md: 112 lines completion verification
-- Architecture diagrams showing before/after
-- Statistics: 100+ direct API usages eliminated
-- Pattern documentation with code examples
-
-**Verification**:
-- All markdown files validated with linter
-- Links verified (no 404s)
-- Code examples tested for syntax correctness
-```
-
-**Example 4: Small Fix**
-```
-fix: correct error wrapping in draft validation
-
-**Prompt Used**:
-Fix error in pkg/models/draft.go validation - errors should be wrapped with
-context per EXISTING_PATTERNS.md, not returned directly.
-
-**AI Implementation Summary**:
-- Changed: return err → return fmt.Errorf("validating draft: %w", err)
-- Applied to 3 validation functions
-- Preserves error chain for debugging
-
-**Verification**:
-- go test ./pkg/models/...: ✅ All pass
-- Error messages now include context
-```
-
-### When to Store Prompts
-
-**ALWAYS store prompts for**:
-- ✅ New feature implementation
-- ✅ Refactoring work
-- ✅ Test generation
-- ✅ Documentation generation
-- ✅ Architecture/design changes
-- ✅ Bug fixes requiring AI assistance
-
-**Optional for**:
-- 🟡 Trivial changes (typo fixes, formatting)
-- 🟡 Mechanical changes (bulk renames following established pattern)
-
-**Prompt Quality Standards**:
-- Be specific (reference files, patterns, docs)
-- Include verification steps in prompt
-- Reference design/strategy documents when applicable
-- Show expected output format if non-standard
-
-## Trust These Instructions
-
-These instructions were created by thoroughly testing the build process, examining CI workflows, reviewing code structure, and documenting actual behavior (not assumptions). When you encounter errors or unexpected behavior:
-
-1. **First**, check if it's documented above as expected/known
-2. **Second**, verify you followed the exact command sequence
-3. **Third**, check that prerequisites (PostgreSQL, correct versions) are met
-4. **Only then** search the codebase or attempt fixes
-
-This workflow ensures **repeatable, tested results** and minimizes trial-and-error debugging.
+**Prompt quality**: Reference files/patterns/docs, include verification steps, show expected output format.

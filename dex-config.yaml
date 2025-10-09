@@ -29,8 +29,9 @@ telemetry:
 staticClients:
 - id: hermes-integration
   redirectURIs:
-  - 'http://localhost:8000/auth/callback'
-  - 'http://localhost:4200/auth/callback'
+  - 'http://localhost:8000/auth/callback'  # Root environment backend
+  - 'http://localhost:8001/auth/callback'  # Testing environment backend
+  - 'http://localhost:4200/auth/callback'  # Frontend (shared by both)
   name: 'Hermes Integration'
   secret: ZXhhbXBsZS1hcHAtc2VjcmV0
 

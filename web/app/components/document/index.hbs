@@ -28,19 +28,91 @@
       class="flex h-full items-center justify-center"
     >
       {{#unless @modelIsChanging}}
-        {{!
-          We teardown and rebuild the iframe when the model is changing
-          so that any SRC changes don't add history entries,
-          which would cause the back button to break.
-        }}
-        <iframe
-          title="Google Doc"
-          height="100%"
-          width="100%"
-          class="border-0"
-          src="https://docs.google.com/document/d/{{@document.objectID}}/edit?embedded=true"
-        >
-        </iframe>
+        {{! Google Workspace: Show iframe }}
+        {{#if this.isGoogleWorkspace}}
+          {{!
+            We teardown and rebuild the iframe when the model is changing
+            so that any SRC changes don't add history entries,
+            which would cause the back button to break.
+          }}
+          <iframe
+            title="Google Doc"
+            height="100%"
+            width="100%"
+            class="border-0"
+            src="https://docs.google.com/document/d/{{@document.objectID}}/edit?embedded=true"
+          >
+          </iframe>
+        {{/if}}
+
+        {{! Local Workspace: Show text editor }}
+        {{#if this.isLocalWorkspace}}
+          <div class="flex h-full w-full flex-col p-6">
+            {{#if this.isEditMode}}
+              {{! Edit Mode }}
+              <div class="mb-4 flex items-center justify-between">
+                <h2 class="text-xl font-semibold">Edit Document</h2>
+                <div class="flex gap-3">
+                  <Hds::Button
+                    @text="Cancel"
+                    @color="secondary"
+                    {{on "click" this.cancelEdit}}
+                    disabled={{this.isSavingContent}}
+                  />
+                  <Hds::Button
+                    @text={{if this.isSavingContent "Saving..." "Save"}}
+                    @color="primary"
+                    {{on "click" this.saveDocumentContent}}
+                    disabled={{this.isSavingContent}}
+                  />
+                </div>
+              </div>
+              
+              {{#if this.isLoadingContent}}
+                <div class="flex h-full items-center justify-center">
+                  <Hds::ApplicationState
+                    @title="Loading document content..."
+                  >
+                    <:media>
+                      <Hds::ApplicationState::Media as |M|>
+                        <M.Loader />
+                      </Hds::ApplicationState::Media>
+                    </:media>
+                  </Hds::ApplicationState>
+                </div>
+              {{else}}
+                <textarea
+                  class="flex-1 w-full rounded border border-gray-300 p-4 font-mono text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                  placeholder="Enter document content..."
+                  value={{this.documentContent}}
+                  {{on "input" this.updateContent}}
+                  disabled={{this.isSavingContent}}
+                ></textarea>
+              {{/if}}
+            {{else}}
+              {{! Read-Only Mode }}
+              <div class="mb-4 flex items-center justify-between">
+                <h2 class="text-xl font-semibold">{{@document.title}}</h2>
+                <Hds::Button
+                  @text="Edit"
+                  @color="primary"
+                  {{on "click" this.toggleEditMode}}
+                />
+              </div>
+              
+              <div class="flex-1 overflow-auto rounded border border-gray-300 bg-gray-50 p-6">
+                <div class="prose max-w-none">
+                  <p class="text-gray-600">
+                    Click "Edit" to modify this document's content.
+                  </p>
+                  <p class="mt-4 text-sm text-gray-500">
+                    This document is stored in the local workspace. You can edit it directly in the browser.
+                  </p>
+                </div>
+              </div>
+            {{/if}}
+          </div>
+        {{/if}}
       {{/unless}}
     </Hds::Card::Container>
   </div>

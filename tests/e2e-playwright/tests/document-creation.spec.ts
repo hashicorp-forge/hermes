@@ -30,11 +30,17 @@ test.describe('Document Creation Flow', () => {
     // Start at the Hermes homepage
     await page.goto('/');
 
-    // Should be redirected to Dex login page (port 5556 is the issuer/connector port)
-    await page.waitForURL(/5556.*\/auth/, { timeout: 10000 });
+    // Should be redirected to Dex login page (port 5558 is the issuer/connector port for testing)
+    await page.waitForURL(/5558.*\/auth/, { timeout: 10000 });
     
     // Verify we're on the Dex login page
-    await expect(page.locator('text=Log in to Your Account')).toBeVisible();
+    await expect(page.locator('text=Log in to dex')).toBeVisible();
+
+    // Click on the first "Log in with Email" button (mock-password connector)
+    await page.click('button:has-text("Log in with Email")');
+    
+    // Wait for the password form
+    await page.waitForURL(/5558.*\/auth\/mock-password/, { timeout: 5000 });
 
     // Fill in credentials
     await page.fill('input[name="login"]', email);
@@ -44,7 +50,7 @@ test.describe('Document Creation Flow', () => {
     await page.click('button[type="submit"]');
 
     // Should be redirected back to Hermes after successful authentication
-    await page.waitForURL('http://localhost:4200/**', { timeout: 10000 });
+    await page.waitForURL(/localhost:420[01]/, { timeout: 10000 });
     await page.waitForLoadState('networkidle');
 
     console.log(`✓ User ${email} authenticated successfully`);

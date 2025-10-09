@@ -588,3 +588,8 @@ func (a *Adapter) WithUserGroup(userEmail string, group *admin.Group) *Adapter {
 	a.UserGroups[userEmail] = append(a.UserGroups[userEmail], group)
 	return a
 }
+
+// SupportsContentEditing returns true as the mock adapter can support content editing for testing.
+func (a *Adapter) SupportsContentEditing() bool {
+	return true
+}

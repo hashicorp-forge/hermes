@@ -570,7 +570,7 @@ func (c *Command) Run(args []string) int {
 	authenticatedEndpoints := []endpoint{
 		{"/api/v2/approvals/", apiv2.ApprovalsHandler(srv)},
 		{"/api/v2/document-types", apiv2.DocumentTypesHandler(srv)},
-		{"/api/v2/documents/", apiv2.DocumentHandler(srv)},
+		{"/api/v2/documents/", apiv2.DocumentHandler(srv)}, // Handles /content suffix too
 		{"/api/v2/drafts", apiv2.DraftsHandler(srv)},
 		{"/api/v2/drafts/", apiv2.DraftsDocumentHandler(srv)},
 		{"/api/v2/groups", apiv2.GroupsHandler(srv)},

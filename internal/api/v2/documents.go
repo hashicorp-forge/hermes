@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"reflect"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/hashicorp-forge/hermes/internal/email"
@@ -44,6 +45,13 @@ const (
 
 func DocumentHandler(srv server.Server) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Check if this is a document content request (/content suffix)
+		// and delegate to DocumentContentHandler
+		if strings.HasSuffix(r.URL.Path, "/content") {
+			DocumentContentHandler(srv).ServeHTTP(w, r)
+			return
+		}
+
 		// Parse document ID and request type from the URL path.
 		docID, reqType, err := parseDocumentsURLPath(
 			r.URL.Path, "documents")

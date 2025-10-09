@@ -21,14 +21,20 @@ test.describe('Authentication Flow', () => {
     // Start at the Hermes homepage
     await page.goto('/');
 
-    // Should be redirected to Dex login page (port 5556 is the issuer/connector port)
-    await page.waitForURL(/5556.*\/auth/, { timeout: 10000 });
+    // Should be redirected to Dex login page (port 5558 is the issuer/connector port for testing)
+    await page.waitForURL(/5558.*\/auth/, { timeout: 10000 });
     
     // Verify we're on the Dex login page
     await expect(page).toHaveTitle(/dex/i);
     
-    // Look for the login form - Dex uses "Log in to Your Account" heading
-    await expect(page.locator('text=Log in to Your Account')).toBeVisible();
+    // Look for the Dex login heading
+    await expect(page.locator('text=Log in to dex')).toBeVisible();
+
+    // Click on the first "Log in with Email" button (mock-password connector)
+    await page.click('button:has-text("Log in with Email")');
+    
+    // Wait for the password form
+    await page.waitForURL(/5558.*\/auth\/mock-password/, { timeout: 5000 });
 
     // Fill in test credentials
     await page.fill('input[name="login"]', 'test@hermes.local');
@@ -38,11 +44,11 @@ test.describe('Authentication Flow', () => {
     await page.click('button[type="submit"]');
 
     // Should be redirected back to Hermes after successful authentication
-    await page.waitForURL('http://localhost:4201/**', { timeout: 10000 });
+    await page.waitForURL(/localhost:420[01]/, { timeout: 10000 });
 
     // Verify we're authenticated - check for user menu or authenticated UI elements
     // The exact selector depends on Hermes UI, but typically there's a user menu/avatar
-    await expect(page).toHaveURL(/localhost:4201/);
+    await expect(page).toHaveURL(/localhost:420[01]/);
     
     // Wait for the page to fully load
     await page.waitForLoadState('networkidle');
@@ -83,8 +89,14 @@ test.describe('Authentication Flow', () => {
     // Start at the Hermes homepage
     await page.goto('/');
 
-    // Wait for redirect to Dex (port 5556 is the issuer/connector port)
-    await page.waitForURL(/5556.*\/auth/, { timeout: 10000 });
+    // Wait for redirect to Dex (port 5558 is the issuer/connector port for testing)
+    await page.waitForURL(/5558.*\/auth/, { timeout: 10000 });
+
+    // Click on the first "Log in with Email" button (mock-password connector)
+    await page.click('button:has-text("Log in with Email")');
+    
+    // Wait for the password form
+    await page.waitForURL(/5558.*\/auth\/mock-password/, { timeout: 5000 });
 
     // Try to login with invalid credentials
     await page.fill('input[name="login"]', 'invalid@hermes.local');
@@ -104,13 +116,19 @@ test.describe('Authentication Flow', () => {
     // Wait for redirect to Dex (port 5558 is the connector port)
     await page.waitForURL(/5558.*\/auth/, { timeout: 10000 });
 
+    // Click on the first "Log in with Email" button (mock-password connector)
+    await page.click('button:has-text("Log in with Email")');
+    
+    // Wait for the password form
+    await page.waitForURL(/5558.*\/auth\/mock-password/, { timeout: 5000 });
+
     // Login with admin credentials
     await page.fill('input[name="login"]', 'admin@hermes.local');
     await page.fill('input[name="password"]', 'password');
     await page.click('button[type="submit"]');
 
     // Should be redirected back to Hermes
-    await page.waitForURL('http://localhost:4201/**', { timeout: 10000 });
+    await page.waitForURL(/localhost:420[01]/, { timeout: 10000 });
     await page.waitForLoadState('networkidle');
 
     // Verify authentication

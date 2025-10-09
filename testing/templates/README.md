@@ -44,7 +44,7 @@ Example use cases for PATH documents:
 - Technical Program Management delivery processes
 - Training and onboarding workflows
 
-See `path-example.md` for a complete working example based on GP-003 Engineering Breakdown.
+The template includes placeholder variables for customization to your specific workflow.
 
 ## How Templates Work
 

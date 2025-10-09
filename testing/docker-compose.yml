@@ -97,7 +97,7 @@ services:
       # Mount workspace data (persists across restarts - runtime data)
       - hermes_workspace:/app/workspace_data
     environment:
-      HERMES_BASE_URL: http://localhost:4201
+      HERMES_BASE_URL: http://localhost:4200  # Frontend dev server port (native Ember)
       HERMES_SEARCH_PROVIDER: meilisearch
       HERMES_MEILISEARCH_URL: http://meilisearch:7700
       HERMES_MEILISEARCH_KEY: masterKey123
@@ -109,8 +109,7 @@ services:
         condition: service_healthy
       meilisearch:
         condition: service_healthy
-      dex:
-        condition: service_healthy
+      # Note: dex dependency removed - using shared Dex from root docker-compose via host.docker.internal
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "-O", "/dev/null", "http://localhost:8000/health"]
       interval: 3s

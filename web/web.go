@@ -75,6 +75,7 @@ type ConfigResponse struct {
 	SupportLinkURL           string          `json:"support_link_url"`
 	ShortRevision            string          `json:"short_revision"`
 	Version                  string          `json:"version"`
+	WorkspaceProvider        string          `json:"workspace_provider"` // "google" or "local"
 }
 
 // ConfigHandler returns runtime configuration for the Hermes frontend.
@@ -168,6 +169,12 @@ func ConfigHandler(
 			dexRedirectURL = cfg.Dex.RedirectURL
 		}
 
+		// Determine which workspace provider is configured
+		workspaceProvider := "google" // Default to Google
+		if cfg.LocalWorkspace != nil {
+			workspaceProvider = "local"
+		}
+
 		response := &ConfigResponse{
 			AlgoliaDocsIndexName:     cfg.Algolia.DocsIndexName,
 			AlgoliaDraftsIndexName:   cfg.Algolia.DraftsIndexName,
@@ -189,6 +196,7 @@ func ConfigHandler(
 			SupportLinkURL:           cfg.SupportLinkURL,
 			ShortRevision:            version.GetShortRevision(),
 			Version:                  version.GetVersion(),
+			WorkspaceProvider:        workspaceProvider,
 		}
 
 		w.Header().Set("Content-Type", "application/json")

@@ -16,6 +16,9 @@ import (
 // Compile-time check that ProviderAdapter implements workspace.Provider
 var _ workspace.Provider = (*ProviderAdapter)(nil)
 
+// Compile-time check that ProviderAdapter implements workspace.ProviderCapabilities
+var _ workspace.ProviderCapabilities = (*ProviderAdapter)(nil)
+
 // ProviderAdapter adapts the local Adapter (which implements StorageProvider)
 // to the workspace.Provider interface used by API handlers.
 // This bridges the gap between the comprehensive StorageProvider and the
@@ -624,4 +627,10 @@ func (p *ProviderAdapter) ListGroups(domain, query string, maxResults int64) ([]
 func (p *ProviderAdapter) ListUserGroups(userEmail string) ([]*admin.Group, error) {
 	// Local adapter doesn't support group management
 	return []*admin.Group{}, nil
+}
+
+// SupportsContentEditing returns true as the local workspace provider supports
+// direct content editing through GetDocumentContent/UpdateDocumentContent.
+func (p *ProviderAdapter) SupportsContentEditing() bool {
+	return true
 }
