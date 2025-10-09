@@ -10,33 +10,45 @@ Hermes is an open source document management system created by HashiCorp to help
 
 ## 🚀 Quick Start
 
-Get Hermes running locally in under 5 minutes:
+Get Hermes running locally in **one command**:
 
 \`\`\`bash
-# 1. Clone the repository
-git clone https://github.com/hashicorp-forge/hermes.git
-cd hermes
+cd testing && docker compose up -d
+\`\`\`
 
-# 2. Copy example configuration
+This starts a complete testing environment with:
+- ✅ Backend (Go) on http://localhost:8001
+- ✅ Frontend (Ember.js) on http://localhost:4201
+- ✅ PostgreSQL database
+- ✅ Meilisearch search engine
+- ✅ Dex OIDC provider
+
+**Login**: `test@hermes.local` / `password`
+
+### Alternative: Native Development
+
+For faster iteration when developing backend or frontend code:
+
+\`\`\`bash
+# 1. Copy example configuration
 cp config-example.hcl config.hcl
 
-# 3. Start services (PostgreSQL, Meilisearch, Dex)
-cd testing && docker compose up -d && cd ..
+# 2. Start infrastructure services only
+cd testing && docker compose up -d postgres meilisearch dex && cd ..
 
-# 4. Build and run backend
+# 3. Terminal 1: Backend
 make bin
 ./hermes server -config=config.hcl
 
-# 5. In another terminal, start frontend
+# 4. Terminal 2: Frontend
 cd web && yarn install
 yarn start:proxy  # Auto-detects backend on port 8000
 
-# 6. Open http://localhost:4200
-# Login with: test@hermes.local / password
+# 5. Open http://localhost:4200
 \`\`\`
 
 **Next Steps**:
-- 📖 [Testing Environment Guide](testing/README.md) - Detailed setup instructions
+- 📖 [Testing Environment Guide](testing/README.md) - Detailed setup and troubleshooting
 - 🔧 [Configuration Guide](docs-internal/CONFIG_HCL_DOCUMENTATION.md) - Customize your setup
 - 🧪 [Makefile Targets](docs-internal/MAKEFILE_ROOT_TARGETS.md) - Common development commands
 

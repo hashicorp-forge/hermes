@@ -82,6 +82,21 @@ related:
 - **Status**: Open
 - **Description**: Remove products from Algolia indexing once fully migrated to database
 
+### TODO-011: E2E Test 'Awaiting Review' Dashboard View
+- **Priority**: High
+- **Status**: Open
+- **Description**: Test that documents awaiting user's review appear correctly in dashboard
+
+### TODO-012: E2E Test 'Latest Docs' Dashboard View
+- **Priority**: High
+- **Status**: Open
+- **Description**: Test that latest published documents appear chronologically in dashboard
+
+### TODO-013: E2E Test 'Recently Viewed' Sidebar
+- **Priority**: High
+- **Status**: Open
+- **Description**: Test that recently viewed documents appear correctly in dashboard sidebar
+
 ## Status Definitions
 
 - **open**: Not yet started, ready to be picked up
