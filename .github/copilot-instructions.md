@@ -113,20 +113,30 @@ make docker/postgres/stop && make docker/postgres/start
 
 ## Development Workflow
 
-### Local Development (Two Process Model)
+**Testing Backend (Docker) + Native Frontend** (stable backend, fast frontend changes, good for playwright-mcp iteration)
 ```bash
-# Terminal 1 - Backend
-make docker/postgres/start
-docker compose up -d dex meilisearch
-# config.hcl is already configured for local dev with Dex + Local + Meilisearch
-# See docs-internal/CONFIG_HCL_DOCUMENTATION.md for full documentation
-./hermes server -config=config.hcl
+# From repo root - start full testing environment
+cd testing
+docker compose up -d
 
-# Terminal 2 - Frontend (proxies to backend)
+# Frontend in another terminal (port 4200 → 8001)
 cd web
-# No build-time auth/search credentials needed!
-yarn start:with-proxy  # Runs on localhost:4200, proxies to :8000
+yarn start:proxy
 ```
+
+**Fully Containerized** (complete integration testing)
+```bash
+# From repo root - everything in containers
+cd testing
+docker compose up -d
+
+# Access at http://localhost:4201
+# Backend at http://localhost:8001
+```
+
+**Port Conventions**:
+- Native: Frontend 4200, Backend 8000, Postgres 5432, Meilisearch 7700, Dex 5556/5557
+- Testing (in `./testing`): Frontend 4201, Backend 8001, Postgres 5433, Meilisearch 7701, Dex 5558/5559
 
 ### E2E Testing with Playwright
 
@@ -175,38 +185,35 @@ npx playwright test --reporter=json > results.json
 echo $?  # 0 = pass, 1 = fail
 ```
 
-### Quick Iteration Workflow
+### Quick Start Commands
 
-**Native Backend (Recommended)**: Fast rebuilds (1-2s), instant frontend hot-reload
 ```bash
-# Start environment (once)
-docker compose up -d dex postgres meilisearch
-make bin && ./hermes server -config=config.hcl &
-cd web && MIRAGE_ENABLED=false yarn ember server --port 4200 --proxy http://127.0.0.1:8000 &
+# Check what's running
+cd testing && docker compose ps
+lsof -i :4200 :4201 :8000 :8001
 
-# Iteration cycle
-# Backend: make bin && pkill -f "./hermes server" && ./hermes server -config=config.hcl &
-# Frontend: Auto-reloads
-# Validate: cd tests/e2e-playwright && npx playwright test --reporter=line --max-failures=1
+# Health checks
+curl -I http://localhost:8000/health   # Native backend
+curl -I http://localhost:8001/health   # Testing backend (docker)
+curl -I http://localhost:4200/         # Native frontend
+curl -I http://localhost:4201/         # Testing frontend (docker)
+
+# Stop services
+pkill -f "hermes server"               # Native backend
+pkill -f "ember server"                # Native frontend
+cd testing && docker compose down      # All testing containers
 ```
 
-**Docker Backend**: For testing `./testing` environment (slower, 10-15s rebuilds)
+**Iteration Cycle** (Native mode):
 ```bash
-cd testing && docker compose build hermes && docker compose up -d hermes  # Port 8001
-cd web && MIRAGE_ENABLED=false yarn ember server --port 4200 --proxy http://127.0.0.1:8001
-```
+# Backend changes
+make bin && pkill -f "./hermes server" && ./hermes server -config=config.hcl &
 
-**Verification**:
-```bash
-curl -I http://localhost:8000/health  # Backend
-curl -I http://localhost:4200/        # Frontend
-lsof -i :4200 :8000 :8001             # Check ports
-```
+# Frontend auto-reloads (no action needed)
 
-**Troubleshooting**:
-- Port conflicts: `pkill -f "ember server"` or `pkill -f "./hermes server"`
-- Dependencies: `docker compose ps | grep -E "dex|postgres|meilisearch"`
-- Backend restart: `pkill -f "./hermes server" && make bin && ./hermes server -config=config.hcl`
+# Validate
+cd tests/e2e-playwright && npx playwright test --reporter=line --max-failures=1
+```
 
 ## What Not To Do
 
