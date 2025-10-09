@@ -1,10 +1,10 @@
-import JSONAdapter from "@ember-data/adapter/json-api";
+import RESTAdapter from "@ember-data/adapter/rest";
 import { service } from "@ember/service";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import SessionService from "hermes/services/session";
 
-export default class ApplicationAdapter extends JSONAdapter {
+export default class ApplicationAdapter extends RESTAdapter {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare session: SessionService;

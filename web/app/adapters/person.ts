@@ -20,4 +20,16 @@ export default class PersonAdapter extends ApplicationAdapter {
 
     return RSVP.hash({ results });
   }
+
+  /**
+   * Queries for a single person record using emailAddress parameter.
+   * Used by store.queryRecord("person", { emails: "user@example.com" })
+   */
+  queryRecord(_store: DS.Store, _type: DS.Model, query: { emails: string }) {
+    return RSVP.Promise.resolve(
+      this.fetchSvc
+        .fetch(`/api/${this.configSvc.config.api_version}/people?emailAddress=${query.emails}`)
+        .then((r) => r?.json())
+    );
+  }
 }
