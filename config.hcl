@@ -588,17 +588,17 @@ dex {
   // disabled: Set to false to enable Dex authentication
   disabled = false  // Enabled for local testing
 
-  // issuer_url: Dex server URL (must match dex-config.yaml)
+  // issuer_url: Dex server URL (must match testing/dex-config.yaml)
   issuer_url = "http://localhost:5556/dex"  // Dex runs on port 5556
 
-  // client_id: OAuth client ID (must match dex-config.yaml staticClients)
+  // client_id: OAuth client ID (must match testing/dex-config.yaml staticClients)
   client_id = "hermes-integration"
 
-  // client_secret: OAuth client secret (must match dex-config.yaml)
-  // This is a base64-encoded example secret from dex-config.yaml
+  // client_secret: OAuth client secret (must match testing/dex-config.yaml)
+  // This is a base64-encoded example secret from testing/dex-config.yaml
   client_secret = "ZXhhbXBsZS1hcHAtc2VjcmV0"
 
-  // redirect_url: OAuth callback URL (must match dex-config.yaml and base_url)
+  // redirect_url: OAuth callback URL (must match testing/dex-config.yaml and base_url)
   redirect_url = "http://localhost:8000/auth/callback"
 }
 
