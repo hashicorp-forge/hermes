@@ -56,7 +56,7 @@ test.describe('Document Creation Flow', () => {
     console.log(`✓ User ${email} authenticated successfully`);
   }
 
-  test('should create a new RFC document successfully', async ({ page }) => {
+  test('should create a new RFC document successfully and validate no template markers remain', async ({ page }) => {
     // Step 1: Authenticate
     await authenticateUser(page);
     
@@ -152,36 +152,26 @@ test.describe('Document Creation Flow', () => {
       }
     }
 
-    // Select document type (RFC)
-    const typeSelectors = [
-      page.locator('select[name="type"]'),
-      page.locator('select[name="docType"]'),
-      page.locator('[data-test-document-type]'),
-      page.locator('text=/select.*type/i').locator('..'),
-    ];
-
-    for (const selector of typeSelectors) {
-      try {
-        await selector.waitFor({ timeout: 3000 });
-        await selector.selectOption('RFC');
-        console.log('✓ Selected document type: RFC');
-        break;
-      } catch (e) {
-        // Try next selector - might be a custom dropdown
-        try {
-          await page.locator('text=/RFC/i').first().click();
-          console.log('✓ Selected RFC via text click');
-          break;
-        } catch (e2) {
-          // Continue
-        }
-      }
+    // Select product area (required field in local workspace)
+    try {
+      const productAreaButton = page.locator('button:has-text("Select a product/area")');
+      await productAreaButton.waitFor({ timeout: 3000 });
+      await productAreaButton.click();
+      await page.waitForTimeout(500);
+      
+      // Click Engineering option
+      await page.click('text=Engineering');
+      await page.waitForTimeout(500);
+      console.log('✓ Selected product area: Engineering');
+    } catch (e) {
+      console.log('⚠ Could not select product area, may not be required or different UI');
     }
 
     await page.screenshot({ path: 'test-results/03-form-filled.png', fullPage: true });
 
     // Step 4: Submit the form
     const submitButtons = [
+      page.locator('button:has-text("Create Draft")'),
       page.locator('button[type="submit"]'),
       page.locator('button:has-text("Create")'),
       page.locator('button:has-text("Submit")'),
@@ -278,7 +268,95 @@ test.describe('Document Creation Flow', () => {
     // Assert that we have some indication of success
     expect(successFound).toBeTruthy();
     
-    console.log('✅ Document creation test completed successfully!');
+    // Step 6: VALIDATION - Check that NO template markers remain in the document
+    // Template markers are placeholders like {{title}}, {{owner}}, {{created_date}}, etc.
+    // These should be replaced with actual values when the document is created
+    
+    console.log('🔍 Validating that no template markers remain in document...');
+    
+    // Get the full page content as text
+    const pageContent = await page.textContent('body');
+    
+    // Common template markers that should NOT appear in the final document
+    const templateMarkers = [
+      '{{title}}',
+      '{{owner}}',
+      '{{created_date}}',
+      '{{modified_date}}',
+      '{{stakeholders}}',
+      '{{contributors}}',
+      '{{approvers}}',
+      '{{product}}',
+      '{{target_version}}',
+      '{{current_version}}',
+      '{{status}}',
+      '{{summary}}',
+      '{{doc_number}}',
+    ];
+    
+    const foundMarkers: string[] = [];
+    for (const marker of templateMarkers) {
+      if (pageContent?.includes(marker)) {
+        foundMarkers.push(marker);
+        console.log(`❌ Found template marker in document: ${marker}`);
+      }
+    }
+    
+    // Also check for double curly braces pattern in general
+    const doubleCurlyPattern = /\{\{[^}]+\}\}/g;
+    const matches = pageContent?.match(doubleCurlyPattern);
+    if (matches && matches.length > 0) {
+      console.log(`❌ Found ${matches.length} template marker(s): ${matches.join(', ')}`);
+      foundMarkers.push(...matches);
+    }
+    
+    // Take a screenshot if markers were found
+    if (foundMarkers.length > 0) {
+      await page.screenshot({ path: 'test-results/06-template-markers-found.png', fullPage: true });
+      console.error(`❌ VALIDATION FAILED: Found ${foundMarkers.length} template marker(s) in document`);
+      console.error('Template markers should be replaced with actual values');
+      
+      // Print context around each marker for debugging
+      for (const marker of foundMarkers.slice(0, 5)) { // Limit to first 5 for brevity
+        const index = pageContent?.indexOf(marker) || 0;
+        const context = pageContent?.substring(Math.max(0, index - 50), Math.min(pageContent.length, index + 100));
+        console.error(`Context: ...${context}...`);
+      }
+    } else {
+      console.log('✅ No template markers found - all placeholders replaced correctly');
+    }
+    
+    // Assert that no template markers remain
+    expect(foundMarkers.length).toBe(0);
+    
+    // Step 7: Additional validation - Check that actual metadata is present
+    console.log('🔍 Validating that actual document metadata is present...');
+    
+    // Should see the actual document title (not the template marker)
+    const hasTitleInView = pageContent?.includes(documentTitle);
+    if (!hasTitleInView) {
+      console.log(`⚠ Warning: Document title "${documentTitle}" not found in page content`);
+    }
+    
+    // Should see the actual owner email
+    const hasOwnerEmail = pageContent?.includes('test@hermes.local') || pageContent?.includes('@hermes.local');
+    if (hasOwnerEmail) {
+      console.log('✅ Owner email found in document');
+    }
+    
+    // Should see product/area if we selected one
+    const hasProductArea = pageContent?.includes('Engineering');
+    if (hasProductArea) {
+      console.log('✅ Product area (Engineering) found in document');
+    }
+    
+    // Should see RFC designation
+    const hasRfcType = pageContent?.includes('RFC');
+    if (hasRfcType) {
+      console.log('✅ Document type (RFC) found in document');
+    }
+    
+    console.log('✅ Document creation test completed successfully with template validation!');
   });
 
   test('should show validation errors for empty form', async ({ page }) => {
