@@ -1,12 +1,17 @@
-# RFC: API Refactoring and Testing Strategy
-
-**RFC Number**: 001  
-**Status**: Implemented ✅  
-**Authors**: HashiCorp Labs Engineering Team  
-**Created**: October 3-9, 2025  
-**Last Updated**: October 9, 2025
-
 ---
+id: RFC-081
+title: API Refactoring and Testing Strategy
+date: 2025-10-09
+type: RFC
+subtype: Architecture Refactoring
+status: Implemented
+tags: [refactoring, api, testing, provider-abstraction, v2-api]
+authors: HashiCorp Labs Engineering Team
+related:
+  - RFC-076
+---
+
+# API Refactoring and Testing Strategy
 
 ## Executive Summary
 
