@@ -214,26 +214,49 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
    * A task that queries the server for people matching the given query.
    * Used as the `search` action for the `ember-power-select` component.
    * Sets `this.people` to the results of the query.
+   * Includes a 250ms debounce to prevent rapid cancellations from quick typing.
    */
   protected searchDirectory = restartableTask(async (query: string) => {
+    console.log('[PeopleSelect] 🔍 searchDirectory task started', { query, includeGroups: this.args.includeGroups, hasStore: !!this.store });
+    
+    // Debounce: wait 250ms before starting the search to prevent rapid cancellations
+    console.log('[PeopleSelect] ⏱️ Debouncing for 250ms...');
+    await timeout(250);
+    console.log('[PeopleSelect] ✅ Debounce complete, proceeding with search');
+    
+    if (!this.store) {
+      console.error('[PeopleSelect] ❌ ERROR: this.store is undefined!');
+      return;
+    }
+    
     for (let i = 0; i < MAX_RETRIES; i++) {
       let retryDelay = INITIAL_RETRY_DELAY;
 
       let p: string[] = [];
       let g: string[] = [];
 
-      let promises = [
-        this.store.query("person", {
-          query,
-        }),
+      /**
+       * WORKAROUND: Directly call adapter methods instead of Store.query()
+       * to avoid Ember Data 4.12 RequestManager initialization issues.
+       * See web/app/services/_store.ts maybeFetchPeople for same workaround.
+       */
+      const personAdapter = this.store.adapterFor("person" as never) as any;
+      
+      const promises = [
+        personAdapter.query(this.store, this.store.modelFor("person"), { query }),
       ];
 
       try {
         if (this.args.includeGroups) {
-          promises.push(this.store.query("group", { query }));
+          const groupAdapter = this.store.adapterFor("group" as never) as any;
+          promises.push(groupAdapter.query(this.store, this.store.modelFor("group"), { query }));
         }
 
-        const [people, groups] = await Promise.all(promises);
+        const [peopleResponse, groupsResponse] = await Promise.all(promises);
+        
+        // Unwrap adapter responses (adapters return { results: [...] })
+        const people = peopleResponse?.results;
+        const groups = groupsResponse?.results;
 
         if (people) {
           p = people
@@ -244,7 +267,7 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
                 (selectedEmail) => selectedEmail === email,
               );
             })
-            .filter((email) => {
+            .filter((email: string) => {
               // filter the authenticated user if `excludeSelf` is true
               return (
                 !this.args.excludeSelf ||
@@ -266,7 +289,7 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
               }
             })
             .map((g: GroupModel) => g.email)
-            .filter((email) => {
+            .filter((email: string) => {
               // Filter out any people already selected
               return !this.args.selected.find(
                 (selectedEmail) => selectedEmail === email,
@@ -278,14 +301,18 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
 
         // Concatenate and sort alphabetically
         this.options = [...p, ...g].sort((a, b) => a.localeCompare(b));
+        console.log('[PeopleSelect] ✅ Search complete', { totalResults: this.options.length, people: p.length, groups: g.length });
 
         // Stop the loop if the query was successful
         return;
       } catch (e) {
+        console.error('[PeopleSelect] ❌ Error on attempt', i + 1, ':', e);
         // Throw an error if this is the last retry.
         if (i === MAX_RETRIES - 1) {
-          console.error(`Error querying people: ${e}`);
+          console.error(`[PeopleSelect] 💥 All retries exhausted. Final error: ${e}`);
           throw e;
+        } else {
+          console.log('[PeopleSelect] 🔄 Retrying after', retryDelay, 'ms delay...');
         }
 
         // Otherwise, wait and try again.
@@ -295,6 +322,7 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
         retryDelay *= 2;
       }
     }
+    console.log('[PeopleSelect] 🏁 searchDirectory task completed');
   });
 }
 
