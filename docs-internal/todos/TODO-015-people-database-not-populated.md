@@ -1,23 +1,30 @@
 ---
 id: TODO-015
-title: People Database Not Populated - Dex OIDC Users Missing
+title: People API Not Returning Test Users - Investigation Required
 date: 2025-10-09
 type: TODO
 priority: critical
-status: open
-progress: 0%
+status: investigation
+progress: 50%
 tags: [backend, authentication, dex, people-api, testing]
 related:
   - TODO-014
   - TODO-011
+  - ADR-075
 blocking: TODO-011, TODO-014
 ---
 
-# TODO-015: People Database Not Populated - Dex OIDC Users Missing
+# TODO-015: People API Not Returning Test Users - Investigation Required
 
-## Problem Statement
+## ⚠️ IMPORTANT: Architecture Correction
 
-**Critical Blocker for E2E Testing**: Dex OIDC authenticated users (`test@hermes.local`, `admin@hermes.local`, `demo@hermes.local`) do not exist in the people database, preventing them from being added as document approvers.
+**The original problem statement was based on an incorrect assumption.**
+
+**Hermes does NOT use a people database table.** See ADR-075 for complete details.
+
+## Problem Statement (Revised)
+
+**E2E Testing Issue**: When testing the Approvers field in the document sidebar, search queries for Dex OIDC authenticated users (`test@hermes.local`, `admin@hermes.local`) return "No results found".
 
 **Impact**:
 - ❌ Cannot add approvers to documents via sidebar UI
@@ -27,24 +34,29 @@ blocking: TODO-011, TODO-014
 
 **Discovered During**: Investigation of TODO-014 using playwright-mcp browser exploration
 
-## Root Cause
+## Root Cause (Under Investigation)
 
-### Current Behavior
+### Architecture Facts (Verified 2025-10-09)
 
-1. User authenticates via Dex OIDC (`/auth/callback`)
-2. Session is created, user can access Hermes
-3. **User is NOT created in people database**
-4. Approvers field searches `/api/v2/people` endpoint
-5. Search returns empty results for authenticated users
-6. Cannot add them as approvers
+**Hermes does NOT store people in a database.** The `/api/v2/people` endpoint delegates to the workspace provider:
 
-### Expected Behavior
+1. **Google Workspace**: Queries Google Directory API directly
+2. **Local Workspace**: Reads from `users.json` file
 
-1. User authenticates via Dex OIDC
-2. Session created
-3. **Person record auto-created in database** with email, name from OIDC claims
-4. User appears in people search
-5. Can be added as approver to documents
+**Testing Environment Status** (✅ = Verified):
+- ✅ Local workspace provider enabled (`providers.workspace = "local"`)
+- ✅ `users.json` mounted: `./users.json:/app/workspace_data/users.json`
+- ✅ File contains 6 users: test@, admin@, user@, jane.smith@, john.doe@, sarah.johnson@ hermes.local
+- ✅ SearchPeople implementation reads from this file and converts to `people.Person` format
+
+### Possible Actual Causes
+
+The issue must be one of:
+
+1. **Authentication**: Playwright test not sending session cookie with API request
+2. **Frontend Query Format**: Approvers field sending incorrect query format
+3. **API Routing**: Request not reaching `/api/v2/people` endpoint correctly
+4. **Response Parsing**: Frontend not parsing the `people.Person` response correctly
 
 ## Evidence
 
@@ -71,299 +83,328 @@ curl -H "Cookie: hermes-session=..." http://localhost:8001/api/v2/people
 # Actual: Empty or missing Dex users
 ```
 
-## Solution Options
+## Solution Options (Revised)
 
-### ⭐ Option A: Auto-Create People on OIDC Login (RECOMMENDED)
+### ❌ Option A: Auto-Create People on OIDC Login - NOT APPLICABLE
 
-**Approach**: Modify auth callback to ensure person record exists after successful authentication.
+**This option was based on the incorrect assumption that Hermes uses a people database table.**
 
-**Changes Needed**:
-
-1. **`internal/auth/dex.go` (or similar auth handler)**:
-   ```go
-   // After successful OIDC token exchange
-   user := userInfoFromOIDC(claims)
-   
-   // Ensure person exists in database
-   person := &models.Person{
-       EmailAddress: user.Email,
-       GivenName:    user.GivenName,
-       FamilyName:   user.FamilyName,
-       PhotoURL:     user.Picture,
-   }
-   
-   if err := person.Upsert(db); err != nil {
-       log.Error("failed to upsert person", "email", user.Email, "error", err)
-   }
-   ```
-
-2. **`pkg/models/person.go`**:
-   ```go
-   // Add Upsert method if it doesn't exist
-   func (p *Person) Upsert(db *gorm.DB) error {
-       return db.Where(Person{EmailAddress: p.EmailAddress}).
-           Assign(p).
-           FirstOrCreate(p).
-           Error
-   }
-   ```
-
-**Pros**:
-- ✅ Works for all OIDC providers (Dex, Okta, Google)
-- ✅ Automatic and transparent
-- ✅ Production-ready solution
-- ✅ No manual data seeding needed
-
-**Cons**:
-- Requires backend code changes
-- Need to handle OIDC claim mapping
-- Must test with all auth providers
-
-**Estimated Effort**: 4-6 hours
+Hermes does NOT have a `Person` model or `people` table in the database. See ADR-075.
 
 ---
 
-### Option B: Seed People Database in Testing Environment
+### ✅ Option B: Verify Existing Configuration - ALREADY IMPLEMENTED
 
-**Approach**: Add test users to database on testing environment startup.
+**Status**: Testing environment is already correctly configured.
 
-**Changes Needed**:
+**Verified Configuration**:
 
-1. **`testing/init-people.sql`** (new file):
-   ```sql
-   INSERT INTO people (email_address, given_name, family_name, created_at, updated_at)
-   VALUES 
-       ('test@hermes.local', 'Test', 'User', NOW(), NOW()),
-       ('admin@hermes.local', 'Admin', 'User', NOW(), NOW()),
-       ('demo@hermes.local', 'Demo', 'User', NOW(), NOW())
-   ON CONFLICT (email_address) DO NOTHING;
-   ```
-
-2. **`testing/docker-compose.yml`**:
+1. **`testing/docker-compose.yml`** ✅:
    ```yaml
-   services:
-     postgres:
-       volumes:
-         - ./init-people.sql:/docker-entrypoint-initdb.d/20-people.sql
+   hermes:
+     volumes:
+       - ./users.json:/app/workspace_data/users.json:ro
    ```
 
-   OR run migration after startup:
-   
-3. **`testing/Makefile`**:
-   ```makefile
-   seed-people:
-       docker compose exec postgres psql -U postgres -d hermes_testing -f /init-people.sql
-   ```
-
-**Pros**:
-- ✅ Quick fix for testing environment
-- ✅ No backend code changes
-- ✅ Can implement immediately
-
-**Cons**:
-- ❌ Only works in testing environment
-- ❌ Doesn't solve production issue
-- ❌ Manual maintenance of test users
-- ❌ Database might reset, need re-seeding
-
-**Estimated Effort**: 1-2 hours
-
----
-
-### Option C: Allow Direct Email Input for Approvers
-
-**Approach**: Modify approvers field to accept email addresses that don't exist in people database.
-
-**Changes Needed**:
-
-1. **`web/app/components/document/sidebar.ts`**:
-   ```typescript
-   // In updateApprovers or similar
-   // Allow emails not in people database
-   @action updateApprovers(approvers: string[]) {
-       this.approvers = approvers; // Don't filter by existing people
+2. **`testing/config.hcl`** ✅:
+   ```hcl
+   local_workspace {
+     base_path = "/app/workspace_data"
+   }
+   providers {
+     workspace = "local"  # Uses local workspace adapter
    }
    ```
 
-2. **`internal/api/v2/documents.go`**:
-   ```go
-   // When saving approvers, validate email format but don't require person record
-   for _, approver := range approvers {
-       if !isValidEmail(approver) {
-           return fmt.Errorf("invalid email: %s", approver)
-       }
+3. **`testing/users.json`** ✅:
+   ```json
+   {
+     "test@hermes.local": { "email": "test@hermes.local", "name": "Test User", ... },
+     "admin@hermes.local": { "email": "admin@hermes.local", "name": "Admin User", ... },
+     ...
    }
    ```
 
-**Pros**:
-- ✅ Flexible for external reviewers
-- ✅ Works without person database
+4. **Container Verification** ✅:
+   ```bash
+   $ docker exec hermes-server cat /app/workspace_data/users.json | jq 'keys'
+   [ "admin@hermes.local", "jane.smith@hermes.local", ... "test@hermes.local", ... ]
+   ```
 
-**Cons**:
-- ❌ Breaks people search UX
-- ❌ No name/photo for approvers
-- ❌ Inconsistent with current design
-- ❌ May cause issues with notifications
+5. **Server Logs** ✅:
+   ```
+   Using workspace provider: local
+   ```
 
-**Estimated Effort**: 3-4 hours
+**Conclusion**: The backend configuration is correct. The issue must be elsewhere.
 
 ---
 
-## Recommended Implementation Plan
+### ⏭️ Next Step: Debug the Actual Issue
 
-### Phase 1: Short-Term Fix (Testing) - Option B
-**Timeline**: 1-2 hours
+Since the backend is correctly configured, the problem is likely:
 
-1. Create `testing/init-people.sql` with test users
-2. Update `testing/docker-compose.yml` to run init script
-3. Test: `make down && make up`
-4. Verify: `docker compose exec postgres psql -U postgres -d hermes_testing -c "SELECT email_address FROM people;"`
-5. Update E2E test to add approvers via sidebar
+**Option C: Debug Frontend/API Integration**
 
-### Phase 2: Long-Term Fix (Production) - Option A
-**Timeline**: 4-6 hours
+1. **Test API directly with authenticated request**:
+   ```bash
+   # Get session cookie from browser
+   # Test people search
+   curl -X POST http://localhost:8001/api/v2/people \
+     -H "Cookie: hermes-session=..." \
+     -H "Content-Type: application/json" \
+     -d '{"query":"test"}'
+   ```
 
-1. Add `Upsert` method to `pkg/models/person.go`
-2. Modify Dex auth callback to create person on login
-3. Test with all three Dex test users
-4. Verify person creation: Check database after login
-5. Add unit tests for person creation logic
-6. Update Okta/Google auth handlers similarly
+2. **Check network requests in browser DevTools**:
+   - Navigate to document sidebar
+   - Open Network tab
+   - Type in Approvers field
+   - Check if `/api/v2/people` request is sent
+   - Verify request format and response
+
+3. **Check frontend component code**:
+   - `web/app/components/document/sidebar.ts`
+   - `web/app/components/inputs/people-select.ts`
+   - Verify query format sent to backend
+
+**Estimated Effort**: 2-3 hours
+
+---
+
+## Recommended Implementation Plan (Revised)
+
+### ✅ Phase 1: Verify Backend Configuration - COMPLETE
+
+**Status**: Backend is correctly configured. No changes needed.
+
+**Verification Results** (2025-10-09):
+1. ✅ Local workspace provider enabled
+2. ✅ `users.json` mounted and accessible
+3. ✅ File contains all Dex test users
+4. ✅ SearchPeople implementation working
+
+### ⏭️ Phase 2: Debug Actual Issue - IN PROGRESS
+
+**Timeline**: 2-3 hours
+
+**Investigation Steps**:
+
+1. **Test API with authenticated request**:
+   - Login to Hermes via Dex (http://localhost:4201)
+   - Extract session cookie from browser
+   - Make manual API request:
+     ```bash
+     curl -X POST http://localhost:8001/api/v2/people \
+       -H "Cookie: hermes-session=..." \
+       -H "Content-Type: application/json" \
+       -d '{"query":"test"}' | jq
+     ```
+   - Expected: Array of `people.Person` objects
+   - If fails: Check authentication/session
+
+2. **Use playwright-mcp to test in browser**:
+   - Navigate to document page
+   - Click Approvers field
+   - Use browser DevTools (Network tab)
+   - Check if `/api/v2/people` request is sent
+   - Check request/response format
+
+3. **Check frontend implementation**:
+   - Search for people-select component
+   - Verify API endpoint and request format
+   - Check if response is parsed correctly
+
+4. **Check Approvers field vs Contributors field**:
+   - Contributors works, Approvers doesn't
+   - Compare implementations
+   - Identify differences
 
 ### Phase 3: Validation
-**Timeline**: 2 hours
+**Timeline**: 1 hour
 
-1. Run E2E test: `cd tests/e2e-playwright && npx playwright test dashboard-awaiting-review.spec.ts`
-2. Expected results:
-   - ✅ Phase 1: Document creation with contributors
-   - ✅ Phase 2: Add approvers via sidebar (post-creation)
-   - ✅ Phase 3: Change status to "In-Review"
-   - ✅ Phase 4: Dashboard shows document in "Awaiting review"
-   - ✅ Phase 5: Pip badge shows count
+After fixing the actual issue:
+1. Test Approvers search manually in browser
+2. Run E2E test: `cd tests/e2e-playwright && npx playwright test dashboard-awaiting-review.spec.ts`
+3. Verify all test phases pass
 
 ---
 
 ## Implementation Details
 
-### Files to Modify
+### Files to Investigate
 
-**Backend**:
-- `internal/auth/dex.go` - Add person creation after OIDC callback
-- `pkg/models/person.go` - Add `Upsert` method
-- `internal/auth/okta.go` - Add person creation (if exists)
-- `internal/auth/google.go` - Add person creation (if exists)
+**Backend (Already Working)**:
+- ✅ `internal/api/v2/people.go` - Delegates to workspace provider
+- ✅ `pkg/workspace/adapters/local/provider.go` - SearchPeople implementation
+- ✅ `pkg/workspace/adapters/local/people.go` - SearchUsers from users.json
+- ✅ `testing/users.json` - Contains all test users
 
-**Testing**:
-- `testing/init-people.sql` - SQL script to seed test users
-- `testing/docker-compose.yml` - Mount init script
-- `testing/README.md` - Document seeding process
+**Frontend (Needs Investigation)**:
+- ⏭️ `web/app/components/document/sidebar.ts` - Approvers field
+- ⏭️ `web/app/components/inputs/people-select.ts` - People search component
+- ⏭️ Network requests - Check request format to `/api/v2/people`
 
-**E2E Test**:
-- `tests/e2e-playwright/tests/dashboard-awaiting-review.spec.ts` - Add sidebar approvers step
+**E2E Test (Needs Update)**:
+- ⏭️ `tests/e2e-playwright/tests/dashboard-awaiting-review.spec.ts` - Add sidebar approvers step
 
-### API Endpoints to Check
+### API Endpoints to Test
 
+**People Search API** (POST):
 ```bash
-# People API - should return Dex users after fix
-GET /api/v2/people
+# Must be authenticated (include session cookie)
+curl -X POST http://localhost:8001/api/v2/people \
+  -H "Cookie: hermes-session=..." \
+  -H "Content-Type: application/json" \
+  -d '{"query":"test"}' | jq
 
-# Search people - should find test users
-GET /api/v2/people?q=test
-
-# Create person (if manual endpoint exists)
-POST /api/v2/people
-{
-  "emailAddress": "test@hermes.local",
-  "givenName": "Test",
-  "familyName": "User"
-}
+# Expected response:
+[
+  {
+    "resourceName": "people/test@hermes.local",
+    "names": [{"displayName": "Test User", "givenName": "Test", "familyName": "User"}],
+    "emailAddresses": [{"value": "test@hermes.local", "type": "work", ...}],
+    "photos": [{"url": "https://ui-avatars.com/api/?name=Test+User&..."}]
+  }
+]
 ```
 
-### Database Schema Check
+**People Lookup API** (GET):
+```bash
+# Get specific users by email
+curl http://localhost:8001/api/v2/people?emails=test@hermes.local,admin@hermes.local \
+  -H "Cookie: hermes-session=..." | jq
+```
 
-```sql
--- Check people table structure
-\d people
+### Backend Configuration Check
 
--- Expected columns:
--- id, email_address, given_name, family_name, photo_url, created_at, updated_at
+**No database table needed.** Verify configuration:
 
--- After fix, verify people exist:
-SELECT id, email_address, given_name, family_name 
-FROM people 
-WHERE email_address LIKE '%@hermes.local';
+```bash
+# Check users.json is mounted
+docker exec hermes-server cat /app/workspace_data/users.json | jq 'keys'
+
+# Check config uses local workspace
+docker exec hermes-server grep -A5 "^providers" /app/config.hcl
+
+# Check server logs
+docker logs hermes-server 2>&1 | grep "workspace provider"
 ```
 
 ---
 
 ## Testing Checklist
 
-### Phase 1 (Seeding) - Testing Environment
+### ✅ Phase 1 (Backend Verification) - COMPLETE
 
-- [ ] Create `testing/init-people.sql` with INSERT statements
-- [ ] Update `testing/docker-compose.yml` to mount init script
-- [ ] Restart testing environment: `cd testing && docker compose down && docker compose up -d`
-- [ ] Verify people in database:
+- [x] Verify local workspace provider enabled
   ```bash
-  docker compose exec postgres psql -U postgres -d hermes_testing \
-    -c "SELECT email_address, given_name FROM people WHERE email_address LIKE '%@hermes.local';"
+  docker logs hermes-server 2>&1 | grep "workspace provider"
+  # Output: "Using workspace provider: local"
   ```
-- [ ] Expected output: 3 rows (test, admin, demo)
+- [x] Verify users.json mounted correctly
+  ```bash
+  docker exec hermes-server cat /app/workspace_data/users.json | jq 'keys'
+  # Output: ["admin@hermes.local", ..., "test@hermes.local", ...]
+  ```
+- [x] Verify users.json contains Dex test users
+  ```bash
+  docker exec hermes-server cat /app/workspace_data/users.json | jq 'keys'
+  # Contains: test@, admin@, user@, jane.smith@, john.doe@, sarah.johnson@
+  ```
+- [x] Verify SearchPeople implementation reads from file
+  - See: `pkg/workspace/adapters/local/provider.go:225`
+  - See: `pkg/workspace/adapters/local/people.go:43`
 
-### Phase 2 (Auto-Create) - Backend
+### ⏭️ Phase 2 (API Testing) - IN PROGRESS
 
-- [ ] Implement `Upsert` method in `pkg/models/person.go`
-- [ ] Write unit test for `Person.Upsert`
-- [ ] Modify Dex auth callback to call `person.Upsert(db)`
-- [ ] Test: Login via Dex, check database for new person record
-- [ ] Verify all OIDC claims are mapped (email, givenName, familyName, picture)
+- [ ] Login to Hermes via Dex (http://localhost:4201)
+- [ ] Extract session cookie from browser (DevTools → Application → Cookies)
+- [ ] Test people search API with authenticated request:
+  ```bash
+  curl -X POST http://localhost:8001/api/v2/people \
+    -H "Cookie: hermes-session=<YOUR_SESSION_COOKIE>" \
+    -H "Content-Type: application/json" \
+    -d '{"query":"test"}' | jq
+  ```
+- [ ] Expected: Array of people.Person objects with test users
+- [ ] If fails: Check authentication, session expiry, CORS
 
-### Phase 3 (E2E Test) - Update Test
+### ⏭️ Phase 3 (Frontend Investigation) - PENDING
 
-- [ ] Update E2E test to navigate to document page after creation
-- [ ] Add step: Click "Approvers" → "None" button
-- [ ] Add step: Search for approver email
-- [ ] Add step: Select approver from dropdown
-- [ ] Add step: Click "Save" button
-- [ ] Add step: Wait for PATCH request to complete
-- [ ] Add step: Change status to "In-Review" (investigate how)
+- [ ] Use playwright-mcp to test Approvers field:
+  - Navigate to document page
+  - Click "Approvers" → "None" button
+  - Open browser DevTools (Network tab)
+  - Type "test" in search field
+  - Check if `/api/v2/people` request is sent
+  - Check request headers (Cookie header present?)
+  - Check request body format
+  - Check response status and body
+- [ ] Compare with Contributors field implementation:
+  - Find component code for Contributors
+  - Find component code for Approvers
+  - Identify differences in API calls
+- [ ] Debug and fix the issue
+
+### ⏭️ Phase 4 (E2E Test Update) - AFTER FIX
+
+- [ ] Update E2E test to add approvers via sidebar:
+  - Click "Approvers" → "None" button
+  - Search for approver email
+  - Select approver from dropdown
+  - Click "Save" button
+  - Wait for PATCH request to complete
+- [ ] Add step to change status to "In-Review"
 - [ ] Run full E2E test and verify all phases pass
 
-### Phase 4 (Validation) - End-to-End
+### ⏭️ Phase 5 (Validation) - FINAL
 
 - [ ] Run E2E test: `npx playwright test dashboard-awaiting-review.spec.ts --reporter=line`
-- [ ] Verify Phase 1: Document created ✅
-- [ ] Verify Phase 2: Approver added via sidebar ✅
-- [ ] Verify Phase 3: Status changed to "In-Review" ✅
-- [ ] Verify Phase 4: Dashboard shows document ✅
-- [ ] Verify Phase 5: Pip badge count correct ✅
+- [ ] Verify all phases pass
 - [ ] Check screenshots in `test-results/`
-- [ ] Review trace if any failures: `npx playwright show-trace test-results/.../trace.zip`
+- [ ] Review trace if any failures
 
 ---
 
 ## Success Criteria
 
-- [ ] Dex OIDC users appear in `/api/v2/people` endpoint
-- [ ] People search returns Dex users (test, admin, demo)
+- [x] Backend uses local workspace provider (verified 2025-10-09)
+- [x] `users.json` mounted and accessible (verified 2025-10-09)
+- [x] File contains Dex test users (verified 2025-10-09)
+- [ ] `/api/v2/people` endpoint returns test users with authenticated request
+- [ ] Approvers search field successfully queries people API
 - [ ] Can add Dex users as approvers via document sidebar
-- [ ] Approvers are saved to database (verify with database query)
-- [ ] Approvers field in search index includes added users
+- [ ] Approvers are saved to document (verify via API or search index)
 - [ ] E2E test passes all phases without errors
-- [ ] Dashboard "Awaiting review" section shows document
+- [ ] Dashboard "Awaiting review" section shows document with approvers
 - [ ] Pip badge displays correct count
 
 ---
 
-## Rollback Plan
+## Key Insights
 
-If issues occur after implementing Option A (auto-create):
+### Architecture Understanding (ADR-075)
 
-1. Remove person creation code from auth callback
-2. Restart backend: `cd testing && docker compose restart hermes`
-3. Rely on Option B (seeding) for testing environment
-4. Investigate and fix issues
-5. Re-deploy Option A with fixes
+1. **No People Database**: Hermes does NOT store people in PostgreSQL
+2. **Provider-Based**: People API delegates to workspace provider
+3. **Google Workspace**: Queries Directory API directly (real-time)
+4. **Local Workspace**: Reads from `users.json` file (already configured)
+5. **Testing Environment**: Already correctly configured with all test users
+
+### What Was Wrong
+
+The original TODO was based on incorrect assumptions:
+- ❌ Assumed Hermes has a `people` database table
+- ❌ Assumed users need to be inserted into database on login
+- ❌ Assumed "Option B" meant creating database seeding scripts
+
+### What's Actually Needed
+
+- ✅ Backend is correctly configured (verified)
+- ⏭️ Debug why frontend Approvers field returns "No results"
+- ⏭️ Fix the actual integration issue (likely auth or request format)
+- ⏭️ Update E2E test to use working Approvers workflow
 
 ---
 
@@ -379,31 +420,59 @@ If issues occur after implementing Option A (auto-create):
 
 After fix is implemented:
 
-1. **`docs-internal/README-dex.md`**:
-   - Add note about automatic person creation
-   - Document test users (test, admin, demo)
+1. **`docs-internal/adr/ADR-075-people-api-architecture-clarification.md`** ✅:
+   - Created 2025-10-09
+   - Documents that Hermes does NOT use a people database
+   - Explains provider-based architecture
 
 2. **`testing/README.md`**:
-   - Update quick start to mention pre-seeded users
-   - Add troubleshooting section for people database
+   - Add note about `users.json` file and test users
+   - Document that people API reads from file (not database)
+   - Add troubleshooting section for people search issues
 
 3. **`tests/e2e-playwright/README.md`**:
-   - Document that test users must exist in people database
-   - Add section on approvers workflow
+   - Document that test users come from `testing/users.json`
+   - Add section on approvers workflow and authentication requirements
+   - Note that people search requires authenticated session
 
 4. **`docs-internal/todos/TODO-011-e2e-test-awaiting-review-dashboard.md`**:
-   - Update status to reflect solution
-   - Add link to TODO-015
+   - Update status to reflect architectural clarification
+   - Add link to ADR-075
+   - Update blocker status once issue is resolved
 
 ---
 
 ## Next Steps
 
-1. **Immediate**: Implement Phase 1 (Option B - Seeding) to unblock E2E test
-2. **This Week**: Implement Phase 2 (Option A - Auto-create) for production
-3. **After Fix**: Update E2E test to add approvers via sidebar
-4. **Validation**: Run full E2E test suite to ensure dashboard workflow works
+### Immediate Actions
 
-**Estimated Total Effort**: 7-10 hours (including testing and documentation)
+1. **Test authenticated API request** (30 mins):
+   - Login to Hermes via browser
+   - Extract session cookie
+   - Make manual curl request to `/api/v2/people`
+   - Verify response contains test users
+
+2. **Use playwright-mcp to debug** (1-2 hours):
+   - Navigate to document page with Approvers field
+   - Monitor network requests when typing in field
+   - Check if API request is sent with correct format
+   - Check if session cookie is included
+   - Identify the actual issue
+
+3. **Fix the identified issue** (1-3 hours depending on root cause):
+   - Could be: authentication, request format, response parsing, etc.
+   - Implement fix in frontend or backend as needed
+
+4. **Update E2E test** (1 hour):
+   - Add approvers via sidebar workflow
+   - Verify test passes with fix
+
+5. **Update documentation** (30 mins):
+   - Update testing README with findings
+   - Document the actual issue and solution
+
+**Estimated Total Effort**: 4-7 hours (investigation + fix + testing)
 
 **Priority**: CRITICAL - Blocks TODO-011 E2E test and review workflow
+
+**Status**: Investigation phase - backend verified working, need to debug frontend/integration
