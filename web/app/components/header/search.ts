@@ -40,7 +40,7 @@ interface HeaderSearchComponentSignature {
 export default class HeaderSearchComponent extends Component<HeaderSearchComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
-  @service declare searchService: SearchService;
+  @service declare search: SearchService;
   @service declare router: RouterService;
   @service declare store: StoreService;
 
@@ -124,7 +124,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
           return;
         } else {
           // Cancel real-time search and kick off a transition to `/results`
-          this.search.cancelAll();
+          this.searchTask.cancelAll();
           this.viewAllResults(dd);
         }
       }
@@ -191,7 +191,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
    */
   protected maybeSearch = task(async () => {
     if (this.query.length && !this.hasSearched) {
-      await this.search.perform();
+      await this.searchTask.perform();
     }
   });
 
@@ -223,10 +223,10 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
 
   /**
    * The task run when the search element receives input.
-   * Queries Algolia for the best document matches and product area match
+   * Queries the search service for the best document matches and product area match
    * and updates the "itemsToShow" object.
    */
-  protected search = restartableTask(
+  protected searchTask = restartableTask(
     async (dd?: XDropdownListAnchorAPI, inputEvent?: Event): Promise<void> => {
       let input = inputEvent?.target;
 
@@ -238,7 +238,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
         this.searchInputIsEmpty = false;
 
         try {
-          const productSearch = this.searchService.searchForFacetValues.perform(
+          const productSearch = this.search.searchForFacetValues.perform(
             this.configSvc.config.algolia_docs_index_name,
             "product",
             this.query,
@@ -247,11 +247,11 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
             },
           );
 
-          const docSearch = this.searchService.search.perform(this.query, {
+          const docSearch = this.search.search.perform(this.query, {
             hitsPerPage: 5,
           });
 
-          const projectSearch = this.searchService.searchIndex.perform(
+          const projectSearch = this.search.searchIndex.perform(
             this.configSvc.config.algolia_projects_index_name,
             this.query,
             {
