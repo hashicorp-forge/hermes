@@ -121,6 +121,42 @@ func (a *Adapter) initializeIndexes(ctx context.Context) error {
 		return fmt.Errorf("failed to update drafts sortable attributes: %w", err)
 	}
 
+	// Create projects index if it doesn't exist
+	if _, err := a.client.CreateIndexWithContext(ctx, &meilisearch.IndexConfig{
+		Uid:        a.projectsIndex,
+		PrimaryKey: "objectID",
+	}); err != nil {
+		// Ignore error if index already exists
+		if !strings.Contains(err.Error(), "already exists") {
+			return fmt.Errorf("failed to create projects index: %w", err)
+		}
+	}
+
+	// Configure projects index
+	projectsIdx := a.client.Index(a.projectsIndex)
+
+	// Projects have different fields than documents
+	projectSearchableAttrs := []string{"title", "description", "jiraIssueID"}
+	if _, err := projectsIdx.UpdateSearchableAttributesWithContext(ctx, &projectSearchableAttrs); err != nil {
+		return fmt.Errorf("failed to update projects searchable attributes: %w", err)
+	}
+
+	// Configure filterable attributes for projects
+	projectFilterableAttrs := []interface{}{
+		"status",
+		"createdTime", "modifiedTime",
+		"jiraIssueID",
+	}
+	if _, err := projectsIdx.UpdateFilterableAttributesWithContext(ctx, &projectFilterableAttrs); err != nil {
+		return fmt.Errorf("failed to update projects filterable attributes: %w", err)
+	}
+
+	// Configure sortable attributes for projects
+	projectSortableAttrs := []string{"createdTime", "modifiedTime", "title"}
+	if _, err := projectsIdx.UpdateSortableAttributesWithContext(ctx, &projectSortableAttrs); err != nil {
+		return fmt.Errorf("failed to update projects sortable attributes: %w", err)
+	}
+
 	return nil
 }
 
@@ -719,8 +755,93 @@ func (pi *projectIndex) Delete(ctx context.Context, projectID string) error {
 }
 
 func (pi *projectIndex) Search(ctx context.Context, query *hermessearch.SearchQuery) (*hermessearch.SearchResult, error) {
-	// TODO: Implement full search with query parameters
-	return nil, fmt.Errorf("Search not yet implemented for projects")
+	idx := pi.client.Index(pi.index)
+
+	// Build Meilisearch request
+	req := &meilisearch.SearchRequest{
+		Limit:  int64(query.PerPage),
+		Offset: int64(query.Page * query.PerPage),
+	}
+
+	// Add filters
+	if len(query.Filters) > 0 || len(query.FilterGroups) > 0 {
+		filters := buildMeilisearchFilters(query.Filters)
+		filterGroupsStr := buildMeilisearchFilterGroups(query.FilterGroups)
+
+		// Combine basic filters and filter groups with AND
+		if filters != nil && filterGroupsStr != "" {
+			req.Filter = fmt.Sprintf("(%s) AND (%s)", filters, filterGroupsStr)
+		} else if filters != nil {
+			req.Filter = filters
+		} else if filterGroupsStr != "" {
+			req.Filter = filterGroupsStr
+		}
+	}
+
+	// Add facets
+	if len(query.Facets) > 0 {
+		req.Facets = query.Facets
+	}
+
+	// Add sorting
+	if query.SortBy != "" {
+		sort := query.SortBy
+		if query.SortOrder == "desc" {
+			sort += ":desc"
+		} else {
+			sort += ":asc"
+		}
+		req.Sort = []string{sort}
+	}
+
+	// Execute search
+	start := time.Now()
+	resp, err := idx.SearchWithContext(ctx, query.Query, req)
+	if err != nil {
+		return nil, &hermessearch.Error{
+			Op:  "Search",
+			Err: err,
+		}
+	}
+	queryTime := time.Since(start)
+
+	// Convert hits - projects use the same hit structure as documents
+	hits := make([]*hermessearch.Document, 0, len(resp.Hits))
+	for i := range resp.Hits {
+		doc, err := convertMeilisearchHit(resp.Hits[i])
+		if err != nil {
+			return nil, &hermessearch.Error{
+				Op:  "Search",
+				Err: fmt.Errorf("failed to convert hit: %w", err),
+			}
+		}
+		hits = append(hits, doc)
+	} // Projects don't use the standard document facets structure
+	// Return empty facets for now
+	facets := &hermessearch.Facets{
+		Products: make(map[string]int),
+		DocTypes: make(map[string]int),
+		Statuses: make(map[string]int),
+		Owners:   make(map[string]int),
+	}
+
+	// Calculate total pages
+	totalPages := 0
+	if query.PerPage > 0 {
+		totalPages = (int(resp.EstimatedTotalHits) + query.PerPage - 1) / query.PerPage
+	}
+
+	result := &hermessearch.SearchResult{
+		Hits:       hits,
+		TotalHits:  int(resp.EstimatedTotalHits),
+		Page:       query.Page,
+		PerPage:    query.PerPage,
+		TotalPages: totalPages,
+		Facets:     facets,
+		QueryTime:  queryTime,
+	}
+
+	return result, nil
 }
 
 func (pi *projectIndex) GetObject(ctx context.Context, projectID string) (map[string]any, error) {
