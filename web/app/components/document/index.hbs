@@ -90,7 +90,7 @@
                 ></textarea>
               {{/if}}
             {{else}}
-              {{! Read-Only Mode }}
+              {{! Read-Only/Preview Mode }}
               <div class="mb-4 flex items-center justify-between">
                 <h2 class="text-xl font-semibold">{{@document.title}}</h2>
                 <Hds::Button
@@ -100,15 +100,21 @@
                 />
               </div>
               
-              <div class="flex-1 overflow-auto rounded border border-gray-300 bg-gray-50 p-6">
-                <div class="prose max-w-none">
-                  <p class="text-gray-600">
-                    Click "Edit" to modify this document's content.
-                  </p>
-                  <p class="mt-4 text-sm text-gray-500">
-                    This document is stored in the local workspace. You can edit it directly in the browser.
-                  </p>
-                </div>
+              <div class="flex-1 overflow-auto rounded border border-gray-300 bg-white p-6">
+                {{#if this.documentContent}}
+                  {{! Display saved content in a formatted preview }}
+                  <pre class="whitespace-pre-wrap font-mono text-sm leading-relaxed text-gray-900">{{this.documentContent}}</pre>
+                {{else}}
+                  {{! Placeholder when no content has been loaded yet }}
+                  <div class="prose max-w-none">
+                    <p class="text-gray-600">
+                      Click "Edit" to modify this document's content.
+                    </p>
+                    <p class="mt-4 text-sm text-gray-500">
+                      This document is stored in the local workspace. You can edit it directly in the browser.
+                    </p>
+                  </div>
+                {{/if}}
               </div>
             {{/if}}
           </div>

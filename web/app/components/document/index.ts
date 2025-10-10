@@ -97,6 +97,7 @@ export default class DocumentIndexComponent extends Component<DocumentIndexCompo
       
       this.flashMessages.success("Document saved successfully");
       this.isEditMode = false;
+      // Content is already in documentContent, no need to reload
     } catch (error) {
       this.flashMessages.critical("Failed to save document", {
         title: "Error",

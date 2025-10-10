@@ -593,3 +593,29 @@ func (a *Adapter) WithUserGroup(userEmail string, group *admin.Group) *Adapter {
 func (a *Adapter) SupportsContentEditing() bool {
 	return true
 }
+
+// Content operations
+
+// GetDocumentContent retrieves the content of a file from memory.
+func (a *Adapter) GetDocumentContent(fileID string) (string, error) {
+	content, ok := a.FileContents[fileID]
+	if !ok {
+		return "", fmt.Errorf("file not found: %s", fileID)
+	}
+	return content, nil
+}
+
+// UpdateDocumentContent updates the content of a file in memory.
+func (a *Adapter) UpdateDocumentContent(fileID, content string) error {
+	if _, ok := a.Files[fileID]; !ok {
+		return fmt.Errorf("file not found: %s", fileID)
+	}
+	a.FileContents[fileID] = content
+
+	// Update modified time
+	if file, ok := a.Files[fileID]; ok {
+		file.ModifiedTime = time.Now().Format(time.RFC3339)
+	}
+
+	return nil
+}

@@ -634,3 +634,15 @@ func (p *ProviderAdapter) ListUserGroups(userEmail string) ([]*admin.Group, erro
 func (p *ProviderAdapter) SupportsContentEditing() bool {
 	return true
 }
+
+// Content operations
+
+// GetDocumentContent retrieves the full text content of a document.
+func (p *ProviderAdapter) GetDocumentContent(fileID string) (string, error) {
+	return p.adapter.DocumentStorage().GetDocumentContent(p.ctx, fileID)
+}
+
+// UpdateDocumentContent updates the text content of a document.
+func (p *ProviderAdapter) UpdateDocumentContent(fileID, content string) error {
+	return p.adapter.DocumentStorage().UpdateDocumentContent(p.ctx, fileID, content)
+}

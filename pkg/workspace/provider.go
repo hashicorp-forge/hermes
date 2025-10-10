@@ -75,4 +75,13 @@ type Provider interface {
 	// ListUserGroups lists all groups a user is a member of.
 	// Returns a slice of groups the user belongs to.
 	ListUserGroups(userEmail string) ([]*admin.Group, error)
+
+	// Content operations (for providers that support direct content editing)
+	// GetDocumentContent retrieves the full text content of a document.
+	// Returns empty string if not supported or content cannot be retrieved.
+	GetDocumentContent(fileID string) (string, error)
+
+	// UpdateDocumentContent updates the text content of a document.
+	// Returns error if not supported by the provider.
+	UpdateDocumentContent(fileID, content string) error
 }

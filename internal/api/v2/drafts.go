@@ -233,7 +233,39 @@ func DraftsHandler(srv server.Server) http.Handler {
 				// Tags:         req.Tags,
 			}
 
-			// Replace the doc header.
+			// For local workspace, expand template variables in the document content.
+			// This replaces placeholders like {{title}}, {{owner}}, {{created_date}} etc.
+			// with actual values from the document metadata.
+			if srv.Config.LocalWorkspace != nil {
+				content, err := srv.WorkspaceProvider.GetDocumentContent(f.Id)
+				if err != nil {
+					srv.Logger.Warn("error getting document content for template expansion",
+						"error", err,
+						"doc_id", f.Id,
+					)
+				} else if strings.Contains(content, "{{") {
+					// Only expand if template variables are present
+					templateData := document.NewTemplateDataFromDocument(doc)
+					expandedContent := document.ExpandTemplate(content, templateData)
+
+					// Update the document content with expanded template
+					err = srv.WorkspaceProvider.UpdateDocumentContent(f.Id, expandedContent)
+					if err != nil {
+						srv.Logger.Error("error updating document with expanded template",
+							"error", err,
+							"doc_id", f.Id,
+						)
+						http.Error(w, "Error creating document draft",
+							http.StatusInternalServerError)
+						return
+					}
+
+					srv.Logger.Info("expanded template variables in document",
+						"doc_id", f.Id,
+						"doc_type", req.DocType,
+					)
+				}
+			} // Replace the doc header.
 			if err = doc.ReplaceHeader(
 				srv.Config.BaseURL, true, srv.WorkspaceProvider,
 			); err != nil {

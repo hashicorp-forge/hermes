@@ -158,3 +158,17 @@ func (a *Adapter) ListUserGroups(userEmail string) ([]*admin.Group, error) {
 func (a *Adapter) SupportsContentEditing() bool {
 	return false
 }
+
+// Content operations (not supported for Google Docs)
+
+// GetDocumentContent is not supported for Google Docs.
+// Google Docs content should be accessed through the Docs API (GetDoc).
+func (a *Adapter) GetDocumentContent(fileID string) (string, error) {
+	return "", nil // Not supported for Google Docs
+}
+
+// UpdateDocumentContent is not supported for Google Docs.
+// Google Docs content should be modified through the Docs API (UpdateDoc).
+func (a *Adapter) UpdateDocumentContent(fileID, content string) error {
+	return nil // Not supported for Google Docs, template expansion happens via ReplaceHeader
+}
