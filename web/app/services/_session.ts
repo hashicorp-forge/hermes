@@ -86,7 +86,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
     // Make a HEAD request to the back end.
     // On 401, the fetch service will set `this.pollResponseIs401` true.
     await this.fetch.fetch(
-      `/api/${this.configSvc.config.api_version}/me`,
+      "/api/v2/me",
       { method: "HEAD" },
       true,
     );

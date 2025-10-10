@@ -310,13 +310,11 @@ module('Unit | Service | authenticated-user', function (hooks) {
     }
   });
 
-  test('fetchSubscriptions uses configured API version', async function (assert) {
+  test('fetchSubscriptions uses v2 API', async function (assert) {
     const service = this.owner.lookup('service:authenticated-user') as AuthenticatedUserService;
     const fetchService = this.owner.lookup('service:fetch') as MockFetchService;
-    const configService = this.owner.lookup('service:config') as MockConfigService;
 
-    configService.config.api_version = 'v1';
-    fetchService.setMockResponse('/api/v1/me/subscriptions', []);
+    fetchService.setMockResponse('/api/v2/me/subscriptions', []);
 
     await service.fetchSubscriptions.perform();
 
@@ -324,24 +322,8 @@ module('Unit | Service | authenticated-user', function (hooks) {
     assert.ok(fetchCall, 'fetch was called');
     if (fetchCall) {
       assert.ok(
-        fetchCall.url.includes('/api/v1/'),
-        'uses v1 API when configured'
-      );
-    }
-
-    // Test with v2
-    fetchService.reset();
-    configService.config.api_version = 'v2';
-    fetchService.setMockResponse('/api/v2/me/subscriptions', []);
-
-    await service.fetchSubscriptions.perform();
-
-    const fetchCall2 = fetchService.fetchCalls[0];
-    assert.ok(fetchCall2, 'fetch was called for v2');
-    if (fetchCall2) {
-      assert.ok(
-        fetchCall2.url.includes('/api/v2/'),
-        'uses v2 API when configured'
+        fetchCall.url.includes('/api/v2/'),
+        'uses v2 API'
       );
     }
   });

@@ -30,9 +30,6 @@ export default class ConfigService extends Service {
   setConfig(param: HermesConfig) {
     // Merge backend config into existing config (using tracked property reactivity)
     this.config = { ...this.config, ...param };
-    
-    // Always use v2 API
-    this.config["api_version"] = "v2";
   }
 }
 

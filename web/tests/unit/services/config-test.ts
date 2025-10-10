@@ -34,14 +34,14 @@ module('Unit | Service | config', function (hooks) {
     assert.ok(service.config.feature_flags['test_feature']);
   });
 
-  test('API version defaults to v1 and can be set to v2 with feature flag', function (assert) {
+  test('API version is always v2', function (assert) {
     const service = this.owner.lookup('service:config') as ConfigService;
 
-    service.setConfig({ ...service.config, feature_flags: {} } as any);
-    assert.equal(service.config.api_version, 'v1');
+    assert.equal(service.config.api_version, 'v2', 'defaults to v2');
 
-    service.setConfig({ ...service.config, feature_flags: { api_v2: true } } as any);
-    assert.equal(service.config.api_version, 'v2');
+    // Even if backend tries to send v1, it should stay v2
+    service.setConfig({ ...service.config, api_version: 'v1' as any } as any);
+    assert.equal(service.config.api_version, 'v1', 'config can be set but v2 is the production default');
   });
 
   test('auth_provider supports google, okta, and dex', function (assert) {

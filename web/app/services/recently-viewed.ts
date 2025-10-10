@@ -3,7 +3,6 @@ import { service } from "@ember/service";
 import { keepLatestTask } from "ember-concurrency";
 import FetchService from "./fetch";
 import { tracked } from "@glimmer/tracking";
-import ConfigService from "hermes/services/config";
 import { HermesDocument } from "hermes/types/document";
 import SessionService from "hermes/services/session";
 import StoreService from "hermes/services/store";
@@ -42,7 +41,6 @@ export type RecentlyViewedProject = IndexedProject & {
 };
 
 export default class RecentlyViewedService extends Service {
-  @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare session: SessionService;
   @service declare store: StoreService;
@@ -77,9 +75,7 @@ export default class RecentlyViewedService extends Service {
       // Set a promise to fetch the recently viewed docs
       console.log('[RecentlyViewed] 📡 Fetching recently viewed docs...');
       const recentlyViewedDocsPromise = this.fetchSvc
-        .fetch(
-          `/api/${this.configSvc.config.api_version}/me/recently-viewed-docs`,
-        )
+        .fetch("/api/v2/me/recently-viewed-docs")
         .then((resp) => {
           console.log('[RecentlyViewed] 📬 Recently viewed docs response received');
           return resp?.json();
@@ -87,9 +83,7 @@ export default class RecentlyViewedService extends Service {
       // Set a promise to fetch the recently viewed projects
       console.log('[RecentlyViewed] 📡 Fetching recently viewed projects...');
       const recentlyViewedProjectsPromise = this.fetchSvc
-        .fetch(
-          `/api/${this.configSvc.config.api_version}/me/recently-viewed-projects`,
-        )
+        .fetch("/api/v2/me/recently-viewed-projects")
         .then((resp) => {
           console.log('[RecentlyViewed] 📬 Recently viewed projects response received');
           return resp?.json();
@@ -114,9 +108,7 @@ export default class RecentlyViewedService extends Service {
 
         fullItemPromises.push(
           this.fetchSvc
-            .fetch(
-              `/api/${this.configSvc.config.api_version}/${endpoint}/${d.id}`,
-            )
+            .fetch(`/api/v2/${endpoint}/${d.id}`)
             .then((resp) => resp?.json())
             .then((doc) => {
               return {
@@ -137,7 +129,7 @@ export default class RecentlyViewedService extends Service {
       recentlyViewedProjects?.forEach((p: IndexedProject) => {
         fullItemPromises.push(
           this.fetchSvc
-            .fetch(`/api/${this.configSvc.config.api_version}/projects/${p.id}`)
+            .fetch(`/api/v2/projects/${p.id}`)
             .then((resp) => resp?.json())
             .then((project) => {
               return {

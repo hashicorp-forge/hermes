@@ -101,10 +101,10 @@ func decodeRequest(r *http.Request, reqStruct interface{}) error {
 }
 
 // parseResourceIDFromURL parses a URL path with the format
-// "/api/v1/{apiPath}/{resourceID}" and returns the resource ID.
+// "/api/v2/{apiPath}/{resourceID}" and returns the resource ID.
 func parseResourceIDFromURL(url, apiPath string) (string, error) {
 	// Remove API path from URL.
-	url = strings.TrimPrefix(url, fmt.Sprintf("/api/v1/%s", apiPath))
+	url = strings.TrimPrefix(url, fmt.Sprintf("/api/v2/%s", apiPath))
 
 	// Remove empty entries and validate path.
 	urlPath := strings.Split(url, "/")

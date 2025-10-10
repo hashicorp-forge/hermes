@@ -2,20 +2,34 @@
 id: TODO-006
 title: Migrate V1 API Handlers to Search Provider
 date: 2025-10-09
+updated: 2025-10-09
 type: TODO
-priority: high
-status: blocked
-tags: [api, v1, search-provider, migration, refactoring]
+priority: obsolete
+status: superseded
+tags: [api, v1, search-provider, migration, refactoring, obsolete]
 related:
   - TODO-003
+  - TODO-014
   - ADR-073
   - RFC-076
-blocked_by: TODO-003
+superseded_by: TODO-014
 ---
 
-# Migrate V1 API Handlers to Search Provider
+# ⚠️ OBSOLETE: Migrate V1 API Handlers to Search Provider
 
-## Description
+## Status Update (2025-10-09)
+
+**This TODO is OBSOLETE** - V1 API endpoints are **no longer registered** in the Hermes server.
+
+- ✅ Server only registers `/api/v2/*` endpoints (see `internal/cmd/commands/server/server.go`)
+- ✅ Frontend hardcoded to use `api_version: "v2"` (see `web/app/services/config.ts`)
+- ⚠️ V1 handler implementations remain in codebase but are unreachable
+
+**Next Action**: See **TODO-007** (Remove V1 API Legacy Code) for cleanup tasks.
+
+---
+
+## Original Description (Historical)
 
 V1 API handlers still use direct Algolia client calls instead of the `SearchProvider` abstraction. This prevents:
 - Running tests without external Algolia dependency

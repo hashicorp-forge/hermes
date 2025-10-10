@@ -17,7 +17,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp-forge/hermes/internal/api"
 	apiv2 "github.com/hashicorp-forge/hermes/internal/api/v2"
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/internal/server"
@@ -271,20 +270,6 @@ func (s *Suite) setupServer() error {
 
 	// Create mux and register endpoints (mimicking internal/cmd/commands/server/server.go)
 	mux := http.NewServeMux()
-
-	// Register key API v1 endpoints (add more as needed for tests)
-	mux.Handle("/api/v1/documents/",
-		api.DocumentHandler(s.Config, srv.Logger, s.SearchProvider, s.WorkspaceProvider, s.DB))
-	// TODO: Refactor drafts handlers to use search.Provider instead of algolia.Client
-	// mux.Handle("/api/v1/drafts",
-	// 	api.DraftsHandler(s.Config, srv.Logger, algoSearch, algoWrite, gwService, s.DB))
-	// mux.Handle("/api/v1/drafts/",
-	// 	api.DraftsDocumentHandler(s.Config, srv.Logger, algoSearch, algoWrite, gwService, s.DB))
-	mux.Handle("/api/v1/products",
-		api.ProductsHandler(s.Config, s.DB, srv.Logger))
-	// TODO: Refactor reviews handler to use search.Provider instead of algolia.Client
-	// mux.Handle("/api/v1/reviews/",
-	// 	api.ReviewHandler(s.Config, srv.Logger, algoSearch, algoWrite, gwService, s.DB))
 
 	// Register API v2 endpoints (use server.Server abstraction)
 	mux.Handle("/api/v2/documents/", apiv2.DocumentHandler(*srv))
