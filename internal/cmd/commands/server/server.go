@@ -580,6 +580,7 @@ func (c *Command) Run(args []string) int {
 		{"/api/v2/me/recently-viewed-docs", apiv2.MeRecentlyViewedDocsHandler(srv)},
 		{"/api/v2/me/recently-viewed-projects",
 			apiv2.MeRecentlyViewedProjectsHandler(srv)},
+		{"/api/v2/me/reviews", apiv2.MeReviewsHandler(srv)},
 		{"/api/v2/me/subscriptions", apiv2.MeSubscriptionsHandler(srv)},
 		{"/api/v2/people", apiv2.PeopleDataHandler(srv)},
 		{"/api/v2/products", apiv2.ProductsHandler(srv)},

@@ -32,19 +32,25 @@ export default class DashboardRoute extends Route {
     }
 
     console.log('[DashboardRoute] 👤 User info available:', userInfo.email);
-    console.log('[DashboardRoute] 🔍 Searching for docs awaiting review...');
+    console.log('[DashboardRoute] 🔍 Fetching docs awaiting review from /api/v2/me/reviews...');
 
-    const docsAwaitingReviewPromise = this.search.searchIndex
-      .perform(this.configSvc.config.algolia_docs_index_name, "", {
-        filters:
-          `approvers:'${userInfo.email}'` +
-          ` AND NOT approvedBy:'${userInfo.email}'` +
-          " AND appCreated:true" +
-          " AND status:In-Review",
+    // Fetch reviews from the backend API instead of searching Algolia
+    const docsAwaitingReviewPromise = this.fetchSvc
+      .fetch("/api/v2/me/reviews")
+      .then((response) => {
+        if (!response) {
+          throw new Error('No response from /api/v2/me/reviews');
+        }
+        return response.json();
       })
-      .then((result) => {
-        console.log('[DashboardRoute] ✅ Docs awaiting review loaded:', result.hits.length);
-        return result.hits as HermesDocument[];
+      .then((data: { reviews: Array<{ document: HermesDocument }> }) => {
+        console.log('[DashboardRoute] ✅ Docs awaiting review loaded:', data.reviews?.length || 0);
+        // Extract documents from review objects
+        return data.reviews?.map((review) => review.document) || [];
+      })
+      .catch((error: Error) => {
+        console.error('[DashboardRoute] ❌ Error fetching reviews:', error);
+        return [] as HermesDocument[];
       });
 
     let promises: Promise<HermesDocument[] | void>[] = [
