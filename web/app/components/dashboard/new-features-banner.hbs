@@ -8,11 +8,34 @@
     class="mb-10"
     as |A|
   >
-    <A.Title>
-      <strong>Migration Notice:</strong> Hermes migration to SharePoint will commence at midnight on January 22nd, 2026 IST. 
-      Following this date, the current system will operate in read-only mode, preventing new document creation and metadata updates. 
-      To ensure data integrity, please refrain from modifying document content during the migration period.
-      It is recommended to start using the new <a href="https://hermes-sharepoint.hashicorp.services/" target="_blank" rel="noopener noreferrer">SharePoint-backed Hermes →</a>
-    </A.Title>
+    <A.Title>What's new in Hermes</A.Title>
+    <A.Description>
+      <ul class="icon-list">
+        {{#if this.configSvc.config.group_approvals}}
+          <li>
+            <FlightIcon @name="users" />
+            <p>
+              Google Groups can be added as document approvers
+            </p>
+          </li>
+        {{/if}}
+        <li>
+          <FlightIcon @name="swap-horizontal" />
+          <p>
+            Document ownership can be transferred between users
+          </p>
+        </li>
+        <li>
+          <FlightIcon @name="smile" />
+          <p>
+            We've improved owner filtering on the
+            <LinkTo @route="authenticated.documents" class="underlined-link">
+              All Docs
+            </LinkTo>
+            view
+          </p>
+        </li>
+      </ul>
+    </A.Description>
   </Hds::Alert>
 {{/if}}
