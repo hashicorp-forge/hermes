@@ -1,10 +1,9 @@
-import Service, { inject as service } from "@ember/service";
+import Service, { service } from "@ember/service";
 import { tracked } from "@glimmer/tracking";
 import { task } from "ember-concurrency";
-import ConfigService from "hermes/services/config";
 import FetchService from "./fetch";
 import { assert } from "@ember/debug";
-import hashValue from "hash-value";
+import hash from "object-hash";
 
 const HDS_COLORS = [
   "#3b3d45",
@@ -63,7 +62,6 @@ export type ProductArea = {
 };
 
 export default class ProductAreasService extends Service {
-  @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
 
   @tracked _index: Record<string, ProductArea> | null = null;
@@ -85,7 +83,11 @@ export default class ProductAreasService extends Service {
       return;
     }
 
-    return hashValue(product, [...HDS_COLORS, ...EXTENDED_COLORS]);
+    // Create a simple hash from the product string and use it to select a color
+    const colorArray = [...HDS_COLORS, ...EXTENDED_COLORS];
+    const hashCode = hash(product);
+    const index = parseInt(hashCode.substring(0, 8), 16) % colorArray.length;
+    return colorArray[index];
   }
 
   /**
@@ -113,11 +115,14 @@ export default class ProductAreasService extends Service {
    * Stores the response in the `_index` property.
    */
   fetch = task(async () => {
+    console.log('[ProductAreas] 🏭 Fetching product areas...');
     try {
       this._index = await this.fetchSvc
-        .fetch(`/api/${this.configSvc.config.api_version}/products`)
+        .fetch("/api/v2/products")
         .then((resp) => resp?.json());
+      console.log('[ProductAreas] ✅ Product areas loaded:', Object.keys(this._index || {}).length, 'products');
     } catch (err) {
+      console.error('[ProductAreas] ❌ Error fetching product areas:', err);
       this._index = null;
       throw err;
     }

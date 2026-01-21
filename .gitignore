@@ -1,5 +1,8 @@
-/config.hcl
 /hermes
+
+# Build artifacts
+/build/*
+!/build/.gitkeep
 
 # Google OAuth 2.0
 /credentials.json
@@ -7,7 +10,15 @@
 
 # macOS & local
 .DS_Store
+
+# Environment variables (secrets)
 .env
+.env.local
+.env.*.local
+.env.development
+.env.staging
+.env.production
+.env.test
 
 # Web application
 node_modules
@@ -16,5 +27,44 @@ node_modules
 /web/.eslintcache
 /web/dist
 
+# Test artifacts
+*.test
+*.out
+coverage*.html
+coverage*.out
+test-output.log
+
+# Playwright test artifacts
+/tests/e2e-playwright/test-results/
+/tests/e2e-playwright/playwright-report/
+/tests/e2e-playwright/.playwright/
+/tests/e2e-playwright/playwright/.cache/
+**/test-results/
+**/.playwright/
+.playwright-mcp/
+
 # Terraform related
 .terraform
+
+# Backup files
+*.bak
+*.bak[0-9]
+*.bak[0-9][0-9]
+*.orig
+*.rej
+*backup
+
+# Test logs
+test_*.log
+
+# Patch files
+*.patch
+
+/web/dist-test
+
+# Playwright MCP screenshots and artifacts
+.playwright-mcp/
+
+# Volume data
+/workspace_data/
+

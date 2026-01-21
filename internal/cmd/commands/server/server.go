@@ -23,10 +23,15 @@ import (
 	"github.com/hashicorp-forge/hermes/internal/server"
 	"github.com/hashicorp-forge/hermes/internal/structs"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
-	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp-forge/hermes/pkg/links"
 	"github.com/hashicorp-forge/hermes/pkg/models"
+	"github.com/hashicorp-forge/hermes/pkg/search"
+	searchalgolia "github.com/hashicorp-forge/hermes/pkg/search/adapters/algolia"
+	meilisearchadapter "github.com/hashicorp-forge/hermes/pkg/search/adapters/meilisearch"
+	"github.com/hashicorp-forge/hermes/pkg/workspace"
+	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
+	localadapter "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/local"
 	"github.com/hashicorp-forge/hermes/web"
 	"github.com/hashicorp/go-hclog"
 	httptrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/net/http"
@@ -40,6 +45,10 @@ type Command struct {
 	flagAddr              string
 	flagBaseURL           string
 	flagConfig            string
+	flagProfile           string
+	flagWorkspaceProvider string
+	flagSearchProvider    string
+	flagAuthProvider      string
 	flagOktaAuthServerURL string
 	flagOktaClientID      string
 	flagOktaDisabled      bool
@@ -75,6 +84,27 @@ func (c *Command) Flags() *base.FlagSet {
 		&c.flagConfig, "config", "", "Path to Hermes config file",
 	)
 	f.StringVar(
+		&c.flagProfile, "profile", "",
+		"[HERMES_SERVER_PROFILE] Configuration profile to use (e.g., 'default', 'testing'). "+
+			"If empty, uses 'default' profile when profiles exist, or root config for backward compatibility.",
+	)
+	f.StringVar(
+		&c.flagWorkspaceProvider, "workspace-provider", "",
+		"[HERMES_WORKSPACE_PROVIDER] Workspace provider to use (e.g., 'google', 'local'). "+
+			"Overrides the provider specified in the config profile.",
+	)
+	f.StringVar(
+		&c.flagSearchProvider, "search-provider", "",
+		"[HERMES_SEARCH_PROVIDER] Search provider to use (e.g., 'algolia', 'meilisearch'). "+
+			"Overrides the provider specified in the config profile.",
+	)
+	f.StringVar(
+		&c.flagAuthProvider, "auth-provider", "",
+		"[HERMES_AUTH_PROVIDER] Authentication provider to use (e.g., 'dex', 'okta', 'google'). "+
+			"Overrides the provider auto-selection based on config. When set to 'dex' or 'okta', "+
+			"will disable other providers to force that provider to be used.",
+	)
+	f.StringVar(
 		&c.flagOktaAuthServerURL, "okta-auth-server-url", "",
 		"[HERMES_SERVER_OKTA_AUTH_SERVER_URL] URL to the Okta authorization server.",
 	)
@@ -102,10 +132,16 @@ func (c *Command) Run(args []string) int {
 		err error
 	)
 	if c.flagConfig != "" {
-		cfg, err = config.NewConfig(c.flagConfig)
+		// Get profile from flag or environment variable
+		profile := c.flagProfile
+		if val, ok := os.LookupEnv("HERMES_SERVER_PROFILE"); ok && profile == "" {
+			profile = val
+		}
+
+		cfg, err = config.NewConfig(c.flagConfig, profile)
 		if err != nil {
-			c.UI.Error(fmt.Sprintf("error parsing config file: %v: config=%q",
-				err, c.flagConfig))
+			c.UI.Error(fmt.Sprintf("error parsing config file: %v: config=%q profile=%q",
+				err, c.flagConfig, profile))
 			return 1
 		}
 	}
@@ -149,6 +185,45 @@ func (c *Command) Run(args []string) int {
 	}
 	if c.flagOktaDisabled {
 		cfg.Okta.Disabled = true
+	}
+
+	// Handle auth provider selection from flag or environment variable
+	authProvider := c.flagAuthProvider
+	if val, ok := os.LookupEnv("HERMES_AUTH_PROVIDER"); ok && authProvider == "" {
+		authProvider = val
+	}
+	if authProvider != "" {
+		// Force the specified provider by disabling others
+		switch strings.ToLower(authProvider) {
+		case "dex":
+			if cfg.Dex != nil {
+				cfg.Dex.Disabled = false
+			}
+			if cfg.Okta != nil {
+				cfg.Okta.Disabled = true
+			}
+			c.Log.Info("auth provider selection", "provider", "dex", "source", "flag/env")
+		case "okta":
+			if cfg.Dex != nil {
+				cfg.Dex.Disabled = true
+			}
+			if cfg.Okta != nil {
+				cfg.Okta.Disabled = false
+			}
+			c.Log.Info("auth provider selection", "provider", "okta", "source", "flag/env")
+		case "google":
+			// Disable both Dex and Okta to fall back to Google
+			if cfg.Dex != nil {
+				cfg.Dex.Disabled = true
+			}
+			if cfg.Okta != nil {
+				cfg.Okta.Disabled = true
+			}
+			c.Log.Info("auth provider selection", "provider", "google", "source", "flag/env")
+		default:
+			c.UI.Error(fmt.Sprintf("invalid auth provider: %s (valid options: dex, okta, google)", authProvider))
+			return 1
+		}
 	}
 
 	// Validate feature flags defined in configuration
@@ -225,52 +300,197 @@ func (c *Command) Run(args []string) int {
 		tracer.Start(tracerOpts...)
 	}
 
-	// Initialize Google Workspace service.
-	var goog *gw.Service
-	// Use Google Workspace service user auth if it is defined in the config.
-	if cfg.GoogleWorkspace.Auth != nil {
-		// Validate temporary drafts folder is configured if creating docs as user.
-		if cfg.GoogleWorkspace.Auth.CreateDocsAsUser &&
-			cfg.GoogleWorkspace.TemporaryDraftsFolder == "" {
-			c.UI.Error(
-				"error initializing server: Google Workspace temporary drafts folder is required if create_docs_as_user is true")
+	// Determine which providers to use (from flags, env vars, or config).
+	workspaceProviderName := c.flagWorkspaceProvider
+	if val, ok := os.LookupEnv("HERMES_WORKSPACE_PROVIDER"); ok && workspaceProviderName == "" {
+		workspaceProviderName = val
+	}
+	if workspaceProviderName == "" && cfg.Providers != nil {
+		workspaceProviderName = cfg.Providers.Workspace
+	}
+	if workspaceProviderName == "" {
+		workspaceProviderName = "google" // Default to google for backward compatibility
+	}
+
+	searchProviderName := c.flagSearchProvider
+	if val, ok := os.LookupEnv("HERMES_SEARCH_PROVIDER"); ok && searchProviderName == "" {
+		searchProviderName = val
+	}
+	if searchProviderName == "" && cfg.Providers != nil {
+		searchProviderName = cfg.Providers.Search
+	}
+	if searchProviderName == "" {
+		searchProviderName = "algolia" // Default to algolia for backward compatibility
+	}
+
+	c.UI.Info(fmt.Sprintf("Using workspace provider: %s", workspaceProviderName))
+	c.UI.Info(fmt.Sprintf("Using search provider: %s", searchProviderName))
+
+	// Initialize workspace provider based on selection.
+	var workspaceProvider workspace.Provider
+	var goog *gw.Service // Keep for legacy handlers that still use it directly
+
+	switch workspaceProviderName {
+	case "google":
+		// Use Google Workspace service user auth if it is defined in the config.
+		if cfg.GoogleWorkspace.Auth != nil {
+			// Validate temporary drafts folder is configured if creating docs as user.
+			if cfg.GoogleWorkspace.Auth.CreateDocsAsUser &&
+				cfg.GoogleWorkspace.TemporaryDraftsFolder == "" {
+				c.UI.Error(
+					"error initializing server: Google Workspace temporary drafts folder is required if create_docs_as_user is true")
+				return 1
+			}
+
+			goog = gw.NewFromConfig(cfg.GoogleWorkspace.Auth)
+		} else {
+			// Use OAuth if Google Workspace auth is not defined in the config.
+			goog = gw.New()
+		}
+
+		reqOpts := map[interface{}]string{
+			cfg.BaseURL:                         "Base URL is required",
+			cfg.GoogleWorkspace.DocsFolder:      "Google Workspace Docs Folder is required",
+			cfg.GoogleWorkspace.Domain:          "Google Workspace Domain is required",
+			cfg.GoogleWorkspace.DraftsFolder:    "Google Workspace Drafts Folder is required",
+			cfg.GoogleWorkspace.ShortcutsFolder: "Google Workspace Shortcuts Folder is required",
+		}
+		for r, msg := range reqOpts {
+			if r == "" {
+				c.UI.Error(fmt.Sprintf("error initializing server: %s", msg))
+				return 1
+			}
+		}
+
+		workspaceProvider = gw.NewAdapter(goog)
+
+	case "local":
+		if cfg.LocalWorkspace == nil {
+			c.UI.Error("error initializing server: local_workspace configuration required when using local workspace provider")
 			return 1
 		}
 
-		goog = gw.NewFromConfig(cfg.GoogleWorkspace.Auth)
-	} else {
-		// Use OAuth if Google Workspace auth is not defined in the config.
-		goog = gw.New()
-	}
-
-	reqOpts := map[interface{}]string{
-		cfg.Algolia.ApplicationID:           "Algolia Application ID is required",
-		cfg.Algolia.SearchAPIKey:            "Algolia Search API Key is required",
-		cfg.BaseURL:                         "Base URL is required",
-		cfg.GoogleWorkspace.DocsFolder:      "Google Workspace Docs Folder is required",
-		cfg.GoogleWorkspace.Domain:          "Google Workspace Domain is required",
-		cfg.GoogleWorkspace.DraftsFolder:    "Google Workspace Drafts Folder is required",
-		cfg.GoogleWorkspace.ShortcutsFolder: "Google Workspace Shortcuts Folder is required",
-	}
-	for r, msg := range reqOpts {
-		if r == "" {
-			c.UI.Error(fmt.Sprintf("error initializing server: %s", msg))
+		localCfg := cfg.LocalWorkspace.ToLocalAdapterConfig()
+		adapter, err := localadapter.NewAdapter(localCfg)
+		if err != nil {
+			c.UI.Error(fmt.Sprintf("error initializing local workspace adapter: %v", err))
 			return 1
 		}
-	}
 
-	// Initialize Algolia search client.
-	algoSearch, err := algolia.NewSearchClient(cfg.Algolia)
-	if err != nil {
-		c.UI.Error(fmt.Sprintf("error initializing Algolia search client: %v", err))
+		// Create workspace provider adapter
+		workspaceProvider = localadapter.NewProviderAdapter(adapter)
+
+		// Note: searchProvider not yet initialized at this point
+		// Document indexing will be triggered after search provider is initialized
+
+	default:
+		c.UI.Error(fmt.Sprintf("error initializing server: unknown workspace provider %q", workspaceProviderName))
 		return 1
 	}
 
-	// Initialize Algolia write client.
-	algoWrite, err := algolia.New(cfg.Algolia)
-	if err != nil {
-		c.UI.Error(fmt.Sprintf("error initializing Algolia write client: %v", err))
+	// Initialize search provider based on selection.
+	var searchProvider search.Provider
+	var algoSearch *algolia.Client       // Keep for legacy proxy handler
+	var algoWrite *algolia.Client        // Keep for legacy operations
+	var algoliaClientCfg *algolia.Config // Keep for legacy handlers
+
+	switch searchProviderName {
+	case "algolia":
+		if cfg.Algolia == nil {
+			c.UI.Error("error initializing server: algolia configuration required when using algolia search provider")
+			return 1
+		}
+
+		reqOpts := map[interface{}]string{
+			cfg.Algolia.AppID:        "Algolia Application ID is required",
+			cfg.Algolia.SearchAPIKey: "Algolia Search API Key is required",
+		}
+		for r, msg := range reqOpts {
+			if r == "" {
+				c.UI.Error(fmt.Sprintf("error initializing server: %s", msg))
+				return 1
+			}
+		}
+
+		// Convert search adapter config to legacy algolia config
+		algoliaClientCfg = &algolia.Config{
+			ApplicationID:          cfg.Algolia.AppID,
+			SearchAPIKey:           cfg.Algolia.SearchAPIKey,
+			WriteAPIKey:            cfg.Algolia.WriteAPIKey,
+			DocsIndexName:          cfg.Algolia.DocsIndexName,
+			DraftsIndexName:        cfg.Algolia.DraftsIndexName,
+			InternalIndexName:      cfg.Algolia.InternalIndexName,
+			LinksIndexName:         cfg.Algolia.LinksIndexName,
+			MissingFieldsIndexName: cfg.Algolia.MissingFieldsIndexName,
+			ProjectsIndexName:      cfg.Algolia.ProjectsIndexName,
+		}
+
+		// Initialize Algolia search client (legacy - still needed for proxy handler).
+		algoSearch, err = algolia.NewSearchClient(algoliaClientCfg)
+		if err != nil {
+			c.UI.Error(fmt.Sprintf("error initializing Algolia search client: %v", err))
+			return 1
+		}
+
+		// Initialize Algolia write client (legacy - still needed for some operations).
+		algoWrite, err = algolia.New(algoliaClientCfg)
+		if err != nil {
+			c.UI.Error(fmt.Sprintf("error initializing Algolia write client: %v", err))
+			return 1
+		}
+
+		// Initialize modern search provider adapter.
+		searchAdapterCfg := &searchalgolia.Config{
+			AppID:           cfg.Algolia.AppID,
+			WriteAPIKey:     cfg.Algolia.WriteAPIKey,
+			DocsIndexName:   cfg.Algolia.DocsIndexName,
+			DraftsIndexName: cfg.Algolia.DraftsIndexName,
+		}
+		searchProvider, err = searchalgolia.NewAdapter(searchAdapterCfg)
+		if err != nil {
+			c.UI.Error(fmt.Sprintf("error initializing search provider: %v", err))
+			return 1
+		}
+
+	case "meilisearch":
+		if cfg.Meilisearch == nil {
+			c.UI.Error("error initializing server: meilisearch configuration required when using meilisearch search provider")
+			return 1
+		}
+
+		meilisearchCfg := cfg.Meilisearch.ToMeilisearchAdapterConfig()
+		meilisearchAdapter, err := meilisearchadapter.NewAdapter(meilisearchCfg)
+		if err != nil {
+			c.UI.Error(fmt.Sprintf("error initializing meilisearch adapter: %v", err))
+			return 1
+		}
+		searchProvider = meilisearchAdapter
+
+	default:
+		c.UI.Error(fmt.Sprintf("error initializing server: unknown search provider %q", searchProviderName))
 		return 1
+	}
+
+	// If using Local workspace provider, index all documents into search provider.
+	// This ensures the search index is synchronized with the filesystem on startup.
+	if workspaceProviderName == "local" {
+		// Extract the local adapter from the provider wrapper
+		if providerAdapter, ok := workspaceProvider.(*localadapter.ProviderAdapter); ok {
+			localAdapter := providerAdapter.GetAdapter()
+			indexer := localadapter.NewDocumentIndexer(localAdapter, searchProvider, c.Log)
+
+			c.UI.Info("Indexing documents from local workspace into search provider...")
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+			defer cancel()
+
+			if err := indexer.IndexAll(ctx); err != nil {
+				c.UI.Warn(fmt.Sprintf("warning: document indexing failed: %v", err))
+				c.UI.Warn("documents may not appear in search results until manually indexed")
+				// Don't fail startup - server can still operate with empty search index
+			} else {
+				c.UI.Info("Document indexing completed successfully")
+			}
+		}
 	}
 
 	// Initialize Jira service.
@@ -337,50 +557,20 @@ func (c *Command) Run(args []string) int {
 	}
 
 	srv := server.Server{
-		AlgoSearch: algoSearch,
-		AlgoWrite:  algoWrite,
-		Config:     cfg,
-		DB:         db,
-		GWService:  goog,
-		Jira:       jiraSvc,
-		Logger:     c.Log,
+		SearchProvider:    searchProvider,
+		WorkspaceProvider: workspaceProvider,
+		Config:            cfg,
+		DB:                db,
+		Jira:              jiraSvc,
+		Logger:            c.Log,
 	}
 
 	// Define handlers for authenticated endpoints.
+	// All API endpoints use v2.
 	authenticatedEndpoints := []endpoint{
-		// Algolia proxy.
-		{"/1/indexes/",
-			algolia.AlgoliaProxyHandler(algoSearch, cfg.Algolia, c.Log)},
-
-		// API v1.
-		{"/api/v1/approvals/",
-			api.ApprovalHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
-		{"/api/v1/document-types", api.DocumentTypesHandler(*cfg, c.Log)},
-		{"/api/v1/documents/",
-			api.DocumentHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
-		{"/api/v1/drafts",
-			api.DraftsHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
-		{"/api/v1/drafts/",
-			api.DraftsDocumentHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
-		{"/api/v1/jira/issue/picker", apiv2.JiraIssuePickerHandler(srv)},
-		{"/api/v1/jira/issues/", apiv2.JiraIssueHandler(srv)},
-		{"/api/v1/me", api.MeHandler(c.Log, goog)},
-		{"/api/v1/me/recently-viewed-docs",
-			api.MeRecentlyViewedDocsHandler(cfg, c.Log, db)},
-		{"/api/v1/me/subscriptions",
-			api.MeSubscriptionsHandler(cfg, c.Log, goog, db)},
-		{"/api/v1/people", api.PeopleDataHandler(cfg, c.Log, goog)},
-		{"/api/v1/products", api.ProductsHandler(cfg, algoSearch, c.Log)},
-		{"/api/v1/projects", apiv2.ProjectsHandler(srv)},
-		{"/api/v1/projects/", apiv2.ProjectHandler(srv)},
-		{"/api/v1/reviews/",
-			api.ReviewHandler(cfg, c.Log, algoSearch, algoWrite, goog, db)},
-		{"/api/v1/web/analytics", api.AnalyticsHandler(c.Log)},
-
-		// API v2.
 		{"/api/v2/approvals/", apiv2.ApprovalsHandler(srv)},
 		{"/api/v2/document-types", apiv2.DocumentTypesHandler(srv)},
-		{"/api/v2/documents/", apiv2.DocumentHandler(srv)},
+		{"/api/v2/documents/", apiv2.DocumentHandler(srv)}, // Handles /content suffix too
 		{"/api/v2/drafts", apiv2.DraftsHandler(srv)},
 		{"/api/v2/drafts/", apiv2.DraftsDocumentHandler(srv)},
 		{"/api/v2/groups", apiv2.GroupsHandler(srv)},
@@ -390,13 +580,23 @@ func (c *Command) Run(args []string) int {
 		{"/api/v2/me/recently-viewed-docs", apiv2.MeRecentlyViewedDocsHandler(srv)},
 		{"/api/v2/me/recently-viewed-projects",
 			apiv2.MeRecentlyViewedProjectsHandler(srv)},
+		{"/api/v2/me/reviews", apiv2.MeReviewsHandler(srv)},
 		{"/api/v2/me/subscriptions", apiv2.MeSubscriptionsHandler(srv)},
 		{"/api/v2/people", apiv2.PeopleDataHandler(srv)},
 		{"/api/v2/products", apiv2.ProductsHandler(srv)},
 		{"/api/v2/projects", apiv2.ProjectsHandler(srv)},
 		{"/api/v2/projects/", apiv2.ProjectHandler(srv)},
 		{"/api/v2/reviews/", apiv2.ReviewsHandler(srv)},
+		{"/api/v2/search/", apiv2.SearchHandler(srv)},
 		{"/api/v2/web/analytics", apiv2.AnalyticsHandler(srv)},
+	}
+
+	// Add Algolia-specific endpoints if using Algolia search provider.
+	if searchProviderName == "algolia" && algoSearch != nil {
+		authenticatedEndpoints = append(authenticatedEndpoints, endpoint{
+			"/1/indexes/",
+			algolia.AlgoliaProxyHandler(algoSearch, algoliaClientCfg, c.Log),
+		})
 	}
 
 	// Define handlers for unauthenticated endpoints.
@@ -405,26 +605,52 @@ func (c *Command) Run(args []string) int {
 		{"/pub/", http.StripPrefix("/pub/", pub.Handler())},
 	}
 
-	// Web endpoints are conditionally authenticated based on if Okta is enabled.
-	webEndpoints := []endpoint{
-		{"/", web.Handler()},
-		{"/api/v1/web/config", web.ConfigHandler(cfg, algoSearch, c.Log)},
-		{"/api/v2/web/config", web.ConfigHandler(cfg, algoSearch, c.Log)},
-		{"/l/", links.RedirectHandler(algoSearch, cfg.Algolia, c.Log)},
+	// Add Dex OIDC auth endpoints if Dex is configured
+	if cfg.Dex != nil && !cfg.Dex.Disabled {
+		unauthenticatedEndpoints = append(unauthenticatedEndpoints,
+			endpoint{"/auth/login", api.LoginHandler(*cfg, c.Log)},
+			endpoint{"/auth/callback", api.CallbackHandler(*cfg, c.Log)},
+			endpoint{"/auth/logout", api.LogoutHandler(c.Log)},
+		)
 	}
 
-	// If Okta is enabled, add the web endpoints for the single page app as
-	// authenticated endpoints.
-	if cfg.Okta != nil && !cfg.Okta.Disabled {
-		authenticatedEndpoints = append(authenticatedEndpoints, webEndpoints...)
+	// Web config endpoints are always unauthenticated so the frontend can load
+	// and determine the auth provider before attempting to authenticate.
+	if searchProviderName == "algolia" && algoSearch != nil {
+		unauthenticatedEndpoints = append(unauthenticatedEndpoints,
+			endpoint{"/api/v2/web/config", web.ConfigHandler(cfg, algoSearch, c.Log)},
+			endpoint{"/l/", links.RedirectHandler(algoSearch, algoliaClientCfg, c.Log)},
+		)
 	} else {
-		// If Okta is disabled, we need to add the web endpoints for the SPA as
-		// unauthenticated endpoints so the application will load.
-		unauthenticatedEndpoints = append(unauthenticatedEndpoints, webEndpoints...)
+		// For non-Algolia search providers, provide minimal config handlers
+		// that return configuration without Algolia-specific data
+		unauthenticatedEndpoints = append(unauthenticatedEndpoints,
+			endpoint{"/api/v2/web/config", web.ConfigHandler(cfg, nil, c.Log)},
+		)
+	}
+
+	// SPA handler - conditionally authenticated based on if Okta or Dex is enabled.
+	spaEndpoints := []endpoint{
+		{"/", web.Handler()},
+	}
+
+	// If Okta or Dex is enabled, add the SPA handler as an authenticated endpoint.
+	if (cfg.Okta != nil && !cfg.Okta.Disabled) || (cfg.Dex != nil && !cfg.Dex.Disabled) {
+		authenticatedEndpoints = append(authenticatedEndpoints, spaEndpoints...)
+	} else {
+		// If both Okta and Dex are disabled, add the SPA handler as an unauthenticated endpoint.
+		unauthenticatedEndpoints = append(unauthenticatedEndpoints, spaEndpoints...)
 	}
 
 	// Register handlers.
 	for _, e := range authenticatedEndpoints {
+		// Note: auth.AuthenticateRequest supports Dex, Okta, or Google authentication.
+		// When using non-Google workspace providers with non-Dex authentication,
+		// Okta authentication must be enabled.
+		if goog == nil && (cfg.Okta == nil || cfg.Okta.Disabled) && (cfg.Dex == nil || cfg.Dex.Disabled) {
+			c.UI.Error("error: when using non-Google workspace providers, Okta or Dex authentication must be enabled")
+			return 1
+		}
 		mux.Handle(
 			e.pattern,
 			auth.AuthenticateRequest(*cfg, goog, c.Log, e.handler),
@@ -554,20 +780,22 @@ func registerProducts(
 			return fmt.Errorf("error upserting product: %w", err)
 		}
 
-		// Add product to Algolia products object.
+		// Add product to Algolia products object (only if using Algolia).
 		productsObj.Data[p.Name] = structs.ProductData{
 			Abbreviation: p.Abbreviation,
 		}
 	}
 
-	// Save Algolia products object.
-	res, err := algo.Internal.SaveObject(&productsObj)
-	if err != nil {
-		return fmt.Errorf("error saving Algolia products object: %w", err)
-	}
-	err = res.Wait()
-	if err != nil {
-		return fmt.Errorf("error saving Algolia products object: %w", err)
+	// Save Algolia products object (skip if using different search provider).
+	if algo != nil {
+		res, err := algo.Internal.SaveObject(&productsObj)
+		if err != nil {
+			return fmt.Errorf("error saving Algolia products object: %w", err)
+		}
+		err = res.Wait()
+		if err != nil {
+			return fmt.Errorf("error saving Algolia products object: %w", err)
+		}
 	}
 
 	return nil

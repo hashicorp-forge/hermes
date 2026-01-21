@@ -6,14 +6,12 @@ import { hbs } from "ember-cli-htmlbars";
 import { HermesDocument } from "hermes/types/document";
 import { TEST_USER_EMAIL } from "hermes/mirage/utils";
 
+// Component-specific test selectors
 const DOCS_AWAITING_REVIEW_COUNT_SELECTOR =
   "[data-test-docs-awaiting-review-count]";
-
 const DOC_AWAITING_REVIEW_LINK_SELECTOR =
   "[data-test-doc-awaiting-review-link]";
-
 const TOGGLE_SELECTOR = "[data-test-docs-awaiting-review-toggle]";
-
 const TOGGLE_ICON = "[data-test-docs-awaiting-review-toggle-icon]";
 
 interface DashboardDocsAwaitingReviewTestContext extends MirageTestContext {

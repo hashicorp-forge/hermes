@@ -7,7 +7,7 @@ import {
   RelatedResource,
   RelatedResourcesScope,
 } from "../related-resources";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
 import { enqueueTask, task, timeout } from "ember-concurrency";
 import { HermesProject, JiraPickerResult } from "hermes/types/project";
@@ -20,18 +20,15 @@ import ConfigService from "hermes/services/config";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
 import { FLASH_MESSAGES_LONG_TIMEOUT } from "hermes/utils/ember-cli-flash/timeouts";
 import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
-import Ember from "ember";
-import { TransitionContext, wait } from "ember-animated/.";
-import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
+import { isTesting } from "@embroider/macros";
+// TEMPORARILY USING STUBS FOR EMBER 6.x UPGRADE
+import { TransitionContext, wait, fadeIn, fadeOut, move, Resize, easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated-stubs";
 import { emptyTransition } from "hermes/utils/ember-animated/empty-transition";
-import move from "ember-animated/motions/move";
-import { Resize } from "ember-animated/motions/resize";
-import { easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated/easings";
 import animateTransform from "hermes/utils/ember-animated/animate-transform";
 import RouterService from "@ember/routing/router-service";
 import StoreService from "hermes/services/store";
 
-const animationDuration = Ember.testing ? 0 : 450;
+const animationDuration = isTesting() ? 0 : 450;
 
 class ResizeExpo extends Resize {
   *animate() {
@@ -260,9 +257,15 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     const cachedLinks = this.externalLinks.slice();
 
     if ("googleFileID" in doc) {
-      this.hermesDocuments.removeObject(doc);
+      const index = this.hermesDocuments.indexOf(doc);
+      if (index > -1) {
+        this.hermesDocuments.splice(index, 1);
+      }
     } else {
-      this.externalLinks.removeObject(doc);
+      const index = this.externalLinks.indexOf(doc);
+      if (index > -1) {
+        this.externalLinks.splice(index, 1);
+      }
     }
     void this.saveProjectResources.perform(cachedDocuments, cachedLinks);
   }
@@ -355,14 +358,14 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
 
     if (resourceType === RelatedResourcesScope.Documents) {
       assert("removed must be a document", "googleFileID" in removed);
-      this.hermesDocuments.insertAt(newIndex, removed);
+      this.hermesDocuments.splice(newIndex, 0, removed);
       void this.saveProjectResources.perform(
         cached,
         this.externalLinks.slice(),
       );
     } else {
       assert("removed must be a link", "url" in removed);
-      this.externalLinks.insertAt(newIndex, removed);
+      this.externalLinks.splice(newIndex, 0, removed);
       void this.saveProjectResources.perform(
         this.hermesDocuments.slice(),
         cached,
@@ -401,7 +404,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   @action protected addDocument(resource: RelatedHermesDocument) {
     const cachedDocuments = this.hermesDocuments.slice();
 
-    this.hermesDocuments.unshiftObject(resource);
+    this.hermesDocuments.unshift(resource);
 
     void this.saveProjectResources.perform(
       cachedDocuments,
@@ -416,7 +419,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   @action protected addLink(resource: RelatedExternalLink) {
     const cachedLinks = this.externalLinks.slice();
 
-    this.externalLinks.unshiftObject(resource);
+    this.externalLinks.unshift(resource);
 
     void this.saveProjectResources.perform(
       this.hermesDocuments.slice(),
@@ -513,7 +516,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     insertedSprites,
     removedSprites,
   }: TransitionContext) {
-    if (Ember.testing) return;
+    if (isTesting()) return;
 
     for (let sprite of insertedSprites) {
       yield wait(animationDuration * 0.1);
@@ -529,7 +532,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     insertedSprites,
     removedSprites,
   }: TransitionContext) {
-    if (Ember.testing) return;
+    if (isTesting()) return;
 
     for (let sprite of insertedSprites) {
       yield wait(animationDuration * 0.01);
@@ -543,7 +546,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   }
 
   *jiraTransition({ insertedSprites, removedSprites }: TransitionContext) {
-    if (Ember.testing) return;
+    if (isTesting()) return;
 
     for (let sprite of insertedSprites) {
       yield wait(animationDuration * 0.1);
@@ -566,7 +569,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     insertedSprites,
     removedSprites,
   }: TransitionContext) {
-    if (Ember.testing) return;
+    if (isTesting()) return;
 
     for (let sprite of insertedSprites) {
       yield wait(animationDuration * 0.3);
@@ -642,7 +645,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
             body: JSON.stringify(valueToSave),
           },
         );
-        await Promise.all([savePromise, timeout(Ember.testing ? 0 : 750)]);
+        await Promise.all([savePromise, timeout(isTesting() ? 0 : 750)]);
       } catch (e) {
         this.flashMessages.critical((e as any).message, {
           title: "Unable to save",

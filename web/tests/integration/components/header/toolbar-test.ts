@@ -163,7 +163,7 @@ module("Integration | Component | header/toolbar", function (hooks) {
       .containsText(TEST_USER_NAME, "the owner's name is displayed");
   });
 
-  test("owners are searched in algolia and the google people api", async function (this: ToolbarTestContext, assert) {
+  test("owners are searched via search service and the google people api", async function (this: ToolbarTestContext, assert) {
     this.server.create("google/person", {
       names: [{ displayName: "Mishra" }],
       emailAddresses: [{ value: "mishra@hashicorp.com" }],

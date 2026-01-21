@@ -5,6 +5,7 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hashicorp-forge/hermes/internal/cmd/base"
+	"github.com/hashicorp-forge/hermes/internal/cmd/commands/canary"
 	"github.com/hashicorp-forge/hermes/internal/cmd/commands/indexer"
 	"github.com/hashicorp-forge/hermes/internal/cmd/commands/operator"
 	"github.com/hashicorp-forge/hermes/internal/cmd/commands/server"
@@ -18,6 +19,11 @@ func initCommands(log hclog.Logger, ui cli.Ui) {
 	b := base.NewCommand(log, ui)
 
 	Commands = map[string]cli.CommandFactory{
+		"canary": func() (cli.Command, error) {
+			return &canary.Command{
+				Command: b,
+			}, nil
+		},
 		"indexer": func() (cli.Command, error) {
 			return &indexer.Command{
 				Command: b,

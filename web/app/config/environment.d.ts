@@ -10,8 +10,7 @@ export interface HermesConfig {
   rootURL: string;
   APP: Record<string, unknown>;
   algolia: {
-    appID: string;
-    apiKey: string;
+    // Index names only - credentials handled by backend
     docsIndexName: string;
     draftsIndexName: string;
     internalIndexName: string;

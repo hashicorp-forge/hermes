@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp-forge/hermes/pkg/document"
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp-forge/hermes/pkg/models"
+	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
 	"google.golang.org/api/drive/v3"
 )
 
@@ -159,8 +160,9 @@ func refreshDocumentHeader(
 	log := idx.Logger
 
 	// Check if document is locked.
+	provider := gw.NewAdapter(idx.GoogleWorkspaceService)
 	locked, err := hcd.IsLocked(
-		file.Id, idx.Database, idx.GoogleWorkspaceService, log)
+		file.Id, idx.Database, provider, log)
 	if err != nil {
 		log.Error("error checking document locked status",
 			"error", err,
@@ -273,7 +275,7 @@ func refreshDocumentHeader(
 
 	// Replace document header.
 	if err := doc.ReplaceHeader(
-		idx.BaseURL, isDraft, idx.GoogleWorkspaceService); err != nil {
+		idx.BaseURL, isDraft, provider); err != nil {
 		log.Error("error replacing document header",
 			"error", err,
 			"google_file_id", file.Id,

@@ -4,7 +4,7 @@ import theme from "tailwindcss/defaultTheme";
 import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import { debounce } from "@ember/runloop";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import { tracked } from "@glimmer/tracking";
 import RecentlyViewedService, {
   RecentlyViewedDoc,

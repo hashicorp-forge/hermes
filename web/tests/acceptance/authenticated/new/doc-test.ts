@@ -1,6 +1,7 @@
 import {
   click,
   fillIn,
+  find,
   triggerKeyEvent,
   visit,
   waitFor,
@@ -238,7 +239,7 @@ module("Acceptance | authenticated/new/doc", function (hooks) {
     await click(PRODUCT_SELECT_TOGGLE);
     await click(FIRST_PRODUCT_SELECT_ITEM_BUTTON);
 
-    await waitUntil(() => !this.element.querySelector(PRODUCT_ERROR));
+    await waitUntil(() => !find(PRODUCT_ERROR));
 
     assert.dom(PRODUCT_ERROR).doesNotExist();
 

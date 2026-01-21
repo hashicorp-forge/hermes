@@ -1,13 +1,13 @@
 import Route from "@ember/routing/route";
-import { inject as service } from "@ember/service";
-import AlgoliaService from "hermes/services/algolia";
+import { service } from "@ember/service";
+import SearchService from "hermes/services/search";
 import ConfigService from "hermes/services/config";
 import { ResultsRouteParams } from "hermes/types/document-routes";
 import ActiveFiltersService from "hermes/services/active-filters";
 import StoreService from "hermes/services/store";
 import { HermesDocument } from "hermes/types/document";
 import { HermesProject, HermesProjectHit } from "hermes/types/project";
-import { SearchResponse } from "instantsearch.js";
+import { SearchResponse } from "hermes/services/search";
 import FetchService from "hermes/services/fetch";
 
 export enum SearchScope {
@@ -19,7 +19,7 @@ export enum SearchScope {
 export default class AuthenticatedResultsRoute extends Route {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
-  @service declare algolia: AlgoliaService;
+  @service declare search: SearchService;
   @service declare activeFilters: ActiveFiltersService;
   @service declare store: StoreService;
 
@@ -58,7 +58,7 @@ export default class AuthenticatedResultsRoute extends Route {
     const scopeIsDocs = scope === SearchScope.Docs;
 
     const productResultsPromise = scopeIsAll
-      ? this.algolia.searchForFacetValues.perform(
+      ? this.search.searchForFacetValues.perform(
           this.configSvc.config.algolia_docs_index_name,
           "product",
           params.q,
@@ -69,19 +69,19 @@ export default class AuthenticatedResultsRoute extends Route {
       : undefined;
     let docFacetsPromise = scopeIsProjects
       ? undefined
-      : this.algolia.getFacets.perform(docsIndex, params);
+      : this.search.getFacets.perform(docsIndex, params as unknown as import("hermes/services/search").SearchParams);
 
     let docResultsPromise = scopeIsProjects
       ? undefined
-      : this.algolia.getDocResults.perform(docsIndex, params);
+      : this.search.getDocResults.perform(docsIndex, params as unknown as import("hermes/services/search").SearchParams);
 
     let projectFacetsPromise = scopeIsDocs
       ? undefined
-      : this.algolia.getFacets.perform(projectsIndex, params);
+      : this.search.getFacets.perform(projectsIndex, params as unknown as import("hermes/services/search").SearchParams);
 
     let projectResultsPromise = scopeIsDocs
       ? undefined
-      : this.algolia.getProjectResults.perform(params);
+      : this.search.getProjectResults.perform(params as unknown as import("hermes/services/search").SearchParams);
     const [
       docFacets,
       docResults,
@@ -100,7 +100,7 @@ export default class AuthenticatedResultsRoute extends Route {
     let typedProjectResults = projectResults as SearchResponse<HermesProject>;
 
     if (docResults) {
-      const docHits = typedDocResults.hits;
+      let { hits: docHits } = typedDocResults;
 
       if (docHits) {
         // Load owner information
@@ -116,7 +116,7 @@ export default class AuthenticatedResultsRoute extends Route {
          * Replace the hits with the full project models
          */
         typedProjectResults.hits = await Promise.all(
-          hits.map(
+          (hits as unknown as HermesProjectHit[]).map(
             async (hit: HermesProjectHit) =>
               await this.fetchSvc
                 .fetch(
@@ -126,9 +126,7 @@ export default class AuthenticatedResultsRoute extends Route {
           ),
         );
       }
-    }
-
-    this.activeFilters.update(params);
+    }    this.activeFilters.update(params);
 
     return {
       docFacets,

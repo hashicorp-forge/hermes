@@ -1,9 +1,8 @@
 import Service from "@ember/service";
 import { tracked } from "@glimmer/tracking";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import { assert } from "@ember/debug";
 import { task } from "ember-concurrency";
-import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import SessionService from "./session";
 import StoreService from "./store";
@@ -20,7 +19,6 @@ enum SubscriptionType {
 }
 
 export default class AuthenticatedUserService extends Service {
-  @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
   @service declare session: SessionService;
   @service declare store: StoreService;
@@ -28,8 +26,9 @@ export default class AuthenticatedUserService extends Service {
   @tracked subscriptions: Subscription[] | null = null;
   @tracked _info: PersonModel | null = null;
 
-  get info(): PersonModel {
-    assert("user info must exist", this._info);
+  get info(): PersonModel | null {
+    // Note: When using Dex authentication without OIDC flow, user info may not be loaded
+    // Return null instead of asserting to prevent application crashes
     return this._info;
   }
 
@@ -56,23 +55,60 @@ export default class AuthenticatedUserService extends Service {
   }
 
   /**
-   * Loads the user's info from the Google API.
+   * Loads the user's info from the API endpoint.
    * Called by `session.handleAuthentication` and `authenticated.afterModel`.
    * Ensures `authenticatedUser.info` is always defined and up-to-date
    * in any route that needs it. On error, bubbles up to the application route.
    */
   loadInfo = task(async () => {
+    console.log('[AuthenticatedUser] 🔄 Starting loadInfo task...');
     try {
-      const mes = await this.store.findAll("me");
-      const me = mes.firstObject;
+      // Fetch user info directly from the /me endpoint
+      console.log('[AuthenticatedUser] 📡 Fetching user info from /api/v2/me');
+      const response = await fetch(
+        "/api/v2/me",
+        {
+          method: "GET",
+          credentials: "include", // Include session cookies for Dex auth
+        },
+      );
 
-      // Grab the person record created by the serializer
-      const person = this.store.peekRecord("person", me.id);
-      assert("person must exist", person);
+      console.log('[AuthenticatedUser] 📬 Response status:', response.status, response.statusText);
+
+      if (!response.ok) {
+        console.error('[AuthenticatedUser] ❌ Failed to fetch user info:', response.statusText);
+        throw new Error(`Failed to fetch user info: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('[AuthenticatedUser] 📦 User data received:', data);
+
+      // Create or update the person record in the store
+      console.log('[AuthenticatedUser] 🔍 Looking for existing person record:', data.email);
+      let person = this.store.peekRecord("person", data.email);
+      if (!person) {
+        console.log('[AuthenticatedUser] ➕ Creating new person record');
+        person = this.store.createRecord("person", {
+          id: data.email,
+          email: data.email,
+          name: data.name,
+          firstName: data.given_name,
+          picture: data.picture,
+        });
+      } else {
+        console.log('[AuthenticatedUser] ♻️ Updating existing person record');
+        // Update existing record
+        person.setProperties({
+          name: data.name,
+          firstName: data.given_name,
+          picture: data.picture,
+        });
+      }
 
       this._info = person;
+      console.log('[AuthenticatedUser] ✅ User info loaded successfully:', person.email);
     } catch (e: unknown) {
-      console.error("Error getting user information: ", e);
+      console.error("[AuthenticatedUser] ❌ Error getting user information: ", e);
       throw e;
     }
   });
@@ -84,7 +120,7 @@ export default class AuthenticatedUserService extends Service {
   fetchSubscriptions = task(async () => {
     try {
       let subscriptions = await this.fetchSvc
-        .fetch(`/api/${this.configSvc.config.api_version}/me/subscriptions`, {
+        .fetch("/api/v2/me/subscriptions", {
           method: "GET",
         })
         .then((response) => response?.json());
@@ -122,14 +158,14 @@ export default class AuthenticatedUserService extends Service {
 
       let cached = this.subscriptions;
 
-      this.subscriptions.addObject({
+      this.subscriptions.push({
         productArea,
         subscriptionType,
       });
 
       try {
         await this.fetchSvc.fetch(
-          `/api/${this.configSvc.config.api_version}/me/subscriptions`,
+          "/api/v2/me/subscriptions",
           {
             method: "POST",
             headers: this.subscriptionsPostHeaders,
@@ -167,11 +203,14 @@ export default class AuthenticatedUserService extends Service {
         subscriptionToRemove,
       );
 
-      this.subscriptions.removeObject(subscriptionToRemove);
+      const indexToRemove = this.subscriptions.indexOf(subscriptionToRemove);
+      if (indexToRemove > -1) {
+        this.subscriptions.splice(indexToRemove, 1);
+      }
 
       try {
         await this.fetchSvc.fetch(
-          `/api/${this.configSvc.config.api_version}/me/subscriptions`,
+          "/api/v2/me/subscriptions",
           {
             method: "POST",
             headers: this.subscriptionsPostHeaders,

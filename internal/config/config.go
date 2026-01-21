@@ -2,23 +2,33 @@ package config
 
 import (
 	"fmt"
+	"os"
 
-	"github.com/hashicorp-forge/hermes/internal/auth/oktaalb"
-	"github.com/hashicorp-forge/hermes/pkg/algolia"
-	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
+	dexadapter "github.com/hashicorp-forge/hermes/pkg/auth/adapters/dex"
+	oktaadapter "github.com/hashicorp-forge/hermes/pkg/auth/adapters/okta"
+	algoliaadapter "github.com/hashicorp-forge/hermes/pkg/search/adapters/algolia"
+	meilisearchadapter "github.com/hashicorp-forge/hermes/pkg/search/adapters/meilisearch"
+	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
+	localadapter "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/local"
+	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclsimple"
+	"github.com/hashicorp/hcl/v2/hclsyntax"
 )
 
 // Config contains the Hermes configuration.
 type Config struct {
 	// Algolia configures Hermes to work with Algolia.
-	Algolia *algolia.Config `hcl:"algolia,block"`
+	Algolia *algoliaadapter.Config `hcl:"algolia,block"`
 
 	// BaseURL is the base URL used for building links.
 	BaseURL string `hcl:"base_url,optional"`
 
 	// Datadog contains the configuration for Datadog.
 	Datadog *Datadog `hcl:"datadog,block"`
+
+	// Dex configures Hermes to work with Dex OIDC.
+	Dex *dexadapter.Config `hcl:"dex,block"`
 
 	// DocumentTypes contain available document types.
 	DocumentTypes *DocumentTypes `hcl:"document_types,block"`
@@ -41,18 +51,27 @@ type Config struct {
 	// Jira is the configuration for Hermes to work with Jira.
 	Jira *Jira `hcl:"jira,block"`
 
+	// LocalWorkspace configures local filesystem workspace storage.
+	LocalWorkspace *LocalWorkspace `hcl:"local_workspace,block"`
+
 	// LogFormat configures the logging format. Supported values are "standard" or
 	// "json".
 	LogFormat string `hcl:"log_format,optional"`
 
+	// Meilisearch configures Hermes to work with Meilisearch.
+	Meilisearch *Meilisearch `hcl:"meilisearch,block"`
+
 	// Okta configures Hermes to work with Okta.
-	Okta *oktaalb.Config `hcl:"okta,block"`
+	Okta *oktaadapter.Config `hcl:"okta,block"`
 
 	// Products contain available products.
 	Products *Products `hcl:"products,block"`
 
 	// Postgres configures PostgreSQL as the app database.
 	Postgres *Postgres `hcl:"postgres,block"`
+
+	// Providers specifies which workspace and search providers to use.
+	Providers *Providers `hcl:"providers,block"`
 
 	// Server contains the configuration for the Hermes server.
 	Server *Server `hcl:"server,block"`
@@ -329,6 +348,81 @@ type Product struct {
 	Abbreviation string `hcl:"abbreviation" json:"abbreviation"`
 }
 
+// Providers specifies which workspace and search providers to use.
+type Providers struct {
+	// Workspace is the workspace provider name (e.g., "google", "local").
+	Workspace string `hcl:"workspace,optional"`
+
+	// Search is the search provider name (e.g., "algolia", "meilisearch").
+	Search string `hcl:"search,optional"`
+}
+
+// LocalWorkspace configures local filesystem workspace storage.
+type LocalWorkspace struct {
+	// BasePath is the root directory for all workspace data.
+	BasePath string `hcl:"base_path"`
+
+	// DocsPath is the directory containing published documents.
+	DocsPath string `hcl:"docs_path"`
+
+	// DraftsPath is the directory containing draft documents.
+	DraftsPath string `hcl:"drafts_path"`
+
+	// FoldersPath is the directory containing folder metadata.
+	FoldersPath string `hcl:"folders_path"`
+
+	// UsersPath is the directory containing user data.
+	UsersPath string `hcl:"users_path"`
+
+	// TokensPath is the directory containing auth tokens.
+	TokensPath string `hcl:"tokens_path"`
+
+	// Domain is the local domain name.
+	Domain string `hcl:"domain"`
+
+	// SMTP contains email configuration.
+	SMTP *LocalWorkspaceSMTP `hcl:"smtp,block"`
+}
+
+// LocalWorkspaceSMTP configures SMTP for the local workspace adapter.
+type LocalWorkspaceSMTP struct {
+	// Enabled enables SMTP email sending.
+	Enabled bool `hcl:"enabled,optional"`
+
+	// Host is the SMTP server hostname.
+	Host string `hcl:"host,optional"`
+
+	// Port is the SMTP server port.
+	Port int `hcl:"port,optional"`
+
+	// Username is the SMTP authentication username.
+	Username string `hcl:"username,optional"`
+
+	// Password is the SMTP authentication password.
+	Password string `hcl:"password,optional"`
+}
+
+// Meilisearch configures Hermes to work with Meilisearch.
+type Meilisearch struct {
+	// Host is the Meilisearch server URL (e.g., "http://localhost:7700").
+	Host string `hcl:"host"`
+
+	// APIKey is the Meilisearch API key (master key).
+	APIKey string `hcl:"api_key"`
+
+	// DocsIndexName is the index name for published documents.
+	DocsIndexName string `hcl:"docs_index_name"`
+
+	// DraftsIndexName is the index name for draft documents.
+	DraftsIndexName string `hcl:"drafts_index_name"`
+
+	// ProjectsIndexName is the index name for projects.
+	ProjectsIndexName string `hcl:"projects_index_name"`
+
+	// LinksIndexName is the index name for links/redirects.
+	LinksIndexName string `hcl:"links_index_name"`
+}
+
 // Server contains the configuration for the Hermes server.
 type Server struct {
 	// Addr is the address to bind to for listening.
@@ -336,20 +430,119 @@ type Server struct {
 }
 
 // NewConfig parses an HCL configuration file and returns the Hermes config.
-func NewConfig(filename string) (*Config, error) {
-	c := &Config{
-		Algolia:         &algolia.Config{},
-		Email:           &Email{},
-		FeatureFlags:    &FeatureFlags{},
-		GoogleWorkspace: &GoogleWorkspace{},
-		Indexer:         &Indexer{},
-		Okta:            &oktaalb.Config{},
-		Server:          &Server{},
-	}
-	err := hclsimple.DecodeFile(filename, nil, c)
+// If profile is non-empty, loads config from profile block with that name.
+// If profile is empty and file has profiles, uses "default" profile.
+// If profile is empty and file has no profiles, loads from root level (backward compatible).
+func NewConfig(filename string, profile string) (*Config, error) {
+	// Read and parse file to check if it has profiles
+	src, err := os.ReadFile(filename)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load configuration: %w", err)
+		return nil, fmt.Errorf("failed to read config file: %w", err)
 	}
 
-	return c, nil
+	file, diags := hclsyntax.ParseConfig(src, filename, hcl.Pos{Line: 1, Column: 1})
+	if diags.HasErrors() {
+		return nil, fmt.Errorf("failed to parse config file: %w", diags)
+	}
+
+	// Check if file has any profile blocks
+	body := file.Body.(*hclsyntax.Body)
+	hasProfiles := false
+	for _, block := range body.Blocks {
+		if block.Type == "profile" {
+			hasProfiles = true
+			break
+		}
+	}
+
+	// If no profiles in file and no profile requested, use root-level config (backward compatible)
+	if !hasProfiles && profile == "" {
+		c := &Config{
+			Algolia:         &algoliaadapter.Config{},
+			Email:           &Email{},
+			FeatureFlags:    &FeatureFlags{},
+			GoogleWorkspace: &GoogleWorkspace{},
+			Indexer:         &Indexer{},
+			Okta:            &oktaadapter.Config{},
+			Server:          &Server{},
+		}
+		err := hclsimple.DecodeFile(filename, nil, c)
+		if err != nil {
+			return nil, fmt.Errorf("failed to load configuration: %w", err)
+		}
+		return c, nil
+	}
+
+	// File has profiles - select which one to use
+	selectedProfile := profile
+	if selectedProfile == "" {
+		selectedProfile = "default" // Default profile when file has profiles
+	}
+
+	// Find and decode the requested profile
+	for _, block := range body.Blocks {
+		if block.Type == "profile" && len(block.Labels) > 0 && block.Labels[0] == selectedProfile {
+			// Found the profile, decode its body into Config
+			c := &Config{
+				Algolia:         &algoliaadapter.Config{},
+				Email:           &Email{},
+				FeatureFlags:    &FeatureFlags{},
+				GoogleWorkspace: &GoogleWorkspace{},
+				Indexer:         &Indexer{},
+				Okta:            &oktaadapter.Config{},
+				Server:          &Server{},
+			}
+			err := gohcl.DecodeBody(block.Body, nil, c)
+			if err != nil {
+				return nil, fmt.Errorf("failed to decode profile %q: %w", selectedProfile, err)
+			}
+			return c, nil
+		}
+	}
+
+	return nil, fmt.Errorf("profile %q not found in configuration", selectedProfile)
+}
+
+// ToLocalAdapterConfig converts LocalWorkspace config to local adapter config.
+func (lw *LocalWorkspace) ToLocalAdapterConfig() *localadapter.Config {
+	if lw == nil {
+		return nil
+	}
+
+	cfg := &localadapter.Config{
+		BasePath:    lw.BasePath,
+		DocsPath:    lw.DocsPath,
+		DraftsPath:  lw.DraftsPath,
+		FoldersPath: lw.FoldersPath,
+		UsersPath:   lw.UsersPath,
+		TokensPath:  lw.TokensPath,
+	}
+
+	if lw.SMTP != nil && lw.SMTP.Enabled {
+		cfg.SMTPConfig = &localadapter.SMTPConfig{
+			Host:     lw.SMTP.Host,
+			Port:     lw.SMTP.Port,
+			Username: lw.SMTP.Username,
+			Password: lw.SMTP.Password,
+			From:     "hermes@" + lw.Domain,
+		}
+	}
+
+	return cfg
+}
+
+// ToMeilisearchAdapterConfig converts Meilisearch config to meilisearch adapter config.
+func (m *Meilisearch) ToMeilisearchAdapterConfig() *meilisearchadapter.Config {
+	if m == nil {
+		return nil
+	}
+
+	return &meilisearchadapter.Config{
+		Host:              m.Host,
+		APIKey:            m.APIKey,
+		DocsIndexName:     m.DocsIndexName,
+		DraftsIndexName:   m.DraftsIndexName,
+		ProjectsIndexName: m.ProjectsIndexName,
+		LinksIndexName:    m.LinksIndexName,
+	}
 }

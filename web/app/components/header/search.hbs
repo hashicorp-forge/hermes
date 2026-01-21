@@ -17,7 +17,7 @@
           data-test-global-search-input
           {{did-insert dd.registerAnchor}}
           {{did-insert this.registerInput}}
-          {{on "input" (perform this.search dd)}}
+          {{on "input" (perform this.searchTask dd)}}
           {{on "mousedown" (fn this.maybeCloseDropdown dd)}}
           {{on "keydown" (fn this.maybeSubmitForm dd)}}
           {{on "focusin" (fn this.maybeOpenDropdown dd)}}

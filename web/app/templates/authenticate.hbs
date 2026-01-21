@@ -19,12 +19,32 @@
       <p class="mb-8 text-display-300">
         Log in to browse, search, and manage documents
       </p>
-      <Hds::Button
-        @text="Authenticate with Google"
-        @size="large"
-        @icon="google"
-        {{on "click" (perform this.authenticate)}}
-      />
+      {{#if (eq this.authProvider "google")}}
+        <Hds::Button
+          @text="Authenticate with Google"
+          @size="large"
+          @icon="google"
+          {{on "click" (perform this.authenticate)}}
+        />
+      {{else if (eq this.authProvider "okta")}}
+        <Hds::Button
+          @text="Authenticate with Okta"
+          @size="large"
+          @icon="okta"
+          {{on "click" (perform this.authenticateOIDC)}}
+        />
+      {{else if (eq this.authProvider "dex")}}
+        <Hds::Button
+          @text="Authenticate with Dex"
+          @size="large"
+          @icon="okta"
+          {{on "click" (perform this.authenticateOIDC)}}
+        />
+      {{else}}
+        <p class="text-body-300 text-color-critical">
+          Unknown authentication provider: {{this.authProvider}}
+        </p>
+      {{/if}}
 
     </Hds::Card::Container>
     <Footer class="compact" />

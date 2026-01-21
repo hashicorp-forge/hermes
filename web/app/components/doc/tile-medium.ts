@@ -1,7 +1,7 @@
 import Component from "@glimmer/component";
 import { RelatedHermesDocument } from "../related-resources";
 import { HermesDocument } from "hermes/types/document";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import FetchService from "hermes/services/fetch";
 import ConfigService from "hermes/services/config";
 

@@ -1,6 +1,6 @@
 import Route from "@ember/routing/route";
 import { next, schedule } from "@ember/runloop";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import AuthenticatedProjectsProjectController from "hermes/controllers/authenticated/projects/project";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";

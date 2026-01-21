@@ -1,4 +1,4 @@
-import Service, { inject as service } from "@ember/service";
+import Service, { service } from "@ember/service";
 import ConfigService from "./config";
 
 export default class FlagsService extends Service {

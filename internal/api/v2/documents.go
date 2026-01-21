@@ -7,11 +7,13 @@ import (
 	"net/http"
 	"reflect"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/hashicorp-forge/hermes/internal/email"
 	"github.com/hashicorp-forge/hermes/internal/helpers"
 	"github.com/hashicorp-forge/hermes/internal/server"
+	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
 	"github.com/hashicorp-forge/hermes/pkg/document"
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp-forge/hermes/pkg/models"
@@ -43,6 +45,13 @@ const (
 
 func DocumentHandler(srv server.Server) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Check if this is a document content request (/content suffix)
+		// and delegate to DocumentContentHandler
+		if strings.HasSuffix(r.URL.Path, "/content") {
+			DocumentContentHandler(srv).ServeHTTP(w, r)
+			return
+		}
+
 		// Parse document ID and request type from the URL path.
 		docID, reqType, err := parseDocumentsURLPath(
 			r.URL.Path, "documents")
@@ -148,7 +157,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 		switch reqType {
 		case relatedResourcesDocumentSubcollectionRequestType:
 			documentsResourceRelatedResourcesHandler(
-				w, r, docID, *doc, srv.Config, srv.Logger, srv.AlgoSearch, srv.DB)
+				w, r, docID, *doc, srv.Config, srv.Logger, srv.SearchProvider, srv.DB)
 			return
 		case shareableDocumentSubcollectionRequestType:
 			srv.Logger.Warn("invalid shareable request for documents collection",
@@ -164,10 +173,10 @@ func DocumentHandler(srv server.Server) http.Handler {
 		case "GET":
 			now := time.Now()
 
-			// Get file from Google Drive so we can return the latest modified time.
-			file, err := srv.GWService.GetFile(docID)
+			// Get file from workspace provider so we can return the latest modified time.
+			file, err := srv.WorkspaceProvider.GetFile(docID)
 			if err != nil {
-				srv.Logger.Error("error getting document file from Google",
+				srv.Logger.Error("error getting document file from workspace",
 					"error", err,
 					"path", r.URL.Path,
 					"method", r.Method,
@@ -257,7 +266,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 				// document metadata.
 				if r.Header.Get("Add-To-Recently-Viewed") != "" {
 					// Get authenticated user's email address.
-					email := r.Context().Value("userEmail").(string)
+					email := pkgauth.MustGetUserEmail(r.Context())
 
 					if err := updateRecentlyViewedDocs(
 						email, docID, srv.DB, now,
@@ -269,63 +278,6 @@ func DocumentHandler(srv server.Server) http.Handler {
 							"path", r.URL.Path,
 						)
 					}
-				}
-
-				// Compare Algolia and database documents to find data inconsistencies.
-				// Get document object from Algolia.
-				var algoDoc map[string]any
-				err = srv.AlgoSearch.Docs.GetObject(docID, &algoDoc)
-				if err != nil {
-					// Only warn because we might be in the process of saving the Algolia
-					// object for a new document.
-					srv.Logger.Warn("error getting Algolia object for data comparison",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", docID,
-					)
-					return
-				}
-				// Get document from database.
-				dbDoc := models.Document{
-					GoogleFileID: docID,
-				}
-				if err := dbDoc.Get(srv.DB); err != nil {
-					srv.Logger.Error(
-						"error getting document from database for data comparison",
-						"error", err,
-						"path", r.URL.Path,
-						"method", r.Method,
-						"doc_id", docID,
-					)
-					return
-				}
-				// Get all reviews for the document.
-				var reviews models.DocumentReviews
-				if err := reviews.Find(srv.DB, models.DocumentReview{
-					Document: models.Document{
-						GoogleFileID: docID,
-					},
-				}); err != nil {
-					srv.Logger.Error(
-						"error getting all reviews for document for data comparison",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", docID,
-					)
-					return
-				}
-				if err := CompareAlgoliaAndDatabaseDocument(
-					algoDoc, dbDoc, reviews, srv.Config.DocumentTypes.DocumentType,
-				); err != nil {
-					srv.Logger.Warn(
-						"inconsistencies detected between Algolia and database docs",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", docID,
-					)
 				}
 			}()
 
@@ -341,7 +293,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 			}
 
 			// Authorize request.
-			userEmail := r.Context().Value("userEmail").(string)
+			userEmail := pkgauth.MustGetUserEmail(r.Context())
 			if err := authorizeDocumentPatchRequest(
 				userEmail, *doc, req,
 			); err != nil {
@@ -430,7 +382,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 			}
 
 			// Check if document is locked.
-			locked, err := hcd.IsLocked(docID, srv.DB, srv.GWService, srv.Logger)
+			locked, err := hcd.IsLocked(docID, srv.DB, srv.WorkspaceProvider, srv.Logger)
 			if err != nil {
 				srv.Logger.Error("error checking document locked status",
 					"error", err,
@@ -576,7 +528,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 				doc.Owners = *req.Owners
 
 				// Give new owner edit access to the document.
-				if err := srv.GWService.ShareFile(
+				if err := srv.WorkspaceProvider.ShareFile(
 					docID, doc.Owners[0], "writer"); err != nil {
 					srv.Logger.Error("error sharing file with new owner",
 						"error", err,
@@ -604,7 +556,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 
 			// Give new document approvers edit access to the document.
 			for _, a := range approversToEmail {
-				if err := srv.GWService.ShareFile(docID, a, "writer"); err != nil {
+				if err := srv.WorkspaceProvider.ShareFile(docID, a, "writer"); err != nil {
 					srv.Logger.Error("error sharing file with approver",
 						"error", err,
 						"doc_id", docID,
@@ -619,7 +571,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 
 			// Replace the doc header.
 			if err := doc.ReplaceHeader(
-				srv.Config.BaseURL, false, srv.GWService,
+				srv.Config.BaseURL, false, srv.WorkspaceProvider,
 			); err != nil {
 				srv.Logger.Error("error replacing document header",
 					"error", err, "doc_id", docID)
@@ -629,7 +581,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 			}
 
 			// Rename file with new title.
-			srv.GWService.RenameFile(docID,
+			srv.WorkspaceProvider.RenameFile(docID,
 				fmt.Sprintf("[%s] %s", doc.DocNumber, doc.Title))
 
 			// Get document record from database so we can modify it for updating.
@@ -829,7 +781,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 					newOwner := email.User{
 						EmailAddress: doc.Owners[0],
 					}
-					ppl, err := srv.GWService.SearchPeople(
+					ppl, err := srv.WorkspaceProvider.SearchPeople(
 						doc.Owners[0], "emailAddresses,names")
 					if err != nil {
 						srv.Logger.Warn("error searching directory for new owner",
@@ -848,7 +800,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 					oldOwner := email.User{
 						EmailAddress: userEmail,
 					}
-					ppl, err = srv.GWService.SearchPeople(
+					ppl, err = srv.WorkspaceProvider.SearchPeople(
 						userEmail, "emailAddresses,names")
 					if err != nil {
 						srv.Logger.Warn("error searching directory for old owner",
@@ -877,7 +829,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 						},
 						[]string{doc.Owners[0]},
 						srv.Config.Email.FromAddress,
-						srv.GWService,
+						srv.WorkspaceProvider,
 					); err != nil {
 						srv.Logger.Error("error sending new owner email",
 							"error", err,
@@ -924,7 +876,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 								},
 								[]string{approverEmail},
 								srv.Config.Email.FromAddress,
-								srv.GWService,
+								srv.WorkspaceProvider,
 							)
 							if err != nil {
 								srv.Logger.Error("error sending approver email",
@@ -969,10 +921,10 @@ func DocumentHandler(srv server.Server) http.Handler {
 
 			// Request post-processing.
 			go func() {
-				// Convert document to Algolia object.
-				docObj, err := doc.ToAlgoliaObject(true)
+				// Convert document to search object.
+				docObjMap, err := doc.ToAlgoliaObject(true)
 				if err != nil {
-					srv.Logger.Error("error converting document to Algolia object",
+					srv.Logger.Error("error converting document to search object",
 						"error", err,
 						"method", r.Method,
 						"path", r.URL.Path,
@@ -981,79 +933,27 @@ func DocumentHandler(srv server.Server) http.Handler {
 					return
 				}
 
-				// Save new modified doc object in Algolia.
-				res, err := srv.AlgoWrite.Docs.SaveObject(docObj)
+				// Convert map to search.Document via JSON round-trip
+				docObj, err := mapToSearchDocument(docObjMap)
 				if err != nil {
-					srv.Logger.Error("error saving patched document in Algolia",
+					srv.Logger.Error("error converting document to search document",
 						"error", err,
 						"method", r.Method,
 						"path", r.URL.Path,
-						"doc_id", docID)
-					return
-				}
-				err = res.Wait()
-				if err != nil {
-					srv.Logger.Error("error saving patched document in Algolia",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", docID)
+						"doc_id", docID,
+					)
 					return
 				}
 
-				// Compare Algolia and database documents to find data inconsistencies.
-				// Get document object from Algolia.
-				var algoDoc map[string]any
-				err = srv.AlgoSearch.Docs.GetObject(docID, &algoDoc)
-				if err != nil {
-					srv.Logger.Error("error getting Algolia object for data comparison",
+				// Save new modified doc object in search index.
+				ctx := r.Context()
+				if err := srv.SearchProvider.DocumentIndex().Index(ctx, docObj); err != nil {
+					srv.Logger.Error("error saving patched document in search index",
 						"error", err,
 						"method", r.Method,
 						"path", r.URL.Path,
-						"doc_id", docID,
-					)
+						"doc_id", docID)
 					return
-				}
-				// Get document from database.
-				dbDoc := models.Document{
-					GoogleFileID: docID,
-				}
-				if err := dbDoc.Get(srv.DB); err != nil {
-					srv.Logger.Error(
-						"error getting document from database for data comparison",
-						"error", err,
-						"path", r.URL.Path,
-						"method", r.Method,
-						"doc_id", docID,
-					)
-					return
-				}
-				// Get all reviews for the document.
-				var reviews models.DocumentReviews
-				if err := reviews.Find(srv.DB, models.DocumentReview{
-					Document: models.Document{
-						GoogleFileID: docID,
-					},
-				}); err != nil {
-					srv.Logger.Error(
-						"error getting all reviews for document for data comparison",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", docID,
-					)
-					return
-				}
-				if err := CompareAlgoliaAndDatabaseDocument(
-					algoDoc, dbDoc, reviews, srv.Config.DocumentTypes.DocumentType,
-				); err != nil {
-					srv.Logger.Warn(
-						"inconsistencies detected between Algolia and database docs",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", docID,
-					)
 				}
 			}()
 

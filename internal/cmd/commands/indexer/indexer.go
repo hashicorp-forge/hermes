@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp-forge/hermes/internal/db"
 	"github.com/hashicorp-forge/hermes/internal/indexer"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
-	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
+	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
 	"github.com/hashicorp/go-hclog"
 	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 )
@@ -73,7 +73,7 @@ func (c *Command) Run(args []string) int {
 	}
 
 	// Parse configuration file.
-	cfg, err := config.NewConfig(c.flagConfig)
+	cfg, err := config.NewConfig(c.flagConfig, "") // No profile support in indexer
 	if err != nil {
 		ui.Error(fmt.Sprintf("error parsing configuration file: %v", err))
 		return 1
@@ -124,7 +124,18 @@ func (c *Command) Run(args []string) int {
 
 	// Initialize Algolia client.
 	var algo *algolia.Client
-	algo, err = algolia.New(cfg.Algolia)
+	algoliaClientCfg := &algolia.Config{
+		ApplicationID:          cfg.Algolia.AppID,
+		SearchAPIKey:           cfg.Algolia.SearchAPIKey,
+		WriteAPIKey:            cfg.Algolia.WriteAPIKey,
+		DocsIndexName:          cfg.Algolia.DocsIndexName,
+		DraftsIndexName:        cfg.Algolia.DraftsIndexName,
+		InternalIndexName:      cfg.Algolia.InternalIndexName,
+		LinksIndexName:         cfg.Algolia.LinksIndexName,
+		MissingFieldsIndexName: cfg.Algolia.MissingFieldsIndexName,
+		ProjectsIndexName:      cfg.Algolia.ProjectsIndexName,
+	}
+	algo, err = algolia.New(algoliaClientCfg)
 	if err != nil {
 		c.UI.Error(fmt.Sprintf("error initializing Algolia: %v", err))
 		return 1

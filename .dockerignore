@@ -1,0 +1,88 @@
+# .dockerignore for Hermes backend build
+# Only include what's needed for the Go server binary
+
+# Exclude testing infrastructure
+testing/
+tests/
+
+# Exclude documentation
+docs-internal/
+*.md
+!README.md
+
+# Exclude build artifacts
+build/
+/hermes
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+coverage*.out
+coverage*.html
+
+# Exclude config files with secrets
+config.hcl
+credentials.json
+token.json
+.env*
+
+# Exclude version control
+.git/
+.github/
+.gitignore
+.gitattributes
+
+# Exclude test outputs and logs
+workspace.test
+test_results.log
+test_output.log
+test_final.log
+*.log
+*.patch
+
+# Exclude macOS and OS files
+.DS_Store
+Thumbs.db
+
+# Exclude Python scripts
+*.py
+*.sh
+refactor_*.py
+fix_*.py
+scripts/
+
+# Exclude web development files (keep only dist/ and web.go)
+web/node_modules/
+web/.yarn/
+web/.pnp.*
+web/.npm/
+web/.eslintcache
+web/tests/
+web/mirage/
+web/tmp/
+web/.cache/
+web/babel.config.js
+web/ember-cli-build.js
+web/package.json
+web/yarn.lock
+web/tsconfig.json
+web/testem.js
+web/tailwind.config.js
+web/.template-lintrc.js
+web/.eslintrc.js
+web/.prettierrc.js
+web/types/
+web/vendor/
+
+# Keep only web/dist (needed for go:embed) and web/web.go
+!web/dist/
+!web/web.go
+
+# Exclude IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~

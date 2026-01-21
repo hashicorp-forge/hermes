@@ -1,0 +1,56 @@
+{
+  "test@hermes.local": {
+    "email": "test@hermes.local",
+    "name": "Test User",
+    "given_name": "Test",
+    "family_name": "User",
+    "photo_url": "https://ui-avatars.com/api/?name=Test+User&background=5c4ee5&color=fff&size=200",
+    "id": "08a8684b-db88-4b73-90a9-3cd1661f5466",
+    "groups": ["users", "testers"]
+  },
+  "admin@hermes.local": {
+    "email": "admin@hermes.local",
+    "name": "Admin User",
+    "given_name": "Admin",
+    "family_name": "User",
+    "photo_url": "https://ui-avatars.com/api/?name=Admin+User&background=1563ff&color=fff&size=200",
+    "id": "08a8684b-db88-4b73-90a9-3cd1661f5467",
+    "groups": ["users", "admins"]
+  },
+  "user@hermes.local": {
+    "email": "user@hermes.local",
+    "name": "Regular User",
+    "given_name": "Regular",
+    "family_name": "User",
+    "photo_url": "https://ui-avatars.com/api/?name=Regular+User&background=60b515&color=fff&size=200",
+    "id": "08a8684b-db88-4b73-90a9-3cd1661f5468",
+    "groups": ["users"]
+  },
+  "jane.smith@hermes.local": {
+    "email": "jane.smith@hermes.local",
+    "name": "Jane Smith",
+    "given_name": "Jane",
+    "family_name": "Smith",
+    "photo_url": "https://ui-avatars.com/api/?name=Jane+Smith&background=ff6b35&color=fff&size=200",
+    "id": "08a8684b-db88-4b73-90a9-3cd1661f5469",
+    "groups": ["users", "engineering"]
+  },
+  "john.doe@hermes.local": {
+    "email": "john.doe@hermes.local",
+    "name": "John Doe",
+    "given_name": "John",
+    "family_name": "Doe",
+    "photo_url": "https://ui-avatars.com/api/?name=John+Doe&background=00a8e8&color=fff&size=200",
+    "id": "08a8684b-db88-4b73-90a9-3cd1661f5470",
+    "groups": ["users", "product"]
+  },
+  "sarah.johnson@hermes.local": {
+    "email": "sarah.johnson@hermes.local",
+    "name": "Sarah Johnson",
+    "given_name": "Sarah",
+    "family_name": "Johnson",
+    "photo_url": "https://ui-avatars.com/api/?name=Sarah+Johnson&background=c73e1d&color=fff&size=200",
+    "id": "08a8684b-db88-4b73-90a9-3cd1661f5471",
+    "groups": ["users", "design"]
+  }
+}

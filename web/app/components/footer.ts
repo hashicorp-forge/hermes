@@ -1,5 +1,5 @@
 import Component from "@glimmer/component";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import RouterService from "@ember/routing/router-service";
 import { HERMES_GITHUB_REPO_URL } from "hermes/utils/hermes-urls";
 import ConfigService from "hermes/services/config";

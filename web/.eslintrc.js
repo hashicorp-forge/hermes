@@ -2,7 +2,7 @@ module.exports = {
   plugins: ["ember", "@typescript-eslint"],
   parser: "@typescript-eslint/parser",
   parserOptions: {
-    project: "web/tsconfig.json",
+    project: "./tsconfig.json",
   },
   ignorePatterns: ["*.js", "/mirage/**/*", "/node_modules/**/*", "/dist/**/*"],
   extends: [

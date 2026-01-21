@@ -1,6 +1,6 @@
 import { getOwner, setOwner } from "@ember/application";
 import { assert } from "@ember/debug";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import EmberMetricsService from "ember-metrics/services/metrics";
 import GoogleAnalyticsFourAdapter from "hermes/metrics-adapters/_google-analytics-four";
 import ConfigService from "./config";

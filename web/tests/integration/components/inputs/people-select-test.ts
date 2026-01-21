@@ -10,12 +10,14 @@ import {
   pushMirageIntoStore,
 } from "hermes/mirage/utils";
 import { Response } from "miragejs";
+import {
+  PEOPLE_SELECT_INPUT,
+  PEOPLE_SELECT_OPTION,
+} from "hermes/tests/helpers/selectors";
 
+// Component-specific test selectors
 const MULTISELECT = ".multiselect";
 const TRIGGER = ".ember-basic-dropdown-trigger";
-const INPUT = ".ember-power-select-trigger-multiple-input";
-const OPTION =
-  ".ember-power-select-option:not(.ember-power-select-option--no-matches-message)";
 const NO_MATCHES_MESSAGE = ".ember-power-select-option--no-matches-message";
 
 const PERSON_COUNT = 10;
@@ -64,39 +66,39 @@ module("Integration | Component | inputs/people-select", function (hooks) {
 
     await click(TRIGGER);
 
-    assert.dom(OPTION).doesNotExist('"Type to search" message is hidden');
+    assert.dom(PEOPLE_SELECT_OPTION).doesNotExist('"Type to search" message is hidden');
 
-    await fillIn(INPUT, "u");
+    await fillIn(PEOPLE_SELECT_INPUT, "u");
 
     assert
-      .dom(OPTION)
+      .dom(PEOPLE_SELECT_OPTION)
       .exists(
         { count: PERSON_COUNT + GROUP_COUNT },
         'Options matching `u` are suggested, and groups containing "departed" or "terminated" are filtered out',
       );
 
-    await fillIn(INPUT, "user 1");
+    await fillIn(PEOPLE_SELECT_INPUT, "user 1");
 
     assert
-      .dom(OPTION)
+      .dom(PEOPLE_SELECT_OPTION)
       .exists(
         { count: 2 },
         'Results are filtered to match "user 1" (this will includes user 10)',
       );
 
-    await click(OPTION);
+    await click(PEOPLE_SELECT_OPTION);
     assert
       .dom(".ember-power-select-multiple-option .person-email")
       .hasText("User 1", "User 1 was successfully selected");
 
-    await fillIn(INPUT, "User 2");
+    await fillIn(PEOPLE_SELECT_INPUT, "User 2");
 
-    await click(OPTION);
+    await click(PEOPLE_SELECT_OPTION);
     assert
       .dom(".ember-power-select-multiple-option .person-email")
       .exists({ count: 2 }, "User 2 was successfully selected");
 
-    await fillIn(INPUT, "User 2");
+    await fillIn(PEOPLE_SELECT_INPUT, "User 2");
     assert
       .dom(NO_MATCHES_MESSAGE)
       .hasText("No results found", "No duplicate users can be added");
@@ -109,10 +111,10 @@ module("Integration | Component | inputs/people-select", function (hooks) {
       .dom(".ember-power-select-multiple-option .person-email")
       .exists({ count: 1 }, "People are removed from the list when clicked");
 
-    await fillIn(INPUT, "group");
+    await fillIn(PEOPLE_SELECT_INPUT, "group");
 
     assert
-      .dom(OPTION)
+      .dom(PEOPLE_SELECT_OPTION)
       .exists({ count: GROUP_COUNT }, "Valid groups are suggested");
   });
 
@@ -140,7 +142,7 @@ module("Integration | Component | inputs/people-select", function (hooks) {
 
     await click(TRIGGER);
 
-    let fillInPromise = fillIn(INPUT, "any text - we're not actually querying");
+    let fillInPromise = fillIn(PEOPLE_SELECT_INPUT, "any text - we're not actually querying");
 
     await waitFor(".ember-power-select-option--loading-message");
 
@@ -150,7 +152,7 @@ module("Integration | Component | inputs/people-select", function (hooks) {
 
     await fillInPromise;
 
-    assert.dom(OPTION).exists({ count: 10 }, "Returns results after retrying");
+    assert.dom(PEOPLE_SELECT_OPTION).exists({ count: 10 }, "Returns results after retrying");
   });
 
   test("you can exclude the authenticated user from the list", async function (this: PeopleSelectContext, assert) {
@@ -169,19 +171,19 @@ module("Integration | Component | inputs/people-select", function (hooks) {
     `);
 
     await click(TRIGGER);
-    await fillIn(INPUT, TEST_USER_EMAIL);
+    await fillIn(PEOPLE_SELECT_INPUT, TEST_USER_EMAIL);
 
     assert
-      .dom(OPTION)
+      .dom(PEOPLE_SELECT_OPTION)
       .doesNotExist("Authenticated user is not in the list of options");
 
     this.set("excludeSelf", false);
 
     await click(TRIGGER);
-    await fillIn(INPUT, TEST_USER_EMAIL);
+    await fillIn(PEOPLE_SELECT_INPUT, TEST_USER_EMAIL);
 
     assert
-      .dom(OPTION)
+      .dom(PEOPLE_SELECT_OPTION)
       .exists({ count: 1 }, "Authenticated user is in the list of options");
   });
 
@@ -199,10 +201,10 @@ module("Integration | Component | inputs/people-select", function (hooks) {
     assert.dom(MULTISELECT).doesNotHaveClass("selection-made");
 
     await click(TRIGGER);
-    await fillIn(INPUT, "u");
-    await click(OPTION);
+    await fillIn(PEOPLE_SELECT_INPUT, "u");
+    await click(PEOPLE_SELECT_OPTION);
 
     assert.dom(MULTISELECT).hasClass("selection-made");
-    assert.dom(INPUT).isNotVisible("input is hidden after a selection is made");
+    assert.dom(PEOPLE_SELECT_INPUT).isNotVisible("input is hidden after a selection is made");
   });
 });

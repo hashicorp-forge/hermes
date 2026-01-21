@@ -35,12 +35,14 @@ import { HdsCardContainerComponent } from "hds/card/container";
 import { HdsTableTdComponent } from "hds/table/td";
 import { HdsTableTrComponent } from "hds/table/tr";
 import { HdsTableComponent } from "hds/table";
-import AnimatedContainer from "ember-animated/components/animated-container";
-import { AnimatedEachCurly } from "ember-animated/components/animated-each";
-import AnimatedValue from "ember-animated/components/animated-value";
-import AnimatedOrphans from "ember-animated/components/animated-orphans";
-import AnimatedTools from "ember-animated-tools/components/animated-tools";
-import { AnimatedIfCurly } from "ember-animated/components/animated-if";
+// TEMPORARY: Using local stubs for ember-animated during Ember 6.x upgrade
+import AnimatedContainer from "hermes/components/animated-container";
+import { AnimatedIfCurly } from "hermes/components/animated-if";
+import { AnimatedEachCurly } from "hermes/components/animated-each";
+// TODO: Create stubs for these if needed (currently unused in templates)
+// import AnimatedValue from "ember-animated/components/animated-value";
+// import AnimatedOrphans from "ember-animated/components/animated-orphans";
+// import AnimatedTools from "ember-animated-tools/components/animated-tools";
 import { FlashMessageComponent } from "ember-cli-flash/flash-message";
 import { HdsFormErrorComponent } from "hds/form/error";
 import PowerSelectMultiple from "ember-power-select/components/power-select-multiple";
@@ -55,9 +57,9 @@ declare module "@glint/environment-ember-loose/registry" {
     "on-window": typeof OnWindowHelper;
     "set-body-class": typeof EmberSetBodyClassHelper;
     AnimatedContainer: typeof AnimatedContainer;
-    AnimatedValue: typeof AnimatedValue;
-    AnimatedOrphans: typeof AnimatedOrphans;
-    AnimatedTools: typeof AnimatedTools;
+    // AnimatedValue: typeof AnimatedValue;  // TODO: Create stub if needed
+    // AnimatedOrphans: typeof AnimatedOrphans;  // TODO: Create stub if needed
+    // AnimatedTools: typeof AnimatedTools;  // TODO: Create stub if needed
     "animated-each": typeof AnimatedEachCurly;
     "animated-if": typeof AnimatedIfCurly;
     PowerSelectMultiple: typeof PowerSelectMultiple;

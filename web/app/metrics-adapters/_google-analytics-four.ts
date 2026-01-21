@@ -1,4 +1,4 @@
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import GoogleAnalyticsFour from "ember-metrics/metrics-adapters/google-analytics-four";
 import ConfigService from "hermes/services/config";
 

@@ -1,15 +1,15 @@
 import { restartableTask, task } from "ember-concurrency";
 import Component from "@glimmer/component";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
-import AlgoliaService from "hermes/services/algolia";
+import SearchService from "hermes/services/search";
 import RouterService from "@ember/routing/router-service";
 import { HermesDocument } from "hermes/types/document";
 import { assert } from "@ember/debug";
 import ConfigService from "hermes/services/config";
 import { next, schedule } from "@ember/runloop";
-import Ember from "ember";
+import { isTesting } from "@embroider/macros";
 import { XDropdownListAnchorAPI } from "../x/dropdown-list";
 import StoreService from "hermes/services/store";
 import FetchService from "hermes/services/fetch";
@@ -40,7 +40,7 @@ interface HeaderSearchComponentSignature {
 export default class HeaderSearchComponent extends Component<HeaderSearchComponentSignature> {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
-  @service declare algolia: AlgoliaService;
+  @service declare search: SearchService;
   @service declare router: RouterService;
   @service declare store: StoreService;
 
@@ -103,7 +103,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
       ...projectItems,
       ...this.docMatches,
       viewAllDocResults,
-    ].compact();
+    ].filter(Boolean);
 
     return items ?? [];
   }
@@ -124,7 +124,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
           return;
         } else {
           // Cancel real-time search and kick off a transition to `/results`
-          this.search.cancelAll();
+          this.searchTask.cancelAll();
           this.viewAllResults(dd);
         }
       }
@@ -191,7 +191,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
    */
   protected maybeSearch = task(async () => {
     if (this.query.length && !this.hasSearched) {
-      await this.search.perform();
+      await this.searchTask.perform();
     }
   });
 
@@ -223,10 +223,10 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
 
   /**
    * The task run when the search element receives input.
-   * Queries Algolia for the best document matches and product area match
+   * Queries the search service for the best document matches and product area match
    * and updates the "itemsToShow" object.
    */
-  protected search = restartableTask(
+  protected searchTask = restartableTask(
     async (dd?: XDropdownListAnchorAPI, inputEvent?: Event): Promise<void> => {
       let input = inputEvent?.target;
 
@@ -238,7 +238,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
         this.searchInputIsEmpty = false;
 
         try {
-          const productSearch = this.algolia.searchForFacetValues.perform(
+          const productSearch = this.search.searchForFacetValues.perform(
             this.configSvc.config.algolia_docs_index_name,
             "product",
             this.query,
@@ -247,11 +247,11 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
             },
           );
 
-          const docSearch = this.algolia.search.perform(this.query, {
+          const docSearch = this.search.search.perform(this.query, {
             hitsPerPage: 5,
           });
 
-          const projectSearch = this.algolia.searchIndex.perform(
+          const projectSearch = this.search.searchIndex.perform(
             this.configSvc.config.algolia_projects_index_name,
             this.query,
             {
@@ -259,13 +259,13 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
             },
           );
 
-          let algoliaResults = await Promise.all([
+          let searchResults = await Promise.all([
             productSearch,
             docSearch,
             projectSearch,
           ]).then((values) => values);
 
-          let [productAreas, docs, projects] = algoliaResults;
+          let [productAreas, docs, projects] = searchResults;
 
           const hits = (docs?.hits as HermesDocument[]) ?? [];
 
@@ -315,7 +315,7 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
        *
        * TODO: Improve this.
        */
-      if (Ember.testing) {
+      if (isTesting()) {
         schedule("afterRender", () => {
           dd?.resetFocusedItemIndex();
           dd?.scheduleAssignMenuItemIDs();

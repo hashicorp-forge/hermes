@@ -1,7 +1,7 @@
 import { action } from "@ember/object";
 import RouterService from "@ember/routing/router-service";
 import { next } from "@ember/runloop";
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { HermesDocument } from "hermes/types/document";
@@ -11,10 +11,11 @@ import FetchService from "hermes/services/fetch";
 import HermesFlashMessagesService from "hermes/services/flash-messages";
 import cleanString from "hermes/utils/clean-string";
 import { JiraPickerResult } from "hermes/types/project";
-import { timeout } from "ember-animated/-private/ember-scheduler";
-import Ember from "ember";
+// TEMPORARILY USING STUBS FOR EMBER 6.x UPGRADE
+import { timeout } from "hermes/utils/ember-animated-stubs";
+import { isTesting } from "@embroider/macros";
 
-const TIMEOUT = Ember.testing ? 0 : 2000;
+const TIMEOUT = isTesting() ? 0 : 2000;
 
 interface NewProjectFormComponentSignature {
   Args: {

@@ -30,91 +30,76 @@ import {
   TEST_USER_2_NAME,
 } from "hermes/mirage/utils";
 import { Response } from "miragejs";
+import {
+  FLASH_MESSAGE,
+  TOOLTIP,
+  DRAFT_VISIBILITY_DROPDOWN,
+  DRAFT_VISIBILITY_TOGGLE,
+  DRAFT_VISIBILITY_READ_ONLY,
+  DRAFT_VISIBILITY_OPTION,
+  SIDEBAR_COPY_URL_BUTTON,
+  APPROVE_BUTTON,
+  SIDEBAR_FOOTER_SECONDARY_DROPDOWN_BUTTON,
+  SIDEBAR_FOOTER_OVERFLOW_MENU,
+  SIDEBAR_FOOTER_PRIMARY_BUTTON_READ_ONLY,
+  DOCUMENT_TITLE,
+  DOCUMENT_SUMMARY,
+  DOCUMENT_CONTRIBUTORS,
+  DOCUMENT_APPROVERS,
+  PRODUCT_SELECT,
+  PRODUCT_VALUE,
+  POPOVER,
+  PRODUCT_SELECT_ITEM,
+  TOGGLE_SELECT,
+  TRANSFER_OWNERSHIP_MODAL,
+  OWNERSHIP_TRANSFERRED_MODAL,
+  PEOPLE_SELECT_INPUT,
+  PEOPLE_SELECT_OPTION,
+  EDITABLE_FIELD_READ_VALUE,
+  SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON,
+  PUBLISH_FOR_REVIEW_MODAL,
+  DELETE_BUTTON,
+  DELETE_MODAL,
+  DOCUMENT_MODAL_PRIMARY_BUTTON,
+  DOC_PUBLISHED_MODAL,
+  CUSTOM_STRING_FIELD,
+  CUSTOM_PEOPLE_FIELD,
+  EDITABLE_FIELD_SAVE_BUTTON,
+  PEOPLE_SELECT_REMOVE_BUTTON,
+  RELATED_DOCUMENT_OPTION,
+  ADD_RESOURCE_MODAL,
+} from "hermes/tests/helpers/selectors";
 
+// Test-specific selectors not in shared file
 const ADD_RELATED_RESOURCE_BUTTON_SELECTOR =
   "[data-test-section-header-button-for='Related resources']";
-const ADD_RELATED_DOCUMENT_OPTION_SELECTOR = ".related-document-option";
-const ADD_RELATED_RESOURCE_MODAL_SELECTOR =
-  "[data-test-add-related-resource-modal]";
-const FLASH_MESSAGE_SELECTOR = "[data-test-flash-notification]";
-const TOOLTIP_SELECTOR = ".hermes-tooltip";
-const DRAFT_VISIBILITY_DROPDOWN_SELECTOR =
-  "[data-test-draft-visibility-dropdown]";
-const DRAFT_VISIBILITY_TOGGLE_SELECTOR = "[data-test-draft-visibility-toggle]";
-const DRAFT_VISIBILITY_READ_ONLY = "[data-test-draft-visibility-read-only]";
-const COPY_URL_BUTTON_SELECTOR = "[data-test-sidebar-copy-url-button]";
-const DRAFT_VISIBILITY_OPTION_SELECTOR = "[data-test-draft-visibility-option]";
-const SECOND_DRAFT_VISIBILITY_LIST_ITEM_SELECTOR = `${DRAFT_VISIBILITY_DROPDOWN_SELECTOR} li:nth-child(2)`;
-const APPROVE_BUTTON = "[data-test-approve-button]";
-const SIDEBAR_FOOTER_SECONDARY_DROPDOWN_BUTTON =
-  "[data-test-sidebar-footer-secondary-dropdown-button]";
-const SIDEBAR_FOOTER_OVERFLOW_MENU = "[data-test-sidebar-footer-overflow-menu]";
+const SECOND_DRAFT_VISIBILITY_LIST_ITEM_SELECTOR = `${DRAFT_VISIBILITY_DROPDOWN} li:nth-child(2)`;
 const SIDEBAR_FOOTER_OVERFLOW_ITEM = `${SIDEBAR_FOOTER_OVERFLOW_MENU} button`;
 const REJECT_FRD_BUTTON = "[data-test-reject-frd-button]";
-const SIDEBAR_FOOTER_PRIMARY_BUTTON_READ_ONLY =
-  "[data-test-sidebar-footer-primary-button-read-only]";
-("[data-test-sidebar-footer-secondary-button]");
-const TITLE_SELECTOR = "[data-test-document-title]";
-const SUMMARY_SELECTOR = "[data-test-document-summary]";
-const CONTRIBUTORS_SELECTOR = "[data-test-document-contributors]";
-const APPROVERS_SELECTOR = "[data-test-document-approvers]";
 const APPROVED_BADGE_SELECTOR = "[data-test-person-badge-type='approved']";
-const PRODUCT_SELECT_SELECTOR = "[data-test-product-select]";
-const PRODUCT_SELECT_PRODUCT_NAME = "[data-test-product-value]";
-const POPOVER = "[data-test-x-dropdown-list-content]";
-const PRODUCT_SELECT_DROPDOWN_ITEM = `${POPOVER} [data-test-product-select-item]`;
-const TOGGLE_SELECT = "[data-test-x-dropdown-list-toggle-select]";
-
-/**
- * Transfer ownership
- */
 const TRANSFER_OWNERSHIP_BUTTON =
   "[data-test-transfer-document-ownership-button]";
-const TRANSFER_OWNERSHIP_MODAL = "[data-test-transfer-ownership-modal]";
-const OWNERSHIP_TRANSFERRED_MODAL = "[data-test-ownership-transferred-modal]";
 const TRANSFERRING_DOC = "[data-test-transferring-doc]";
 const SELECT_NEW_OWNER_LABEL = "[data-test-select-new-owner-label]";
 const MODAL_PEOPLE_SELECT = "dialog [data-test-people-select]";
-const PEOPLE_SELECT_INPUT = ".ember-power-select-trigger-multiple-input";
-const PEOPLE_SELECT_OPTION =
-  ".ember-power-select-option:not(.ember-power-select-option--no-matches-message)";
-
 const DISABLED_FOOTER_H5 = "[data-test-disabled-footer-h5]";
 const OWNER_LINK = "[data-test-owner-link]";
-
-const EDITABLE_FIELD_READ_VALUE = "[data-test-editable-field-read-value]";
 const EDITABLE_PRODUCT_AREA_SELECTOR =
   "[data-test-document-product-area-editable]";
 const READ_ONLY_PRODUCT_AREA_SELECTOR =
   "[data-test-document-product-area-read-only]";
-const SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON_SELECTOR =
-  "[data-test-sidebar-publish-for-review-button";
-const PUBLISH_FOR_REVIEW_MODAL_SELECTOR =
-  "[data-test-publish-for-review-modal]";
-const DELETE_BUTTON = "[data-test-delete-draft-button]";
-const DELETE_MODAL = "[data-test-delete-draft-modal]";
-const DOCUMENT_MODAL_PRIMARY_BUTTON =
-  "[data-test-document-modal-primary-button]";
 const PUBLISHING_FOR_REVIEW_MESSAGE_SELECTOR =
   "[data-test-publishing-for-review-message]";
-const DOC_PUBLISHED_MODAL_SELECTOR = "[data-test-doc-published-modal]";
 const SHARE_DOCUMENT_URL_INPUT_SELECTOR =
   "[data-test-share-document-url-input]";
 const CONTINUE_TO_DOCUMENT_BUTTON_SELECTOR =
   "[data-test-continue-to-document-button]";
-const DOC_PUBLISHED_COPY_URL_BUTTON_SELECTOR =
+const DOC_PUBLISHED_SIDEBAR_COPY_URL_BUTTON =
   "[data-test-doc-published-copy-url-button]";
 const PROJECTS_ERROR_BUTTON = "[data-test-document-projects-error-button]";
 const DOC_STATUS = "[data-test-doc-status]";
 const DOC_STATUS_TOGGLE = "[data-test-doc-status-toggle]";
 const DOC_STATUS_DROPDOWN = "[data-test-doc-status-dropdown]";
-
-const CUSTOM_STRING_FIELD_SELECTOR = "[data-test-custom-field-type='string']";
-const CUSTOM_PEOPLE_FIELD_SELECTOR = "[data-test-custom-field-type='people']";
-const EDITABLE_FIELD_SAVE_BUTTON_SELECTOR =
-  ".editable-field [data-test-save-button]";
-const PEOPLE_SELECT_REMOVE_BUTTON_SELECTOR =
-  ".ember-power-select-multiple-remove-btn";
 const TYPE_TO_CONFIRM_INPUT = "[data-test-type-to-confirm-input]";
 const PROJECT_LINK = "[data-test-project-link]";
 const ADD_TO_PROJECT_BUTTON =
@@ -141,13 +126,13 @@ const MODAL_ERROR = "[data-test-modal-error]";
 const ERROR_MESSAGE_TEXT = "Internal Server Error";
 
 const assertEditingIsDisabled = (assert: Assert) => {
-  assert.dom(TITLE_SELECTOR).doesNotHaveAttribute("data-test-editable");
-  assert.dom(SUMMARY_SELECTOR).doesNotHaveAttribute("data-test-editable");
-  assert.dom(CONTRIBUTORS_SELECTOR).doesNotHaveAttribute("data-test-editable");
-  assert.dom(APPROVERS_SELECTOR).doesNotHaveAttribute("data-test-editable");
+  assert.dom(DOCUMENT_TITLE).doesNotHaveAttribute("data-test-editable");
+  assert.dom(DOCUMENT_SUMMARY).doesNotHaveAttribute("data-test-editable");
+  assert.dom(DOCUMENT_CONTRIBUTORS).doesNotHaveAttribute("data-test-editable");
+  assert.dom(DOCUMENT_APPROVERS).doesNotHaveAttribute("data-test-editable");
 
   assert.dom(EDITABLE_PRODUCT_AREA_SELECTOR).doesNotExist();
-  assert.dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR).doesNotExist();
+  assert.dom(DRAFT_VISIBILITY_TOGGLE).doesNotExist();
   assert.dom(ADD_RELATED_RESOURCE_BUTTON_SELECTOR).doesNotExist();
 
   assert.dom(READ_ONLY_PRODUCT_AREA_SELECTOR).exists();
@@ -241,15 +226,15 @@ module("Acceptance | authenticated/document", function (hooks) {
     await visit(`/document/${docID}?draft=true`);
 
     assert
-      .dom(PRODUCT_SELECT_SELECTOR)
+      .dom(PRODUCT_SELECT)
       .exists("drafts show a product select element");
 
     assert
-      .dom(PRODUCT_SELECT_PRODUCT_NAME)
+      .dom(PRODUCT_VALUE)
       .hasText(initialProductName, "The document product is selected");
 
     await click(TOGGLE_SELECT);
-    const options = findAll(PRODUCT_SELECT_DROPDOWN_ITEM);
+    const options = findAll(PRODUCT_SELECT_ITEM);
 
     const expectedProducts = ["TP0", "TP1", "TP2"];
     options.forEach((option: Element, index: number) => {
@@ -262,10 +247,10 @@ module("Acceptance | authenticated/document", function (hooks) {
       );
     });
 
-    await click(PRODUCT_SELECT_DROPDOWN_ITEM);
+    await click(PRODUCT_SELECT_ITEM);
 
     assert
-      .dom(PRODUCT_SELECT_SELECTOR)
+      .dom(PRODUCT_SELECT)
       .containsText(
         "Test Product 0",
         "The document product is updated to the selected product",
@@ -305,7 +290,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     });
 
     await visit("/document/500");
-    const shortLinkURL = find(COPY_URL_BUTTON_SELECTOR)?.getAttribute(
+    const shortLinkURL = find(SIDEBAR_COPY_URL_BUTTON)?.getAttribute(
       "data-test-url",
     );
 
@@ -326,13 +311,13 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await click(ADD_RELATED_RESOURCE_BUTTON_SELECTOR);
 
-    await waitFor(ADD_RELATED_DOCUMENT_OPTION_SELECTOR);
+    await waitFor(RELATED_DOCUMENT_OPTION);
 
-    await click(ADD_RELATED_DOCUMENT_OPTION_SELECTOR);
+    await click(RELATED_DOCUMENT_OPTION);
 
-    await waitFor(FLASH_MESSAGE_SELECTOR);
+    await waitFor(FLASH_MESSAGE);
 
-    assert.dom(FLASH_MESSAGE_SELECTOR).containsText("Unable to save resource");
+    assert.dom(FLASH_MESSAGE).containsText("Unable to save resource");
   });
 
   test("a draft can toggle its `isShareable` property", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -345,36 +330,36 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1?draft=true");
 
-    assert.dom(COPY_URL_BUTTON_SELECTOR).doesNotExist("not yet shareable");
-    assert.dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR).exists();
+    assert.dom(SIDEBAR_COPY_URL_BUTTON).doesNotExist("not yet shareable");
+    assert.dom(DRAFT_VISIBILITY_TOGGLE).exists();
     assert
-      .dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR)
+      .dom(DRAFT_VISIBILITY_TOGGLE)
       .hasAttribute("data-test-icon", DraftVisibilityIcon.Restricted);
 
-    assert.dom(TOOLTIP_SELECTOR).doesNotExist();
+    assert.dom(TOOLTIP).doesNotExist();
 
-    await triggerEvent(DRAFT_VISIBILITY_TOGGLE_SELECTOR, "mouseenter");
+    await triggerEvent(DRAFT_VISIBILITY_TOGGLE, "mouseenter");
 
     assert
-      .dom(TOOLTIP_SELECTOR)
+      .dom(TOOLTIP)
       .hasText(capitalize(DraftVisibility.Restricted));
 
-    await click(DRAFT_VISIBILITY_TOGGLE_SELECTOR);
+    await click(DRAFT_VISIBILITY_TOGGLE);
 
-    assert.dom(DRAFT_VISIBILITY_DROPDOWN_SELECTOR).exists("dropdown is open");
+    assert.dom(DRAFT_VISIBILITY_DROPDOWN).exists("dropdown is open");
 
-    assert.dom(DRAFT_VISIBILITY_OPTION_SELECTOR).exists({ count: 2 });
+    assert.dom(DRAFT_VISIBILITY_OPTION).exists({ count: 2 });
 
     assert
-      .dom(DRAFT_VISIBILITY_OPTION_SELECTOR + " h4")
+      .dom(DRAFT_VISIBILITY_OPTION + " h4")
       .containsText(capitalize(DraftVisibility.Restricted));
 
     assert
-      .dom(DRAFT_VISIBILITY_OPTION_SELECTOR + " p")
+      .dom(DRAFT_VISIBILITY_OPTION + " p")
       .containsText(DraftVisibilityDescription.Restricted);
 
     assert
-      .dom(DRAFT_VISIBILITY_OPTION_SELECTOR)
+      .dom(DRAFT_VISIBILITY_OPTION)
       .hasAttribute("data-test-is-checked")
       .hasAttribute("data-test-value", DraftVisibility.Restricted);
 
@@ -390,49 +375,49 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     assert
       .dom(
-        `${SECOND_DRAFT_VISIBILITY_LIST_ITEM_SELECTOR} ${DRAFT_VISIBILITY_OPTION_SELECTOR}`,
+        `${SECOND_DRAFT_VISIBILITY_LIST_ITEM_SELECTOR} ${DRAFT_VISIBILITY_OPTION}`,
       )
       .doesNotHaveAttribute("data-test-is-checked")
       .hasAttribute("data-test-value", DraftVisibility.Shareable);
 
     const clickPromise = click(
-      `${DRAFT_VISIBILITY_DROPDOWN_SELECTOR} li:nth-child(2) ${DRAFT_VISIBILITY_OPTION_SELECTOR}`,
+      `${DRAFT_VISIBILITY_DROPDOWN} li:nth-child(2) ${DRAFT_VISIBILITY_OPTION}`,
     );
 
-    await waitFor(`${COPY_URL_BUTTON_SELECTOR}[data-test-icon="running"]`);
+    await waitFor(`${SIDEBAR_COPY_URL_BUTTON}[data-test-icon="running"]`);
 
     assert
-      .dom(`${COPY_URL_BUTTON_SELECTOR}[data-test-icon="running"]`)
+      .dom(`${SIDEBAR_COPY_URL_BUTTON}[data-test-icon="running"]`)
       .exists('a "running" state is shown');
-    assert.dom(TOOLTIP_SELECTOR).hasText("Creating link...");
+    assert.dom(TOOLTIP).hasText("Creating link...");
 
-    await waitFor(`${COPY_URL_BUTTON_SELECTOR}[data-test-icon="smile"]`);
+    await waitFor(`${SIDEBAR_COPY_URL_BUTTON}[data-test-icon="smile"]`);
 
     assert
-      .dom(`${COPY_URL_BUTTON_SELECTOR}[data-test-icon="smile"]`)
+      .dom(`${SIDEBAR_COPY_URL_BUTTON}[data-test-icon="smile"]`)
       .exists('a "smile" state is shown');
-    assert.dom(TOOLTIP_SELECTOR).hasText("Link created!");
+    assert.dom(TOOLTIP).hasText("Link created!");
 
     await clickPromise;
 
-    await waitFor(`${COPY_URL_BUTTON_SELECTOR}[data-test-icon="link"]`);
+    await waitFor(`${SIDEBAR_COPY_URL_BUTTON}[data-test-icon="link"]`);
 
     assert
-      .dom(DRAFT_VISIBILITY_DROPDOWN_SELECTOR)
+      .dom(DRAFT_VISIBILITY_DROPDOWN)
       .doesNotExist("dropdown is closed");
 
     assert
-      .dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR)
+      .dom(DRAFT_VISIBILITY_TOGGLE)
       .hasAttribute("data-test-icon", DraftVisibilityIcon.Shareable);
 
-    assert.dom(TOOLTIP_SELECTOR).doesNotExist("the tooltip is force-closed");
+    assert.dom(TOOLTIP).doesNotExist("the tooltip is force-closed");
 
-    await triggerEvent(DRAFT_VISIBILITY_TOGGLE_SELECTOR, "mouseenter");
+    await triggerEvent(DRAFT_VISIBILITY_TOGGLE, "mouseenter");
 
-    assert.dom(TOOLTIP_SELECTOR).hasText(capitalize(DraftVisibility.Shareable));
+    assert.dom(TOOLTIP).hasText(capitalize(DraftVisibility.Shareable));
 
     assert
-      .dom(COPY_URL_BUTTON_SELECTOR)
+      .dom(SIDEBAR_COPY_URL_BUTTON)
       .exists("now shareable")
       .hasAttribute(
         "data-test-url",
@@ -440,27 +425,27 @@ module("Acceptance | authenticated/document", function (hooks) {
         "the URL to be copied is correct",
       );
 
-    await click(DRAFT_VISIBILITY_TOGGLE_SELECTOR);
+    await click(DRAFT_VISIBILITY_TOGGLE);
 
     assert
-      .dom(DRAFT_VISIBILITY_OPTION_SELECTOR)
+      .dom(DRAFT_VISIBILITY_OPTION)
       .doesNotHaveAttribute("data-test-is-checked");
 
     assert
       .dom(
-        `${SECOND_DRAFT_VISIBILITY_LIST_ITEM_SELECTOR} ${DRAFT_VISIBILITY_OPTION_SELECTOR}`,
+        `${SECOND_DRAFT_VISIBILITY_LIST_ITEM_SELECTOR} ${DRAFT_VISIBILITY_OPTION}`,
       )
       .hasAttribute("data-test-is-checked");
 
     // Turn it back to restricted
-    await click(DRAFT_VISIBILITY_OPTION_SELECTOR);
+    await click(DRAFT_VISIBILITY_OPTION);
 
     assert
-      .dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR)
+      .dom(DRAFT_VISIBILITY_TOGGLE)
       .hasAttribute("data-test-icon", DraftVisibilityIcon.Restricted);
 
     assert
-      .dom(COPY_URL_BUTTON_SELECTOR)
+      .dom(SIDEBAR_COPY_URL_BUTTON)
       .doesNotExist("copyURLButton is removed");
   });
 
@@ -471,13 +456,13 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1?draft=true");
 
-    assert.dom(TITLE_SELECTOR).hasAttribute("data-test-editable");
-    assert.dom(SUMMARY_SELECTOR).hasAttribute("data-test-editable");
-    assert.dom(CONTRIBUTORS_SELECTOR).hasAttribute("data-test-editable");
-    assert.dom(APPROVERS_SELECTOR).hasAttribute("data-test-editable");
+    assert.dom(DOCUMENT_TITLE).hasAttribute("data-test-editable");
+    assert.dom(DOCUMENT_SUMMARY).hasAttribute("data-test-editable");
+    assert.dom(DOCUMENT_CONTRIBUTORS).hasAttribute("data-test-editable");
+    assert.dom(DOCUMENT_APPROVERS).hasAttribute("data-test-editable");
 
     assert.dom(EDITABLE_PRODUCT_AREA_SELECTOR).exists();
-    assert.dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR).exists();
+    assert.dom(DRAFT_VISIBILITY_TOGGLE).exists();
     assert.dom(ADD_RELATED_RESOURCE_BUTTON_SELECTOR).exists();
 
     assert.dom(READ_ONLY_PRODUCT_AREA_SELECTOR).doesNotExist();
@@ -492,13 +477,13 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1");
 
-    assert.dom(TITLE_SELECTOR).hasAttribute("data-test-editable");
-    assert.dom(SUMMARY_SELECTOR).hasAttribute("data-test-editable");
-    assert.dom(CONTRIBUTORS_SELECTOR).hasAttribute("data-test-editable");
-    assert.dom(APPROVERS_SELECTOR).hasAttribute("data-test-editable");
+    assert.dom(DOCUMENT_TITLE).hasAttribute("data-test-editable");
+    assert.dom(DOCUMENT_SUMMARY).hasAttribute("data-test-editable");
+    assert.dom(DOCUMENT_CONTRIBUTORS).hasAttribute("data-test-editable");
+    assert.dom(DOCUMENT_APPROVERS).hasAttribute("data-test-editable");
 
     assert.dom(EDITABLE_PRODUCT_AREA_SELECTOR).doesNotExist();
-    assert.dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR).doesNotExist();
+    assert.dom(DRAFT_VISIBILITY_TOGGLE).doesNotExist();
 
     assert.dom(ADD_RELATED_RESOURCE_BUTTON_SELECTOR).exists();
 
@@ -554,7 +539,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await triggerEvent(DELETE_BUTTON, "mouseenter");
 
-    assert.dom(TOOLTIP_SELECTOR).hasText("Delete...");
+    assert.dom(TOOLTIP).hasText("Delete...");
 
     await click(DELETE_BUTTON);
 
@@ -566,7 +551,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     assert.dom(DELETE_MODAL).doesNotExist("the modal is dismissed");
 
-    assert.dom(FLASH_MESSAGE_SELECTOR).containsText("Document draft deleted");
+    assert.dom(FLASH_MESSAGE).containsText("Document draft deleted");
 
     assert.equal(
       currentURL(),
@@ -586,7 +571,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1");
 
-    const approversList = find(APPROVERS_SELECTOR);
+    const approversList = find(DOCUMENT_APPROVERS);
 
     assert.dom(approversList).containsText("Me");
 
@@ -602,7 +587,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert.dom(SIDEBAR_FOOTER_OVERFLOW_MENU).doesNotExist();
 
     assert
-      .dom(FLASH_MESSAGE_SELECTOR)
+      .dom(FLASH_MESSAGE)
       .hasAttribute("data-test-flash-notification-type", "success")
       .containsText("You've left the approver role");
 
@@ -633,7 +618,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert.dom(SIDEBAR_FOOTER_PRIMARY_BUTTON_READ_ONLY).hasText("Approved");
 
     assert
-      .dom(FLASH_MESSAGE_SELECTOR)
+      .dom(FLASH_MESSAGE)
       .hasAttribute("data-test-flash-notification-type", "success")
       .containsText("Document approved");
 
@@ -657,7 +642,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await triggerEvent(REJECT_FRD_BUTTON, "mouseenter");
 
-    assert.dom(TOOLTIP_SELECTOR).hasText("Reject");
+    assert.dom(TOOLTIP).hasText("Reject");
 
     await click(REJECT_FRD_BUTTON);
 
@@ -666,7 +651,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     assert.dom(SIDEBAR_FOOTER_PRIMARY_BUTTON_READ_ONLY).hasText("Rejected");
 
     assert
-      .dom(FLASH_MESSAGE_SELECTOR)
+      .dom(FLASH_MESSAGE)
       .exists({ count: 1 })
       .hasAttribute("data-test-flash-notification-type", "success")
       .containsText("rejected");
@@ -703,7 +688,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     assert.dom(SIDEBAR_FOOTER_PRIMARY_BUTTON_READ_ONLY).hasText("Approved");
 
-    assert.dom(APPROVERS_SELECTOR).containsText("Me");
+    assert.dom(DOCUMENT_APPROVERS).containsText("Me");
 
     const doc = this.server.schema.document.find(1).attrs;
 
@@ -772,9 +757,9 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     assert.dom(DOC_STATUS).hasText("WIP");
 
-    await click(SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON_SELECTOR);
+    await click(SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON);
 
-    assert.dom(PUBLISH_FOR_REVIEW_MODAL_SELECTOR).exists();
+    assert.dom(PUBLISH_FOR_REVIEW_MODAL).exists();
 
     // Add an approver
     await click(MODAL_PEOPLE_SELECT);
@@ -793,8 +778,8 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await clickPromise;
 
-    await waitFor(DOC_PUBLISHED_MODAL_SELECTOR);
-    assert.dom(DOC_PUBLISHED_MODAL_SELECTOR).exists();
+    await waitFor(DOC_PUBLISHED_MODAL);
+    assert.dom(DOC_PUBLISHED_MODAL).exists();
 
     assert
       .dom(DOC_STATUS)
@@ -805,7 +790,7 @@ module("Acceptance | authenticated/document", function (hooks) {
       .exists()
       .hasValue(`${TEST_SHORT_LINK_BASE_URL}/prd/hcp-001`);
 
-    assert.dom(DOC_PUBLISHED_COPY_URL_BUTTON_SELECTOR).hasText("Copy link");
+    assert.dom(DOC_PUBLISHED_SIDEBAR_COPY_URL_BUTTON).hasText("Copy link");
     assert
       .dom(CONTINUE_TO_DOCUMENT_BUTTON_SELECTOR)
       .hasText("Continue to document")
@@ -813,9 +798,9 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await click(CONTINUE_TO_DOCUMENT_BUTTON_SELECTOR);
 
-    assert.dom(DOC_PUBLISHED_MODAL_SELECTOR).doesNotExist();
+    assert.dom(DOC_PUBLISHED_MODAL).doesNotExist();
 
-    assert.dom(APPROVERS_SELECTOR).containsText(TEST_USER_2_NAME);
+    assert.dom(DOCUMENT_APPROVERS).containsText(TEST_USER_2_NAME);
   });
 
   test('the "document published" modal hides the share elements if the docNumber fails to load', async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -827,14 +812,14 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1?draft=true");
 
-    await click(SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON_SELECTOR);
+    await click(SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON);
     await click(DOCUMENT_MODAL_PRIMARY_BUTTON);
 
-    await waitFor(DOC_PUBLISHED_MODAL_SELECTOR);
-    assert.dom(DOC_PUBLISHED_MODAL_SELECTOR).exists();
+    await waitFor(DOC_PUBLISHED_MODAL);
+    assert.dom(DOC_PUBLISHED_MODAL).exists();
 
     assert.dom(SHARE_DOCUMENT_URL_INPUT_SELECTOR).doesNotExist();
-    assert.dom(DOC_PUBLISHED_COPY_URL_BUTTON_SELECTOR).doesNotExist();
+    assert.dom(DOC_PUBLISHED_SIDEBAR_COPY_URL_BUTTON).doesNotExist();
 
     assert
       .dom(CONTINUE_TO_DOCUMENT_BUTTON_SELECTOR)
@@ -853,13 +838,13 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1?draft=true");
 
-    await click(`${SUMMARY_SELECTOR} button`);
+    await click(`${DOCUMENT_SUMMARY} button`);
 
-    await fillIn(`${SUMMARY_SELECTOR} textarea`, "");
+    await fillIn(`${DOCUMENT_SUMMARY} textarea`, "");
 
-    await triggerKeyEvent(`${SUMMARY_SELECTOR} textarea`, "keydown", "Enter");
+    await triggerKeyEvent(`${DOCUMENT_SUMMARY} textarea`, "keydown", "Enter");
 
-    assert.dom(SUMMARY_SELECTOR).hasText("Enter a summary");
+    assert.dom(DOCUMENT_SUMMARY).hasText("Enter a summary");
   });
 
   test('"people" inputs receive focus on click', async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -876,15 +861,15 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1?draft=true");
 
-    await click(`${CONTRIBUTORS_SELECTOR} .field-toggle`);
+    await click(`${DOCUMENT_CONTRIBUTORS} .field-toggle`);
 
     assert.true(
-      document.activeElement === find(`${CONTRIBUTORS_SELECTOR} input`),
+      document.activeElement === find(`${DOCUMENT_CONTRIBUTORS} input`),
     );
 
-    await click(`${APPROVERS_SELECTOR} .field-toggle`);
+    await click(`${DOCUMENT_APPROVERS} .field-toggle`);
 
-    assert.true(document.activeElement === find(`${APPROVERS_SELECTOR} input`));
+    assert.true(document.activeElement === find(`${DOCUMENT_APPROVERS} input`));
   });
 
   test('clicking the empty state of the related resources list opens the "add related resource" modal', async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -896,9 +881,9 @@ module("Acceptance | authenticated/document", function (hooks) {
     await visit("/document/1?draft=true");
 
     await click("[data-test-related-resources-list-empty-state]");
-    await waitFor(ADD_RELATED_RESOURCE_MODAL_SELECTOR);
+    await waitFor(ADD_RESOURCE_MODAL);
 
-    assert.dom(ADD_RELATED_RESOURCE_MODAL_SELECTOR).exists();
+    assert.dom(ADD_RESOURCE_MODAL).exists();
   });
 
   test("the title attribute saves", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -913,21 +898,21 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1?draft=true");
 
-    assert.dom(TITLE_SELECTOR).hasText(`${title} ${docNumber}`);
+    assert.dom(DOCUMENT_TITLE).hasText(`${title} ${docNumber}`);
 
-    await click(`${TITLE_SELECTOR} button`);
+    await click(`${DOCUMENT_TITLE} button`);
 
     assert
-      .dom(`${TITLE_SELECTOR} textarea`)
+      .dom(`${DOCUMENT_TITLE} textarea`)
       .hasValue(title, "docNumber not part of the textarea");
 
     title = "New Title";
 
-    await fillIn(`${TITLE_SELECTOR} textarea`, title);
+    await fillIn(`${DOCUMENT_TITLE} textarea`, title);
 
-    await triggerKeyEvent(`${TITLE_SELECTOR} textarea`, "keydown", "Enter");
+    await triggerKeyEvent(`${DOCUMENT_TITLE} textarea`, "keydown", "Enter");
 
-    assert.dom(TITLE_SELECTOR).hasText(`${title} ${docNumber}`);
+    assert.dom(DOCUMENT_TITLE).hasText(`${title} ${docNumber}`);
 
     assert.equal(
       this.server.schema.document.first().attrs.title,
@@ -944,13 +929,13 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1?draft=true");
 
-    await click(`${SUMMARY_SELECTOR} button`);
+    await click(`${DOCUMENT_SUMMARY} button`);
 
-    await fillIn(`${SUMMARY_SELECTOR} textarea`, "New Summary");
+    await fillIn(`${DOCUMENT_SUMMARY} textarea`, "New Summary");
 
-    await triggerKeyEvent(`${SUMMARY_SELECTOR} textarea`, "keydown", "Enter");
+    await triggerKeyEvent(`${DOCUMENT_SUMMARY} textarea`, "keydown", "Enter");
 
-    assert.dom(SUMMARY_SELECTOR).hasText("New Summary");
+    assert.dom(DOCUMENT_SUMMARY).hasText("New Summary");
   });
 
   test("the contributors attribute saves", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -961,13 +946,13 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1?draft=true");
 
-    await click(`${CONTRIBUTORS_SELECTOR} button`);
+    await click(`${DOCUMENT_CONTRIBUTORS} button`);
 
     // Delete the existing contributor and save
-    await click(PEOPLE_SELECT_REMOVE_BUTTON_SELECTOR);
-    await click(EDITABLE_FIELD_SAVE_BUTTON_SELECTOR);
+    await click(PEOPLE_SELECT_REMOVE_BUTTON);
+    await click(EDITABLE_FIELD_SAVE_BUTTON);
 
-    assert.dom(CONTRIBUTORS_SELECTOR).hasText("None");
+    assert.dom(DOCUMENT_CONTRIBUTORS).hasText("None");
   });
 
   test("the approvers attribute saves", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -978,13 +963,13 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1?draft=true");
 
-    await click(`${APPROVERS_SELECTOR} button`);
+    await click(`${DOCUMENT_APPROVERS} button`);
 
     // Delete the existing approver and save
-    await click(PEOPLE_SELECT_REMOVE_BUTTON_SELECTOR);
-    await click(EDITABLE_FIELD_SAVE_BUTTON_SELECTOR);
+    await click(PEOPLE_SELECT_REMOVE_BUTTON);
+    await click(EDITABLE_FIELD_SAVE_BUTTON);
 
-    assert.dom(APPROVERS_SELECTOR).hasText("None");
+    assert.dom(DOCUMENT_APPROVERS).hasText("None");
   });
 
   test("the product area attribute saves", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -1003,13 +988,13 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1?draft=true");
 
-    assert.dom(PRODUCT_SELECT_SELECTOR).containsText("Bar");
+    assert.dom(PRODUCT_SELECT).containsText("Bar");
 
-    await click(`${PRODUCT_SELECT_SELECTOR} button`);
+    await click(`${PRODUCT_SELECT} button`);
 
-    await click(PRODUCT_SELECT_DROPDOWN_ITEM);
+    await click(PRODUCT_SELECT_ITEM);
 
-    assert.dom(PRODUCT_SELECT_SELECTOR).containsText("Foo");
+    assert.dom(PRODUCT_SELECT).containsText("Foo");
 
     // confirm with the back end
 
@@ -1033,13 +1018,13 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1?draft=true");
 
-    await click(`${CUSTOM_STRING_FIELD_SELECTOR} button`);
+    await click(`${CUSTOM_STRING_FIELD} button`);
 
     await fillIn("textarea", "Bar");
 
-    await click(EDITABLE_FIELD_SAVE_BUTTON_SELECTOR);
+    await click(EDITABLE_FIELD_SAVE_BUTTON);
 
-    assert.dom(CUSTOM_STRING_FIELD_SELECTOR).hasText("Bar");
+    assert.dom(CUSTOM_STRING_FIELD).hasText("Bar");
   });
 
   test("customEditableFields save (PEOPLE)", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -1056,13 +1041,13 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1?draft=true");
 
-    await click(`${CUSTOM_PEOPLE_FIELD_SELECTOR} button`);
+    await click(`${CUSTOM_PEOPLE_FIELD} button`);
 
     // Delete the existing contributor and save
-    await click(PEOPLE_SELECT_REMOVE_BUTTON_SELECTOR);
-    await click(EDITABLE_FIELD_SAVE_BUTTON_SELECTOR);
+    await click(PEOPLE_SELECT_REMOVE_BUTTON);
+    await click(EDITABLE_FIELD_SAVE_BUTTON);
 
-    assert.dom(CUSTOM_PEOPLE_FIELD_SELECTOR).hasText("None");
+    assert.dom(CUSTOM_PEOPLE_FIELD).hasText("None");
   });
 
   test(`you can move between statuses`, async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -1152,14 +1137,14 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1");
 
-    assert.dom(`${APPROVERS_SELECTOR} li`).exists({ count: 2 });
+    assert.dom(`${DOCUMENT_APPROVERS} li`).exists({ count: 2 });
 
     assert
-      .dom(`${APPROVERS_SELECTOR} li:nth-child(1) ${APPROVED_BADGE_SELECTOR}`)
+      .dom(`${DOCUMENT_APPROVERS} li:nth-child(1) ${APPROVED_BADGE_SELECTOR}`)
       .exists("the first approver is badged with a check");
 
     assert
-      .dom(`${APPROVERS_SELECTOR} li:nth-child(2) ${APPROVED_BADGE_SELECTOR}`)
+      .dom(`${DOCUMENT_APPROVERS} li:nth-child(2) ${APPROVED_BADGE_SELECTOR}`)
       .doesNotExist("the second approver is not badged");
   });
 
@@ -1171,25 +1156,25 @@ module("Acceptance | authenticated/document", function (hooks) {
     await visit("/document/doc-0?draft=true");
 
     assert
-      .dom(`${TITLE_SELECTOR} ${EDITABLE_FIELD_READ_VALUE}`)
+      .dom(`${DOCUMENT_TITLE} ${EDITABLE_FIELD_READ_VALUE}`)
       .exists("read-only title");
     assert
-      .dom(`${SUMMARY_SELECTOR} ${EDITABLE_FIELD_READ_VALUE}`)
+      .dom(`${DOCUMENT_SUMMARY} ${EDITABLE_FIELD_READ_VALUE}`)
       .exists("read-only summary")
       .hasText("None", 'correctly does not say "enter a summary"');
 
     assert
-      .dom(`${CONTRIBUTORS_SELECTOR} ${EDITABLE_FIELD_READ_VALUE}`)
+      .dom(`${DOCUMENT_CONTRIBUTORS} ${EDITABLE_FIELD_READ_VALUE}`)
       .exists("read-only contributors list");
     assert
-      .dom(`${APPROVERS_SELECTOR} ${EDITABLE_FIELD_READ_VALUE}`)
+      .dom(`${DOCUMENT_APPROVERS} ${EDITABLE_FIELD_READ_VALUE}`)
       .exists("read-only approvers list");
     assert
-      .dom(ADD_RELATED_DOCUMENT_OPTION_SELECTOR)
+      .dom(RELATED_DOCUMENT_OPTION)
       .doesNotExist("no add related resource option");
 
-    assert.dom(PRODUCT_SELECT_SELECTOR).doesNotExist("no product select");
-    assert.dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR).isDisabled();
+    assert.dom(PRODUCT_SELECT).doesNotExist("no product select");
+    assert.dom(DRAFT_VISIBILITY_TOGGLE).isDisabled();
 
     assert
       .dom(DISABLED_FOOTER_H5)
@@ -1204,19 +1189,19 @@ module("Acceptance | authenticated/document", function (hooks) {
     await visit("/document/doc-0?draft=true");
 
     assert
-      .dom(`${TITLE_SELECTOR} ${EDITABLE_FIELD_READ_VALUE}`)
+      .dom(`${DOCUMENT_TITLE} ${EDITABLE_FIELD_READ_VALUE}`)
       .exists("read-only title");
     assert
-      .dom(`${SUMMARY_SELECTOR} ${EDITABLE_FIELD_READ_VALUE}`)
+      .dom(`${DOCUMENT_SUMMARY} ${EDITABLE_FIELD_READ_VALUE}`)
       .exists("read-only summary")
       .hasText("None", 'correctly does not say "enter a summary"');
 
     assert
-      .dom(`${CONTRIBUTORS_SELECTOR} ${EDITABLE_FIELD_READ_VALUE}`)
+      .dom(`${DOCUMENT_CONTRIBUTORS} ${EDITABLE_FIELD_READ_VALUE}`)
       .exists("read-only contributors list");
 
     assert
-      .dom(`${APPROVERS_SELECTOR} ${EDITABLE_FIELD_READ_VALUE}`)
+      .dom(`${DOCUMENT_APPROVERS} ${EDITABLE_FIELD_READ_VALUE}`)
       .exists("read-only approvers list");
 
     assert
@@ -1224,8 +1209,8 @@ module("Acceptance | authenticated/document", function (hooks) {
       .hasAttribute("aria-disabled");
 
     assert.dom(ADD_TO_PROJECT_BUTTON).hasAttribute("aria-disabled");
-    assert.dom(PRODUCT_SELECT_SELECTOR).doesNotExist("no product select");
-    assert.dom(DRAFT_VISIBILITY_TOGGLE_SELECTOR).isDisabled();
+    assert.dom(PRODUCT_SELECT).doesNotExist("no product select");
+    assert.dom(DRAFT_VISIBILITY_TOGGLE).isDisabled();
 
     assert
       .dom(DISABLED_FOOTER_H5)
@@ -1387,11 +1372,11 @@ module("Acceptance | authenticated/document", function (hooks) {
     });
 
     // Try changing the title
-    await click(`${TITLE_SELECTOR} button`);
-    await fillIn(`${TITLE_SELECTOR} textarea`, "New Title");
-    await triggerKeyEvent(`${TITLE_SELECTOR} textarea`, "keydown", "Enter");
+    await click(`${DOCUMENT_TITLE} button`);
+    await fillIn(`${DOCUMENT_TITLE} textarea`, "New Title");
+    await triggerKeyEvent(`${DOCUMENT_TITLE} textarea`, "keydown", "Enter");
 
-    assert.dom(FLASH_MESSAGE_SELECTOR).containsText(ERROR_MESSAGE_TEXT);
+    assert.dom(FLASH_MESSAGE).containsText(ERROR_MESSAGE_TEXT);
   });
 
   test("it shows an error when requesting a review fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -1405,7 +1390,7 @@ module("Acceptance | authenticated/document", function (hooks) {
       return new Response(500, {}, ERROR_MESSAGE_TEXT);
     });
 
-    await click(SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON_SELECTOR);
+    await click(SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON);
 
     await click(DOCUMENT_MODAL_PRIMARY_BUTTON);
 
@@ -1448,7 +1433,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await click(APPROVE_BUTTON);
 
-    assert.dom(FLASH_MESSAGE_SELECTOR).containsText(ERROR_MESSAGE_TEXT);
+    assert.dom(FLASH_MESSAGE).containsText(ERROR_MESSAGE_TEXT);
   });
 
   test("it shows an error when rejecting an FRD fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -1469,7 +1454,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await click(REJECT_FRD_BUTTON);
 
-    assert.dom(FLASH_MESSAGE_SELECTOR).containsText(ERROR_MESSAGE_TEXT);
+    assert.dom(FLASH_MESSAGE).containsText(ERROR_MESSAGE_TEXT);
   });
 
   test("it shows an error when changing the status of a document fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -1489,7 +1474,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await click(`${DOC_STATUS_DROPDOWN} li:nth-child(2) button`);
 
-    assert.dom(FLASH_MESSAGE_SELECTOR).containsText(ERROR_MESSAGE_TEXT);
+    assert.dom(FLASH_MESSAGE).containsText(ERROR_MESSAGE_TEXT);
   });
 
   test("it shows an error when changing draft visibility fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -1504,11 +1489,11 @@ module("Acceptance | authenticated/document", function (hooks) {
       return new Response(500, {}, ERROR_MESSAGE_TEXT);
     });
 
-    await click(DRAFT_VISIBILITY_TOGGLE_SELECTOR);
+    await click(DRAFT_VISIBILITY_TOGGLE);
 
-    await click(DRAFT_VISIBILITY_OPTION_SELECTOR);
+    await click(DRAFT_VISIBILITY_OPTION);
 
-    assert.dom(FLASH_MESSAGE_SELECTOR).containsText(ERROR_MESSAGE_TEXT);
+    assert.dom(FLASH_MESSAGE).containsText(ERROR_MESSAGE_TEXT);
   });
 
   test("it shows an error when changing a draft's product area fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -1530,9 +1515,9 @@ module("Acceptance | authenticated/document", function (hooks) {
       return new Response(500, {}, ERROR_MESSAGE_TEXT);
     });
 
-    await click(PRODUCT_SELECT_DROPDOWN_ITEM);
+    await click(PRODUCT_SELECT_ITEM);
 
-    assert.dom(FLASH_MESSAGE_SELECTOR).containsText(ERROR_MESSAGE_TEXT);
+    assert.dom(FLASH_MESSAGE).containsText(ERROR_MESSAGE_TEXT);
   });
 
   test("it shows an error when removing a document from a project fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -1557,7 +1542,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await click(REMOVE_FROM_PROJECT_BUTTON);
 
-    assert.dom(FLASH_MESSAGE_SELECTOR).containsText(ERROR_MESSAGE_TEXT);
+    assert.dom(FLASH_MESSAGE).containsText(ERROR_MESSAGE_TEXT);
   });
 
   test("it shows an error when adding a document to a project fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -1579,7 +1564,7 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await click(PROJECT_OPTION);
 
-    assert.dom(FLASH_MESSAGE_SELECTOR).containsText(ERROR_MESSAGE_TEXT);
+    assert.dom(FLASH_MESSAGE).containsText(ERROR_MESSAGE_TEXT);
   });
 
   test("an error is shown when fetching document projects fails", async function (this: AuthenticatedDocumentRouteTestContext, assert) {
@@ -1640,7 +1625,7 @@ module("Acceptance | authenticated/document", function (hooks) {
     await click(APPROVE_BUTTON);
 
     assert
-      .dom(FLASH_MESSAGE_SELECTOR)
+      .dom(FLASH_MESSAGE)
       .containsText("423")
       .hasAttribute("data-test-flash-notification-type", "critical");
 
@@ -1792,23 +1777,23 @@ module("Acceptance | authenticated/document", function (hooks) {
 
     await visit("/document/1?draft=true");
 
-    await click(`${APPROVERS_SELECTOR} button`);
+    await click(`${DOCUMENT_APPROVERS} button`);
 
-    await fillIn(`${APPROVERS_SELECTOR} input`, name);
+    await fillIn(`${DOCUMENT_APPROVERS} input`, name);
 
     assert.dom(PEOPLE_SELECT_OPTION).containsText(name).containsText(email);
 
     await click(PEOPLE_SELECT_OPTION);
 
-    await click(EDITABLE_FIELD_SAVE_BUTTON_SELECTOR);
+    await click(EDITABLE_FIELD_SAVE_BUTTON);
 
-    assert.dom(APPROVERS_SELECTOR).containsText(name);
+    assert.dom(DOCUMENT_APPROVERS).containsText(name);
 
     const doc = this.server.schema.document.find(1).attrs;
 
     assert.true(doc.approverGroups.includes(email));
 
-    await click(SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON_SELECTOR);
+    await click(SIDEBAR_PUBLISH_FOR_REVIEW_BUTTON);
 
     assert
       .dom(MODAL_PEOPLE_SELECT)

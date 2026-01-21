@@ -1,11 +1,11 @@
 import Route from "@ember/routing/route";
-import { inject as service } from "@ember/service";
-import AlgoliaService, { AlgoliaFacetsObject } from "hermes/services/algolia";
+import { service } from "@ember/service";
+import SearchService, { FacetsObject } from "hermes/services/search";
 import ConfigService from "hermes/services/config";
 import FetchService from "hermes/services/fetch";
 import AuthenticatedUserService from "hermes/services/authenticated-user";
 import { task } from "ember-concurrency";
-import { SearchOptions, SearchResponse } from "instantsearch.js";
+import { SearchOptions, SearchResponse } from "hermes/services/search";
 import { HermesDocument } from "hermes/types/document";
 import { createDraftURLSearchParams } from "hermes/utils/create-draft-url-search-params";
 import { SortByValue } from "hermes/components/header/toolbar";
@@ -14,7 +14,7 @@ import FlashMessageService from "ember-cli-flash/services/flash-messages";
 import StoreService from "hermes/services/store";
 
 export interface DraftResponseJSON {
-  facets: AlgoliaFacetsObject;
+  facets: FacetsObject;
   Hits: HermesDocument[];
   params: string;
   page: number;
@@ -30,7 +30,7 @@ interface AuthenticatedMyDocumentsRouteParams {
 export default class AuthenticatedMyDocumentsRoute extends Route {
   @service("fetch") declare fetchSvc: FetchService;
   @service("config") declare configSvc: ConfigService;
-  @service declare algolia: AlgoliaService;
+  @service declare search: SearchService;
   @service declare authenticatedUser: AuthenticatedUserService;
   @service declare flashMessages: FlashMessageService;
   @service declare store: StoreService;
@@ -58,7 +58,7 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
             `/api/${this.configSvc.config.api_version}/drafts?` +
               createDraftURLSearchParams({
                 ...options,
-                ownerEmail: this.authenticatedUser.info.email,
+                ownerEmail: this.authenticatedUser.info?.email ?? "",
               }),
           )
           .then((response) => response?.json());
@@ -91,10 +91,10 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
         page,
         facetFilters:
           params.includeSharedDrafts === false
-            ? [`owners:${this.authenticatedUser.info.email}`]
+            ? [[`owners:${this.authenticatedUser.info?.email ?? ""}`]]
             : undefined,
       }),
-      this.algolia.getDocResults.perform(
+      this.search.getDocResults.perform(
         searchIndex,
         {
           hitsPerPage: 100,

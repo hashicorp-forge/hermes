@@ -19,21 +19,22 @@ export default class MyHeaderComponent extends Component<MyHeaderComponentSignat
   <template>
     <div class="mt-2 flex items-center justify-between">
       <div class="relative flex items-center gap-5">
+        {{! Note: When using Dex authentication without OIDC flow, user info may not be loaded }}
         <PersonAvatar
           data-test-avatar
-          @email={{this.authenticatedUser.info.email}}
+          @email={{if this.authenticatedUser.info this.authenticatedUser.info.email "guest@hermes.local"}}
           @size="xl"
           class="-ml-0.5"
         />
         <div>
           <h1 data-test-name class="text-display-300">
-            {{this.authenticatedUser.info.name}}
+            {{if this.authenticatedUser.info this.authenticatedUser.info.name "Guest User"}}
           </h1>
           <p
             data-test-email
             class="mt-0.5 text-body-200 text-color-foreground-faint"
           >
-            {{this.authenticatedUser.info.email}}
+            {{if this.authenticatedUser.info this.authenticatedUser.info.email "guest@hermes.local"}}
           </p>
         </div>
       </div>

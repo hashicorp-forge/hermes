@@ -32,14 +32,10 @@ func PeopleDataHandler(srv server.Server) http.Handler {
 				return
 			}
 
-			users, err := srv.GWService.People.SearchDirectoryPeople().
-				Query(req.Query).
-				// Only query for photos and email addresses
-				// This may be expanded based on use case
-				// in the future
-				ReadMask("emailAddresses,names,photos").
-				Sources("DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE").
-				Do()
+			users, err := srv.WorkspaceProvider.SearchPeople(
+				req.Query,
+				"emailAddresses,names,photos",
+			)
 			if err != nil {
 				srv.Logger.Error("error searching people directory", "error", err)
 				http.Error(w, fmt.Sprintf("Error searching people directory: %q", err),
@@ -52,7 +48,7 @@ func PeopleDataHandler(srv server.Server) http.Handler {
 			w.WriteHeader(http.StatusOK)
 
 			enc := json.NewEncoder(w)
-			err = enc.Encode(users.People)
+			err = enc.Encode(users)
 			if err != nil {
 				srv.Logger.Error("error encoding people response", "error", err)
 				http.Error(w, "Error searching people directory",
@@ -72,20 +68,17 @@ func PeopleDataHandler(srv server.Server) http.Handler {
 				var people []*people.Person
 
 				for _, email := range emails {
-					result, err := srv.GWService.People.SearchDirectoryPeople().
-						Query(email).
-						ReadMask("emailAddresses,names,photos").
-						Sources("DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE").
-						Do()
+					result, err := srv.WorkspaceProvider.SearchPeople(
+						email,
+						"emailAddresses,names,photos",
+					)
 
-					if err == nil && len(result.People) > 0 {
-						people = append(people, result.People[0])
+					if err == nil && len(result) > 0 {
+						people = append(people, result[0])
 					} else {
 						srv.Logger.Warn("Email lookup miss", "error", err)
 					}
-				}
-
-				// Write response.
+				} // Write response.
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusOK)
 

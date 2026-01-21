@@ -1,3 +1,4 @@
-import { TransitionContext } from "ember-animated/.";
-
-export function* emptyTransition(_context: TransitionContext) {}
+// TEMPORARILY STUBBED FOR EMBER 6.x UPGRADE
+export function emptyTransition(context?: any): Promise<void> {
+  return Promise.resolve();
+}

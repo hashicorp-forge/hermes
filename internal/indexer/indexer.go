@@ -12,9 +12,9 @@ import (
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	"github.com/hashicorp-forge/hermes/pkg/document"
-	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
 	"github.com/hashicorp-forge/hermes/pkg/links"
 	"github.com/hashicorp-forge/hermes/pkg/models"
+	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
 	"github.com/hashicorp/go-hclog"
 	"gorm.io/gorm"
 )
@@ -570,7 +570,7 @@ func saveDocInAlgolia(
 
 	// Save document redirect details.
 	if doc.DocNumber != "" {
-		err = links.SaveDocumentRedirectDetails(
+		err = links.SaveDocumentRedirectDetailsLegacy(
 			algo, doc.ObjectID, doc.DocType, doc.DocNumber)
 		if err != nil {
 			return err

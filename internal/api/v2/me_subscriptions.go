@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/hashicorp-forge/hermes/internal/server"
+	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
 	"github.com/hashicorp-forge/hermes/pkg/models"
 )
 
@@ -24,8 +25,8 @@ func MeSubscriptionsHandler(srv server.Server) http.Handler {
 		}
 
 		// Authorize request.
-		userEmail := r.Context().Value("userEmail").(string)
-		if userEmail == "" {
+		userEmail, ok := pkgauth.GetUserEmail(r.Context())
+		if !ok || userEmail == "" {
 			errResp(
 				http.StatusUnauthorized,
 				"No authorization information for request",

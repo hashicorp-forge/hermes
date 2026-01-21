@@ -2,9 +2,9 @@
 
 import { Collection, Response, createServer } from "miragejs";
 import { getTestDocNumber } from "./factories/document";
-import algoliaHosts from "./algolia/hosts";
+import searchHosts from "./search/hosts";
 import { ProjectStatus } from "hermes/types/project-status";
-import { HITS_PER_PAGE } from "hermes/services/algolia";
+import { HITS_PER_PAGE } from "hermes/services/search";
 import { PROJECT_HITS_PER_PAGE } from "hermes/routes/authenticated/projects/index";
 import { assert as emberAssert } from "@ember/debug";
 import { HermesDocument } from "hermes/types/document";
@@ -17,14 +17,20 @@ import {
   TEST_USER_GIVEN_NAME,
   TEST_USER_PHOTO,
 } from "../mirage/utils";
-import { getFacetsFromHits } from "./algolia/utils";
+import { getFacetsFromHits } from "./search/utils";
 
 export default function (mirageConfig) {
   let finalConfig = {
     ...mirageConfig,
 
     routes() {
-      this.namespace = "api/v1";
+      // Passthrough all API and auth requests to the real backend
+      // when running in development with the proxy server.
+      // This allows testing with real backend instead of Mirage mocks.
+      this.passthrough('/api/**');
+      this.passthrough('/auth/**');
+      
+      this.namespace = "api/v2";
 
       /*************************************************************************
        *
@@ -393,9 +399,16 @@ export default function (mirageConfig) {
        * And Mirage lacks wildcards, so we create a route for each.
        *
        * Additionally, we support the remaining Algolia routes.
+       * 
+       * IMPORTANT: Algolia routes are now proxied through backend at /1/indexes/*
+       * and must be registered WITHOUT the 'api/v1' namespace.
        */
 
-      algoliaHosts.forEach((host) => {
+      // Temporarily clear namespace to register Algolia proxy routes at root
+      const currentNamespace = this.namespace;
+      this.namespace = "";
+
+      searchHosts.forEach((host) => {
         this.post(host, (schema, request) => {
           return handleAlgoliaRequest(schema, request);
         });
@@ -404,6 +417,9 @@ export default function (mirageConfig) {
           return handleAlgoliaRequest(schema, request);
         });
       });
+
+      // Restore namespace for remaining routes
+      this.namespace = currentNamespace;
 
       /*************************************************************************
        *

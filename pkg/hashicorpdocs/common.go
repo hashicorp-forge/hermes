@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
+	"github.com/hashicorp-forge/hermes/pkg/workspace"
+	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
 	"google.golang.org/api/drive/v3"
 )
 
@@ -36,7 +37,7 @@ type Doc interface {
 	GetTitle() string
 
 	MissingFields() []string
-	ReplaceHeader(fileID, baseURL string, isDraft bool, s *gw.Service) error
+	ReplaceHeader(fileID, baseURL string, isDraft bool, provider workspace.Provider) error
 
 	// Setters for fields common to all document types.
 	SetApprovedBy([]string)
@@ -81,6 +82,8 @@ func NewEmptyDoc(docType string) (Doc, error) {
 		return &RFC{}, nil
 	case "PRD":
 		return &PRD{}, nil
+	case "PATH":
+		return &PATH{}, nil
 	default:
 		return nil, fmt.Errorf("invalid doc type")
 	}
@@ -115,6 +118,13 @@ func ParseDoc(
 		p, err := NewPRD(f, s, allFolders)
 		if err != nil {
 			return nil, fmt.Errorf("error parsing PRD: %w", err)
+		}
+		return p, nil
+
+	case "path":
+		p, err := NewPATH(f, s, allFolders)
+		if err != nil {
+			return nil, fmt.Errorf("error parsing PATH: %w", err)
 		}
 		return p, nil
 

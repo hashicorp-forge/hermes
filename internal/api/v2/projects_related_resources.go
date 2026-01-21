@@ -1,6 +1,7 @@
 package api
 
 import (
+pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -64,7 +65,7 @@ func projectsResourceRelatedResourcesHandler(
 	}
 
 	// Authorize request.
-	userEmail := r.Context().Value("userEmail").(string)
+	userEmail := pkgauth.MustGetUserEmail(r.Context())
 	if userEmail == "" {
 		srv.Logger.Error("user email not found in request context", logArgs...)
 		http.Error(

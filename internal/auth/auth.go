@@ -1,60 +1,93 @@
 package auth
 
 import (
+	"fmt"
 	"net/http"
 
-	"github.com/hashicorp-forge/hermes/internal/auth/google"
-	"github.com/hashicorp-forge/hermes/internal/auth/oktaalb"
 	"github.com/hashicorp-forge/hermes/internal/config"
-	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
+	pkgauth "github.com/hashicorp-forge/hermes/pkg/auth"
+	googleadapter "github.com/hashicorp-forge/hermes/pkg/auth/adapters/google"
+	oktaadapter "github.com/hashicorp-forge/hermes/pkg/auth/adapters/okta"
+	gw "github.com/hashicorp-forge/hermes/pkg/workspace/adapters/google"
 	"github.com/hashicorp/go-hclog"
 )
 
-// AuthenticateRequest is middleware that authenticates an HTTP request.
+const (
+	// SessionCookieName is the name of the cookie used to store user session for Dex auth
+	SessionCookieName = "hermes_session"
+)
+
+// DexSessionProvider wraps the Dex adapter and adds session cookie support.
+type DexSessionProvider struct {
+	log hclog.Logger
+}
+
+// NewDexSessionProvider creates a new Dex session provider.
+func NewDexSessionProvider(log hclog.Logger) *DexSessionProvider {
+	return &DexSessionProvider{log: log}
+}
+
+// Authenticate checks for a valid session cookie for Dex authentication.
+func (p *DexSessionProvider) Authenticate(r *http.Request) (string, error) {
+	// Check for session cookie
+	cookie, err := r.Cookie(SessionCookieName)
+	if err != nil {
+		p.log.Debug("no session cookie found", "error", err)
+		return "", fmt.Errorf("no session cookie found")
+	}
+
+	if cookie.Value == "" {
+		p.log.Debug("empty session cookie")
+		return "", fmt.Errorf("empty session cookie")
+	}
+
+	p.log.Debug("authenticated via session cookie", "email", cookie.Value)
+	return cookie.Value, nil
+}
+
+// Name returns the provider name.
+func (p *DexSessionProvider) Name() string {
+	return "dex-session"
+}
+
+// AuthenticateRequest is middleware that authenticates an HTTP request using
+// the appropriate authentication provider based on configuration.
 func AuthenticateRequest(
 	cfg config.Config, gwSvc *gw.Service, log hclog.Logger, next http.Handler,
 ) http.Handler {
-	// If Okta isn't disabled, authenticate using Okta.
-	if cfg.Okta != nil && !cfg.Okta.Disabled {
-		// Create Okta authorizer.
-		oa, err := oktaalb.New(*cfg.Okta, log)
-		if err != nil {
-			log.Error("error creating Okta authenticator")
-			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				http.Error(w, "Internal server error", http.StatusInternalServerError)
-				return
-			})
+	var provider pkgauth.Provider
+
+	// Priority: Dex > Okta > Google
+	// If Dex is configured and enabled, use Dex session-based authentication.
+	if cfg.Dex != nil && !cfg.Dex.Disabled {
+		// For Dex, we use session cookies instead of bearer tokens
+		provider = NewDexSessionProvider(log)
+	} else if cfg.Okta != nil && !cfg.Okta.Disabled {
+		// If Okta is configured and enabled, use Okta authentication.
+		oktaCfg := oktaadapter.Config{
+			AuthServerURL: cfg.Okta.AuthServerURL,
+			AWSRegion:     cfg.Okta.AWSRegion,
+			ClientID:      cfg.Okta.ClientID,
+			Disabled:      cfg.Okta.Disabled,
+			JWTSigner:     cfg.Okta.JWTSigner,
 		}
 
-		// Return handler wrapped with Okta auth.
-		return oa.EnforceOktaAuth(
-			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				validateUserEmail(w, r, log)
-				next.ServeHTTP(w, r)
-			}))
+		adapter, err := oktaadapter.NewAdapter(oktaCfg, log)
+		if err != nil {
+			log.Error("error creating Okta authentication adapter", "error", err)
+			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				http.Error(w, "Internal server error", http.StatusInternalServerError)
+			})
+		}
+		provider = adapter
+	} else {
+		// Use Google authentication.
+		provider = googleadapter.NewAdapter(gwSvc)
 	}
 
-	// Authenticate using Google.
-	return google.AuthenticateRequest(gwSvc, log,
-		// Return handler wrapped with Google auth.
-		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			validateUserEmail(w, r, log)
-			next.ServeHTTP(w, r)
-		}))
-}
-
-// validateUserEmail validates that userEmail was set in the request's context.
-// It responds with an internal server error if not found because this should
-// be set by all authentication methods. userEmail is used for authorization in
-// API endpoint implmentations.
-func validateUserEmail(
-	w http.ResponseWriter, r *http.Request, log hclog.Logger,
-) {
-	if r.Context().Value("userEmail") == nil {
-		log.Error("userEmail is not set in the request context",
-			"method", r.Method,
-			"path", r.URL.Path)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
+	// Wrap the handler with authentication middleware and an additional
+	// safety check to ensure the user email is set.
+	return pkgauth.Middleware(provider, log)(
+		pkgauth.RequireUserEmail(log, next),
+	)
 }

@@ -1,0 +1,30 @@
+# Simple build for Hermes web frontend
+# NOTE: Requires web/dist to be pre-built on host (run `make web/build` first)
+# This avoids memory exhaustion during Docker build
+
+FROM nginx:alpine
+
+# Copy nginx configuration
+COPY testing/nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy pre-built assets from host
+COPY web/dist /usr/share/nginx/html
+
+# Create non-root user for nginx
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
+    chown -R nginx:nginx /var/cache/nginx && \
+    chown -R nginx:nginx /var/log/nginx && \
+    chown -R nginx:nginx /etc/nginx/conf.d && \
+    touch /var/run/nginx.pid && \
+    chown -R nginx:nginx /var/run/nginx.pid
+
+USER nginx
+
+# Expose port
+EXPOSE 4200
+
+# Health check
+HEALTHCHECK --interval=10s --timeout=5s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:4200/ || exit 1
+
+CMD ["nginx", "-g", "daemon off;"]

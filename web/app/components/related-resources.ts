@@ -1,15 +1,15 @@
-import { inject as service } from "@ember/service";
+import { service } from "@ember/service";
 import ConfigService from "hermes/services/config";
-import AlgoliaService from "hermes/services/algolia";
+import SearchService from "hermes/services/search";
 import Component from "@glimmer/component";
 import { HermesDocument } from "hermes/types/document";
 import { restartableTask, timeout } from "ember-concurrency";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { XDropdownListAnchorAPI } from "./x/dropdown-list";
-import { SearchOptions } from "instantsearch.js";
+import { SearchOptions } from "hermes/services/search";
 import { next } from "@ember/runloop";
-import Ember from "ember";
+import { isTesting } from "@embroider/macros";
 import StoreService from "hermes/services/store";
 
 export type RelatedResource = RelatedExternalLink | RelatedHermesDocument;
@@ -77,7 +77,7 @@ interface RelatedResourcesComponentSignature {
 
 export default class RelatedResourcesComponent extends Component<RelatedResourcesComponentSignature> {
   @service("config") declare configSvc: ConfigService;
-  @service declare algolia: AlgoliaService;
+  @service declare searchService: SearchService;
   @service declare store: StoreService;
 
   @tracked private _algoliaResults: HermesDocument[] | null = null;
@@ -225,7 +225,7 @@ export default class RelatedResourcesComponent extends Component<RelatedResource
       }
 
       try {
-        let algoliaResponse = await this.algolia.searchIndex
+        let algoliaResponse = await this.searchService.searchIndex
           .perform(index, query, {
             hitsPerPage: options?.hitsPerPage || 12,
             filters: filterString,
@@ -267,7 +267,7 @@ export default class RelatedResourcesComponent extends Component<RelatedResource
           // This will show the "loading" spinner for some additional time
           // unless the task is restarted. This is to prevent the spinner
           // from flashing when the user types and results return quickly.
-          await timeout(Ember.testing ? 0 : 200);
+          await timeout(isTesting() ? 0 : 200);
         }
       } catch (e: unknown) {
         this.handleSearchError(e);
@@ -283,7 +283,7 @@ export default class RelatedResourcesComponent extends Component<RelatedResource
   protected getObject = restartableTask(
     async (dd: XDropdownListAnchorAPI | null, objectID: string) => {
       try {
-        let algoliaResponse = await this.algolia.getObject.perform(objectID);
+        let algoliaResponse = await this.searchService.getObject.perform(objectID);
         if (algoliaResponse) {
           this._algoliaResults = [
             algoliaResponse,

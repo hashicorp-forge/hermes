@@ -2,6 +2,7 @@ import { module, test } from "qunit";
 import { setupTest } from "ember-qunit";
 import { MirageTestContext, setupMirage } from "ember-cli-mirage/test-support";
 import { waitUntil } from "@ember/test-helpers";
+import { authenticateSession } from "ember-simple-auth/test-support";
 import LatestDocsService from "hermes/services/latest-docs";
 
 interface Context extends MirageTestContext {
@@ -13,6 +14,7 @@ module("Unit | Service | latest", function (hooks) {
   setupMirage(hooks);
 
   hooks.beforeEach(function (this: Context) {
+    authenticateSession({ access_token: "test-token" });
     this.set("latestDocs", this.owner.lookup("service:latest-docs"));
   });
 

@@ -1,0 +1,84 @@
+# Dex OIDC Provider Configuration for Testing Environment
+# 
+# Purpose: Provides OpenID Connect authentication for testing
+#          Uses port 5557 to avoid conflicts with integration testing (5556)
+#
+# Usage:
+#   - Runs on port 5557 in testing/docker-compose.yml
+#   - Accessed at http://localhost:5557/dex (external) or http://dex:5557/dex (internal)
+#   - Static user: test@hermes.local / password
+#
+# OIDC Configuration:
+#   - Issuer: http://dex:5557/dex (uses Docker internal DNS for container-to-container communication)
+#   - Client ID: hermes-testing
+#   - Client Secret: dGVzdGluZy1hcHAtc2VjcmV0
+#   - Redirect URI: http://localhost:8001/auth/callback
+#
+# Note: Using 'localhost:5558' as the issuer so both browsers AND containers can access it.
+#       Port 5558 is the host-mapped port (5557 is internal container port)
+#       The hermes container uses extra_hosts to map localhost to host-gateway
+
+issuer: http://localhost:5558/dex
+
+storage:
+  type: memory
+
+web:
+  http: 0.0.0.0:5557
+
+telemetry:
+  http: 0.0.0.0:5559
+
+# Static clients for Hermes testing
+staticClients:
+- id: hermes-testing
+  redirectURIs:
+  - 'http://localhost:8001/auth/callback'
+  - 'http://localhost:4201/auth/callback'
+  name: 'Hermes Testing'
+  secret: dGVzdGluZy1hcHAtc2VjcmV0
+
+# Static password connector for testing
+connectors:
+- type: mockCallback
+  id: mock
+  name: Mock
+
+# Enable password grants - this allows staticPasswords to work via local login
+enablePasswordDB: true
+
+# Static passwords for testing
+staticPasswords:
+- email: "test@hermes.local"
+  hash: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"  # password: "password"
+  username: "test"
+  userID: "08a8684b-db88-4b73-90a9-3cd1661f5466"
+  name: "Test User"
+  groups:
+    - "users"
+    - "testers"
+- email: "admin@hermes.local"
+  hash: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"  # password: "password"
+  username: "admin"
+  userID: "08a8684b-db88-4b73-90a9-3cd1661f5467"
+  name: "Admin User"
+  groups:
+    - "users"
+    - "admins"
+- email: "user@hermes.local"
+  hash: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"  # password: "password"
+  username: "user"
+  userID: "08a8684b-db88-4b73-90a9-3cd1661f5468"
+  name: "Regular User"
+  groups:
+    - "users"
+
+# OAuth2 configuration
+oauth2:
+  skipApprovalScreen: true
+  responseTypes: ["code", "token", "id_token"]
+  
+# Logging
+logger:
+  level: "debug"
+  format: "text"
