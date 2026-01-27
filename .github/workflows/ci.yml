@@ -25,6 +25,9 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
+      - name: Use package manager from package.json
+        run: cd web && corepack install
+
       - name: Set yarn version
         run: make web/set-yarn-version
 
