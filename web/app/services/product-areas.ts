@@ -4,7 +4,7 @@ import { task } from "ember-concurrency";
 import ConfigService from "hermes/services/config";
 import FetchService from "./fetch";
 import { assert } from "@ember/debug";
-import hashValue from "hash-value";
+import hashValue from "hermes/helpers/hash-value";
 
 const HDS_COLORS = [
   "#3b3d45",
