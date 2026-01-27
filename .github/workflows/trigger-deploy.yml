@@ -3,7 +3,7 @@ name: Trigger Deploy
 on:
   push:
     branches: [main]
-    workflow_dispatch: {}
+  workflow_dispatch:
 
 jobs:
   trigger-deploy:
