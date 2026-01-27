@@ -22,19 +22,19 @@ jobs:
           cache: "yarn"
           cache-dependency-path: "web/yarn.lock"
 
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Use package manager from package.json
-        run: cd web && corepack install
-
-      - name: Set yarn version
-        run: make web/set-yarn-version
+      - name: Enable Corepack and setup Yarn
+        run: |
+          corepack enable
+          cd web
+          corepack prepare yarn@$(node -p "require('./package.json').packageManager.split('@')[1]") --activate
 
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
           go-version: "^1.18"
+
+      - name: Verify Yarn version
+        run: cd web && yarn --version
 
       - name: Build web
         run: make web/build
