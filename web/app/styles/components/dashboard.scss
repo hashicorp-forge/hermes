@@ -179,3 +179,20 @@
     box-shadow: 0 8px 25px -5px rgba(220, 38, 38, 0.6);
   }
 }
+
+
+/* Enhanced migration link styling - blue color override */
+.permanent-migration-banner .migration-link {
+  color: #1e40af !important;
+  background-color: rgba(30, 64, 175, 0.1) !important;
+  border-color: #1e40af !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease !important;
+  
+  &:hover {
+    background-color: #1e40af !important;
+    color: white !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.4) !important;
+  }
+}
