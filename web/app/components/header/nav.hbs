@@ -33,13 +33,15 @@
   <Header::Search @query={{@query}} class="global-search" />
 
   <div class="user-buttons">
-    <Hds::Button
+    {{!-- Disabled during migration - users should use new SharePoint system --}}
+    {{!-- <Hds::Button
       data-test-create-new-button
       @route="authenticated.new"
       @text="New"
       @icon="plus"
+      @isDisabled={{true}}
       class="pl-2.5 pr-4"
-    />
+    /> --}}
     <div class="relative flex">
       <X::DropdownList
         @items={{this.dropdownListItems}}
