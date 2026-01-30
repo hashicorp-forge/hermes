@@ -1,0 +1,15 @@
+{{#if this.isShown}}
+  <Hds::Alert
+    data-test-sidebar-migration-banner
+    @type="inline"
+    @color="critical"
+    class="sidebar-migration-banner"
+    as |A|
+  >
+    <A.Title>
+      <strong>Important Notice:</strong> Hermes has been migrated to SharePoint.
+      <br><br>
+      <strong>Read-Only Mode:</strong> This system is now in read-only mode. Please do not update any existing Hermes documents.
+    </A.Title>
+  </Hds::Alert>
+{{/if}}
