@@ -16,6 +16,8 @@
     {{did-insert this.didInsertBody}}
   >
     <div class="sidebar-body-container">
+      {{! Migration Banner }}
+      <Document::Sidebar::MigrationBanner />
       {{! div to break the parent's space-y styles }}
       <div>
         {{! Add bgColor to make badge `multiply` work }}
