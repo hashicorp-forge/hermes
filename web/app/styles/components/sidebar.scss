@@ -202,6 +202,17 @@
         margin-bottom: 6px;
       }
     }
+
+    .sidebar-migration-link {
+      color: #2563eb !important;
+      text-decoration: underline !important;
+      font-weight: 500 !important;
+
+      &:hover {
+        color: #1d4ed8 !important;
+        text-decoration: underline !important;
+      }
+    }
   }
 
   @keyframes sidebarPulseRed {
