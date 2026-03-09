@@ -1,5 +1,5 @@
 import Controller from "@ember/controller";
-import RouterService from "@ember/routing/router-service";
+import type RouterService from "@ember/routing/router-service";
 import { inject as service } from "@ember/service";
 import { tracked } from "@glimmer/tracking";
 

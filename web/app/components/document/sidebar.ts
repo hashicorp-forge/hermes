@@ -14,29 +14,31 @@ import {
 import { capitalize } from "@ember/string";
 import cleanString from "hermes/utils/clean-string";
 import { debounce, schedule } from "@ember/runloop";
-import FetchService from "hermes/services/fetch";
-import RouterService from "@ember/routing/router-service";
-import SessionService from "hermes/services/session";
-import { CustomEditableField, HermesDocument } from "hermes/types/document";
+import type FetchService from "hermes/services/fetch";
+import type RouterService from "@ember/routing/router-service";
+import type SessionService from "hermes/services/session";
+import type { CustomEditableField } from "hermes/types/document";
+import type { HermesDocument } from "hermes/types/document";
 import { assert } from "@ember/debug";
-import Route from "@ember/routing/route";
+import type Route from "@ember/routing/route";
 import Ember from "ember";
 import htmlElement from "hermes/utils/html-element";
-import ConfigService from "hermes/services/config";
+import type ConfigService from "hermes/services/config";
 import isValidURL from "hermes/utils/is-valid-u-r-l";
-import { HermesDocumentType } from "hermes/types/document-type";
-import HermesFlashMessagesService from "hermes/services/flash-messages";
-import {
+import type { HermesDocumentType } from "hermes/types/document-type";
+import type HermesFlashMessagesService from "hermes/services/flash-messages";
+import type {
   HermesProjectInfo,
   HermesProjectResources,
 } from "hermes/types/project";
 import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
 import { ProjectStatus } from "hermes/types/project-status";
-import { RelatedHermesDocument } from "../related-resources";
-import PersonModel from "hermes/models/person";
-import RecentlyViewedService from "hermes/services/recently-viewed";
-import StoreService from "hermes/services/store";
-import ModalAlertsService, { ModalType } from "hermes/services/modal-alerts";
+import type { RelatedHermesDocument } from "../related-resources";
+import type PersonModel from "hermes/models/person";
+import type RecentlyViewedService from "hermes/services/recently-viewed";
+import type StoreService from "hermes/services/store";
+import type ModalAlertsService from "hermes/services/modal-alerts";
+import { ModalType } from "hermes/services/modal-alerts";
 
 interface DocumentSidebarComponentSignature {
   Args: {
@@ -986,8 +988,9 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     try {
       // Update approvers.
       this.toggleApproverVisibility();
+      // Filter out undefined/null values (compact replacement for Ember 5.x)
       await this.patchDocument.perform({
-        approvers: this.approvers.compact(),
+        approvers: this.approvers.filter(Boolean),
       });
 
       await this.fetchSvc.fetch(
@@ -1286,7 +1289,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
       // filter out the current document
       hermesDocuments = hermesDocuments.filter(
-        (doc) => doc.googleFileID !== this.docID,
+        (doc) => doc.FileID !== this.docID,
       );
 
       // update the sort order of all resources
@@ -1299,7 +1302,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
           body: JSON.stringify({
             hermesDocuments: hermesDocuments.map((doc) => {
               return {
-                googleFileID: doc.googleFileID,
+                FileID: doc.FileID,
                 sortOrder: doc.sortOrder,
               };
             }),
@@ -1345,7 +1348,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
 
       // Add the formatted document to the start of the array
       hermesDocuments.unshift({
-        googleFileID: this.args.document.objectID,
+        FileID: this.args.document.objectID,
         sortOrder: 1,
       });
 
@@ -1362,10 +1365,10 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
               (
                 doc:
                   | RelatedHermesDocument
-                  | { googleFileID: string; sortOrder: number },
+                  | { FileID: string; sortOrder: number },
               ) => {
                 return {
-                  googleFileID: doc.googleFileID,
+                  FileID: doc.FileID,
                   sortOrder: doc.sortOrder,
                 };
               },

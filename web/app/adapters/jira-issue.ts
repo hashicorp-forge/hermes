@@ -1,8 +1,8 @@
-import DS from "ember-data";
+import type DS from "ember-data";
 import ApplicationAdapter from "./application";
 import RSVP from "rsvp";
-import ModelRegistry from "ember-data/types/registries/model";
-import JiraIssueModel from "hermes/models/jira-issue";
+import type ModelRegistry from "ember-data/types/registries/model";
+import type JiraIssueModel from "hermes/models/jira-issue";
 
 export default class JiraIssueAdapter extends ApplicationAdapter {
   findRecord<K extends string | number>(

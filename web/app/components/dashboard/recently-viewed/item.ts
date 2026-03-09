@@ -1,6 +1,6 @@
 import { assert } from "@ember/debug";
 import Component from "@glimmer/component";
-import {
+import type {
   RecentlyViewedDoc,
   RecentlyViewedProject,
 } from "hermes/services/recently-viewed";

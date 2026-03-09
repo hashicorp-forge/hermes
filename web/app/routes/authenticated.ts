@@ -1,10 +1,10 @@
 import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
-import AuthenticatedController from "hermes/controllers/authenticated";
-import AuthenticatedUserService from "hermes/services/authenticated-user";
-import ConfigService from "hermes/services/config";
-import ProductAreasService from "hermes/services/product-areas";
-import SessionService from "hermes/services/session";
+import type AuthenticatedController from "hermes/controllers/authenticated";
+import type AuthenticatedUserService from "hermes/services/authenticated-user";
+import type ConfigService from "hermes/services/config";
+import type ProductAreasService from "hermes/services/product-areas";
+import type SessionService from "hermes/services/session";
 
 export default class AuthenticatedRoute extends Route {
   @service("config") declare configSvc: ConfigService;
@@ -13,10 +13,6 @@ export default class AuthenticatedRoute extends Route {
   @service declare productAreas: ProductAreasService;
 
   beforeModel(transition: any) {
-    /**
-     * If the user is dry-loading the results route with a query,
-     * we capture the query on our controller and pass it to the search input.
-     */
     const { to } = transition;
     const query = to.queryParams["q"];
 
@@ -27,39 +23,66 @@ export default class AuthenticatedRoute extends Route {
       );
     }
 
-    /**
-     * If using Google auth, check if the session is authenticated.
-     * If unauthenticated, it will redirect to the auth screen.
-     */
-    if (!this.configSvc.config.skip_google_auth) {
+    if (!this.configSvc.config.skip_microsoft_auth) {
+      // ESA 7.x - requireAuthentication works correctly
       this.session.requireAuthentication(transition, "authenticate");
     }
   }
 
-  // Note: Only called if the session is authenticated in the front end
   async afterModel() {
-    /**
-     * Checks if the session is authenticated in the back end.
-     * If the `loadInfo` task returns a 401, it will bubble up to the
-     * application error method which invalidates the session
-     * and redirects to the auth screen.
-     */
-    const loadInfoPromise = this.authenticatedUser.loadInfo.perform();
+    try {
+      const loadInfoPromise = this.authenticatedUser.loadInfo.perform();
 
-    /**
-     * Fetch the product areas for the ProductAvatar and
-     * ProductSelect components.
-     */
-    const loadProductAreasPromise = this.productAreas.fetch.perform();
+      const loadProductAreasPromise = this.productAreas.fetch.perform();
 
-    /**
-     * Wait for both promises to resolve.
-     */
-    await Promise.all([loadInfoPromise, loadProductAreasPromise]);
+      await Promise.all([loadInfoPromise, loadProductAreasPromise]);
 
-    /**
-     * Kick off the task to poll for expired auth.
-     */
+      void this.session.pollForExpiredAuth.perform();
+
+      // Check if we're in an Office Dialog and notify parent add-in
+      this.notifyOfficeDialogIfPresent();
+    } catch (error) {
+      throw error;
+    }
+
     void this.session.pollForExpiredAuth.perform();
+  }
+
+  /**
+   * If the app is running inside an Office Dialog (opened by the add-in),
+   * send a message to the parent to signal that authentication is complete.
+   */
+  private notifyOfficeDialogIfPresent(): void {
+    try {
+      // Check if we're in a popup/dialog context (opened for auth)
+      const urlParams = new URLSearchParams(window.location.search);
+      const isPopupAuth = urlParams.get('popup') === 'true';
+
+      if (!isPopupAuth) {
+        return;
+      }
+
+      // Check if Office.js is available (we're in an Office Dialog)
+      // Use window.Office since Office global may not be defined
+      const officeContext = (window as any).Office;
+      if (officeContext && officeContext.context && officeContext.context.ui) {
+        console.log("AuthenticatedRoute: Sending message to Office parent");
+        officeContext.context.ui.messageParent(JSON.stringify({
+          type: 'AUTH_COMPLETE',
+          success: true,
+          email: this.authenticatedUser.info?.email || 'authenticated'
+        }));
+      } else {
+        if (window.opener) {
+          window.opener.postMessage({
+            type: 'AUTH_COMPLETE',
+            success: true,
+            email: this.authenticatedUser.info?.email || 'authenticated'
+          }, window.location.origin);
+        }
+      }
+    } catch (error) {
+      console.error("AuthenticatedRoute: Error notifying Office dialog:", error);
+    }
   }
 }

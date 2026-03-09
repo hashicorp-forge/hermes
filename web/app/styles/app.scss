@@ -46,8 +46,12 @@
 @use "components/projects/tile" as project-tile;
 @use "components/header/facet-dropdown";
 @use "components/floating-u-i/content";
+@use "components/theme-toggle";
 @use "hashicorp/product-badge";
 @use "hashicorp/hermes-logo";
+
+// Theme system
+@use "themes/dark";
 @use "hermes/avatar";
 @use "routes/results";
 @use "routes/my";

@@ -1,4 +1,4 @@
-import { OffsetOptions } from "@floating-ui/dom";
+import type { OffsetOptions } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 
 export interface OverflowItem {

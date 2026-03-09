@@ -3,17 +3,17 @@ import Component from "@glimmer/component";
 import { inject as service } from "@ember/service";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
-import AlgoliaService from "hermes/services/algolia";
-import RouterService from "@ember/routing/router-service";
-import { HermesDocument } from "hermes/types/document";
+import type AlgoliaService from "hermes/services/algolia";
+import type RouterService from "@ember/routing/router-service";
+import type { HermesDocument } from "hermes/types/document";
 import { assert } from "@ember/debug";
-import ConfigService from "hermes/services/config";
+import type ConfigService from "hermes/services/config";
 import { next, schedule } from "@ember/runloop";
 import Ember from "ember";
-import { XDropdownListAnchorAPI } from "../x/dropdown-list";
-import StoreService from "hermes/services/store";
-import FetchService from "hermes/services/fetch";
-import { HermesProjectHit } from "hermes/types/project";
+import type { XDropdownListAnchorAPI } from "../x/dropdown-list";
+import type StoreService from "hermes/services/store";
+import type FetchService from "hermes/services/fetch";
+import type { HermesProjectHit } from "hermes/types/project";
 import { SearchScope } from "hermes/routes/authenticated/results";
 
 export interface SearchResultObjects {
@@ -98,12 +98,13 @@ export default class HeaderSearchComponent extends Component<HeaderSearchCompone
       };
     });
 
+    // Filter out undefined/null values (compact replacement for Ember 5.x)
     const items = [
       productAreaMatch,
       ...projectItems,
       ...this.docMatches,
       viewAllDocResults,
-    ].compact();
+    ].filter(Boolean);
 
     return items ?? [];
   }

@@ -2,12 +2,12 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { assert } from "@ember/debug";
-import {
+import type {
   RelatedExternalLink,
   RelatedHermesDocument,
   RelatedResource,
 } from "hermes/components/related-resources";
-import { OverflowItem } from "hermes/components/overflow-menu";
+import type { OverflowItem } from "hermes/components/overflow-menu";
 
 interface DocumentSidebarRelatedResourcesListItemComponentSignature {
   Element: HTMLLIElement;
@@ -66,12 +66,12 @@ export default class DocumentSidebarRelatedResourcesListItemComponent extends Co
   }
 
   /**
-   * The resource's googleFileID, if it exists.
+   * The resource's FileID, if it exists.
    * Used in the template to determine internal or external routing.
    */
   protected get documentObjectID(): string | null {
-    if ("googleFileID" in this.args.resource) {
-      return this.args.resource.googleFileID;
+    if ("FileID" in this.args.resource) {
+      return this.args.resource.FileID;
     } else {
       return null;
     }

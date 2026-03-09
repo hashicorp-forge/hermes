@@ -1,6 +1,6 @@
 import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
-import ProductAreasService from "hermes/services/product-areas";
+import type ProductAreasService from "hermes/services/product-areas";
 
 interface AuthenticatedNewDocRouteParams {
   docType: string;

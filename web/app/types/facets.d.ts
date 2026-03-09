@@ -1,4 +1,4 @@
-import { FacetName } from "hermes/components/header/toolbar";
+import type { FacetName } from "hermes/components/header/toolbar";
 
 /**
  * E.g., { docType: { "API": { count: 1, isSelected: false }}}

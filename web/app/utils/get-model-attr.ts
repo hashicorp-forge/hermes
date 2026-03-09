@@ -1,4 +1,4 @@
-import StoreService from "hermes/services/store";
+import type StoreService from "hermes/services/store";
 
 export type GetModelAttrArgs = [modelAndAttribute: string, id?: string];
 

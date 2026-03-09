@@ -1,16 +1,16 @@
 import Component from "@glimmer/component";
 import { inject as service } from "@ember/service";
 import { action } from "@ember/object";
-import ConfigService from "hermes/services/config";
-import SessionService from "hermes/services/session";
-import RouterService from "@ember/routing/router-service";
-import AuthenticatedUserService from "hermes/services/authenticated-user";
+import type ConfigService from "hermes/services/config";
+import type SessionService from "hermes/services/session";
+import type RouterService from "@ember/routing/router-service";
+import type AuthenticatedUserService from "hermes/services/authenticated-user";
 import window from "ember-window-mock";
 import { tracked } from "@glimmer/tracking";
 import { HERMES_GITHUB_REPO_URL } from "hermes/utils/hermes-urls";
 import { SortByValue } from "./toolbar";
 import { ProjectStatus } from "hermes/types/project-status";
-import PersonModel from "hermes/models/person";
+import type PersonModel from "hermes/models/person";
 
 interface UserNavItem {
   label: string;
@@ -52,7 +52,7 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
   }
 
   protected get showSignOut(): boolean {
-    return !this.configSvc.config.skip_google_auth;
+    return !this.configSvc.config.skip_microsoft_auth;
   }
 
   protected get gitHubRepoURL() {
@@ -79,13 +79,6 @@ export default class HeaderNavComponent extends Component<HeaderNavComponentSign
         href: this.supportDocsURL,
       },
     ] as UserNavMenuItem[];
-
-    if (this.showSignOut) {
-      defaultItems.push({
-        label: "Sign out",
-        action: this.invalidateSession,
-      });
-    }
 
     return defaultItems;
   }

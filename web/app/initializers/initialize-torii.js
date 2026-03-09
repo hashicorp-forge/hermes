@@ -1,7 +1,6 @@
 import bootstrapTorii from "torii/bootstrap/torii";
 import { configure } from "torii/configuration";
 import config from "../config/environment";
-import fetch from "fetch";
 
 /**
  * This file overrides https://github.com/FMGSuite/torii/blob/8abbfe99b3a820470192e7cfcf7795be375d9b47/app/initializers/initialize-torii.js
@@ -37,7 +36,10 @@ export function initialize(application) {
 
   configure(config.torii || {});
   bootstrapTorii(application);
-  application.inject("route", "torii", "service:torii");
+  
+  // In Ember 5.x, application.inject was removed
+  // Routes can still access torii service via @service torii or this.torii
+  // if they need it, but we don't need to force-inject it into all routes
 }
 
 export default {

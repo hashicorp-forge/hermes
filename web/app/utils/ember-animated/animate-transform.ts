@@ -3,9 +3,9 @@
  * Modified from Ember Animated's `move` motion.
  */
 
-import { Motion, rAF, Sprite, Tween } from "ember-animated";
-import { BaseOptions } from "ember-animated/-private/motion";
-import { TweenLike } from "ember-animated/-private/tween";
+import { Motion, rAF, type Sprite, Tween } from "ember-animated";
+import type { BaseOptions } from "ember-animated/-private/motion";
+import type { TweenLike } from "ember-animated/-private/tween";
 
 interface AnimateTransformOptions extends BaseOptions {
   scale?: {

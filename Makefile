@@ -2,7 +2,7 @@
 default: help
 
 .PHONY: build
-build: web/build
+build: web/build plugin/build
 	rm -f ./hermes
 	CGO_ENABLED=0 go build -o ./hermes ./cmd/hermes
 
@@ -13,6 +13,15 @@ bin:
 .PHONY: bin/linux
 bin/linux: # bin creates hermes binary for linux
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./hermes ./cmd/hermes
+
+.PHONY: build/linux
+build/linux: web/build plugin/build
+	rm -f ./hermes
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./hermes ./cmd/hermes
+
+.PHONY: plugin/build
+plugin/build:
+	cd hermes-plugin && npm install && rm -rf dist/ && npm run build
 
 .PHONY: dev
 dev: ## One command to start a dev environment

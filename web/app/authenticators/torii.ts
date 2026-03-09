@@ -1,8 +1,8 @@
 // @ts-ignore -- TODO: Add Types
 import Torii from "ember-simple-auth/authenticators/torii";
 import { inject as service } from "@ember/service";
-import ConfigService from "hermes/services/config";
-import FetchService from "hermes/services/fetch";
+import type ConfigService from "hermes/services/config";
+import type FetchService from "hermes/services/fetch";
 
 export default class ToriiAuthenticator extends Torii {
   @service("config") declare configSvc: ConfigService;
@@ -11,8 +11,8 @@ export default class ToriiAuthenticator extends Torii {
   // Appears unused, but necessary for the session service
   @service declare torii: unknown;
 
-  async restore() {
-    const data = await super.restore(...arguments);
+  async restore(data: any = {}) {
+    const restoredData = await super.restore(data);
     /**
      * A rejecting promise indicates invalid session data and will result
      * in the session being invalidated or remaining unauthenticated.
@@ -21,9 +21,9 @@ export default class ToriiAuthenticator extends Torii {
       .fetch(`/api/${this.configSvc.config.api_version}/me`, {
         method: "HEAD",
         headers: {
-          "Hermes-Google-Access-Token": data.access_token,
+          "Hermes-Google-Access-Token": restoredData.access_token,
         },
       })
-      .then(() => data);
+      .then(() => restoredData);
   }
 }

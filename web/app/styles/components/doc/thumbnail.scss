@@ -24,6 +24,11 @@
       @apply fill-color-palette-neutral-300 opacity-60;
       @apply -left-[8px] top-[3px];
     }
+
+    &.archived {
+      @apply fill-color-palette-neutral-500 opacity-90;
+      @apply left-1/2 -translate-x-1/2 top-[2px];
+    }
   }
 
   .product-badge {
@@ -49,6 +54,10 @@
       &.obsolete {
         @apply top-[3px] -left-2.5;
       }
+
+      &.archived {
+        @apply left-1/2 -translate-x-1/2 top-[3px];
+      }
     }
   }
 
@@ -72,6 +81,10 @@
 
       &.obsolete {
         @apply -left-5;
+      }
+
+      &.archived {
+        @apply left-1/2 -translate-x-1/2;
       }
     }
   }

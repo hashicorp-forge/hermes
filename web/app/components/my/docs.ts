@@ -1,13 +1,13 @@
 import Component from "@glimmer/component";
-import { HermesDocument } from "hermes/types/document";
+import type { HermesDocument } from "hermes/types/document";
 import { SortDirection } from "../table/sortable-header";
 import { inject as service } from "@ember/service";
-import AuthenticatedUserService from "hermes/services/authenticated-user";
-import FetchService from "hermes/services/fetch";
-import ConfigService from "hermes/services/config";
-import AlgoliaService from "hermes/services/algolia";
+import type AuthenticatedUserService from "hermes/services/authenticated-user";
+import type FetchService from "hermes/services/fetch";
+import type ConfigService from "hermes/services/config";
+import type AlgoliaService from "hermes/services/algolia";
 import { SortByValue } from "../header/toolbar";
-import RouterService from "@ember/routing/router-service";
+import type RouterService from "@ember/routing/router-service";
 
 interface MyDocsComponentSignature {
   Args: {
@@ -16,6 +16,7 @@ interface MyDocsComponentSignature {
     currentPage: number;
     nbPages: number;
     includeSharedDrafts: boolean;
+    showArchivedDrafts: boolean;
   };
 }
 
@@ -55,6 +56,17 @@ export default class MyDocsComponent extends Component<MyDocsComponentSignature>
     }
     return {
       includeSharedDrafts: true,
+      page: 1,
+    };
+  }
+
+  /**
+   * The params passed to the archived toggle LinkTo.
+   * Resets the page to 1 and toggles the showArchivedDrafts flag.
+   */
+  protected get archivedToggleQueryParams() {
+    return {
+      showArchivedDrafts: !this.args.showArchivedDrafts,
       page: 1,
     };
   }

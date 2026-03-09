@@ -2,8 +2,8 @@ import { getOwner, setOwner } from "@ember/application";
 import { assert } from "@ember/debug";
 import { inject as service } from "@ember/service";
 import EmberMetricsService from "ember-metrics/services/metrics";
-import GoogleAnalyticsFourAdapter from "hermes/metrics-adapters/_google-analytics-four";
-import ConfigService from "./config";
+import type GoogleAnalyticsFourAdapter from "hermes/metrics-adapters/_google-analytics-four";
+import type ConfigService from "./config";
 
 export default class MetricsService extends EmberMetricsService {
   @service("config") declare configSvc: ConfigService;

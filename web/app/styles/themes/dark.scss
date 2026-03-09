@@ -1,0 +1,488 @@
+/*
+ * Dark Mode Color Tokens for Hermes
+ * 
+ * These CSS custom properties provide dark mode variants of all HDS tokens.
+ * Uses the :root[data-theme="dark"] selector to override light mode defaults.
+ * 
+ * Color strategy:
+ * - Maintains semantic meaning (success = green, warning = orange, etc.)
+ * - Ensures WCAG 2.1 AA contrast ratios (4.5:1 for normal text, 3:1 for large)
+ * - Based on the existing Word add-in dark theme for consistency
+ */
+
+:root[data-theme="dark"] {
+  /* ===== Background Colors ===== */
+    /* Form controls: input, textarea, select */
+    input,
+    textarea,
+    select {
+      background-color: var(--token-color-surface-primary) !important;
+      color: var(--token-color-foreground-primary) !important;
+      border-color: var(--token-color-border-primary) !important;
+      caret-color: var(--token-color-foreground-primary) !important;
+    }
+
+    /* HDS form fields */
+  .hds-form-field__input,
+  .hds-form-field__textarea,
+  .hds-form-textarea,
+  .hds-form-text-input {
+    background-color: var(--token-color-surface-primary) !important;
+    color: var(--token-color-foreground-primary) !important;
+    border-color: var(--token-color-border-primary) !important;
+    caret-color: var(--token-color-foreground-primary) !important;
+  }
+
+  /* HDS form labels and helper text */
+  .hds-form-label,
+  .hds-form-field__label,
+  .hds-form-helper-text,
+  .hds-form-field__helper-text,
+  .hds-form-field__error,
+  .hermes-form-label,
+  label {
+    color: var(--token-color-foreground-primary) !important;
+  }
+
+  /* Form legend styling */
+  legend,
+  .hds-form-legend {
+    color: var(--token-color-foreground-primary) !important;
+  }
+  --token-color-page-primary: #000000;          /* Main page background - pitch black */
+  --token-color-page-faint: #2a2a2a;            /* Subtle background variations - visible contrast against black */
+  
+  --token-color-surface-primary: #242424;        /* Card/panel backgrounds */
+  --token-color-surface-faint: #1e1e1e;         /* Subtle surface variations - lighter for contrast against black */
+  --token-color-surface-strong: #333333;        /* Elevated surfaces */
+  --token-color-surface-interactive: #2a2a2a;    /* Interactive surface base - lighter for contrast against black */
+  --token-color-surface-interactive-hover: #3a3a3a;  /* Interactive hover - more visible against black */
+  --token-color-surface-interactive-active: #4a4a4a; /* Interactive active - brightest state */
+  
+  /* Status-specific surfaces */
+  --token-color-surface-action: #0f1e42;        /* Action surface (blue) - darker version of light mode */
+  --token-color-surface-critical: #4a1a1a;      /* Critical/error surface */
+  --token-color-surface-warning: #3d2a1a;       /* Warning surface */
+  --token-color-surface-highlight: #2d1b3d;     /* Highlight surface */
+
+  /* ===== Text Colors ===== */
+  --token-color-foreground-primary: #ffffff;     /* Primary text - high contrast */
+  --token-color-foreground-strong: #f0f0f0;      /* Strong text */
+  --token-color-foreground-high-contrast: #ffffff; /* Highest contrast text */
+  --token-color-foreground-faint: #b0b0b0;       /* Subtle/secondary text */
+  --token-color-foreground-disabled: #666666;    /* Disabled text */
+  
+  /* Interactive text colors */
+  --token-color-foreground-action: #1060ff;      /* Links and actions - same as light mode */
+  --token-color-foreground-action-hover: #0c56e9; /* Action hover - same as light mode */
+  --token-color-foreground-action-active: #0046d1; /* Action active - same as light mode */
+  
+  /* Status text colors */
+  --token-color-foreground-critical: #ff6b6b;    /* Error text */
+  --token-color-foreground-critical-on-surface: #ff4757; /* Error on surface */
+  --token-color-foreground-warning: #fb923c;     /* Warning text */
+  --token-color-foreground-warning-on-surface: #f39c12; /* Warning on surface */
+  --token-color-foreground-highlight: #c084fc;   /* Highlight text */
+
+  /* ===== Border Colors ===== */
+  --token-color-border-primary: #404040;         /* Main borders */
+  --token-color-border-faint: #353535;          /* Subtle borders */
+  --token-color-border-strong: #555555;         /* Emphasized borders */
+  --token-color-border-action: #1060ff;         /* Action borders - same blue as actions */
+  --token-color-border-critical: #d83b01;       /* Error borders */
+  --token-color-border-warning: #ff8c00;        /* Warning borders */
+  --token-color-border-highlight: #c084fc;      /* Highlight borders */
+
+  /* Form control borders */
+  --token-form-control-base-border-color-default: #404040;
+  --token-form-control-base-border-color-hover: #555555;
+  
+  /* Form control surfaces */
+  --token-form-control-base-surface-color-default: #242424;
+  --token-form-control-disabled-surface-color: #2d2d2d;
+  
+  /* Form control dimensions */
+  --token-form-control-border-width: 1px;
+  --token-form-control-border-radius: 6px;
+  --token-form-control-padding: 8px;
+
+  /* ===== Focus Colors ===== */
+  --token-color-focus-action-internal: #1060ff;  /* Focus ring inner - same as light mode */
+  --token-color-focus-action-external: rgba(16, 96, 255, 0.3); /* Focus ring outer - same as light mode */
+
+  /* ===== Status-Specific Color Schemes ===== */
+  
+  /* Success/Approved States (Green) */
+  --token-color-palette-green-200: #238636;      /* Medium green for progress bars (GitHub-like) */
+  
+  /* Warning States (Orange) */  
+  --token-color-palette-amber-200: #fb923c;      /* Light orange for warnings */
+  
+  /* Critical/Error States (Red) */
+  --token-color-palette-red-200: #ff6b6b;        /* Light red for errors */
+  
+  /* Info/Review States (Purple) */
+  --token-color-palette-purple-100: #e9d5ff;     /* Very light purple */
+  --token-color-palette-purple-200: #c084fc;     /* Light purple for info */
+  
+  /* Neutral States (Blue) - keep same as light mode for consistency */
+  --token-color-palette-blue-500: #1c345f;       /* Same as light mode */
+  --token-color-palette-blue-400: #0046d1;       /* Same as light mode */
+  --token-color-palette-blue-300: #0c56e9;       /* Same as light mode */  
+  --token-color-palette-blue-200: #1060ff;       /* Same as light mode */
+  --token-color-palette-blue-100: #cce3fe;       /* Same as light mode */
+  --token-color-palette-blue-50: #f2f8ff;        /* Same as light mode */
+
+  /* ===== Neutral Palette ===== */
+  /* Keep neutral palette consistent with light mode for product branding */
+  --token-color-palette-neutral-50: #fafafa;     /* Lightest neutral - same as light mode */
+  --token-color-palette-neutral-100: #f1f2f3;    /* Very light neutral - same as light mode */
+  --token-color-palette-neutral-200: #dedfe3;    /* Light neutral - same as light mode */
+  --token-color-palette-neutral-300: #c2c5cb;    /* Medium light neutral - same as light mode */
+  --token-color-palette-neutral-400: #8c909c;    /* Medium neutral - same as light mode */
+  --token-color-palette-neutral-500: #656a76;    /* Medium dark neutral - same as light mode */
+  --token-color-palette-neutral-600: #3b3d45;    /* Dark neutral - same as light mode */
+  --token-color-palette-neutral-700: #0c0c0e;    /* Very dark neutral - same as light mode */
+
+  /* ===== Alpha Colors ===== */
+  --token-color-palette-alpha-100: rgba(255, 255, 255, 0.1); /* Light overlay */
+  --token-color-palette-alpha-300: rgba(255, 255, 255, 0.3); /* Medium overlay */
+
+
+
+  /* ===== Component-Specific Overrides ===== */
+  
+  /* Tables */
+  --token-surface-low-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --token-surface-mid-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  --token-elevation-low-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  
+  /* Focus rings */
+  --token-focus-ring-action-box-shadow: 0 0 0 3px rgba(16, 96, 255, 0.3);
+  
+  /* Typography (if needed for overrides) */
+  --token-typography-font-weight-regular: 400;
+  --token-typography-font-weight-medium: 500;
+  --token-typography-font-weight-semibold: 600;
+  --token-typography-font-weight-bold: 700;
+
+  /* ===== Document Status & Badge Colors ===== */
+  
+  /* HDS Badge color overrides for dark mode */
+  --token-color-surface-success: #238636;       /* GitHub green badge background */
+  --token-color-foreground-success: #ffffff;    /* White text for better contrast */
+  --token-color-foreground-success-on-surface: #ffffff; /* Ensure white text on success surface */
+  --hds-token-color-foreground-success: #ffffff; /* Additional HDS override */
+  
+  --token-color-surface-highlight: #2d1b4d;     /* Purple highlight badge background */ 
+  --token-color-foreground-highlight-on-surface: #c084fc; /* Purple highlight badge text */
+  
+  --token-color-surface-neutral: #525252;       /* Neutral badge background */
+  --token-color-foreground-neutral: #ffffff;    /* Neutral badge text */
+}
+
+/* ===== System Theme Detection ===== */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    /* Apply dark theme when system prefers dark and no explicit theme is set */
+    color-scheme: dark;
+  }
+}
+
+/* ===== Accessibility Enhancements ===== */
+:root[data-theme="dark"] {
+  /* Enhanced focus indicators for dark mode */
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+  
+  /* Ensure proper contrast for interactive elements */
+  color-scheme: dark;
+}
+
+/* ===== Document Status Component Overrides ===== */
+:root[data-theme="dark"] {
+  .doc-status {
+    /* Status progress bars */
+    .progress-bar {
+      background-color: var(--token-color-surface-faint);
+    }
+
+    /* WIP status */
+    &--wip li:nth-child(1) {
+      background-color: var(--token-color-palette-blue-200);
+    }
+
+    /* In-Review status */
+    &--in-review {
+      li:nth-child(1) {
+        background-color: var(--token-color-palette-purple-200);
+        opacity: 0.7;
+      }
+      li:nth-child(2) {
+        background-color: var(--token-color-palette-purple-200);
+        height: 0.25rem;
+      }
+    }
+
+    /* Approved status */
+    &--approved {
+      .progress-bar {
+        background-color: var(--token-color-palette-green-200);
+        opacity: 0.7;
+      }
+      li:nth-child(3) {
+        height: 0.25rem;
+        opacity: 1;
+      }
+    }
+  }
+}
+
+/* Document Status Icon Overrides */
+:root[data-theme="dark"] {
+  [data-test-document-status-icon] {
+    /* Default page fill - make it darker for better contrast */
+    [data-test-default-page-fill] {
+      fill: #2d2d2d;
+    }
+    
+    /* Obsolete page fill */
+    [data-test-obsolete-page-fill] {
+      fill: #2d2d2d;
+    }
+    
+    /* Status strokes - make them lighter */
+    [data-test-default-page-stroke] {
+      fill: #9ca3af;
+    }
+    
+    [data-test-approved-page-stroke] {
+      fill: #9ca3af;
+    }
+    
+    [data-test-obsolete-page-stroke] {
+      fill: #9ca3af;
+    }
+    
+    /* Approved checkmark - make it brighter green (GitHub-like) */
+    [data-test-checkmark-icon] {
+      stroke: #3fb950;
+    }
+    
+    /* Draft pencil icon - adjust for dark mode */
+    [data-test-pencil-icon] {
+      fill: #404040;
+      stroke: #9ca3af;
+    }
+  }
+}
+
+/* HDS Badge Mix-blend-mode fix for dark mode */
+:root[data-theme="dark"] {
+  .hds-badge {
+    mix-blend-mode: normal; /* Disable mix-blend-multiply in dark mode */
+    
+    /* Force white text for success badges */
+    &--color-success {
+      .hds-badge__text {
+        color: #ffffff !important;
+      }
+    }
+  }
+
+  /* HDS Badge Count styling - now handled with inline styles for reliability */
+
+  /* ===== Button Dark Mode Styling ===== */
+  
+  /* HDS Buttons - most colors are handled by palette tokens above, but ensure proper contrast */
+  .hds-button {
+    /* Primary buttons use blue palette colors which are now correct */
+    
+    /* Secondary buttons */
+    &--color-secondary {
+      background-color: var(--token-color-surface-interactive);
+      border-color: var(--token-color-border-primary);
+      color: var(--token-color-foreground-primary);
+
+      &:hover {
+        background-color: var(--token-color-surface-interactive-hover);
+        border-color: var(--token-color-border-strong);
+        color: var(--token-color-foreground-primary);
+      }
+
+      &:focus {
+        border-color: var(--token-color-focus-action-internal);
+        
+        &::before {
+          border-color: var(--token-color-focus-action-external);
+        }
+      }
+    }
+
+    /* Tertiary buttons */
+    &--color-tertiary {
+      color: var(--token-color-foreground-action);
+      
+      &:hover {
+        color: var(--token-color-foreground-action-hover);
+        background-color: var(--token-color-surface-interactive);
+      }
+    }
+
+    /* Critical buttons - use default HDS styling which should work well in dark mode */
+  }
+
+  /* ===== Tooltip Dark Mode Styling ===== */
+  
+  /* Hermes tooltip components */
+  .hermes-tooltip {
+    background-color: var(--token-color-surface-strong) !important;
+    color: var(--token-color-foreground-high-contrast) !important;
+    border: 1px solid var(--token-color-border-primary) !important;
+    
+    .arrow {
+      background-color: var(--token-color-surface-strong) !important;
+    }
+  }
+
+  /* Hermes popover components */
+  .hermes-popover {
+    background-color: var(--token-color-surface-primary) !important;
+    color: var(--token-color-foreground-primary) !important;
+    border: 1px solid var(--token-color-border-primary) !important;
+  }
+
+  /* ===== Dropdown Dark Mode Styling ===== */
+  
+  /* X::DropdownList components */
+  .x-dropdown-list {
+    .x-dropdown-list-container {
+      background-color: var(--token-color-surface-primary);
+      border: 1px solid var(--token-color-border-primary);
+    }
+
+    .x-dropdown-list-scroll-container {
+      background-color: var(--token-color-surface-primary);
+    }
+
+    .x-dropdown-list-input-container {
+      background-color: var(--token-color-surface-primary);
+      border-bottom-color: var(--token-color-border-faint);
+      
+      input {
+        background-color: transparent;
+        color: var(--token-color-foreground-primary);
+        
+        &::placeholder {
+          color: var(--token-color-foreground-faint);
+        }
+      }
+    }
+
+    .x-dropdown-list-default-empty-state {
+      color: var(--token-color-foreground-faint);
+    }
+  }
+
+  /* Dropdown list items */
+  .x-dropdown-list-item-link {
+    color: var(--token-color-foreground-primary) !important;
+    
+    &:hover {
+      background-color: var(--token-color-surface-interactive-hover);
+    }
+
+    &.is-aria-selected {
+      background-color: var(--token-color-foreground-action) !important;
+      color: var(--token-color-foreground-high-contrast) !important;
+    }
+
+    &:not(.is-aria-selected) .check {
+      color: var(--token-color-foreground-action);
+    }
+  }
+
+  /* HDS Dropdown components */
+  .hds-dropdown {
+    .hds-dropdown__content {
+      background-color: var(--token-color-surface-primary);
+      border: 1px solid var(--token-color-border-primary);
+    }
+
+    .hds-dropdown__list-item {
+      color: var(--token-color-foreground-primary);
+      
+      &:hover {
+        background-color: var(--token-color-surface-interactive-hover);
+      }
+
+      &:focus,
+      &[aria-selected="true"] {
+        background-color: var(--token-color-foreground-action);
+        color: var(--token-color-foreground-high-contrast);
+      }
+    }
+  }
+
+  /* Facet dropdowns */
+  .header-facet-dropdown {
+    .hds-dropdown__content {
+      background-color: var(--token-color-surface-primary);
+      border: 1px solid var(--token-color-border-primary);
+    }
+  }
+
+  /* User menu dropdown */
+  .user-dropdown {
+    .hds-dropdown__content {
+      background-color: var(--token-color-surface-primary);
+      border: 1px solid var(--token-color-border-primary);
+    }
+  }
+
+  /* ===== Project Page Dark Mode Styling ===== */
+  
+  /* Project badge styling */
+  .project-header {
+    /* Project badge with neutral background */
+    .bg-color-palette-neutral-100 {
+      background-color: var(--token-color-surface-strong) !important;
+      color: var(--token-color-foreground-strong) !important;
+      border: 1px solid var(--token-color-border-faint);
+    }
+  }
+
+  /* Alternative: If we want to target it more specifically by content */
+  .project-header div:has(h5:contains("Project")) {
+    background-color: var(--token-color-surface-strong) !important;
+    color: var(--token-color-foreground-strong) !important;
+    border: 1px solid var(--token-color-border-faint);
+  }
+}
+
+/* ===== Document Tile Hover Fix ===== */
+:root[data-theme="dark"] {
+  /* Disable mix-blend-multiply on document tile hover overlays to fix hover visibility */
+  .group .mix-blend-multiply {
+    mix-blend-mode: normal !important;
+  }
+  
+  /* Alternative: target the specific hover overlay pattern */
+  .group-hover\:bg-color-page-faint.mix-blend-multiply,
+  .group-focus-within\:bg-color-page-faint.mix-blend-multiply {
+    mix-blend-mode: normal !important;
+  }
+}
+
+/* ===== Reduced Motion Support ===== */
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme="dark"] {
+    /* Remove animations for users who prefer reduced motion */
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

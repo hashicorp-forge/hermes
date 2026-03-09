@@ -1,13 +1,13 @@
 import Service from "@ember/service";
 import { inject as service } from "@ember/service";
 import { keepLatestTask } from "ember-concurrency";
-import FetchService from "./fetch";
+import type FetchService from "./fetch";
 import { tracked } from "@glimmer/tracking";
-import ConfigService from "hermes/services/config";
-import { HermesDocument } from "hermes/types/document";
-import SessionService from "hermes/services/session";
-import StoreService from "hermes/services/store";
-import { HermesProject } from "hermes/types/project";
+import type ConfigService from "hermes/services/config";
+import type { HermesDocument } from "hermes/types/document";
+import type SessionService from "hermes/services/session";
+import type StoreService from "hermes/services/store";
+import type { HermesProject } from "hermes/types/project";
 
 /**
  * The document format returned by /me/recently-viewed-docs
@@ -60,7 +60,16 @@ export default class RecentlyViewedService extends Service {
    * A potentially combined array of the ten most recently viewed docs and projects.
    */
   get index(): Array<RecentlyViewedDoc | RecentlyViewedProject> | undefined {
-    return this._index?.sortBy("viewedTime").reverse().slice(0, 10);
+    // Sort by viewedTime, reverse (newest first), and take top 10
+    // Native JS sort replacement for Ember 5.x (sortBy removed)
+    return this._index
+      ?.slice()
+      .sort((a, b) => {
+        const aTime = a.viewedTime || 0;
+        const bTime = b.viewedTime || 0;
+        return bTime - aTime;
+      })
+      .slice(0, 10);
   }
 
   /**
@@ -148,11 +157,16 @@ export default class RecentlyViewedService extends Service {
       );
 
       // Update the local array to recompute the getter
-      this._index = formattedItems.compact();
+      // Filter out undefined/null values and archived drafts (compact replacement for Ember 5.x)
+      this._index = formattedItems.filter(
+        (item): item is RecentlyViewedDoc | RecentlyViewedProject => {
+          if (item === null || item === undefined) return false;
+          // Filter out archived drafts
+          if ('doc' in item && item.doc?.archived === true) return false;
+          return true;
+        }
+      );
     } catch (e) {
-      // Log an error if the fetch fails
-      console.error("Error fetching recently viewed docs", e);
-
       // Cause the dashboard to show an error message.
       this._index = null;
     }

@@ -3,18 +3,19 @@ import { task, timeout } from "ember-concurrency";
 import { inject as service } from "@ember/service";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
-import ConfigService from "hermes/services/config";
+import type ConfigService from "hermes/services/config";
 import Ember from "ember";
-import FetchService from "hermes/services/fetch";
-import AuthenticatedUserService from "hermes/services/authenticated-user";
-import RouterService from "@ember/routing/router-service";
-import ModalAlertsService, { ModalType } from "hermes/services/modal-alerts";
+import type FetchService from "hermes/services/fetch";
+import type AuthenticatedUserService from "hermes/services/authenticated-user";
+import type RouterService from "@ember/routing/router-service";
+import type ModalAlertsService from "hermes/services/modal-alerts";
+import { ModalType } from "hermes/services/modal-alerts";
 import { assert } from "@ember/debug";
 import cleanString from "hermes/utils/clean-string";
-import { ProductArea } from "hermes/services/product-areas";
+import type { ProductArea } from "hermes/services/product-areas";
 import { next } from "@ember/runloop";
-import HermesFlashMessagesService from "hermes/services/flash-messages";
-import DocumentTypesService from "hermes/services/document-types";
+import type HermesFlashMessagesService from "hermes/services/flash-messages";
+import type DocumentTypesService from "hermes/services/document-types";
 
 interface DocFormErrors {
   title: string | null;
@@ -213,6 +214,52 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
       // Wait for document to be available.
       await timeout(AWAIT_DOC_DELAY);
 
+      // Initialize retry counter and max attempts
+      let retryCount = 0;
+      const maxRetries = 8;
+      const retryInterval = 3000; // 3 seconds
+      let documentData = null;
+
+      // Retry fetching document details until we get directEditUrl or max retries
+      while (retryCount < maxRetries) {
+        try {
+          console.log(`Attempt ${retryCount + 1}/${maxRetries} to fetch document details for ID: ${doc.id}`);
+          
+          // Fetch the complete document data to get directEditUrl
+          documentData = await this.fetchSvc
+            .fetch(`/api/${this.configSvc.config.api_version}/drafts/${doc.id}`)
+            .then((response) => response?.json());
+                    
+          // If we have directEditURL or directEditUrl, break out of the loop
+          if (documentData && (documentData.directEditURL || documentData.directEditUrl)) {
+            break;
+          }
+          
+          // If no directEditUrl, wait and retry
+          retryCount++;
+          if (retryCount < maxRetries) {
+            console.log(`No directEditUrl found, waiting ${retryInterval/1000}s before retry...`);
+            await timeout(retryInterval);
+          }
+        } catch (error) {
+          console.error(`Error fetching document details (attempt ${retryCount + 1}):`, error);
+          retryCount++;
+          if (retryCount < maxRetries) {
+            await timeout(retryInterval);
+          }
+        }
+      }
+
+      // Check if directEditURL or directEditUrl exists and redirect to it
+      const editUrl = documentData && (documentData.directEditURL || documentData.directEditUrl);
+      if (editUrl) {
+        window.location.replace(editUrl);
+        return;
+      } else {
+        console.log('Max retries reached or no direct edit URL found, falling back to default route');
+      }
+
+      // Fallback to the original route if directEditUrl is not available
       this.router
         .transitionTo("authenticated.document", doc.id, {
           queryParams: { draft: true },

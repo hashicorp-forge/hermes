@@ -1,15 +1,15 @@
 import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
-import AlgoliaService from "hermes/services/algolia";
-import ConfigService from "hermes/services/config";
-import FetchService from "hermes/services/fetch";
-import RecentlyViewedService from "hermes/services/recently-viewed";
-import SessionService from "hermes/services/session";
-import AuthenticatedUserService from "hermes/services/authenticated-user";
-import { HermesDocument } from "hermes/types/document";
+import type AlgoliaService from "hermes/services/algolia";
+import type ConfigService from "hermes/services/config";
+import type FetchService from "hermes/services/fetch";
+import type RecentlyViewedService from "hermes/services/recently-viewed";
+import type SessionService from "hermes/services/session";
+import type AuthenticatedUserService from "hermes/services/authenticated-user";
+import type { HermesDocument } from "hermes/types/document";
 import { assert } from "@ember/debug";
-import LatestDocsService from "hermes/services/latest-docs";
-import StoreService from "hermes/services/store";
+import type LatestDocsService from "hermes/services/latest-docs";
+import type StoreService from "hermes/services/store";
 
 export default class DashboardRoute extends Route {
   @service("latest-docs") declare latestDocs: LatestDocsService;
@@ -23,6 +23,7 @@ export default class DashboardRoute extends Route {
 
   async model(): Promise<HermesDocument[]> {
     const userInfo = this.authenticatedUser.info;
+    
 
     const docsAwaitingReviewPromise = this.algolia.searchIndex
       .perform(this.configSvc.config.algolia_docs_index_name, "", {

@@ -1,12 +1,12 @@
 import Route from "@ember/routing/route";
 import { next, schedule } from "@ember/runloop";
 import { inject as service } from "@ember/service";
-import AuthenticatedProjectsProjectController from "hermes/controllers/authenticated/projects/project";
-import ConfigService from "hermes/services/config";
-import FetchService from "hermes/services/fetch";
-import RecentlyViewedService from "hermes/services/recently-viewed";
-import StoreService from "hermes/services/store";
-import { HermesProject } from "hermes/types/project";
+import type AuthenticatedProjectsProjectController from "hermes/controllers/authenticated/projects/project";
+import type ConfigService from "hermes/services/config";
+import type FetchService from "hermes/services/fetch";
+import type RecentlyViewedService from "hermes/services/recently-viewed";
+import type StoreService from "hermes/services/store";
+import type { HermesProject } from "hermes/types/project";
 
 export default class AuthenticatedProjectsProjectRoute extends Route {
   @service("fetch") declare fetchSvc: FetchService;

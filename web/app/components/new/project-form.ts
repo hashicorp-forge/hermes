@@ -1,16 +1,16 @@
 import { action } from "@ember/object";
-import RouterService from "@ember/routing/router-service";
+import type RouterService from "@ember/routing/router-service";
 import { next } from "@ember/runloop";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { HermesDocument } from "hermes/types/document";
+import type { HermesDocument } from "hermes/types/document";
 import { task } from "ember-concurrency";
-import ConfigService from "hermes/services/config";
-import FetchService from "hermes/services/fetch";
-import HermesFlashMessagesService from "hermes/services/flash-messages";
+import type ConfigService from "hermes/services/config";
+import type FetchService from "hermes/services/fetch";
+import type HermesFlashMessagesService from "hermes/services/flash-messages";
 import cleanString from "hermes/utils/clean-string";
-import { JiraPickerResult } from "hermes/types/project";
+import type { JiraPickerResult } from "hermes/types/project";
 import { timeout } from "ember-animated/-private/ember-scheduler";
 import Ember from "ember";
 
@@ -138,7 +138,7 @@ export default class NewProjectFormComponent extends Component<NewProjectFormCom
             body: JSON.stringify({
               hermesDocuments: [
                 {
-                  googleFileID: this.args.document.objectID,
+                  FileID: this.args.document.objectID,
                   sortOrder: 1,
                 },
               ],

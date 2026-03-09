@@ -4,12 +4,12 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { next, schedule } from "@ember/runloop";
 import Ember from "ember";
-import { WithBoundArgs } from "@glint/template";
-import XDropdownListActionComponent from "./action";
-import XDropdownListLinkToComponent from "./link-to";
+import type { WithBoundArgs } from "@glint/template";
+import type XDropdownListActionComponent from "./action";
+import type XDropdownListLinkToComponent from "./link-to";
 import { restartableTask, timeout } from "ember-concurrency";
-import { FocusDirection } from ".";
-import XDropdownListExternalLinkComponent from "./external-link";
+import type { FocusDirection } from ".";
+import type XDropdownListExternalLinkComponent from "./external-link";
 
 type XDropdownListInteractiveComponentBoundArgs =
   | "role"

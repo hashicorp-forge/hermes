@@ -1,6 +1,6 @@
 import Component from "@glimmer/component";
-import { HdsButtonColor } from "hds/_shared";
-import { XDropdownListToggleComponentArgs } from "./_shared";
+import type { HdsButtonColor } from "hds/_shared";
+import type { XDropdownListToggleComponentArgs } from "./_shared";
 
 interface XDropdownListToggleButtonComponentSignature {
   Element: HTMLButtonElement;

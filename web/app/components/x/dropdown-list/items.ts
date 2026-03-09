@@ -2,8 +2,8 @@ import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
 import { FocusDirection } from ".";
-import { XDropdownListSharedArgs } from "./_shared";
-import { XDropdownListItemAPI, XDropdownListItemComponentArgs } from "./item";
+import type { XDropdownListSharedArgs } from "./_shared";
+import type { XDropdownListItemAPI, XDropdownListItemComponentArgs } from "./item";
 
 interface XDropdownListItemsComponentSignature {
   Args: XDropdownListSharedArgs &

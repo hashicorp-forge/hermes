@@ -1,0 +1,9 @@
+{{page-title (or this.model.doc.title "Document")}}
+{{set-body-class "secondary-screen"}}
+
+<Document
+  @document={{this.model.doc}}
+  @docType={{this.model.docType}}
+  @modelIsChanging={{this.modelIsChanging}}
+  @viewerIsGroupApprover={{this.model.viewerIsGroupApprover}}
+/>

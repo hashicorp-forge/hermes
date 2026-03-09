@@ -14,8 +14,8 @@ interface RelatedResourceHermesDocumentComponentSignature {
 export default class RelatedResourceHermesDocumentComponent extends Component<RelatedResourceHermesDocumentComponentSignature> {
   protected get document(): RelatedHermesDocument {
     assert(
-      "googleFileID must exist on the resource",
-      "googleFileID" in this.args.resource,
+      "FileID must exist on the resource",
+      "FileID" in this.args.resource,
     );
     return this.args.resource as RelatedHermesDocument;
   }

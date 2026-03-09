@@ -1,6 +1,6 @@
 import Component from "@glimmer/component";
 import { inject as service } from "@ember/service";
-import RouterService from "@ember/routing/router-service";
+import type RouterService from "@ember/routing/router-service";
 
 interface PaginationComponentSignature {
   Args: {

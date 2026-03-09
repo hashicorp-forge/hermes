@@ -1,7 +1,8 @@
 import Helper from "@ember/component/helper";
 import { inject as service } from "@ember/service";
-import StoreService from "hermes/services/store";
-import getModelAttr, { GetModelAttrArgs } from "hermes/utils/get-model-attr";
+import type StoreService from "hermes/services/store";
+import type { GetModelAttrArgs } from "hermes/utils/get-model-attr";
+import getModelAttr from "hermes/utils/get-model-attr";
 
 export interface GetModelAttrSignature {
   Args: {

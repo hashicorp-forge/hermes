@@ -1,9 +1,9 @@
 import Service, { inject as service } from "@ember/service";
 import { tracked } from "@glimmer/tracking";
 import { task } from "ember-concurrency";
-import ConfigService from "hermes/services/config";
-import FetchService from "./fetch";
-import { HermesDocumentType } from "hermes/types/document-type";
+import type ConfigService from "hermes/services/config";
+import type FetchService from "./fetch";
+import type { HermesDocumentType } from "hermes/types/document-type";
 
 export default class DocumentTypesService extends Service {
   @service("config") declare configSvc: ConfigService;

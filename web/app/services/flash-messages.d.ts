@@ -1,5 +1,6 @@
+import type {
+  FlashFunction} from "ember-cli-flash/services/flash-messages";
 import FlashMessageService, {
-  FlashFunction,
   MessageOptions,
 } from "ember-cli-flash/services/flash-messages";
 

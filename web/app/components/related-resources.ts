@@ -1,16 +1,16 @@
 import { inject as service } from "@ember/service";
-import ConfigService from "hermes/services/config";
-import AlgoliaService from "hermes/services/algolia";
+import type ConfigService from "hermes/services/config";
+import type AlgoliaService from "hermes/services/algolia";
 import Component from "@glimmer/component";
-import { HermesDocument } from "hermes/types/document";
+import type { HermesDocument } from "hermes/types/document";
 import { restartableTask, timeout } from "ember-concurrency";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
-import { XDropdownListAnchorAPI } from "./x/dropdown-list";
-import { SearchOptions } from "instantsearch.js";
+import type { XDropdownListAnchorAPI } from "./x/dropdown-list";
+import type { SearchOptions } from "instantsearch.js";
 import { next } from "@ember/runloop";
 import Ember from "ember";
-import StoreService from "hermes/services/store";
+import type StoreService from "hermes/services/store";
 
 export type RelatedResource = RelatedExternalLink | RelatedHermesDocument;
 
@@ -26,7 +26,7 @@ export interface RelatedExternalLink {
 }
 
 export interface RelatedHermesDocument {
-  googleFileID: string;
+  FileID: string;
   title: string;
   documentType: string;
   documentNumber: string;
@@ -153,7 +153,7 @@ export default class RelatedResourcesComponent extends Component<RelatedResource
   protected get relatedDocuments() {
     return (
       (this.args.items?.filter((resource) => {
-        return "googleFileID" in resource;
+        return "FileID" in resource;
       }) as RelatedHermesDocument[]) ?? []
     );
   }
@@ -197,7 +197,7 @@ export default class RelatedResourcesComponent extends Component<RelatedResource
       // And if there are any related documents, omit those too
       if (this.relatedDocuments.length) {
         let relatedDocIDs = this.relatedDocuments.map(
-          (doc) => doc.googleFileID,
+          (doc) => doc.FileID,
         );
 
         filterString = filterString.slice(0, -1) + " ";

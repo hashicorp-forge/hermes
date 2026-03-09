@@ -1,7 +1,7 @@
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
 import { SearchScope } from "hermes/routes/authenticated/results";
-import ActiveFiltersService from "hermes/services/active-filters";
+import type ActiveFiltersService from "hermes/services/active-filters";
 
 interface HeaderActiveFilterListComponentSignature {
   Args: {};
@@ -26,7 +26,8 @@ export default class HeaderActiveFilterListComponent extends Component<HeaderAct
    * A flat array of active filters. Looped through in the template.
    */
   protected get shownFilters(): string[] {
-    return Object.values(this.activeFilters.index).flat().compact();
+    // Filter out undefined/null values (compact replacement for Ember 5.x)
+    return Object.values(this.activeFilters.index).flat().filter(Boolean);
   }
 }
 

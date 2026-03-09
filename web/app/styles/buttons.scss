@@ -1,10 +1,14 @@
 .quarternary-button {
   @apply flex items-center justify-center gap-1.5 rounded-button-md border border-transparent;
+  
+  // Add subtle visibility for overflow buttons in light mode
+  color: var(--token-color-foreground-faint);
 
   &:hover:not(.disabled):not(:focus),
   &:focus,
   &.open {
     @apply border-color-border-strong bg-color-foreground-high-contrast outline-none;
+    color: var(--token-color-foreground-primary);
   }
 
   &:focus,

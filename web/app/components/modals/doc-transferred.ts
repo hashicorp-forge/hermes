@@ -1,7 +1,7 @@
 import { assert } from "@ember/debug";
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
-import ModalAlertsService from "hermes/services/modal-alerts";
+import type ModalAlertsService from "hermes/services/modal-alerts";
 
 interface ModalsDocTransferredComponentSignature {
   Args: {

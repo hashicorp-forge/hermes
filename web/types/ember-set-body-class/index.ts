@@ -1,4 +1,4 @@
-import { HelperLike } from "@glint/template";
+import type { HelperLike } from "@glint/template";
 
 export type EmberSetBodyClassHelper = HelperLike<{
   Args: {

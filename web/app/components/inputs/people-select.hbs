@@ -1,41 +1,92 @@
-<PowerSelectMultiple
+<div
   data-test-people-select
-  {{on "click" this.onClick}}
-  @searchEnabled={{true}}
-  @search={{perform this.searchDirectory}}
-  @searchField="email"
-  @options={{this.options}}
-  @selected={{@selected}}
-  @renderInPlace={{@renderInPlace}}
-  @placeholder="Search by name or email..."
-  @onChange={{@onChange}}
-  @onInput={{this.onInput}}
-  @onClose={{this.onClose}}
-  @onFocus={{this.onFocus}}
-  @onOpen={{this.maybeClose}}
-  @triggerId={{@triggerId}}
-  @onKeydown={{this.onKeydown}}
-  @disabled={{@disabled}}
-  @selectedItemComponent={{component "multiselect/user-email-image-chip"}}
-  @calculatePosition={{this.calculatePosition}}
-  @loadingMessage="Loading..."
-  @eventType="click"
-  class="hds-form-field__control multiselect w-full
+  class="hds-form-field__control multiselect w-full custom-people-select
     {{if (and @isSingleSelect @selected.length) 'selection-made'}}"
+  role="combobox"
+  aria-haspopup="listbox"
+  aria-expanded={{if this.showDropdown "true" "false"}}
+  aria-owns={{if this.showDropdown "people-select-listbox" undefined}}
   ...attributes
-  as |option|
 >
-  <div class="flex items-center gap-2 overflow-hidden py-1">
-    <Person::Avatar @email={{option}} />
-    <div class="w-full min-w-0">
-      <TruncatedText
-        class="text-body-200 leading-tight text-color-foreground-primary"
-      >
-        {{get-model-attr "person.name" option fallback="group.name"}}
-        <span class="ml-0.5 text-body-100 text-color-foreground-disabled">
-          {{option}}
+  <div class="flex flex-wrap items-center gap-1 w-full">
+    {{! Selected items display }}
+    {{#each @selected as |email|}}
+      <div class="selected-item" role="option" aria-selected="true">
+        <Person::Avatar @email={{email}} />
+        <span class="selected-name">
+          {{get-model-attr "person.name" email fallback=email}}
         </span>
-      </TruncatedText>
-    </div>
+        <button
+          type="button"
+          class="remove-btn"
+          aria-label="Remove {{get-model-attr 'person.name' email fallback=email}}"
+          {{on "click" (fn this.removeSelection email)}}
+        >
+          ×
+        </button>
+      </div>
+    {{/each}}
+
+    {{! Search input - inline with selected items }}
+    {{#unless (and @isSingleSelect @selected.length)}}
+      <input
+        type="text"
+        class="search-input-inline"
+        placeholder={{if @selected.length "" "Search by name or email..."}}
+        value={{this.searchQuery}}
+        disabled={{@disabled}}
+        role="searchbox"
+        aria-autocomplete="list"
+        aria-controls={{if this.showDropdown "people-select-listbox" undefined}}
+        aria-activedescendant={{if (gt this.focusedIndex -1) (concat "people-select-option-" this.focusedIndex) undefined}}
+        {{on "input" this.onSearchInput}}
+        {{on "focus" this.onFocus}}
+        {{on "blur" this.onBlur}}
+        {{on "keydown" this.onKeyDown}}
+      />
+    {{/unless}}
+    
+    <FlightIcon
+      data-test-caret
+      @name="caret"
+      class="caret-icon-inline"
+    />
   </div>
-</PowerSelectMultiple>
+
+  {{! Dropdown results }}
+  {{#if this.showDropdown}}
+    <div 
+      id="people-select-listbox"
+      class="dropdown-results" 
+      role="listbox"
+      aria-label="People and groups"
+      {{did-insert this.setupDropdown}}
+    >
+      {{#if this.isSearching}}
+        <div class="dropdown-message" role="status">Loading...</div>
+      {{else if this.searchResults.length}}
+        {{#each this.searchResults as |option index|}}
+          <div
+            id="people-select-option-{{index}}"
+            data-option-index={{index}}
+            class="dropdown-item {{if (eq this.focusedIndex index) 'is-focused'}}"
+            role="option"
+            aria-selected="false"
+            {{on "mousedown" (fn this.selectOption option)}}
+            {{on "mouseenter" (fn this.onMouseEnter index)}}
+          >
+            <Person::Avatar @email={{option}} />
+            <div class="option-details">
+              <div class="option-name">
+                {{get-model-attr "person.name" option fallback="group.name"}}
+              </div>
+              <div class="option-email">{{option}}</div>
+            </div>
+          </div>
+        {{/each}}
+      {{else}}
+        <div class="dropdown-message" role="status">No matches found</div>
+      {{/if}}
+    </div>
+  {{/if}}
+</div>

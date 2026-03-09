@@ -1,6 +1,6 @@
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
-import StoreService from "hermes/services/store";
+import type StoreService from "hermes/services/store";
 import { HermesSize } from "hermes/types/sizes";
 import getModelAttr from "hermes/utils/get-model-attr";
 

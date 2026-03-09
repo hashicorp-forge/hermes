@@ -1,5 +1,5 @@
 import Component from "@glimmer/component";
-import { OverflowItem } from "hermes/components/overflow-menu";
+import type { OverflowItem } from "hermes/components/overflow-menu";
 
 export enum MoveOptionLabel {
   Top = "Move to top",
@@ -71,7 +71,8 @@ export default class ProjectResourceComponent extends Component<ProjectResourceC
       canMoveDown ? moveToBottom : null,
     ];
 
-    return items.compact();
+    // Filter out null values (compact replacement for Ember 5.x)
+    return items.filter(Boolean);
   }
 }
 

@@ -37,6 +37,7 @@ export interface HermesDocument {
   approvedBy?: string[];
   summary?: string;
   isDraft?: boolean;
+  archived?: boolean;
   projects?: number[];
   customEditableFields?: CustomEditableFields;
 

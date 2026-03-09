@@ -1,35 +1,37 @@
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import {
+import type {
   RelatedExternalLink,
   RelatedHermesDocument,
-  RelatedResource,
+  RelatedResource} from "../related-resources";
+import {
   RelatedResourcesScope,
 } from "../related-resources";
 import { inject as service } from "@ember/service";
-import FetchService from "hermes/services/fetch";
+import type FetchService from "hermes/services/fetch";
 import { enqueueTask, task, timeout } from "ember-concurrency";
-import { HermesProject, JiraPickerResult } from "hermes/types/project";
+import type { HermesProject, JiraPickerResult } from "hermes/types/project";
 import {
   ProjectStatus,
   projectStatusObjects,
 } from "hermes/types/project-status";
 import { assert } from "@ember/debug";
-import ConfigService from "hermes/services/config";
-import HermesFlashMessagesService from "hermes/services/flash-messages";
+import type ConfigService from "hermes/services/config";
+import type HermesFlashMessagesService from "hermes/services/flash-messages";
 import { FLASH_MESSAGES_LONG_TIMEOUT } from "hermes/utils/ember-cli-flash/timeouts";
 import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
 import Ember from "ember";
-import { TransitionContext, wait } from "ember-animated/.";
+import type TransitionContext from "ember-animated/-private/transition-context";
+import { wait } from "ember-animated";
 import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
 import { emptyTransition } from "hermes/utils/ember-animated/empty-transition";
 import move from "ember-animated/motions/move";
 import { Resize } from "ember-animated/motions/resize";
 import { easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated/easings";
 import animateTransform from "hermes/utils/ember-animated/animate-transform";
-import RouterService from "@ember/routing/router-service";
-import StoreService from "hermes/services/store";
+import type RouterService from "@ember/routing/router-service";
+import type StoreService from "hermes/services/store";
 
 const animationDuration = Ember.testing ? 0 : 450;
 
@@ -197,7 +199,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
 
     const hermesDocuments = this.hermesDocuments.map((doc) => {
       return {
-        googleFileID: doc.googleFileID,
+        FileID: doc.FileID,
         sortOrder: doc.sortOrder,
       };
     });
@@ -232,7 +234,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * Adds the resource to the correct array, then saves the project.
    */
   @action protected addResource(resource: RelatedResource): void {
-    if ("googleFileID" in resource) {
+    if ("FileID" in resource) {
       this.addDocument(resource);
     } else {
       this.addLink(resource);
@@ -259,11 +261,12 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
     const cachedDocuments = this.hermesDocuments.slice();
     const cachedLinks = this.externalLinks.slice();
 
-    if ("googleFileID" in doc) {
-      this.hermesDocuments.removeObject(doc);
+    if ("FileID" in doc) {
+      this.hermesDocuments = this.hermesDocuments.filter((d) => d !== doc);
     } else {
-      this.externalLinks.removeObject(doc);
+      this.externalLinks = this.externalLinks.filter((d) => d !== doc);
     }
+
     void this.saveProjectResources.perform(cachedDocuments, cachedLinks);
   }
 
@@ -343,30 +346,25 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   ) {
     const isDoc = resourceType === RelatedResourcesScope.Documents;
 
-    const cached = isDoc
-      ? this.hermesDocuments.slice()
-      : this.externalLinks.slice();
-
-    const [removed] = isDoc
-      ? this.hermesDocuments.splice(currentIndex, 1)
-      : this.externalLinks.splice(currentIndex, 1);
-
-    assert("removed must exist", removed);
+    const cachedDocuments = this.hermesDocuments.slice();
+    const cachedLinks = this.externalLinks.slice();
 
     if (resourceType === RelatedResourcesScope.Documents) {
-      assert("removed must be a document", "googleFileID" in removed);
-      this.hermesDocuments.insertAt(newIndex, removed);
-      void this.saveProjectResources.perform(
-        cached,
-        this.externalLinks.slice(),
-      );
+      const updatedDocs = this.hermesDocuments.slice();
+      const [removed] = updatedDocs.splice(currentIndex, 1);
+      assert("removed must exist", removed);
+      assert("removed must be a document", "FileID" in removed);
+      updatedDocs.splice(newIndex, 0, removed);
+      this.hermesDocuments = updatedDocs;
+      void this.saveProjectResources.perform(cachedDocuments, cachedLinks);
     } else {
+      const updatedLinks = this.externalLinks.slice();
+      const [removed] = updatedLinks.splice(currentIndex, 1);
+      assert("removed must exist", removed);
       assert("removed must be a link", "url" in removed);
-      this.externalLinks.insertAt(newIndex, removed);
-      void this.saveProjectResources.perform(
-        this.hermesDocuments.slice(),
-        cached,
-      );
+      updatedLinks.splice(newIndex, 0, removed);
+      this.externalLinks = updatedLinks;
+      void this.saveProjectResources.perform(cachedDocuments, cachedLinks);
     }
   }
 
@@ -401,7 +399,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   @action protected addDocument(resource: RelatedHermesDocument) {
     const cachedDocuments = this.hermesDocuments.slice();
 
-    this.hermesDocuments.unshiftObject(resource);
+    this.hermesDocuments = [resource, ...this.hermesDocuments];
 
     void this.saveProjectResources.perform(
       cachedDocuments,
@@ -416,7 +414,7 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
   @action protected addLink(resource: RelatedExternalLink) {
     const cachedLinks = this.externalLinks.slice();
 
-    this.externalLinks.unshiftObject(resource);
+    this.externalLinks = [resource, ...this.externalLinks];
 
     void this.saveProjectResources.perform(
       this.hermesDocuments.slice(),
@@ -679,7 +677,10 @@ export default class ProjectIndexComponent extends Component<ProjectIndexCompone
    * the resource-highlight animation.
    */
   protected saveProjectResources = task(
-    async (cachedDocuments, cachedLinks) => {
+    async (
+      cachedDocuments: RelatedHermesDocument[],
+      cachedLinks: RelatedExternalLink[],
+    ) => {
       try {
         await this.fetchSvc.fetch(
           `/api/${this.configSvc.config.api_version}/projects/${this.args.project.id}/related-resources`,

@@ -1,5 +1,5 @@
 import Component from "@glimmer/component";
-import { DocThumbnailSize } from "hermes/components/doc/thumbnail";
+import type { DocThumbnailSize } from "hermes/components/doc/thumbnail";
 import { HermesSize } from "hermes/types/sizes";
 
 interface DocFolderAffordanceSignature {

@@ -1,9 +1,10 @@
 import Controller from "@ember/controller";
 import { tracked } from "@glimmer/tracking";
-import AuthenticatedResultsRoute, {
+import type AuthenticatedResultsRoute from "hermes/routes/authenticated/results";
+import {
   SearchScope,
 } from "hermes/routes/authenticated/results";
-import { ModelFrom } from "hermes/types/route-models";
+import type { ModelFrom } from "hermes/types/route-models";
 
 export default class AuthenticatedResultsController extends Controller {
   queryParams = ["page", "q", "scope", "docType", "owners", "product"];

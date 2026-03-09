@@ -3,10 +3,10 @@ import { tracked } from "@glimmer/tracking";
 import Ember from "ember";
 import { restartableTask, timeout } from "ember-concurrency";
 import { inject as service } from "@ember/service";
-import { Placement } from "@floating-ui/dom";
+import type { Placement } from "@floating-ui/dom";
 import { action } from "@ember/object";
 import { assert } from "@ember/debug";
-import HermesFlashMessagesService from "hermes/services/flash-messages";
+import type HermesFlashMessagesService from "hermes/services/flash-messages";
 
 interface CopyURLButtonComponentSignature {
   Element: HTMLButtonElement;

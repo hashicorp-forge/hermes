@@ -1,17 +1,17 @@
 import { inject as service } from "@ember/service";
-import RouterService from "@ember/routing/router-service";
+import type RouterService from "@ember/routing/router-service";
 import EmberSimpleAuthSessionService from "ember-simple-auth/services/session";
 import window from "ember-window-mock";
 import { dropTask, keepLatestTask, timeout } from "ember-concurrency";
 import Ember from "ember";
 import { tracked } from "@glimmer/tracking";
 import simpleTimeout from "hermes/utils/simple-timeout";
-import ConfigService from "hermes/services/config";
-import FetchService from "./fetch";
-import AuthenticatedUserService from "./authenticated-user";
+import type ConfigService from "hermes/services/config";
+import type FetchService from "./fetch";
+import type AuthenticatedUserService from "./authenticated-user";
 import { capitalize } from "@ember/string";
-import FlashObject from "ember-cli-flash/flash/object";
-import HermesFlashMessagesService from "./flash-messages";
+import type FlashObject from "ember-cli-flash/flash/object";
+import type HermesFlashMessagesService from "./flash-messages";
 
 export const REDIRECT_STORAGE_KEY = "hermes.redirectTarget";
 
@@ -58,13 +58,13 @@ export default class SessionService extends EmberSimpleAuthSessionService {
   @tracked reauthFlashMessage: FlashObject | null = null;
 
   /**
-   * Whether the app is configured to use Okta.
+   * Whether the app is configured to use Oidc.
    * Dictates reauthButton text and behavior.
    * Determines whether we poll the back end for a 401
    * while the reauthentication message is shown.
    */
-  get isUsingOkta(): boolean {
-    return this.configSvc.config.skip_google_auth;
+  get isUsingOidc(): boolean {
+    return this.configSvc.config.skip_microsoft_auth;
   }
 
   /**
@@ -83,7 +83,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
       true,
     );
 
-    if (this.isUsingOkta) {
+    if (this.isUsingOidc) {
       this.tokenIsValid = !this.pollResponseIs401;
     } else {
       let isLoggedIn = this.requireAuthentication(null, () => {});
@@ -121,7 +121,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
    * Triggers a flash message with a button to reauthenticate.
    * Used when the user's session has expired, or when the user
    * unsuccessfully attempts to reauthenticate.
-   * Functions in accordance with the `skip_google_auth` config.
+  * Functions in accordance with the `skip_microsoft_auth` config.
    */
   private showReauthMessage(
     title: string,
@@ -129,7 +129,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
     type: "warning" | "critical",
     onDestroy?: () => void,
   ) {
-    const buttonIcon = this.isUsingOkta ? "okta" : "google";
+    const buttonIcon = this.isUsingOidc ? "okta" : "microsoft"; //TODO: Update icon
 
     const buttonText = `Authenticate with ${capitalize(buttonIcon)}`;
 
@@ -157,12 +157,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
    */
   protected reauthenticate = dropTask(async () => {
     try {
-      if (this.isUsingOkta) {
-        // Reload to redirect to Okta login.
-        window.location.reload();
-      } else {
-        await this.authenticate("authenticator:torii", "google-oauth2-bearer");
-      }
+       window.location.reload();
 
       this.reauthFlashMessage?.destroyMessage();
 
@@ -226,5 +221,41 @@ export default class SessionService extends EmberSimpleAuthSessionService {
       window.sessionStorage.removeItem(REDIRECT_STORAGE_KEY);
       window.localStorage.removeItem(REDIRECT_STORAGE_KEY);
     });
+  }
+
+  isAuthenticated() {
+    // Check if authenticated in Ember Simple Auth
+    if (this.get('isAuthenticated')) {
+      return true;
+    }
+    
+    // Check for Microsoft token if ESA is not authenticated
+    const microsoftToken = this.getMicrosoftTokenFromCookie();
+    return !!microsoftToken;
+  }
+
+  getMicrosoftTokenFromCookie() {
+    return document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("microsoft_token="))
+      ?.split("=")[1];
+  }
+
+  // Override the prohibitAuthentication method
+  prohibitAuthentication(routeOrCallback: string | ((...args: unknown[]) => void)): boolean {
+    console.log("SessionService: Checking if authenticated with Microsoft or Google");
+
+    if (this.isAuthenticated()) {
+      console.log("SessionService: User is authenticated, redirecting to", routeOrCallback);
+      if (typeof routeOrCallback === "string") {
+        this.router.replaceWith(routeOrCallback);
+      } else if (typeof routeOrCallback === "function") {
+        routeOrCallback();
+      }
+      return true;
+    } else {
+      console.log("SessionService: User is not authenticated");
+      return false;
+    }
   }
 }

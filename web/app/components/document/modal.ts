@@ -3,7 +3,7 @@ import { action } from "@ember/object";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { task } from "ember-concurrency";
-import { HdsModalColor } from "hds/_shared";
+import type { HdsModalColor } from "hds/_shared";
 
 interface DocumentModalComponentSignature {
   Element: HTMLDialogElement;

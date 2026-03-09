@@ -1,6 +1,6 @@
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
-import DocumentTypesService from "hermes/services/document-types";
+import type DocumentTypesService from "hermes/services/document-types";
 
 interface NewDocumentTemplateListComponentSignature {}
 

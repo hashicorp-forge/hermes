@@ -67,7 +67,7 @@ type ConfigResponse struct {
 	GroupApprovals           bool            `json:"group_approvals"`
 	JiraURL                  string          `json:"jira_url"`
 	ShortLinkBaseURL         string          `json:"short_link_base_url"`
-	SkipGoogleAuth           bool            `json:"skip_google_auth"`
+	SkipMicrosoftAuth        bool            `json:"skip_microsoft_auth"`
 	SupportLinkURL           string          `json:"support_link_url"`
 	ShortRevision            string          `json:"short_revision"`
 	Version                  string          `json:"version"`
@@ -94,7 +94,7 @@ func ConfigHandler(
 			// Use the "x-amzn-oidc-identity" header if set
 			// as id to be hashed and toggle flags.
 			r.Header.Get("x-amzn-oidc-identity"),
-			// Get user email from value set by Okta middleware
+			// Get user email from value set by OIDC middleware
 			fmt.Sprintf("%v", r.Context().Value("userEmail")),
 			log,
 		)
@@ -108,10 +108,10 @@ func ConfigHandler(
 			shortLinkBaseURL = strings.TrimSuffix(cfg.BaseURL, "/") + "/l"
 		}
 
-		// Skip Google auth if Okta is not disabled in the config.
-		skipGoogleAuth := false
-		if cfg.Okta == nil || (cfg.Okta != nil && !cfg.Okta.Disabled) {
-			skipGoogleAuth = true
+		// Skip Microsoft auth if OIDC ALB is not disabled in the config.
+		skipMicrosoftAuth := false
+		if cfg.OidcAlb == nil || (cfg.OidcAlb != nil && !cfg.OidcAlb.Disabled) {
+			skipMicrosoftAuth = true
 		}
 
 		// Set CreateDocsAsUser if enabled in the config.
@@ -123,8 +123,8 @@ func ConfigHandler(
 
 		// Set GroupApprovals if enabled in the config.
 		groupApprovals := false
-		if cfg.GoogleWorkspace.GroupApprovals != nil &&
-			cfg.GoogleWorkspace.GroupApprovals.Enabled {
+		if cfg.SharePoint.GroupApprovals != nil &&
+			cfg.SharePoint.GroupApprovals.Enabled {
 			groupApprovals = true
 		}
 
@@ -147,7 +147,7 @@ func ConfigHandler(
 			GroupApprovals:           groupApprovals,
 			JiraURL:                  jiraURL,
 			ShortLinkBaseURL:         shortLinkBaseURL,
-			SkipGoogleAuth:           skipGoogleAuth,
+			SkipMicrosoftAuth:        skipMicrosoftAuth,
 			SupportLinkURL:           cfg.SupportLinkURL,
 			ShortRevision:            version.GetShortRevision(),
 			Version:                  version.GetVersion(),

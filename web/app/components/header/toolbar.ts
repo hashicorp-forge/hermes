@@ -1,27 +1,27 @@
 import Component from "@glimmer/component";
 import { action } from "@ember/object";
 import { inject as service } from "@ember/service";
-import {
+import type {
   FacetDropdownGroups,
   FacetDropdownObjectDetails,
   FacetDropdownObjects,
 } from "hermes/types/facets";
-import ActiveFiltersService from "hermes/services/active-filters";
+import type ActiveFiltersService from "hermes/services/active-filters";
 import { next, schedule } from "@ember/runloop";
 import { SearchScope } from "hermes/routes/authenticated/results";
 import { assert } from "@ember/debug";
-import DocumentTypesService from "hermes/services/document-types";
-import ProductAreasService from "hermes/services/product-areas";
+import type DocumentTypesService from "hermes/services/document-types";
+import type ProductAreasService from "hermes/services/product-areas";
 import { tracked } from "@glimmer/tracking";
 import { restartableTask, task } from "ember-concurrency";
-import { XDropdownListAnchorAPI } from "../x/dropdown-list";
-import AlgoliaService from "hermes/services/algolia";
-import ConfigService from "hermes/services/config";
-import { SearchForFacetValuesResponse } from "instantsearch.js";
+import type { XDropdownListAnchorAPI } from "../x/dropdown-list";
+import type AlgoliaService from "hermes/services/algolia";
+import type ConfigService from "hermes/services/config";
+import type { SearchForFacetValuesResponse } from "instantsearch.js";
 import Ember from "ember";
 import { ProjectStatus } from "hermes/types/project-status";
-import StoreService from "hermes/services/_store";
-import PersonModel from "hermes/models/person";
+import type StoreService from "hermes/services/_store";
+import type PersonModel from "hermes/models/person";
 
 export enum SortByValue {
   DateDesc = "dateDesc",

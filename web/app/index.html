@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <!-- `head` sorted by https://rviscomi.github.io/capo.js/ -->
   <head>
     <meta charset="utf-8" />
@@ -18,6 +18,40 @@
     <link rel="icon" type="image/png" href="{{rootURL}}images/favicon.png" />
 
     {{content-for "head-footer"}}
+    
+    <script>
+      // Simple theme toggle functionality
+      window.toggleTheme = function() {
+        const html = document.documentElement;
+        const currentTheme = html.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? null : 'dark';
+        
+        if (newTheme) {
+          html.setAttribute('data-theme', newTheme);
+        } else {
+          html.removeAttribute('data-theme');
+        }
+        
+        // Store preference
+        localStorage.setItem('theme', newTheme || 'light');
+        
+        // Update toggle button if it exists
+        const toggleBtn = document.querySelector('.theme-toggle-manual');
+        if (toggleBtn) {
+          toggleBtn.textContent = newTheme ? '🌙' : '☀️';
+        }
+      };
+      
+      // Initialize theme from localStorage on page load
+      (function() {
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        if (savedTheme === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+        }
+      })();
+    </script>
   </head>
 
   <body>

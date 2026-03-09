@@ -1,15 +1,15 @@
 import Route from "@ember/routing/route";
-import RouterService from "@ember/routing/router-service";
+import type RouterService from "@ember/routing/router-service";
 import { inject as service } from "@ember/service";
 import { dasherize } from "@ember/string";
-import AlgoliaService from "hermes/services/algolia";
-import AuthenticatedUserService from "hermes/services/authenticated-user";
-import ConfigService from "hermes/services/config";
-import HermesFlashMessagesService from "hermes/services/flash-messages";
-import ProductAreasService from "hermes/services/product-areas";
-import StoreService from "hermes/services/store";
-import { HermesDocument } from "hermes/types/document";
-import { SearchResponse } from "instantsearch.js";
+import type AlgoliaService from "hermes/services/algolia";
+import type AuthenticatedUserService from "hermes/services/authenticated-user";
+import type ConfigService from "hermes/services/config";
+import type HermesFlashMessagesService from "hermes/services/flash-messages";
+import type ProductAreasService from "hermes/services/product-areas";
+import type StoreService from "hermes/services/store";
+import type { HermesDocument } from "hermes/types/document";
+import type { SearchResponse } from "instantsearch.js";
 
 export default class AuthenticatedProductAreasProductAreaRoute extends Route {
   @service("config") declare configSvc: ConfigService;

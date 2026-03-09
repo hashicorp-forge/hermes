@@ -1,10 +1,10 @@
 import Component from "@glimmer/component";
-import { XDropdownListInteractiveComponentArgs } from "./_shared";
+import type { XDropdownListInteractiveComponentArgs } from "./_shared";
 import { action } from "@ember/object";
 import Ember from "ember";
 import { next, schedule } from "@ember/runloop";
 import { inject as service } from "@ember/service";
-import RouterService from "@ember/routing/router-service";
+import type RouterService from "@ember/routing/router-service";
 
 interface XDropdownListLinkToComponentSignature {
   Element: HTMLAnchorElement;

@@ -15,6 +15,25 @@
     @apply flex shrink-0 gap-1;
   }
 
+  /* Dark mode enhancements */
+  .welcome-message {
+    @apply text-color-foreground-strong;
+  }
+
+  .section-header {
+    @apply text-color-foreground-strong;
+  }
+
+  .doc-list {
+    .doc-item {
+      @apply border-color-border-faint;
+      
+      &:hover {
+        @apply bg-color-surface-interactive;
+      }
+    }
+  }
+
   .main,
   .secondary {
     h2,

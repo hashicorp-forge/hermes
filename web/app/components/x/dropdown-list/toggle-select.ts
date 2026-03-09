@@ -1,5 +1,5 @@
 import Component from "@glimmer/component";
-import { XDropdownListToggleComponentArgs } from "./_shared";
+import type { XDropdownListToggleComponentArgs } from "./_shared";
 
 interface XDropdownListToggleSelectComponentSignature {
   Element: HTMLButtonElement;

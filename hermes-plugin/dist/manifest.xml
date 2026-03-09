@@ -10,7 +10,6 @@
   <HighResolutionIconUrl DefaultValue="https://www.contoso.com/assets/hermes.png"/>
   <SupportUrl DefaultValue="https://www.contoso.com/help"/>
   <AppDomains>
-    <AppDomain>https://www.hashicorp.com</AppDomain>
     <AppDomain>https://localhost:8443</AppDomain>
     <AppDomain>https://localhost:3000</AppDomain>
   </AppDomains>

@@ -1,9 +1,38 @@
 import { task } from "ember-concurrency";
-import Store from "@ember-data/store";
-import { HermesDocument } from "hermes/types/document";
-import { RelatedHermesDocument } from "hermes/components/related-resources";
+// @ts-ignore - types not available for these packages
+import Store from "ember-data/store";
+// @ts-ignore - types not available
+import { 
+  LegacyNetworkHandler,
+  adapterFor,
+  serializerFor,
+  pushPayload,
+  normalize,
+  serializeRecord,
+  cleanup
+} from "@ember-data/legacy-compat";
+import type { HermesDocument } from "hermes/types/document";
+import type { RelatedHermesDocument } from "hermes/components/related-resources";
 
 export default class StoreService extends Store {
+  // Legacy adapter/serializer support methods (required by LegacyNetworkHandler)
+  // @ts-ignore - method assignment from legacy-compat
+  adapterFor = adapterFor;
+  // @ts-ignore - method assignment from legacy-compat
+  serializerFor = serializerFor;
+  // @ts-ignore - method assignment from legacy-compat
+  pushPayload = pushPayload;
+  // @ts-ignore - method assignment from legacy-compat
+  normalize = normalize;
+  // @ts-ignore - method assignment from legacy-compat
+  serializeRecord = serializeRecord;
+
+  destroy() {
+    // @ts-ignore - cleanup from legacy-compat
+    cleanup.call(this);
+    return super.destroy();
+  }
+
   /**
    * The task to fetch `person` records if they're not already in the EmberData store.
    * Retrieves the record which pushes it to the store to be used by components like
@@ -25,9 +54,18 @@ export default class StoreService extends Store {
       let promises: Promise<void | any>[] = [];
       let uniqueEmails: string[] = [];
 
-      emailsOrDocs = emailsOrDocs.uniq(); // Remove duplicates
+      // Remove duplicates - filter to only unique items
+      const seen = new Set();
+      const uniqueItems = emailsOrDocs.filter((item) => {
+        const key = typeof item === "string" ? item : (item as { id?: string })?.id;
+        if (seen.has(key)) {
+          return false;
+        }
+        seen.add(key);
+        return true;
+      });
 
-      emailsOrDocs.forEach((emailOrDoc) => {
+      uniqueItems.forEach((emailOrDoc) => {
         if (!emailOrDoc) {
           return;
         }

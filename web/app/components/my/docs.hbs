@@ -15,6 +15,21 @@
         checked={{this.ownerToggleIsChecked}}
       />
     </LinkTo>
+    <LinkTo
+      data-test-archived-filter
+      @route={{this.currentRoute}}
+      @query={{this.archivedToggleQueryParams}}
+      class="flex items-center gap-3 text-body-100 text-color-foreground-faint"
+    >
+      <label tabindex="-1" for="archived-filter" class="text-body-200">
+        Show Archived
+      </label>
+      <Hds::Form::Toggle::Base
+        tabindex="-1"
+        id="archived-filter"
+        checked={{@showArchivedDrafts}}
+      />
+    </LinkTo>
   </:controls>
 </My::Header>
 
@@ -69,6 +84,6 @@
     data-test-my-docs-empty-state
     class="mt-7 flex h-64 items-center justify-center text-display-300 text-color-foreground-faint"
   >
-    You don't have any docs yet.
+    {{if @showArchivedDrafts "You don't have any archived docs yet." "You don't have any docs yet."}}
   </div>
 {{/if}}

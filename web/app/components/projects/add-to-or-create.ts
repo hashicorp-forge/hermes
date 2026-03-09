@@ -1,15 +1,15 @@
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { HermesProject, HermesProjectInfo } from "hermes/types/project";
+import type { HermesProject, HermesProjectInfo } from "hermes/types/project";
 import { action } from "@ember/object";
-import { HermesDocument } from "hermes/types/document";
+import type { HermesDocument } from "hermes/types/document";
 import { task } from "ember-concurrency";
-import FetchService from "hermes/services/fetch";
+import type FetchService from "hermes/services/fetch";
 import { inject as service } from "@ember/service";
-import ConfigService from "hermes/services/config";
-import AlgoliaService from "hermes/services/algolia";
+import type ConfigService from "hermes/services/config";
+import type AlgoliaService from "hermes/services/algolia";
 import { ProjectStatus } from "hermes/types/project-status";
-import { XDropdownListAnchorAPI } from "../x/dropdown-list";
+import type { XDropdownListAnchorAPI } from "../x/dropdown-list";
 import { next } from "@ember/runloop";
 
 interface ProjectsAddToOrCreateSignature {

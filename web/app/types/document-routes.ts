@@ -1,4 +1,4 @@
-import { SearchScope } from "hermes/routes/authenticated/results";
+import type { SearchScope } from "hermes/routes/authenticated/results";
 
 export interface DocumentsRouteParams {
   docType: string[];

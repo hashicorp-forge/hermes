@@ -1,4 +1,5 @@
-import Modifier, { ArgsFor } from "ember-modifier";
+import type { ArgsFor } from "ember-modifier";
+import Modifier from "ember-modifier";
 import { registerDestructor } from "@ember/destroyable";
 import { tracked } from "@glimmer/tracking";
 import { assert } from "@ember/debug";

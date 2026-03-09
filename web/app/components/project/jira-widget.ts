@@ -3,13 +3,13 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { inject as service } from "@ember/service";
 import { restartableTask } from "ember-concurrency";
-import FetchService from "hermes/services/fetch";
-import { JiraPickerResult } from "hermes/types/project";
-import ConfigService from "hermes/services/config";
-import { XDropdownListAnchorAPI } from "../x/dropdown-list";
+import type FetchService from "hermes/services/fetch";
+import type { JiraPickerResult } from "hermes/types/project";
+import type ConfigService from "hermes/services/config";
+import type { XDropdownListAnchorAPI } from "../x/dropdown-list";
 import { next } from "@ember/runloop";
 import { assert } from "@ember/debug";
-import JiraIssueModel from "hermes/models/jira-issue";
+import type JiraIssueModel from "hermes/models/jira-issue";
 
 interface ProjectJiraWidgetComponentSignature {
   Element: HTMLDivElement;
@@ -85,7 +85,7 @@ export default class ProjectJiraWidgetComponent extends Component<ProjectJiraWid
    */
   protected get issueStatus() {
     if (this.issue && "status" in this.issue) {
-      return this.issue.status as string;
+      return this.issue.status;
     }
   }
 
@@ -129,7 +129,7 @@ export default class ProjectJiraWidgetComponent extends Component<ProjectJiraWid
    */
   protected get issuePriorityImage() {
     if (this.issue && "priorityImage" in this.issue) {
-      return this.issue.priorityImage as string;
+      return this.issue.priorityImage;
     }
   }
 

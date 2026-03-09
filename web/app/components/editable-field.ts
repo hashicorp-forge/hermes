@@ -4,9 +4,9 @@ import { action } from "@ember/object";
 import { schedule, scheduleOnce } from "@ember/runloop";
 import { assert } from "@ember/debug";
 import { guidFor } from "@ember/object/internals";
-import { HermesDocument } from "hermes/types/document";
+import type { HermesDocument } from "hermes/types/document";
 import blinkElement from "hermes/utils/blink-element";
-import { Select } from "ember-power-select/components/power-select";
+import type { Select } from "ember-power-select/components/power-select";
 
 export const FOCUSABLE =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';

@@ -4,7 +4,7 @@ export function createDraftURLSearchParams(options: {
   ownerEmail: string;
   hitsPerPage?: number;
   page?: number;
-  facetFilters?: string[];
+  facetFilters?: string | readonly string[] | readonly (string | readonly string[])[] | undefined;
 }): URLSearchParams {
   const { ownerEmail, page, hitsPerPage, facetFilters } = options;
   return new URLSearchParams(

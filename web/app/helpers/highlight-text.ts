@@ -1,6 +1,6 @@
 import Helper from "@ember/component/helper";
 import { htmlSafe } from "@ember/template";
-import { ContentValue } from "@glint/template";
+import type { ContentValue } from "@glint/template";
 
 interface HighlightTextHelperSignature {
   Args: {

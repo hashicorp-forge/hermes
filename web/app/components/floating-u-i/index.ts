@@ -1,10 +1,10 @@
 import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import { guidFor } from "@ember/object/internals";
-import { OffsetOptions, Placement } from "@floating-ui/dom";
+import type { OffsetOptions, Placement } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { MatchAnchorWidthOptions } from "./content";
+import type { MatchAnchorWidthOptions } from "./content";
 
 interface FloatingUIAnchorAPI {
   contentIsShown: boolean;

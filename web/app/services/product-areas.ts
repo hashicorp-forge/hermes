@@ -1,8 +1,8 @@
 import Service, { inject as service } from "@ember/service";
 import { tracked } from "@glimmer/tracking";
 import { task } from "ember-concurrency";
-import ConfigService from "hermes/services/config";
-import FetchService from "./fetch";
+import type ConfigService from "hermes/services/config";
+import type FetchService from "./fetch";
 import { assert } from "@ember/debug";
 import hashValue from "hermes/helpers/hash-value";
 
@@ -118,6 +118,7 @@ export default class ProductAreasService extends Service {
         .fetch(`/api/${this.configSvc.config.api_version}/products`)
         .then((resp) => resp?.json());
     } catch (err) {
+      // fetch error
       this._index = null;
       throw err;
     }

@@ -16,15 +16,12 @@ module.exports = function (environment) {
     modulePrefix: "hermes",
     environment,
     rootURL: "/",
-    locationType: "auto",
+    locationType: "history",
     EmberENV: {
+      EXTEND_PROTOTYPES: false,
       FEATURES: {
         // Here you can enable experimental features on an ember canary build
         // e.g. EMBER_NATIVE_DECORATOR_SUPPORT: true
-      },
-      EXTEND_PROTOTYPES: {
-        // Prevent Ember Data from overriding Date.parse.
-        Date: false,
       },
     },
 
@@ -61,17 +58,22 @@ module.exports = function (environment) {
       docFolders: getEnv("GOOGLE_DOCFOLDERS", "").split(","),
     },
 
-    skipGoogleAuth: getEnv("SKIP_GOOGLE_AUTH"),
+    skipMicrosoftAuth: getEnv("SKIP_MICROSOFT_AUTH"),
 
     shortLinkBaseURL: getEnv("SHORT_LINK_BASE_URL"),
+    
+    microsoft: {
+      clientId: getEnv("MICROSOFT_OAUTH2_CLIENT_ID", ""),
+      tenantId: getEnv("MICROSOFT_OAUTH2_TENANT_ID", ""),
+      redirectUri: getEnv("MICROSOFT_OAUTH2_REDIRECT_URI", ""),
+    },
 
     torii: {
-      sessionServiceName: "session",
       providers: {
         "google-oauth2-bearer-v2": {
-          apiKey: getEnv("GOOGLE_OAUTH2_CLIENT_ID"),
-          hd: getEnv("GOOGLE_OAUTH2_HD"),
-          scope: "email profile https://www.googleapis.com/auth/drive.appdata",
+          apiKey: getEnv("GOOGLE_OAUTH2_CLIENT_ID", ""),
+          hd: getEnv("GOOGLE_OAUTH2_HD", ""),
+          redirectUri: getEnv("GOOGLE_OAUTH2_REDIRECT_URI", ""),
         },
       },
     },

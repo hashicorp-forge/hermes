@@ -1,4 +1,4 @@
-import {
+import type {
   RelatedExternalLink,
   RelatedHermesDocument,
 } from "hermes/components/related-resources";

@@ -23,7 +23,7 @@ export interface HermesConfig {
     docFolders: string;
   };
   shortLinkBaseURL: string;
-  skipGoogleAuth: boolean;
+  skipMicrosoftAuth: boolean;
   groupApprovals: boolean;
   showEmberAnimatedTools: boolean;
   supportLinkURL: string;

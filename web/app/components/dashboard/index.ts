@@ -1,6 +1,6 @@
 import Component from "@glimmer/component";
-import AuthenticatedUserService from "hermes/services/authenticated-user";
-import { HermesDocument } from "hermes/types/document";
+import type AuthenticatedUserService from "hermes/services/authenticated-user";
+import type { HermesDocument } from "hermes/types/document";
 import { inject as service } from "@ember/service";
 
 interface DashboardIndexComponentSignature {

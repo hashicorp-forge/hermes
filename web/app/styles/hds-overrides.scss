@@ -25,6 +25,19 @@
   }
 }
 
+/* Dark mode override for badge counts */
+:root[data-theme="dark"] {
+  .hds-badge-count--color-neutral.hds-badge-count--type-filled {
+    background-color: #525252 !important;
+    color: #ffffff !important;
+    mix-blend-mode: normal !important;
+    
+    &:not(.checkable-item-count) {
+      mix-blend-mode: normal !important;
+    }
+  }
+}
+
 .x-dropdown-list-item-link {
   &.is-aria-selected {
     .hds-badge-count--color-neutral.hds-badge-count--type-filled {

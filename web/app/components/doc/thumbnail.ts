@@ -3,7 +3,7 @@ import { dasherize } from "@ember/string";
 import getProductId from "hermes/utils/get-product-id";
 import { HermesSize } from "hermes/types/sizes";
 import { inject as service } from "@ember/service";
-import ProductAreasService from "hermes/services/product-areas";
+import type ProductAreasService from "hermes/services/product-areas";
 
 export type DocThumbnailSize = Exclude<HermesSize, HermesSize.XL>;
 
@@ -13,6 +13,7 @@ interface DocThumbnailComponentSignature {
     status?: string;
     product?: string;
     size?: `${DocThumbnailSize}`;
+    archived?: boolean;
   };
 }
 
@@ -49,6 +50,10 @@ export default class DocThumbnailComponent extends Component<DocThumbnailCompone
 
   protected get isObsolete(): boolean {
     return this.status === "obsolete";
+  }
+
+  protected get isArchived(): boolean {
+    return this.args.archived === true;
   }
 }
 

@@ -13,13 +13,13 @@
       <Doc::FolderAffordance @size={{@size}} />
     {{/if}}
 
-    {{#if (or this.isApproved this.isObsolete)}}
+    {{#if (or this.isApproved this.isObsolete this.isArchived)}}
       <div class="absolute w-full">
         <FlightIcon
           data-test-doc-status-icon
           @name={{if this.isApproved "check-circle" "archive"}}
           @size="24"
-          class="status-icon {{this.status}}"
+          class="status-icon {{if this.isArchived "archived" this.status}}"
         />
       </div>
     {{/if}}

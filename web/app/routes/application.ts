@@ -2,14 +2,15 @@ import Route from "@ember/routing/route";
 import { UnauthorizedError } from "@ember-data/adapter/error";
 import { action } from "@ember/object";
 import { inject as service } from "@ember/service";
-import ConfigService from "hermes/services/config";
-import FetchService from "hermes/services/fetch";
-import SessionService, { REDIRECT_STORAGE_KEY } from "hermes/services/session";
-import RouterService from "@ember/routing/router-service";
+import type ConfigService from "hermes/services/config";
+import type FetchService from "hermes/services/fetch";
+import type SessionService from "hermes/services/session";
+import { REDIRECT_STORAGE_KEY } from "hermes/services/session";
+import type RouterService from "@ember/routing/router-service";
 
 import window from "ember-window-mock";
-import Transition from "@ember/routing/transition";
-import MetricsService from "hermes/services/_metrics";
+import type Transition from "@ember/routing/transition";
+import type MetricsService from "hermes/services/_metrics";
 
 export default class ApplicationRoute extends Route {
   @service declare config: ConfigService;
@@ -62,7 +63,18 @@ export default class ApplicationRoute extends Route {
       );
     }
 
-    await this.session.setup();
+  // Initialize ESA session (required by ESA 7.x)
+  await this.session.setup();
+
+    // Try to authenticate with backend-managed cookie session
+    // This will check if /api/v2/me is accessible (backend session valid)
+    if (!this.session.isAuthenticated && !this.config.config.skip_microsoft_auth) {
+      try {
+        await this.session.authenticate("authenticator:cookie");
+      } catch (error) {
+        // Not authenticated yet - user will be redirected to /authenticate by requireAuthentication
+      }
+    }
 
     await this.fetchSvc
       .fetch(`/api/${this.config.config.api_version}/web/config`)
@@ -70,11 +82,12 @@ export default class ApplicationRoute extends Route {
       .then((json) => {
         this.config.setConfig(json);
       })
-      .catch((err) => {
-        console.log("Error fetching and setting web config: " + err);
+      .catch((error) => {
+        // Log error for debugging, but do not expose to user
+        console.error("Failed to fetch web config:", error);
       });
 
-    // Initialize the metrics service
-    this.metrics;
+  // Initialize the metrics service
+  this.metrics;
   }
 }

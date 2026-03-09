@@ -1,5 +1,5 @@
 import Component from "@glimmer/component";
-import { HermesProjectInfo } from "hermes/types/project";
+import type { HermesProjectInfo } from "hermes/types/project";
 import {
   ProjectStatus,
   projectStatusObjects,

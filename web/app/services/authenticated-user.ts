@@ -3,11 +3,11 @@ import { tracked } from "@glimmer/tracking";
 import { inject as service } from "@ember/service";
 import { assert } from "@ember/debug";
 import { task } from "ember-concurrency";
-import ConfigService from "hermes/services/config";
-import FetchService from "hermes/services/fetch";
-import SessionService from "./session";
-import StoreService from "./store";
-import PersonModel from "hermes/models/person";
+import type ConfigService from "hermes/services/config";
+import type FetchService from "hermes/services/fetch";
+import type SessionService from "./session";
+import type StoreService from "./store";
+import type PersonModel from "hermes/models/person";
 
 export interface Subscription {
   productArea: string;
@@ -25,7 +25,7 @@ export default class AuthenticatedUserService extends Service {
   @service declare session: SessionService;
   @service declare store: StoreService;
 
-  @tracked subscriptions: Subscription[] | null = null;
+  @tracked subscriptions: Subscription[] = [];
   @tracked _info: PersonModel | null = null;
 
   get info(): PersonModel {
@@ -39,7 +39,6 @@ export default class AuthenticatedUserService extends Service {
    * Used in POST requests to the subscriptions endpoint.
    */
   private get subscriptionsPostBody(): string {
-    assert("subscriptions must be defined", this.subscriptions);
     let subscriptions = this.subscriptions.map(
       (subscription: Subscription) => subscription.productArea,
     );
@@ -56,15 +55,17 @@ export default class AuthenticatedUserService extends Service {
   }
 
   /**
-   * Loads the user's info from the Google API.
+   * Loads the user's info from the API.
    * Called by `session.handleAuthentication` and `authenticated.afterModel`.
    * Ensures `authenticatedUser.info` is always defined and up-to-date
    * in any route that needs it. On error, bubbles up to the application route.
    */
   loadInfo = task(async () => {
     try {
-      const mes = await this.store.findAll("me");
-      const me = mes.firstObject;
+      // Use queryRecord instead of findAll since /api/v2/me returns a single object, not an array
+      const me = await this.store.queryRecord("me", {});
+
+      assert("me must exist", me);
 
       // Grab the person record created by the serializer
       const person = this.store.peekRecord("person", me.id);
@@ -72,7 +73,6 @@ export default class AuthenticatedUserService extends Service {
 
       this._info = person;
     } catch (e: unknown) {
-      console.error("Error getting user information: ", e);
       throw e;
     }
   });
@@ -101,7 +101,6 @@ export default class AuthenticatedUserService extends Service {
       }
       this.subscriptions = newSubscriptions;
     } catch (e: unknown) {
-      console.error("Error loading subscriptions: ", e);
       throw e;
     }
   });
@@ -115,17 +114,15 @@ export default class AuthenticatedUserService extends Service {
       productArea: string,
       subscriptionType = SubscriptionType.Instant,
     ) => {
-      assert(
-        "removeSubscription expects a valid subscriptions array",
-        this.subscriptions,
-      );
+      let cached = [...this.subscriptions];
 
-      let cached = this.subscriptions;
-
-      this.subscriptions.addObject({
-        productArea,
-        subscriptionType,
-      });
+      this.subscriptions = [
+        ...this.subscriptions,
+        {
+          productArea,
+          subscriptionType,
+        },
+      ];
 
       try {
         await this.fetchSvc.fetch(
@@ -137,7 +134,6 @@ export default class AuthenticatedUserService extends Service {
           },
         );
       } catch (e: unknown) {
-        console.error("Error updating subscriptions: ", e);
         this.subscriptions = cached;
         throw e;
       }
@@ -152,22 +148,21 @@ export default class AuthenticatedUserService extends Service {
       productArea: string,
       subscriptionType = SubscriptionType.Instant,
     ) => {
-      assert(
-        "removeSubscription expects a subscriptions array",
-        this.subscriptions,
-      );
+      // make a shallow copy for rollback if the network request fails
+      let cached = [...this.subscriptions];
 
-      let cached = this.subscriptions;
       let subscriptionToRemove = this.subscriptions.find(
         (subscription) => subscription.productArea === productArea,
       );
-
       assert(
         "removeSubscription expects a valid productArea",
         subscriptionToRemove,
       );
 
-      this.subscriptions.removeObject(subscriptionToRemove);
+      // Create a new array without the removed subscription so @tracked notices the change
+      this.subscriptions = this.subscriptions.filter(
+        (s) => s !== subscriptionToRemove,
+      );
 
       try {
         await this.fetchSvc.fetch(
@@ -179,7 +174,6 @@ export default class AuthenticatedUserService extends Service {
           },
         );
       } catch (e: unknown) {
-        console.error("Error updating subscriptions: ", e);
         this.subscriptions = cached;
         throw e;
       }

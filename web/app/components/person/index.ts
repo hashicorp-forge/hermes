@@ -1,7 +1,7 @@
 import { inject as service } from "@ember/service";
 import Component from "@glimmer/component";
-import AuthenticatedUserService from "hermes/services/authenticated-user";
-import StoreService from "hermes/services/store";
+import type AuthenticatedUserService from "hermes/services/authenticated-user";
+import type StoreService from "hermes/services/store";
 import getModelAttr from "hermes/utils/get-model-attr";
 
 interface PersonComponentSignature {

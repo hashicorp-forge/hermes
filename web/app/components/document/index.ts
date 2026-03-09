@@ -1,10 +1,10 @@
 import Component from "@glimmer/component";
 import { inject as service } from "@ember/service";
-import { HermesDocument } from "hermes/types/document";
+import type { HermesDocument } from "hermes/types/document";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
-import { HermesDocumentType } from "hermes/types/document-type";
-import AuthenticatedUserService from "hermes/services/authenticated-user";
+import type { HermesDocumentType } from "hermes/types/document-type";
+import type AuthenticatedUserService from "hermes/services/authenticated-user";
 
 interface DocumentIndexComponentSignature {
   Args: {
@@ -21,6 +21,67 @@ export default class DocumentIndexComponent extends Component<DocumentIndexCompo
 
   @action protected toggleSidebarCollapsedState() {
     this.sidebarIsCollapsed = !this.sidebarIsCollapsed;
+  }
+
+  /**
+   * Check if the document is from SharePoint (has FileID or webUrl contains sharepoint.com)
+   */
+  get isSharePointDocument(): boolean {
+    const doc = this.args.document as any;
+    if ("FileID" in doc && doc.FileID) {
+      return true;
+    }
+    if ("webUrl" in doc && doc.webUrl) {
+      try {
+        const url = new URL(doc.webUrl);
+        return url.hostname.endsWith('.sharepoint.com') || url.hostname === 'sharepoint.com';
+      } catch {
+        return false;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Get the current webUrl for the document
+   */
+  get webUrl(): string {
+    const doc = this.args.document as any;
+    return ("webUrl" in doc && doc.webUrl) ? doc.webUrl : '';
+  }
+
+  /**
+   * Get the document ID (prefer SharePoint ID if available, otherwise use Google ID)
+   */
+  get docId(): string {
+    const doc = this.args.document as any;
+    if ("FileID" in doc && doc.FileID) {
+      return doc.FileID;
+    }
+    if ("FileID" in doc && doc.FileID) {
+      return doc.FileID;
+    }
+    return doc.objectID || '';
+  }
+
+  /**
+   * Get the direct SharePoint URL for opening the document directly in SharePoint
+   * This returns the directEditURL if available, or falls back to webUrl
+   */
+  get sharepointDirectUrl(): string {
+    const doc = this.args.document as any;
+    // Log document keys for debugging
+    console.log('Document object keys:', Object.keys(doc));
+    
+    // Check for directEditURL first (note the uppercase URL - matches the backend naming)
+    if ("directEditURL" in doc && doc.directEditURL) {
+      console.log('Using directEditURL:', doc.directEditURL);
+      return doc.directEditURL;
+    }
+    
+    // Fall back to webUrl if directEditURL is not available
+    console.log('directEditURL not found, using webUrl:', doc.webUrl);
+    return ("webUrl" in doc && doc.webUrl) ? doc.webUrl : '';
   }
 }
 

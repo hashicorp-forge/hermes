@@ -1,5 +1,5 @@
 import Component from "@glimmer/component";
-import {
+import type {
   RelatedHermesDocument,
   RelatedResource,
 } from "hermes/components/related-resources";
@@ -15,10 +15,10 @@ interface DocumentSidebarRelatedResourcesListItemResourceComponentSignature {
 export default class DocumentSidebarRelatedResourcesListItemResourceComponent extends Component<DocumentSidebarRelatedResourcesListItemResourceComponentSignature> {
   /**
    * Whether the resource is a HermesDocument,
-   * as measured by the googleFileID attribute.
+   * as measured by the FileID attribute.
    */
   protected get resourceIsDocument(): boolean {
-    return "googleFileID" in this.args.resource;
+    return "FileID" in this.args.resource;
   }
 
   /**
@@ -75,7 +75,7 @@ export default class DocumentSidebarRelatedResourcesListItemResourceComponent ex
   private assertResourceIsDocument(
     document: RelatedResource,
   ): asserts document is RelatedHermesDocument {
-    if (!("googleFileID" in document)) {
+    if (!("FileID" in document)) {
       throw new Error("resource must be a document");
     }
   }

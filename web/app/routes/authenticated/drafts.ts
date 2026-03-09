@@ -1,6 +1,6 @@
 import Route from "@ember/routing/route";
-import RouterService from "@ember/routing/router-service";
-import Transition from "@ember/routing/transition";
+import type RouterService from "@ember/routing/router-service";
+import type Transition from "@ember/routing/transition";
 import { inject as service } from "@ember/service";
 
 export default class AuthenticatedDraftsRoute extends Route {

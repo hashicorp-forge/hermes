@@ -1,5 +1,5 @@
 import JSONSerializer from "@ember-data/serializer/json";
-import DS from "ember-data";
+import type DS from "ember-data";
 
 export default class ApplicationSerializer extends JSONSerializer {
   /**

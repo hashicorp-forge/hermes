@@ -1,47 +1,66 @@
 "use strict";
 
 const EmberApp = require("ember-cli/lib/broccoli/ember-app");
+const PostcssCompiler = require('broccoli-postcss');
+const Funnel = require('broccoli-funnel');
+const mergeTrees = require('broccoli-merge-trees');
 
 module.exports = function (defaults) {
+  const tailwindcss = require('tailwindcss');
+  const autoprefixer = require('autoprefixer');
+  
   let app = new EmberApp(defaults, {
-    postcssOptions: {
-      compile: {
-        extension: "scss",
-        enabled: true,
-        parser: require("postcss-scss"),
-        cacheInclude: [/.*\.hbs$/, /.*\.scss$/],
-        plugins: [
-          {
-            module: require("@csstools/postcss-sass"),
-            options: {
-              includePaths: [
-                // Brings in the styles for TailwindCSS from node_modules
-                // - Required so we can use @import to include the styles in SASS
-                "node_modules",
-                // And the styles from @hashicorp/design-system-tokens
-                // - Required for @hashicorp/design-system-components to work
-                "./node_modules/@hashicorp/design-system-tokens/dist/products/css",
-              ],
-            },
-          },
-          require("tailwindcss")("./tailwind.config.js"),
-        ],
-      },
+    'ember-cli-terser': {
+      enabled: process.env.EMBER_ENV === 'production',
+    },
+    babel: {
+      plugins: [
+        require.resolve('ember-concurrency/async-arrow-task-transform'),
+      ],
+    },
+    sassOptions: {
+      includePaths: [
+        "node_modules",
+        "./node_modules/@hashicorp/design-system-tokens/dist/products/css",
+      ],
+      sourceMap: false,
+      onlyIncluded: false,
+      extension: 'scss',
+      quietDeps: true,
+      verbose: false,
+      silenceDeprecations: ['import', 'global-builtin'],
+    },
+    autoImport: {
+      watchDependencies: ['@ember/test-waiters'],
     },
   });
 
-  // Use `app.import` to add additional libraries to the generated
-  // output files.
-  //
-  // If you need to use different assets in different
-  // environments, specify an object as the first parameter. That
-  // object's keys should be the environment name and the values
-  // should be the asset to use in that environment.
-  //
-  // If the library that you are including contains AMD or ES6
-  // modules that you would like to import into your application
-  // please specify an object with the list of modules as keys
-  // along with the exports of each module as its value.
-
-  return app.toTree();
+  // Get the output tree
+  let tree = app.toTree();
+  
+  // Post-process just the CSS files with Tailwind
+  let cssTree = new Funnel(tree, {
+    include: ['assets/*.css'],
+    destDir: '.'
+  });
+  
+  let processedCss = new PostcssCompiler(cssTree, {
+    plugins: [
+      {
+        module: tailwindcss,
+        options: require('./tailwind.config.js')
+      },
+      {
+        module: autoprefixer
+      }
+    ],
+    map: false
+  });
+  
+  // Merge processed CSS back with the rest of the tree
+  let otherAssets = new Funnel(tree, {
+    exclude: ['assets/*.css']
+  });
+  
+  return mergeTrees([processedCss, otherAssets], { overwrite: true });
 };

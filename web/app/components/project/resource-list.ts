@@ -1,15 +1,16 @@
 import Component from "@glimmer/component";
-import { RelatedResource } from "../related-resources";
+import type { RelatedResource } from "../related-resources";
 import { action } from "@ember/object";
-import { TransitionRules } from "ember-animated/transition-rules";
+import type { TransitionRules } from "ember-animated/transition-rules";
 import { emptyTransition } from "hermes/utils/ember-animated/empty-transition";
-import { TransitionContext, wait } from "ember-animated/.";
+import type TransitionContext from "ember-animated/-private/transition-context";
+import { wait } from "ember-animated";
 import move from "ember-animated/motions/move";
 import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
 import { easeOutExpo, easeOutQuad } from "hermes/utils/ember-animated/easings";
 import Ember from "ember";
 import { inject as service } from "@ember/service";
-import RouterService from "@ember/routing/router-service";
+import type RouterService from "@ember/routing/router-service";
 import highlightElement from "hermes/utils/ember-animated/highlight-element";
 import scrollIntoViewIfNeeded from "hermes/utils/scroll-into-view-if-needed";
 

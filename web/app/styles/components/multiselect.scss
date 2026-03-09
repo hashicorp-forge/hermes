@@ -8,6 +8,8 @@
   background-size: var(--token-form-select-background-image-size);
   background-repeat: no-repeat;
   box-shadow: var(--token-elevation-low-box-shadow);
+  background-color: var(--token-form-control-base-surface-color-default);
+  border-color: var(--token-form-control-base-border-color-default);
   @apply p-1;
 
   &--narrow {
@@ -62,6 +64,7 @@
 
   .ember-power-select-trigger-multiple-input {
     @apply min-w-[80px] px-[3px] text-body-200 placeholder:text-color-foreground-disabled;
+    color: var(--token-color-foreground-primary);
 
     &::-webkit-search-cancel-button {
       display: none;
@@ -70,6 +73,7 @@
 
   .ember-power-select-multiple-option {
     @apply relative inline-flex max-w-full items-center border-0 text-color-foreground-strong;
+    color: var(--token-color-foreground-primary);
 
     // Compensate for the chip padding by setting negative margins.
     // Allows content to maintain its position in both the edit and read-only states.
@@ -79,12 +83,198 @@
       @apply absolute right-1 z-10 grid h-5 w-5 shrink-0 place-items-center rounded-sm pb-px text-color-foreground-primary;
 
       &:hover {
-        @apply bg-neutral-200;
+        background-color: var(--token-color-surface-interactive-hover);
       }
 
       &:focus,
       &:active {
         outline: 2px solid var(--token-color-focus-action-internal);
+      }
+    }
+    
+    // Ensure person components within chips are visible
+    .person {
+      .person-email {
+        color: var(--token-color-foreground-primary) !important;
+      }
+    }
+  }
+}
+
+// Custom people select component styles
+.custom-people-select {
+  position: relative;
+  border: var(--token-form-control-border-width) solid var(--token-form-control-base-border-color-default);
+  border-radius: var(--token-form-control-border-radius);
+  padding: 6px 36px 6px 8px;
+  min-height: 40px;
+  background: var(--token-form-control-base-surface-color-default);
+  color: var(--token-color-foreground-primary);
+  cursor: text;
+
+  &:focus-within {
+    border-color: var(--token-color-focus-action-external);
+    box-shadow: var(--token-elevation-low-box-shadow);
+  }
+
+  .selected-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--token-color-surface-faint);
+    border: 1px solid var(--token-color-border-strong);
+    border-radius: 6px;
+    padding: 4px 8px 4px 4px;
+    font-size: 14px;
+    color: var(--token-color-foreground-primary);
+    white-space: nowrap;
+  }
+
+  .selected-name {
+    font-weight: 500;
+    color: var(--token-color-foreground-primary);
+  }
+
+  .remove-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 0 2px;
+    color: var(--token-color-foreground-faint);
+    transition: color 0.1s;
+    margin-left: 2px;
+
+    &:hover {
+      color: var(--token-color-foreground-primary);
+    }
+  }
+
+  .search-input-inline {
+    flex: 1;
+    min-width: 120px;
+    border: none;
+    outline: none;
+    padding: 4px;
+    font-size: 14px;
+    background: transparent;
+    color: var(--token-color-foreground-primary);
+
+    &::placeholder {
+      color: var(--token-color-foreground-disabled);
+    }
+
+    &:disabled {
+      background: transparent;
+      cursor: not-allowed;
+      color: var(--token-color-foreground-disabled);
+    }
+  }
+
+  // Hide input in single-select mode when a selection is made
+  &.selection-made .search-input-inline {
+    display: none;
+  }
+
+  .caret-icon-inline {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--token-color-foreground-faint);
+    pointer-events: none;
+    flex-shrink: 0;
+  }
+
+  .dropdown-results {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--token-form-control-base-surface-color-default);
+    border: var(--token-form-control-border-width) solid var(--token-form-control-base-border-color-default);
+    border-radius: var(--token-form-control-border-radius);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: var(--token-elevation-low-box-shadow);
+  }
+
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.1s;
+    color: var(--token-color-foreground-primary);
+
+    &:hover,
+    &.is-focused {
+      background-color: var(--token-color-surface-interactive-hover);
+    }
+
+    &.is-focused {
+      outline: 2px solid var(--token-color-focus-action-external);
+      outline-offset: -2px;
+    }
+  }
+
+  .option-details {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .option-name {
+    font-weight: 500;
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--token-color-foreground-primary);
+  }
+
+  .option-email {
+    font-size: 12px;
+    color: var(--token-color-foreground-faint);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .dropdown-message {
+    padding: 12px;
+    text-align: center;
+    color: var(--token-color-foreground-faint);
+    font-size: 14px;
+  }
+}
+
+// Dark mode specific styling for better chip visibility
+:root[data-theme="dark"] {
+  .multiselect {
+    .ember-power-select-multiple-option {
+      // Style the outer chip container instead of the inner person div
+      background-color: var(--token-color-surface-strong);
+      border: 1px solid var(--token-color-border-faint);
+      border-radius: 6px;
+      
+      .person {
+        // Remove any redundant styling from the person container
+        background: none;
+        border: none;
+        padding: 4px 8px;
+        
+        .person-email {
+          color: var(--token-color-foreground-primary) !important;
+          font-weight: 500;
+        }
+        
+        // Avatar styling within chips in dark mode
+        img {
+          border: 1px solid var(--token-color-border-faint);
+        }
       }
     }
   }

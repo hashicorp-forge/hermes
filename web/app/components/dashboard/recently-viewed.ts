@@ -1,15 +1,16 @@
 import Component from "@glimmer/component";
-import ViewportService from "hermes/services/viewport";
+import type ViewportService from "hermes/services/viewport";
 import theme from "tailwindcss/defaultTheme";
 import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import { debounce } from "@ember/runloop";
 import { inject as service } from "@ember/service";
 import { tracked } from "@glimmer/tracking";
-import RecentlyViewedService, {
+import type {
   RecentlyViewedDoc,
   RecentlyViewedProject,
 } from "hermes/services/recently-viewed";
+import type RecentlyViewedService from "hermes/services/recently-viewed";
 
 export const RECENTLY_VIEWED_SCROLL_AMOUNT = 300;
 

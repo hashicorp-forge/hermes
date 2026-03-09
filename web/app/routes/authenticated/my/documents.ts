@@ -1,17 +1,18 @@
 import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
-import AlgoliaService, { AlgoliaFacetsObject } from "hermes/services/algolia";
-import ConfigService from "hermes/services/config";
-import FetchService from "hermes/services/fetch";
-import AuthenticatedUserService from "hermes/services/authenticated-user";
+import type { AlgoliaFacetsObject } from "hermes/services/algolia";
+import type AlgoliaService from "hermes/services/algolia";
+import type ConfigService from "hermes/services/config";
+import type FetchService from "hermes/services/fetch";
+import type AuthenticatedUserService from "hermes/services/authenticated-user";
 import { task } from "ember-concurrency";
-import { SearchOptions, SearchResponse } from "instantsearch.js";
-import { HermesDocument } from "hermes/types/document";
+import type { SearchOptions, SearchResponse } from "@algolia/client-search";
+import type { HermesDocument } from "hermes/types/document";
 import { createDraftURLSearchParams } from "hermes/utils/create-draft-url-search-params";
 import { SortByValue } from "hermes/components/header/toolbar";
 import { SortDirection } from "hermes/components/table/sortable-header";
-import FlashMessageService from "ember-cli-flash/services/flash-messages";
-import StoreService from "hermes/services/store";
+import type FlashMessageService from "ember-cli-flash/services/flash-messages";
+import type StoreService from "hermes/services/store";
 
 export interface DraftResponseJSON {
   facets: AlgoliaFacetsObject;
@@ -25,6 +26,7 @@ interface AuthenticatedMyDocumentsRouteParams {
   page?: number;
   sortBy?: SortByValue;
   includeSharedDrafts?: boolean;
+  showArchivedDrafts?: boolean;
 }
 
 export default class AuthenticatedMyDocumentsRoute extends Route {
@@ -43,6 +45,9 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
       refreshModel: true,
     },
     sortBy: {
+      refreshModel: true,
+    },
+    showArchivedDrafts: {
       refreshModel: true,
     },
   };
@@ -85,16 +90,22 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
     const searchIndex = `${indexName}_modifiedTime_${sortDirection}`;
     const sortIsDesc = sortDirection === SortDirection.Desc;
 
+    // Determine facet filters for drafts based on owner toggle
+    // Don't filter by archived status here - we'll do that client-side
+    const ownerFilter = params.includeSharedDrafts === false
+      ? [`owners:${this.authenticatedUser.info.email}`]
+      : undefined;
+
     let [draftResults, docResults] = await Promise.all([
       this.getDraftResults.perform({
         hitsPerPage: 100,
         page,
-        facetFilters:
-          params.includeSharedDrafts === false
-            ? [`owners:${this.authenticatedUser.info.email}`]
-            : undefined,
+        facetFilters: ownerFilter,
       }),
-      this.algolia.getDocResults.perform(
+      // Only fetch published docs when not showing archived drafts
+      params.showArchivedDrafts === true
+        ? Promise.resolve({ hits: [], nbPages: 0 })
+        : this.algolia.getDocResults.perform(
         searchIndex,
         {
           hitsPerPage: 100,
@@ -112,7 +123,17 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
       draftResults?.nbPages ?? 1,
     );
 
-    let docs = [...(draftResults?.Hits ?? []), ...(typedDocResults.hits ?? [])];
+    // Filter drafts based on archived status (client-side)
+    let filteredDrafts = draftResults?.Hits ?? [];
+    if (params.showArchivedDrafts === true) {
+      // Show only archived drafts
+      filteredDrafts = filteredDrafts.filter(draft => draft.archived === true);
+    } else {
+      // Show only non-archived drafts (including those without archived field)
+      filteredDrafts = filteredDrafts.filter(draft => draft.archived !== true);
+    }
+
+    let docs = [...filteredDrafts, ...(typedDocResults.hits ?? [])];
 
     docs = docs.sort((a, b) => {
       const aTime = a.modifiedTime ?? 0;
@@ -134,6 +155,7 @@ export default class AuthenticatedMyDocumentsRoute extends Route {
       currentPage: page ?? 1,
       nbPages,
       includeSharedDrafts: params.includeSharedDrafts ?? true,
+      showArchivedDrafts: params.showArchivedDrafts ?? false,
     };
   }
 }

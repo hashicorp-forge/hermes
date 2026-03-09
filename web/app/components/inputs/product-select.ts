@@ -1,15 +1,16 @@
 import { assert } from "@ember/debug";
 import { action } from "@ember/object";
 import { inject as service } from "@ember/service";
-import { OffsetOptions, Placement } from "@floating-ui/dom";
+import type { OffsetOptions, Placement } from "@floating-ui/dom";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import FetchService from "hermes/services/fetch";
-import ProductAreasService, {
+import type FetchService from "hermes/services/fetch";
+import type {
   ProductArea,
 } from "hermes/services/product-areas";
+import type ProductAreasService from "hermes/services/product-areas";
 import getProductId from "hermes/utils/get-product-id";
-import { MatchAnchorWidthOptions } from "../floating-u-i/content";
+import type { MatchAnchorWidthOptions } from "../floating-u-i/content";
 
 interface InputsProductSelectSignature {
   Element: HTMLDivElement;

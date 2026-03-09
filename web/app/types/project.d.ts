@@ -1,11 +1,11 @@
-import {
+import type {
   RelatedExternalLink,
   RelatedHermesDocument,
 } from "hermes/components/related-resources";
-import { ProjectStatus } from "./project-status";
+import type { ProjectStatus } from "./project-status";
 import { HermesDocument } from "./document";
-import { AlgoliaHit } from "hermes/services/algolia";
-import JiraIssueModel from "hermes/models/jira-issue";
+import type { AlgoliaHit } from "hermes/services/algolia";
+import type JiraIssueModel from "hermes/models/jira-issue";
 
 export interface JiraPickerResult {
   key: string;

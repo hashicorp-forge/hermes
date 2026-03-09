@@ -1,7 +1,7 @@
 import Controller from "@ember/controller";
 import { tracked } from "@glimmer/tracking";
-import AuthenticatedProjectsProjectRoute from "hermes/routes/authenticated/projects/project";
-import { ModelFrom } from "hermes/types/route-models";
+import type AuthenticatedProjectsProjectRoute from "hermes/routes/authenticated/projects/project";
+import type { ModelFrom } from "hermes/types/route-models";
 
 export default class AuthenticatedProjectsProjectController extends Controller {
   declare model: ModelFrom<AuthenticatedProjectsProjectRoute>;

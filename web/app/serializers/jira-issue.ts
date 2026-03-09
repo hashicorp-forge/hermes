@@ -1,6 +1,6 @@
 import JSONSerializer from "@ember-data/serializer/json";
-import DS from "ember-data";
-import JiraIssueModel from "hermes/models/jira-issue";
+import type DS from "ember-data";
+import type JiraIssueModel from "hermes/models/jira-issue";
 
 export default class JiraIssueSerializer extends JSONSerializer {
   /**

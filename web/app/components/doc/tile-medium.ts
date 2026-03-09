@@ -1,9 +1,9 @@
 import Component from "@glimmer/component";
-import { RelatedHermesDocument } from "../related-resources";
-import { HermesDocument } from "hermes/types/document";
+import type { RelatedHermesDocument } from "../related-resources";
+import type { HermesDocument } from "hermes/types/document";
 import { inject as service } from "@ember/service";
-import FetchService from "hermes/services/fetch";
-import ConfigService from "hermes/services/config";
+import type FetchService from "hermes/services/fetch";
+import type ConfigService from "hermes/services/config";
 
 interface DocTileMediumComponentSignature {
   Element: HTMLAnchorElement;
@@ -34,8 +34,8 @@ export default class DocTileMediumComponent extends Component<DocTileMediumCompo
   @service("config") declare configSvc: ConfigService;
 
   protected get docID() {
-    if ("googleFileID" in this.args.doc) {
-      return this.args.doc.googleFileID;
+    if ("FileID" in this.args.doc) {
+      return this.args.doc.FileID;
     } else {
       return this.args.doc.objectID;
     }

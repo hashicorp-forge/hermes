@@ -2,20 +2,21 @@ import Component from "@glimmer/component";
 import { action } from "@ember/object";
 import { tracked } from "@glimmer/tracking";
 import { inject as service } from "@ember/service";
-import FetchService from "hermes/services/fetch";
-import ConfigService from "hermes/services/config";
-import AlgoliaService from "hermes/services/algolia";
+import type FetchService from "hermes/services/fetch";
+import type ConfigService from "hermes/services/config";
+import type AlgoliaService from "hermes/services/algolia";
 import { restartableTask, task } from "ember-concurrency";
 import { next, schedule } from "@ember/runloop";
 import htmlElement from "hermes/utils/html-element";
-import {
+import type {
   RelatedExternalLink,
   RelatedHermesDocument,
-  RelatedResource,
+  RelatedResource} from "hermes/components/related-resources";
+import {
   RelatedResourceSelector,
 } from "hermes/components/related-resources";
 import { assert } from "@ember/debug";
-import HermesFlashMessagesService from "hermes/services/flash-messages";
+import type HermesFlashMessagesService from "hermes/services/flash-messages";
 import { FLASH_MESSAGES_LONG_TIMEOUT } from "hermes/utils/ember-cli-flash/timeouts";
 import updateRelatedResourcesSortOrder from "hermes/utils/update-related-resources-sort-order";
 import highlightElement from "hermes/utils/ember-animated/highlight-element";
@@ -61,7 +62,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
 
     const hermesDocuments = this.relatedDocuments.map((doc) => {
       return {
-        googleFileID: doc.googleFileID,
+        FileID: doc.FileID,
         sortOrder: doc.sortOrder,
       };
     });
@@ -84,14 +85,9 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
    * The combined resources array, formatted for the RelatedResourcesList.
    */
   protected get relatedResources(): RelatedResource[] {
-    let resourcesArray: RelatedResource[] = [];
+  this.updateSortOrder();
 
-    this.updateSortOrder();
-
-    resourcesArray.pushObjects(this.relatedDocuments);
-    resourcesArray.pushObjects(this.relatedLinks);
-
-    return resourcesArray;
+  return [...this.relatedDocuments, ...this.relatedLinks];
   }
   /**
    * Whether the "Add Resource" button should be hidden.
@@ -172,10 +168,10 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     let cachedDocuments = this.relatedDocuments.slice();
 
     if ("url" in resource) {
-      this.relatedLinks.unshiftObject(resource);
+      this.relatedLinks = [resource as RelatedExternalLink, ...this.relatedLinks];
     } else {
       resourceSelector = RelatedResourceSelector.HermesDocument;
-      this.relatedDocuments.unshiftObject(resource);
+      this.relatedDocuments = [resource as RelatedHermesDocument, ...this.relatedDocuments];
     }
 
     void this.saveRelatedResources.perform(
@@ -194,9 +190,9 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
     const cachedLinks = this.relatedLinks;
 
     if ("url" in resource) {
-      this.relatedLinks.removeObject(resource);
+      this.relatedLinks = this.relatedLinks.filter((r) => r !== resource);
     } else {
-      this.relatedDocuments.removeObject(resource);
+      this.relatedDocuments = this.relatedDocuments.filter((r) => r !== resource);
     }
 
     void this.saveRelatedResources.perform(cachedDocuments, cachedLinks);
@@ -257,7 +253,7 @@ export default class DocumentSidebarRelatedResourcesComponent extends Component<
         target = htmlElement(targetSelector);
 
         next(() => {
-          scrollIntoViewIfNeeded(target as HTMLElement, {
+          scrollIntoViewIfNeeded(target, {
             block: "nearest",
             behavior: "smooth",
           });

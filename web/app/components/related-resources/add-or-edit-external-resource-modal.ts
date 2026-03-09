@@ -1,7 +1,7 @@
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { RelatedExternalLink } from "hermes/components/related-resources";
+import type { RelatedExternalLink } from "hermes/components/related-resources";
 import isValidURL from "hermes/utils/is-valid-u-r-l";
 import { assert } from "@ember/debug";
 

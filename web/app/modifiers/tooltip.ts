@@ -1,19 +1,21 @@
-import Modifier, { ArgsFor } from "ember-modifier";
+import type { ArgsFor } from "ember-modifier";
+import Modifier from "ember-modifier";
 import { registerDestructor } from "@ember/destroyable";
 import { tracked } from "@glimmer/tracking";
 import { assert } from "@ember/debug";
 import { action } from "@ember/object";
-import {
+import type {
   Placement,
   Side,
+  OffsetOptions} from "@floating-ui/dom";
+import {
   arrow,
   autoUpdate,
   computePosition,
   flip,
   shift,
   offset,
-  platform,
-  OffsetOptions,
+  platform
 } from "@floating-ui/dom";
 import { FOCUSABLE } from "hermes/components/editable-field";
 import { guidFor } from "@ember/object/internals";

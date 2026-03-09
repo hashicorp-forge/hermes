@@ -1,5 +1,5 @@
 import Component from "@glimmer/component";
-import { HermesDocument } from "hermes/types/document";
+import type { HermesDocument } from "hermes/types/document";
 
 interface DashboardDocsAwaitingReviewDocComponentSignature {
   Element: null;

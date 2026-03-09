@@ -1,6 +1,6 @@
 import Component from "@glimmer/component";
 import Ember from "ember";
-import { TransitionContext } from "ember-animated/.";
+import type TransitionContext from "ember-animated/-private/transition-context";
 import move from "ember-animated/motions/move";
 import { fadeIn, fadeOut } from "ember-animated/motions/opacity";
 import { Resize } from "ember-animated/motions/resize";

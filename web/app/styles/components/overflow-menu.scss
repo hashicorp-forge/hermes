@@ -1,9 +1,22 @@
 .overflow-button {
   @apply pointer-events-auto relative z-10 h-[26px] w-[26px] rounded;
+  
+  // Ensure visibility in both light and dark modes
+  color: var(--token-color-foreground-faint);
+  border: 1px solid transparent;
 
   &:hover:not(.disabled):not(:focus),
   &:focus {
     @apply bg-color-surface-faint;
+    color: var(--token-color-foreground-primary);
+    border-color: var(--token-color-border-faint);
+  }
+
+  // Better visibility when dropdown is open
+  &.open {
+    @apply bg-color-surface-faint;
+    color: var(--token-color-foreground-primary);
+    border-color: var(--token-color-border-faint);
   }
 }
 

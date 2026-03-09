@@ -1,23 +1,23 @@
 import { action } from "@ember/object";
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-import { HermesDocument } from "hermes/types/document";
+import type { HermesDocument } from "hermes/types/document";
 import { assert } from "@ember/debug";
 import { restartableTask } from "ember-concurrency";
-import ConfigService from "hermes/services/config";
+import type ConfigService from "hermes/services/config";
 import { inject as service } from "@ember/service";
-import {
+import type {
   RelatedExternalLink,
   RelatedHermesDocument,
   RelatedResource,
 } from "hermes/components/related-resources";
 import isValidURL from "hermes/utils/is-valid-u-r-l";
-import FetchService from "hermes/services/fetch";
-import { XDropdownListAnchorAPI } from "hermes/components/x/dropdown-list";
-import { SearchOptions } from "instantsearch.js";
+import type FetchService from "hermes/services/fetch";
+import type { XDropdownListAnchorAPI } from "hermes/components/x/dropdown-list";
+import type { SearchOptions } from "instantsearch.js";
 import { RelatedResourcesScope } from "../related-resources";
 import { guidFor } from "@ember/object/internals";
-import HermesFlashMessagesService from "hermes/services/flash-messages";
+import type HermesFlashMessagesService from "hermes/services/flash-messages";
 
 interface RelatedResourcesAddComponentSignature {
   Element: null;
@@ -340,7 +340,7 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
     } = attrs;
 
     const relatedHermesDocument = {
-      googleFileID: attrs.objectID,
+      FileID: attrs.objectID,
       documentType: attrs.docType,
       documentNumber: attrs.docNumber,
       title,
@@ -376,7 +376,7 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
     let isDuplicate = false;
     if (resourceIsHermesDocument) {
       isDuplicate = !!this.args.relatedDocuments.find((document) => {
-        return document.googleFileID === urlOrID;
+        return document.FileID === urlOrID;
       });
     } else {
       isDuplicate = !!this.args.relatedLinks.find((link) => {
@@ -568,9 +568,20 @@ export default class RelatedResourcesAddComponent extends Component<RelatedResou
 
     const googleDocsURL = "https://docs.google.com/document/d/";
 
-    if (url.includes(googleDocsURL)) {
+    if (url.startsWith(googleDocsURL)) {
       this.firstPartyURLFormat = FirstPartyURLFormat.FullURL;
       return true;
+    }
+
+    // Additional check: parse URL and verify hostname
+    try {
+      const parsedUrl = new URL(url);
+      if (parsedUrl.hostname === 'docs.google.com' && parsedUrl.pathname.startsWith('/document/d/')) {
+        this.firstPartyURLFormat = FirstPartyURLFormat.FullURL;
+        return true;
+      }
+    } catch {
+      // Invalid URL, continue to return false
     }
 
     this.firstPartyURLFormat = null;

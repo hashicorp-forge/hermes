@@ -1,4 +1,4 @@
-import DS from "ember-data";
+import type DS from "ember-data";
 import ApplicationAdapter from "./application";
 import RSVP from "rsvp";
 
@@ -8,7 +8,7 @@ export default class PersonAdapter extends ApplicationAdapter {
    * Default query:     `/people?query=foo`
    * Our custom query:  `/people` with `{ query: "foo" }` in the request body.
    */
-  query(_store: DS.Store, _type: DS.Model, query: { query: string }) {
+  query(_store: DS.Store, _type: any, query: { query: string }) {
     const results = this.fetchSvc
       .fetch(`/api/${this.configSvc.config.api_version}/people`, {
         method: "POST",

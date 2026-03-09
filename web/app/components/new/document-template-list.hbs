@@ -40,13 +40,13 @@
               data-test-icon
               @size="24"
               @name={{or docType.flightIcon "file-text"}}
-              class="-mt-1 shrink-0 text-color-foreground-faint"
+              class="-mt-1 shrink-0 text-color-foreground-primary"
             />
             <div class="w-full">
               <div class="flex w-full items-start justify-between gap-2.5">
                 <h2
                   data-test-long-name
-                  class="hermes-h-300 -mt-1 leading-tight"
+                  class="hermes-h-300 -mt-1 leading-tight text-color-foreground-strong"
                 >
                   {{docType.longName}}
                 </h2>
@@ -55,7 +55,7 @@
                 }}
                   <p
                     data-test-name
-                    class="mt-px mr-2 shrink-0 leading-none text-color-foreground-disabled"
+                    class="mt-px mr-2 shrink-0 leading-none text-color-foreground-faint"
                   >
                     {{docType.name}}
                   </p>
@@ -63,7 +63,7 @@
               </div>
               <p
                 data-test-description
-                class="mt-0.5 max-w-[360px] text-body-300 text-color-foreground-faint"
+                class="mt-0.5 max-w-[360px] text-body-300 text-color-foreground-primary"
               >
                 {{docType.description}}
               </p>
@@ -77,7 +77,7 @@
 
 {{#if this.moreInfoLinksAreShown}}
   <div class="mt-12 max-w-md">
-    <h3 class="mb-2 text-display-100 font-medium text-color-foreground-faint">
+    <h3 class="mb-2 text-display-100 font-medium text-color-foreground-primary">
       Related links
     </h3>
     <ul class="grid gap-1">
@@ -88,7 +88,7 @@
               data-test-more-info-link
               @iconIsShown={{true}}
               href={{docType.moreInfoLink.url}}
-              class="relative inline-flex text-body-200 text-color-foreground-faint decoration-color-palette-neutral-200 hover:text-color-foreground-primary"
+              class="relative inline-flex text-body-200 text-color-foreground-primary hover:text-color-foreground-strong"
             >
               {{docType.moreInfoLink.text}}
             </ExternalLink>

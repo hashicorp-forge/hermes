@@ -43,6 +43,7 @@ import AnimatedTools from "ember-animated-tools/components/animated-tools";
 import { AnimatedIfCurly } from "ember-animated/components/animated-if";
 import { FlashMessageComponent } from "ember-cli-flash/flash-message";
 import { HdsFormErrorComponent } from "hds/form/error";
+import PowerSelect from "ember-power-select/components/power-select";
 import PowerSelectMultiple from "ember-power-select/components/power-select-multiple";
 import { HdsFormLabelComponent } from "hds/form/label";
 
@@ -60,6 +61,7 @@ declare module "@glint/environment-ember-loose/registry" {
     AnimatedTools: typeof AnimatedTools;
     "animated-each": typeof AnimatedEachCurly;
     "animated-if": typeof AnimatedIfCurly;
+    PowerSelect: typeof PowerSelect;
     PowerSelectMultiple: typeof PowerSelectMultiple;
     perform: typeof PerformHelper;
     or: typeof OrHelper;

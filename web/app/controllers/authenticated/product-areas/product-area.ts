@@ -1,6 +1,6 @@
 import Controller from "@ember/controller";
-import AuthenticatedProductAreasProductAreaRoute from "hermes/routes/authenticated/product-areas/product-area";
-import { ModelFrom } from "hermes/types/route-models";
+import type AuthenticatedProductAreasProductAreaRoute from "hermes/routes/authenticated/product-areas/product-area";
+import type { ModelFrom } from "hermes/types/route-models";
 
 export default class AuthenticatedProductAreasProductAreaController extends Controller {
   queryParams = ["product"];

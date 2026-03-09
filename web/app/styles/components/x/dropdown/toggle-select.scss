@@ -1,5 +1,7 @@
 .x-dropdown-list-toggle-select {
-  @apply relative flex min-h-[36px] w-full items-center justify-start gap-0 rounded-button-md border border-color-border-strong px-2.5 leading-none;
+  @apply relative flex min-h-[36px] w-full items-center justify-start gap-0 rounded-button-md border border-color-border-input px-2.5 leading-none;
+  background-color: var(--token-form-control-base-surface-color-default);
+  color: var(--token-color-foreground-primary);
 
   .flight-icon {
     @apply shrink-0;
@@ -15,6 +17,18 @@
 
   .hds-button__icon + .hds-button__text {
     @apply ml-2.5;
+  }
+
+  &:hover,
+  &.mock-hover {
+    border-color: var(--token-form-control-base-border-color-hover);
+  }
+
+  &:focus,
+  &.mock-focus {
+    border-color: var(--token-color-focus-action-internal);
+    outline: 3px solid var(--token-color-focus-action-external);
+    outline-offset: 0px;
   }
 
   &.hds-button--color-secondary:not(:hover) {

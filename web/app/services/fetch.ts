@@ -1,8 +1,7 @@
 import Service from "@ember/service";
-import fetch from "fetch";
 import { inject as service } from "@ember/service";
-import ConfigService from "hermes/services/config";
-import SessionService from "./session";
+import type ConfigService from "hermes/services/config";
+import type SessionService from "./session";
 
 interface FetchOptions {
   method?: string;
@@ -37,25 +36,6 @@ export default class FetchService extends Service {
   }
 
   async fetch(url: string, options: FetchOptions = {}, isPollCall = false) {
-    // If using Google auth, add the Google access token in a header if the URL
-    // starts with a frontslash, which will only target the application backend.
-    if (!this.configSvc.config.skip_google_auth) {
-      if (Array.from(url)[0] == "/") {
-        if (options.headers && options.headers["Hermes-Google-Access-Token"]) {
-          /**
-           * Don't modify headers with a Hermes-Google-Access-Token.
-           * In other words, let the authenticator's `restore` method use
-           * the session's previous access token to check if it still works.
-           */
-        } else {
-          options.headers = {
-            ...options.headers,
-            "Hermes-Google-Access-Token":
-              this.session.data.authenticated.access_token,
-          };
-        }
-      }
-    }
 
     try {
       const resp = await fetch(url, options);
@@ -90,7 +70,7 @@ export default class FetchService extends Service {
           // reauthenticate.
           this.session.pollResponseIs401 = true;
         } else {
-          // Reload to redirect to Okta login.
+          // Reload to redirect to OIDC login.
           window.location.reload();
         }
       } else {

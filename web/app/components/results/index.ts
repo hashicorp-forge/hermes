@@ -1,9 +1,9 @@
 import Component from "@glimmer/component";
-import { SearchResponse } from "@algolia/client-search";
-import { HermesDocument } from "hermes/types/document";
-import { HermesProject } from "hermes/types/project";
+import type { SearchResponse } from "@algolia/client-search";
+import type { HermesDocument } from "hermes/types/document";
+import type { HermesProject } from "hermes/types/project";
 import { SearchScope } from "hermes/routes/authenticated/results";
-import { SearchForFacetValuesResponse } from "instantsearch.js";
+import type { SearchForFacetValuesResponse } from "instantsearch.js";
 
 interface ResultsIndexComponentSignature {
   Args: {

@@ -1,7 +1,12 @@
 import JSONSerializer from "@ember-data/serializer/json";
 import { assert } from "@ember/debug";
-import DS from "ember-data";
-import { GoogleUser } from "hermes/components/inputs/people-select";
+import type DS from "ember-data";
+
+interface GoogleUser {
+  emailAddresses: Array<{ value: string }>;
+  names: Array<{ displayName: string; givenName: string }>;
+  photos: Array<{ url: string }>;
+}
 
 export default class PersonSerializer extends JSONSerializer {
   /**

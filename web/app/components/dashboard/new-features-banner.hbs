@@ -8,34 +8,6 @@
     class="mb-10"
     as |A|
   >
-    <A.Title>What's new in Hermes</A.Title>
-    <A.Description>
-      <ul class="icon-list">
-        {{#if this.configSvc.config.group_approvals}}
-          <li>
-            <FlightIcon @name="users" />
-            <p>
-              Google Groups can be added as document approvers
-            </p>
-          </li>
-        {{/if}}
-        <li>
-          <FlightIcon @name="swap-horizontal" />
-          <p>
-            Document ownership can be transferred between users
-          </p>
-        </li>
-        <li>
-          <FlightIcon @name="smile" />
-          <p>
-            We've improved owner filtering on the
-            <LinkTo @route="authenticated.documents" class="underlined-link">
-              All Docs
-            </LinkTo>
-            view
-          </p>
-        </li>
-      </ul>
-    </A.Description>
+    <A.Title>Welcome to new Hermes with Sharepoint support !</A.Title>
   </Hds::Alert>
 {{/if}}

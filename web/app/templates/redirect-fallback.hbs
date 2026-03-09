@@ -1,0 +1,20 @@
+{{page-title "Opening document..."}}
+
+<div class="relative flex h-full w-full flex-col items-center justify-center">
+  <div class="relative mb-5 flex justify-center">
+    <FlightIcon
+      @name="running"
+      @size="24"
+      data-test-redirect-loading-icon
+    />
+  </div>
+
+  <h1 class="mb-2 text-display-400 font-semibold text-color-foreground-primary" data-test-redirect-headline>
+    Opening document...
+  </h1>
+
+  <div class="text-center text-body-300 text-color-foreground-faint" data-test-redirect-description>
+    <p>Preparing your document for editing.</p>
+    <p class="mt-1">This usually takes a few seconds.</p>
+  </div>
+</div>

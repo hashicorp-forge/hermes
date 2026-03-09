@@ -1,6 +1,6 @@
 import Helper from "@ember/component/helper";
 import { inject as service } from "@ember/service";
-import ActiveFiltersService from "hermes/services/active-filters";
+import type ActiveFiltersService from "hermes/services/active-filters";
 
 export interface IsActiveFilterSignature {
   Args: {

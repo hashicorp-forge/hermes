@@ -1,6 +1,6 @@
 import Component from "@glimmer/component";
-import { HermesDocument } from "hermes/types/document";
-import {
+import type { HermesDocument } from "hermes/types/document";
+import type {
   SortAttribute,
   SortDirection,
 } from "hermes/components/table/sortable-header";

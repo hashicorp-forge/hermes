@@ -2,11 +2,11 @@ import Service from "@ember/service";
 import { inject as service } from "@ember/service";
 import { keepLatestTask } from "ember-concurrency";
 import { tracked } from "@glimmer/tracking";
-import ConfigService from "hermes/services/config";
-import { HermesDocument } from "hermes/types/document";
+import type ConfigService from "hermes/services/config";
+import type { HermesDocument } from "hermes/types/document";
 import { assert } from "@ember/debug";
-import AlgoliaService from "./algolia";
-import StoreService from "hermes/services/store";
+import type AlgoliaService from "./algolia";
+import type StoreService from "hermes/services/store";
 
 export default class LatestDocsService extends Service {
   @service("config") declare configSvc: ConfigService;

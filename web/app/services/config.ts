@@ -1,5 +1,13 @@
 import Service from "@ember/service";
-import config, { HermesConfig } from "hermes/config/environment";
+import config, { type HermesConfig } from "hermes/config/environment";
+import ENV from "hermes/config/environment";
+
+interface MicrosoftConfig {
+  clientId: string;
+  clientSecret: string;
+  tenantId: string;
+  redirectUri: string;
+}
 
 export default class ConfigService extends Service {
   config = {
@@ -12,13 +20,14 @@ export default class ConfigService extends Service {
     feature_flags: config.featureFlags,
     google_doc_folders: config.google.docFolders ?? "",
     short_link_base_url: config.shortLinkBaseURL,
-    skip_google_auth: config.skipGoogleAuth,
+    skip_microsoft_auth: config.skipMicrosoftAuth,
     google_analytics_tag_id: undefined,
     jira_url: config.jiraURL,
     support_link_url: config.supportLinkURL,
     version: config.version,
     short_revision: config.shortRevision,
     group_approvals: config.groupApprovals,
+    microsoft: ENV.microsoft,
   };
 
   setConfig(param: HermesConfig) {

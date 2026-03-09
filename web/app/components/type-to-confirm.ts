@@ -1,9 +1,9 @@
 import Component from "@glimmer/component";
 import { guidFor } from "@ember/object/internals";
-import { WithBoundArgs } from "@glint/template";
+import type { WithBoundArgs } from "@glint/template";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
-import TypeToConfirmInput from "./type-to-confirm/input";
+import type TypeToConfirmInput from "./type-to-confirm/input";
 
 type TypeToConfirmInputBoundArgs =
   | "value"

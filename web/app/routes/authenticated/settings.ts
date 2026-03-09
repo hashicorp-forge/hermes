@@ -1,7 +1,7 @@
 import Route from "@ember/routing/route";
 import { inject as service } from "@ember/service";
-import AuthenticatedUserService from "hermes/services/authenticated-user";
-import ProductAreasService from "hermes/services/product-areas";
+import type AuthenticatedUserService from "hermes/services/authenticated-user";
+import type ProductAreasService from "hermes/services/product-areas";
 
 export default class SettingsRoute extends Route {
   @service declare authenticatedUser: AuthenticatedUserService;
