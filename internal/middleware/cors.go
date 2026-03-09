@@ -61,10 +61,8 @@ func CorsMiddlewareWithConfig(log hclog.Logger, next http.Handler, isDevelopment
 				isAllowed = true
 			} else if strings.Contains(origin, "officeapps.live.com") ||
 				strings.Contains(origin, "office.com") ||
-				strings.Contains(origin, "sharepoint.com") ||
-				strings.Contains(origin, "hashicorp.services") {
-				// In pre-prod and prod allow requests from Office 365 domains and our own services
-				// Allow only Office 365 origins in production
+				strings.Contains(origin, "sharepoint.com") {
+				// Allow Office 365 origins in production for Word Add-in
 				isAllowed = true
 			}
 			// In production, all other cross-origin requests are denied

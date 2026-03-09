@@ -187,8 +187,8 @@ func compareAlgoliaAndDatabaseDocument(
 	} else {
 		// Replace "-xxx.docx" (how draft doc numbers are defined in Algolia) with a
 		// zero.
-		re := regexp.MustCompile(`-xxx.docx$`)
-		algoDocNumber = re.ReplaceAllString(algoDocNumber, "-000.docx")
+		re := regexp.MustCompile(`-xxx\.docx$`)
+		algoDocNumber = re.ReplaceAllString(algoDocNumber, "-000")
 
 		var dbDocNumber string
 		// If document number in Algolia isn't empty, build the database document
