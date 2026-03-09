@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	addin "github.com/hashicorp-forge/hermes/hermes-plugin"
 	"github.com/hashicorp-forge/hermes/internal/api"
 	apiv2 "github.com/hashicorp-forge/hermes/internal/api/v2"
 	"github.com/hashicorp-forge/hermes/internal/auth"
@@ -18,6 +19,7 @@ import (
 	"github.com/hashicorp-forge/hermes/internal/datadog"
 	"github.com/hashicorp-forge/hermes/internal/db"
 	"github.com/hashicorp-forge/hermes/internal/jira"
+	"github.com/hashicorp-forge/hermes/internal/middleware"
 	"github.com/hashicorp-forge/hermes/internal/pkg/doctypes"
 	"github.com/hashicorp-forge/hermes/internal/pub"
 	"github.com/hashicorp-forge/hermes/internal/server"
@@ -27,6 +29,7 @@ import (
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp-forge/hermes/pkg/links"
 	"github.com/hashicorp-forge/hermes/pkg/models"
+	"github.com/hashicorp-forge/hermes/pkg/sharepointhelper"
 	"github.com/hashicorp-forge/hermes/web"
 	"github.com/hashicorp/go-hclog"
 	httptrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/net/http"
@@ -40,9 +43,12 @@ type Command struct {
 	flagAddr              string
 	flagBaseURL           string
 	flagConfig            string
-	flagOktaAuthServerURL string
-	flagOktaClientID      string
-	flagOktaDisabled      bool
+	flagOidcAuthServerURL string
+	flagOidcClientID      string
+	flagOidcDisabled      bool
+	flagTLSEnabled        bool
+	flagTLSCert           string
+	flagTLSKey            string
 }
 
 type endpoint struct {
@@ -68,23 +74,35 @@ func (c *Command) Flags() *base.FlagSet {
 		"[HERMES_SERVER_ADDR] Address to bind to for listening.",
 	)
 	f.StringVar(
-		&c.flagBaseURL, "base-url", "http://localhost:8000",
+		&c.flagBaseURL, "base-url", "https://localhost:8443",
 		"[HERMES_BASE_URL] Base URL used for building links.",
 	)
 	f.StringVar(
 		&c.flagConfig, "config", "", "Path to Hermes config file",
 	)
 	f.StringVar(
-		&c.flagOktaAuthServerURL, "okta-auth-server-url", "",
-		"[HERMES_SERVER_OKTA_AUTH_SERVER_URL] URL to the Okta authorization server.",
+		&c.flagOidcAuthServerURL, "oidc-auth-server-url", "",
+		"[HERMES_SERVER_OIDC_AUTH_SERVER_URL] URL to the OIDC authorization server.",
 	)
 	f.StringVar(
-		&c.flagOktaClientID, "okta-client-id", "",
-		"[HERMES_SERVER_OKTA_CLIENT_ID] Okta client ID.",
+		&c.flagOidcClientID, "oidc-client-id", "",
+		"[HERMES_SERVER_OIDC_CLIENT_ID] OIDC client ID.",
 	)
 	f.BoolVar(
-		&c.flagOktaDisabled, "okta-disabled", false,
-		"[HERMES_SERVER_OKTA_DISABLED] Disable Okta authorization.",
+		&c.flagOidcDisabled, "oidc-disabled", false,
+		"[HERMES_SERVER_OIDC_DISABLED] Disable OIDC authorization.",
+	)
+	f.BoolVar(
+		&c.flagTLSEnabled, "tls-enabled", false,
+		"[HERMES_SERVER_TLS_ENABLED] Enable TLS/HTTPS for the server.",
+	)
+	f.StringVar(
+		&c.flagTLSCert, "tls-cert", "",
+		"[HERMES_SERVER_TLS_CERT] Path to TLS certificate file.",
+	)
+	f.StringVar(
+		&c.flagTLSKey, "tls-key", "",
+		"[HERMES_SERVER_TLS_KEY] Path to TLS private key file.",
 	)
 
 	return f
@@ -108,6 +126,12 @@ func (c *Command) Run(args []string) int {
 				err, c.flagConfig))
 			return 1
 		}
+		// Log configuration loaded successfully without exposing sensitive data
+		c.Log.Info("Configuration loaded successfully",
+			"config_file", c.flagConfig,
+			"log_format", cfg.LogFormat,
+			"server_addr", cfg.Server.Addr,
+			"base_url", cfg.BaseURL)
 	}
 
 	// Get configuration from environment variables if not set on the command
@@ -125,30 +149,50 @@ func (c *Command) Run(args []string) int {
 	if c.flagBaseURL != f.Lookup("base-url").DefValue {
 		cfg.BaseURL = c.flagBaseURL
 	}
-	if val, ok := os.LookupEnv("HERMES_SERVER_OKTA_AUTH_SERVER_URL"); ok {
-		cfg.Okta.AuthServerURL = val
+	if val, ok := os.LookupEnv("HERMES_SERVER_OIDC_AUTH_SERVER_URL"); ok {
+		cfg.OidcAlb.AuthServerURL = val
 	}
-	if c.flagOktaAuthServerURL != f.Lookup("okta-auth-server-url").DefValue {
-		cfg.Okta.AuthServerURL = c.flagOktaAuthServerURL
+	if c.flagOidcAuthServerURL != f.Lookup("oidc-auth-server-url").DefValue {
+		cfg.OidcAlb.AuthServerURL = c.flagOidcAuthServerURL
 	}
-	if val, ok := os.LookupEnv("HERMES_SERVER_OKTA_CLIENT_ID"); ok {
-		cfg.Okta.ClientID = val
+	if val, ok := os.LookupEnv("HERMES_SERVER_OIDC_CLIENT_ID"); ok {
+		cfg.OidcAlb.ClientID = val
 	}
-	if c.flagOktaClientID != f.Lookup("okta-client-id").DefValue {
-		cfg.Okta.ClientID = c.flagOktaClientID
+	if c.flagOidcClientID != f.Lookup("oidc-client-id").DefValue {
+		cfg.OidcAlb.ClientID = c.flagOidcClientID
 	}
-	if val, ok := os.LookupEnv("HERMES_SERVER_OKTA_DISABLED"); ok {
+	if val, ok := os.LookupEnv("HERMES_SERVER_OIDC_DISABLED"); ok {
 		if val == "" || val == "false" {
-			// Keep Okta enabled if the env var value is an empty string or "false".
+			// Keep OIDC ALB enabled if the env var value is an empty string or "false".
 		} else {
-			cfg.Okta.Disabled = true
+			cfg.OidcAlb.Disabled = true
 		}
 	}
-	if val, ok := os.LookupEnv("HERMES_SERVER_OKTA_JWT_SIGNER"); ok {
-		cfg.Okta.JWTSigner = val
+	if val, ok := os.LookupEnv("HERMES_SERVER_OIDC_JWT_SIGNER"); ok {
+		cfg.OidcAlb.JWTSigner = val
 	}
-	if c.flagOktaDisabled {
-		cfg.Okta.Disabled = true
+	if c.flagOidcDisabled {
+		cfg.OidcAlb.Disabled = true
+	}
+
+	// Handle TLS configuration
+	if val, ok := os.LookupEnv("HERMES_SERVER_TLS_ENABLED"); ok {
+		cfg.Server.TLSEnabled = val == "true"
+	}
+	if c.flagTLSEnabled {
+		cfg.Server.TLSEnabled = true
+	}
+	if val, ok := os.LookupEnv("HERMES_SERVER_TLS_CERT"); ok {
+		cfg.Server.TLSCert = val
+	}
+	if c.flagTLSCert != "" {
+		cfg.Server.TLSCert = c.flagTLSCert
+	}
+	if val, ok := os.LookupEnv("HERMES_SERVER_TLS_KEY"); ok {
+		cfg.Server.TLSKey = val
+	}
+	if c.flagTLSKey != "" {
+		cfg.Server.TLSKey = c.flagTLSKey
 	}
 
 	// Validate feature flags defined in configuration
@@ -168,7 +212,6 @@ func (c *Command) Run(args []string) int {
 		}
 	}
 
-	// Configure logger.
 	switch cfg.LogFormat {
 	case "json":
 		c.Log = hclog.New(&hclog.LoggerOptions{
@@ -181,23 +224,26 @@ func (c *Command) Run(args []string) int {
 		return 1
 	}
 
-	// Build configuration for Okta authentication.
-	if !cfg.Okta.Disabled {
-		// Check for required Okta configuration.
-		if cfg.Okta.AuthServerURL == "" {
-			c.UI.Error("error initializing server: Okta authorization server URL is required")
+	// Log comprehensive configuration overview
+	logInstanceOverview(c.Log, cfg)
+
+	// Build configuration for OIDC ALB authentication.
+	if !cfg.OidcAlb.Disabled {
+		// Check for required OIDC ALB configuration.
+		if cfg.OidcAlb.AuthServerURL == "" {
+			c.UI.Error("error initializing server: OIDC ALB authorization server URL is required")
 			return 1
 		}
-		if cfg.Okta.AWSRegion == "" {
-			c.UI.Error("error initializing server: Okta AWS region is required")
+		if cfg.OidcAlb.AWSRegion == "" {
+			c.UI.Error("error initializing server: OIDC ALB AWS region is required")
 			return 1
 		}
-		if cfg.Okta.ClientID == "" {
-			c.UI.Error("error initializing server: Okta client ID is required")
+		if cfg.OidcAlb.ClientID == "" {
+			c.UI.Error("error initializing server: OIDC ALB client ID is required")
 			return 1
 		}
-		if cfg.Okta.JWTSigner == "" {
-			c.UI.Error("error initializing server: Okta JWT signer is required")
+		if cfg.OidcAlb.JWTSigner == "" {
+			c.UI.Error("error initializing server: OIDC ALB JWT signer is required")
 			return 1
 		}
 	}
@@ -238,11 +284,49 @@ func (c *Command) Run(args []string) int {
 		}
 
 		goog = gw.NewFromConfig(cfg.GoogleWorkspace.Auth)
-	} else {
+	} else if cfg.GoogleWorkspace.OAuth2.ClientID != "" {
 		// Use OAuth if Google Workspace auth is not defined in the config.
 		goog = gw.New()
 	}
 
+	// Initialize SharePoint service.
+	var sharepointSvc *sharepointhelper.Service
+	if cfg.SharePoint != nil {
+		// Validate required SharePoint configuration.
+		if cfg.SharePoint.ClientID == "" {
+			c.UI.Error("error initializing server: SharePoint client ID is required")
+			return 1
+		}
+		if cfg.SharePoint.ClientSecret == "" {
+			c.UI.Error("error initializing server: SharePoint client secret is required")
+			return 1
+		}
+		if cfg.SharePoint.TenantID == "" {
+			c.UI.Error("error initializing server: SharePoint tenant ID is required")
+			return 1
+		}
+		if cfg.SharePoint.SiteID == "" {
+			c.UI.Error("error initializing server: SharePoint Site ID is required")
+			return 1
+		}
+		if cfg.SharePoint.DriveID == "" {
+			c.UI.Error("error initializing server: SharePoint Drive ID is required")
+			return 1
+		}
+
+		// Initialize the SharePoint service.
+		sharepointSvc = sharepointhelper.NewService(cfg.SharePoint, c.Log)
+
+		// Check for SharePoint token creation in initializing step.
+		_, err := sharepointSvc.GetToken()
+		if err != nil {
+			c.UI.Error(fmt.Sprintf("error initializing SharePoint service: %v", err))
+			return 1
+		}
+		c.Log.Info("Successfully initialized SharePoint service.")
+	}
+
+	c.Log.Info("Algolia client configuration", "application_id", cfg.Algolia.ApplicationID)
 	reqOpts := map[interface{}]string{
 		cfg.Algolia.ApplicationID:           "Algolia Application ID is required",
 		cfg.Algolia.SearchAPIKey:            "Algolia Search API Key is required",
@@ -344,6 +428,7 @@ func (c *Command) Run(args []string) int {
 		GWService:  goog,
 		Jira:       jiraSvc,
 		Logger:     c.Log,
+		SharePoint: sharepointSvc,
 	}
 
 	// Define handlers for authenticated endpoints.
@@ -405,45 +490,68 @@ func (c *Command) Run(args []string) int {
 		{"/pub/", http.StripPrefix("/pub/", pub.Handler())},
 	}
 
-	// Web endpoints are conditionally authenticated based on if Okta is enabled.
-	webEndpoints := []endpoint{
+	// Web endpoints are conditionally authenticated based on if Oidc is enabled.
+	webEndpoints1 := []endpoint{
 		{"/", web.Handler()},
+		{"/addin/", addin.AddinHandler(c.Log)},
+	}
+	webEndpoints2 := []endpoint{
 		{"/api/v1/web/config", web.ConfigHandler(cfg, algoSearch, c.Log)},
 		{"/api/v2/web/config", web.ConfigHandler(cfg, algoSearch, c.Log)},
 		{"/l/", links.RedirectHandler(algoSearch, cfg.Algolia, c.Log)},
 	}
 
-	// If Okta is enabled, add the web endpoints for the single page app as
+	// If Oidc is enabled, add the web endpoints for the single page app as
 	// authenticated endpoints.
-	if cfg.Okta != nil && !cfg.Okta.Disabled {
-		authenticatedEndpoints = append(authenticatedEndpoints, webEndpoints...)
-	} else {
-		// If Okta is disabled, we need to add the web endpoints for the SPA as
-		// unauthenticated endpoints so the application will load.
-		unauthenticatedEndpoints = append(unauthenticatedEndpoints, webEndpoints...)
-	}
+	//if cfg.Oidc != nil && cfg.Oidc.Disabled {
+	authenticatedEndpoints = append(authenticatedEndpoints, webEndpoints1...)
+	unauthenticatedEndpoints = append(unauthenticatedEndpoints, webEndpoints2...)
 
 	// Register handlers.
 	for _, e := range authenticatedEndpoints {
 		mux.Handle(
 			e.pattern,
-			auth.AuthenticateRequest(*cfg, goog, c.Log, e.handler),
+			auth.AuthenticateRequest(*cfg, goog, sharepointSvc, c.Log, e.handler),
 		)
 	}
 	for _, e := range unauthenticatedEndpoints {
 		mux.Handle(e.pattern, e.handler)
 	}
 
+	// Use dev_mode flag from configuration
+	isDevelopment := cfg.Server.DevMode
+
+	if isDevelopment {
+		c.Log.Info("Running in development mode - permissive CORS policy enabled")
+	} else {
+		c.Log.Info("Running in production mode - restrictive CORS policy enabled")
+	} // Wrap the entire mux with CORS middleware
+	corsHandler := middleware.CorsMiddlewareWithConfig(c.Log, mux, isDevelopment)
+
 	server := &http.Server{
 		Addr:    cfg.Server.Addr,
-		Handler: mux,
+		Handler: corsHandler,
 	}
 	go func() {
-		c.Log.Info(fmt.Sprintf("listening on %s...", cfg.Server.Addr))
+		if cfg.Server.TLSEnabled {
+			c.Log.Info("Starting server with TLS/HTTPS", "addr", cfg.Server.Addr, "tls_enabled", true)
 
-		if err := server.ListenAndServe(); err != http.ErrServerClosed {
-			c.Log.Error(fmt.Sprintf("error starting listener: %v", err))
-			os.Exit(1)
+			if cfg.Server.TLSCert == "" || cfg.Server.TLSKey == "" {
+				c.Log.Error("TLS is enabled but certificate or key file path is not specified")
+				os.Exit(1)
+			}
+
+			if err := server.ListenAndServeTLS(cfg.Server.TLSCert, cfg.Server.TLSKey); err != http.ErrServerClosed {
+				c.Log.Error("Error starting TLS listener", "error", err, "addr", cfg.Server.Addr)
+				os.Exit(1)
+			}
+		} else {
+			c.Log.Info("Starting server", "addr", cfg.Server.Addr, "tls_enabled", false)
+
+			if err := server.ListenAndServe(); err != http.ErrServerClosed {
+				c.Log.Error("Error starting listener", "error", err, "addr", cfg.Server.Addr)
+				os.Exit(1)
+			}
 		}
 	}()
 
@@ -571,4 +679,97 @@ func registerProducts(
 	}
 
 	return nil
+}
+
+// logInstanceOverview logs a comprehensive overview of the running instance configuration
+// without exposing sensitive data
+func logInstanceOverview(log hclog.Logger, cfg *config.Config) {
+	// Determine authentication method
+	var authMethod string
+	var authDetails []interface{}
+
+	if cfg.OidcAlb != nil && !cfg.OidcAlb.Disabled {
+		authMethod = "OIDC ALB"
+		authDetails = []interface{}{
+			"auth_server_configured", cfg.OidcAlb.AuthServerURL != "",
+			"client_id_configured", cfg.OidcAlb.ClientID != "",
+			"aws_region", cfg.OidcAlb.AWSRegion,
+		}
+	} else {
+		authMethod = "Microsoft Auth / SharePoint"
+		authDetails = []interface{}{
+			"sharepoint_configured", cfg.SharePoint != nil,
+		}
+		if cfg.SharePoint != nil {
+			authDetails = append(authDetails,
+				"tenant_id_configured", cfg.SharePoint.TenantID != "",
+				"site_id_configured", cfg.SharePoint.SiteID != "",
+				"drive_id_configured", cfg.SharePoint.DriveID != "",
+				"domain", cfg.SharePoint.Domain,
+			)
+		}
+	}
+
+	// Determine mode (development vs production)
+	mode := "production"
+	if cfg.Server != nil && cfg.Server.DevMode {
+		mode = "development"
+	}
+
+	// Log format determination
+	logFormat := "standard"
+	if cfg.LogFormat == "json" {
+		logFormat = "json"
+	} else if cfg.LogFormat != "" {
+		logFormat = cfg.LogFormat
+	}
+
+	// Main configuration overview
+	configFields := []interface{}{
+		"instance_mode", mode,
+		"server_addr", cfg.Server.Addr,
+		"base_url", cfg.BaseURL,
+		"shortener_base_url", cfg.ShortenerBaseURL,
+		"log_format", logFormat,
+		"tls_enabled", cfg.Server != nil && cfg.Server.TLSEnabled,
+		"auth_method", authMethod,
+	}
+
+	// Add auth-specific details
+	configFields = append(configFields, authDetails...)
+
+	// Service configurations
+	configFields = append(configFields,
+		"algolia_configured", cfg.Algolia != nil && cfg.Algolia.ApplicationID != "",
+		"google_workspace_configured", cfg.GoogleWorkspace != nil && cfg.GoogleWorkspace.Domain != "",
+		"email_enabled", cfg.Email != nil && cfg.Email.Enabled,
+		"jira_enabled", cfg.Jira != nil && cfg.Jira.Enabled,
+		"datadog_enabled", cfg.Datadog != nil && cfg.Datadog.Enabled,
+	)
+
+	// Google Workspace details (if configured)
+	if cfg.GoogleWorkspace != nil {
+		configFields = append(configFields,
+			"gw_domain", cfg.GoogleWorkspace.Domain,
+			"gw_docs_folder", cfg.GoogleWorkspace.DocsFolder,
+			"gw_drafts_folder", cfg.GoogleWorkspace.DraftsFolder,
+			"gw_shortcuts_enabled", cfg.GoogleWorkspace.CreateDocShortcuts,
+		)
+	}
+
+	// Document types count
+	if cfg.DocumentTypes != nil {
+		configFields = append(configFields,
+			"document_types_count", len(cfg.DocumentTypes.DocumentType),
+		)
+	}
+
+	// Products count
+	if cfg.Products != nil {
+		configFields = append(configFields,
+			"products_count", len(cfg.Products.Product),
+		)
+	}
+
+	log.Info("=== Hermes Instance Configuration Overview ===", configFields...)
 }

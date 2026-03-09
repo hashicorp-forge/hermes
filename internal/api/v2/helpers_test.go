@@ -116,7 +116,7 @@ func TestCompareAlgoliaAndDatabaseDocument(t *testing.T) {
 	}{
 		"good": {
 			algoDoc: map[string]any{
-				"objectID":   "GoogleFileID1",
+				"objectID":   "FileID1",
 				"title":      "Title1",
 				"docType":    "RFC",
 				"docNumber":  "ABC-123",
@@ -159,8 +159,8 @@ func TestCompareAlgoliaAndDatabaseDocument(t *testing.T) {
 				"status":  "In-Review",
 			},
 			dbDoc: models.Document{
-				GoogleFileID: "GoogleFileID1",
-				Title:        "Title1",
+				FileID: "FileID1",
+				Title:  "Title1",
 				DocumentType: models.DocumentType{
 					Name: "RFC",
 				},
@@ -212,12 +212,12 @@ func TestCompareAlgoliaAndDatabaseDocument(t *testing.T) {
 					2023, time.April, 5, 23, 0, 0, 0, time.UTC),
 				FileRevisions: []models.DocumentFileRevision{
 					{
-						GoogleDriveFileRevisionID: "1",
-						Name:                      "FileRevision1",
+						FileRevisionID: "1",
+						Name:           "FileRevision1",
 					},
 					{
-						GoogleDriveFileRevisionID: "2",
-						Name:                      "FileRevision2",
+						FileRevisionID: "2",
+						Name:           "FileRevision2",
 					},
 				},
 				Owner: &models.User{
@@ -255,10 +255,10 @@ func TestCompareAlgoliaAndDatabaseDocument(t *testing.T) {
 			shouldErr: false,
 		},
 
-		"good draft doc number (test 'ABC-???')": {
+		"good draft doc number (test 'ABC-123')": {
 			algoDoc: map[string]any{
 				"appCreated": true,
-				"docNumber":  "ABC-???",
+				"docNumber":  "ABC-123",
 				"docType":    "RFC",
 				"createdTime": float64(time.Date(
 					2023, time.April, 5, 1, 0, 0, 0, time.UTC).Unix()),
@@ -395,12 +395,12 @@ func TestCompareAlgoliaAndDatabaseDocument(t *testing.T) {
 					2023, time.April, 5, 23, 0, 0, 0, time.UTC),
 				FileRevisions: []models.DocumentFileRevision{
 					{
-						GoogleDriveFileRevisionID: "1",
-						Name:                      "FileRevision1",
+						FileRevisionID: "1",
+						Name:           "FileRevision1",
 					},
 					{
-						GoogleDriveFileRevisionID: "2",
-						Name:                      "FileRevision2",
+						FileRevisionID: "2",
+						Name:           "FileRevision2",
 					},
 				},
 				Owner: &models.User{
@@ -437,7 +437,7 @@ func TestCompareAlgoliaAndDatabaseDocument(t *testing.T) {
 
 		"bad objectID": {
 			algoDoc: map[string]any{
-				"objectID":   "GoogleFileID1",
+				"objectID":   "FileID1",
 				"appCreated": true,
 				"docNumber":  "ABC-123",
 				"createdTime": float64(time.Date(
@@ -448,7 +448,7 @@ func TestCompareAlgoliaAndDatabaseDocument(t *testing.T) {
 				"product": "Product1",
 			},
 			dbDoc: models.Document{
-				GoogleFileID:   "BadGoogleFileID",
+				FileID:         "BadFileID",
 				DocumentNumber: 123,
 				Product: models.Product{
 					Name:         "Product1",
@@ -608,7 +608,7 @@ func TestCompareAlgoliaAndDatabaseDocument(t *testing.T) {
 				"product": "Product1",
 			},
 			dbDoc: models.Document{
-				GoogleFileID:   "BadGoogleFileID",
+				FileID:         "BadFileID",
 				DocumentNumber: 123,
 				Product: models.Product{
 					Name:         "Product1",
@@ -770,7 +770,7 @@ func TestCompareAlgoliaAndDatabaseDocument(t *testing.T) {
 				"product": "Product1",
 			},
 			dbDoc: models.Document{
-				GoogleFileID:   "BadGoogleFileID",
+				FileID:         "BadFileID",
 				DocumentNumber: 123,
 				Product: models.Product{
 					Name:         "Product1",

@@ -95,6 +95,11 @@ func ProjectsHandler(srv server.Server) http.Handler {
 			if pageParam != "" {
 				p, err := strconv.Atoi(pageParam)
 				if err != nil {
+					srv.Logger.Warn("invalid page parameter",
+						append([]interface{}{
+							"error", err,
+							"page_param", pageParam,
+						}, logArgs...)...)
 					http.Error(w, "Invalid page parameter", http.StatusBadRequest)
 					return
 				}
@@ -105,6 +110,11 @@ func ProjectsHandler(srv server.Server) http.Handler {
 			if hitsPerPageParam != "" {
 				hpp, err := strconv.Atoi(hitsPerPageParam)
 				if err != nil {
+					srv.Logger.Warn("invalid hitsPerPage parameter",
+						append([]interface{}{
+							"error", err,
+							"hits_per_page_param", hitsPerPageParam,
+						}, logArgs...)...)
 					http.Error(w, "Invalid hitsPerPage parameter", http.StatusBadRequest)
 					return
 				}
@@ -121,6 +131,10 @@ func ProjectsHandler(srv server.Server) http.Handler {
 						Status: statusFilter,
 					}
 				} else {
+					srv.Logger.Warn("invalid status parameter",
+						append([]interface{}{
+							"status_param", statusParam,
+						}, logArgs...)...)
 					http.Error(w, "Invalid status", http.StatusUnprocessableEntity)
 					return
 				}
@@ -230,6 +244,7 @@ func ProjectsHandler(srv server.Server) http.Handler {
 
 			// Validate request.
 			if req.Title == "" {
+				srv.Logger.Warn("project title is required", logArgs...)
 				http.Error(w, "Bad request: title is required", http.StatusBadRequest)
 				return
 			}
@@ -453,6 +468,10 @@ func ProjectHandler(srv server.Server) http.Handler {
 					case "archived":
 					case "completed":
 					default:
+						srv.Logger.Warn("invalid project status in patch request",
+							append([]interface{}{
+								"status", *req.Status,
+							}, logArgs...)...)
 						http.Error(w,
 							"Bad request: invalid status"+
 								` (valid values are "active", "archived", "completed")`,
@@ -461,6 +480,7 @@ func ProjectHandler(srv server.Server) http.Handler {
 					}
 				}
 				if req.Title != nil && *req.Title == "" {
+					srv.Logger.Warn("project title cannot be empty", logArgs...)
 					http.Error(
 						w, "Bad request: title cannot be empty", http.StatusBadRequest)
 					return

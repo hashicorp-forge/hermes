@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/errs"
 	"github.com/hashicorp-forge/hermes/internal/config"
@@ -39,22 +40,34 @@ func ApprovalHandler(
 				return
 			}
 
-			// Check if document is locked.
-			locked, err := hcd.IsLocked(docID, db, s, l)
-			if err != nil {
-				l.Error("error checking document locked status",
-					"error", err,
-					"path", r.URL.Path,
-					"method", r.Method,
-					"doc_id", docID,
-				)
-				http.Error(w, "Error getting document status", http.StatusNotFound)
-				return
+			// Check if this is a SharePoint document
+			isSharePoint := false
+			// Try to find the document with FileID first
+			spDoc := models.Document{
+				FileID: docID,
 			}
-			// Don't continue if document is locked.
-			if locked {
-				http.Error(w, "Document is locked", http.StatusLocked)
-				return
+			if err := spDoc.Get(db); err == nil {
+				isSharePoint = true
+				l.Info("SharePoint document, skipping lock check",
+					"sharepoint_file_id", docID)
+			} else {
+				// For Google Workspace documents, perform lock check
+				locked, err := hcd.IsLocked(docID, db, s, l)
+				if err != nil {
+					l.Error("error checking document locked status",
+						"error", err,
+						"path", r.URL.Path,
+						"method", r.Method,
+						"doc_id", docID,
+					)
+					http.Error(w, "Error getting document status", http.StatusNotFound)
+					return
+				}
+				// Don't continue if document is locked.
+				if locked {
+					http.Error(w, "Document is locked", http.StatusLocked)
+					return
+				}
 			}
 
 			// Get document object from Algolia.
@@ -127,36 +140,47 @@ func ApprovalHandler(
 			}
 			doc.ApprovedBy = newApprovedBy
 
-			// Get latest Google Drive file revision.
-			latestRev, err := s.GetLatestRevision(docID)
-			if err != nil {
-				l.Error("error getting latest revision",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", docID)
-				http.Error(w, "Error requesting changes of document",
-					http.StatusInternalServerError)
-				return
-			}
+			var revisionId string
+			if isSharePoint {
+				// For SharePoint documents, we don't track revisions the same way
+				// Just use a placeholder revision ID
+				revisionId = "sharepoint-revision-" + fmt.Sprint(time.Now().Unix())
+				l.Info("SharePoint document, using placeholder revision",
+					"sharepoint_file_id", docID,
+					"revision_id", revisionId)
+			} else {
+				// Get latest Google Drive file revision.
+				latestRev, err := s.GetLatestRevision(docID)
+				if err != nil {
+					l.Error("error getting latest revision",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID)
+					http.Error(w, "Error requesting changes of document",
+						http.StatusInternalServerError)
+					return
+				}
 
-			// Mark latest revision to be kept forever.
-			_, err = s.KeepRevisionForever(docID, latestRev.Id)
-			if err != nil {
-				l.Error("error marking revision to keep forever",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", docID,
-					"rev_id", latestRev.Id)
-				http.Error(w, "Error updating document status",
-					http.StatusInternalServerError)
-				return
+				// Mark latest revision to be kept forever.
+				_, err = s.KeepRevisionForever(docID, latestRev.Id)
+				if err != nil {
+					l.Error("error marking revision to keep forever",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID,
+						"rev_id", latestRev.Id)
+					http.Error(w, "Error updating document status",
+						http.StatusInternalServerError)
+					return
+				}
+				revisionId = latestRev.Id
 			}
 
 			// Record file revision in the Algolia document object.
 			revisionName := fmt.Sprintf("Changes requested by %s", userEmail)
-			doc.SetFileRevision(latestRev.Id, revisionName)
+			doc.SetFileRevision(revisionId, revisionName)
 
 			// Convert document to Algolia object.
 			docObj, err := doc.ToAlgoliaObject(true)
@@ -197,16 +221,21 @@ func ApprovalHandler(
 			}
 
 			// Replace the doc header.
-			if err := doc.ReplaceHeader(cfg.BaseURL, false, s); err != nil {
-				l.Error("error replacing doc header",
-					"error", err,
-					"doc_id", docID,
-					"method", r.Method,
-					"path", r.URL.Path,
-				)
-				http.Error(w, "Error requesting changes of document",
-					http.StatusInternalServerError)
-				return
+			if !isSharePoint {
+				if err := doc.ReplaceHeader(cfg.BaseURL, false, s); err != nil {
+					l.Error("error replacing doc header",
+						"error", err,
+						"doc_id", docID,
+						"method", r.Method,
+						"path", r.URL.Path,
+					)
+					http.Error(w, "Error requesting changes of document",
+						http.StatusInternalServerError)
+					return
+				}
+			} else {
+				l.Info("SharePoint document, skipping header replacement",
+					"sharepoint_file_id", docID)
 			}
 
 			// Update document reviews in the database.
@@ -245,9 +274,11 @@ func ApprovalHandler(
 				return
 			}
 			// Get document from database.
-			dbDoc := models.Document{
-				GoogleFileID: docID,
-			}
+			var dbDoc models.Document
+			dbDoc = models.Document{
+					FileID: docID,
+				}
+
 			if err := dbDoc.Get(db); err != nil {
 				l.Error("error getting document from database for data comparison",
 					"error", err,
@@ -257,13 +288,17 @@ func ApprovalHandler(
 				)
 				return
 			}
+
 			// Get all reviews for the document.
 			var reviews models.DocumentReviews
-			if err := reviews.Find(db, models.DocumentReview{
-				Document: models.Document{
-					GoogleFileID: docID,
-				},
-			}); err != nil {
+			var reviewQuery models.DocumentReview
+			reviewQuery = models.DocumentReview{
+					Document: models.Document{
+						FileID: docID,
+					},
+				}
+
+			if err := reviews.Find(db, reviewQuery); err != nil {
 				l.Error("error getting all reviews for document for data comparison",
 					"error", err,
 					"method", r.Method,
@@ -296,22 +331,34 @@ func ApprovalHandler(
 				return
 			}
 
-			// Check if document is locked.
-			locked, err := hcd.IsLocked(docID, db, s, l)
-			if err != nil {
-				l.Error("error checking document locked status",
-					"error", err,
-					"path", r.URL.Path,
-					"method", r.Method,
-					"doc_id", docID,
-				)
-				http.Error(w, "Error getting document status", http.StatusNotFound)
-				return
+			// Check if this is a SharePoint document
+			isSharePoint := false
+			// Try to find the document with FileID first
+			spDoc := models.Document{
+				FileID: docID,
 			}
-			// Don't continue if document is locked.
-			if locked {
-				http.Error(w, "Document is locked", http.StatusLocked)
-				return
+			if err := spDoc.Get(db); err == nil {
+				isSharePoint = true
+				l.Info("SharePoint document, skipping lock check",
+					"sharepoint_file_id", docID)
+			} else {
+				// For Google Workspace documents, perform lock check
+				locked, err := hcd.IsLocked(docID, db, s, l)
+				if err != nil {
+					l.Error("error checking document locked status",
+						"error", err,
+						"path", r.URL.Path,
+						"method", r.Method,
+						"doc_id", docID,
+					)
+					http.Error(w, "Error getting document status", http.StatusNotFound)
+					return
+				}
+				// Don't continue if document is locked.
+				if locked {
+					http.Error(w, "Document is locked", http.StatusLocked)
+					return
+				}
 			}
 
 			// Get document object from Algolia.
@@ -386,36 +433,47 @@ func ApprovalHandler(
 			}
 			doc.ChangesRequestedBy = newChangesRequestedBy
 
-			// Get latest Google Drive file revision.
-			latestRev, err := s.GetLatestRevision(docID)
-			if err != nil {
-				l.Error("error getting latest revision",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", docID)
-				http.Error(w, "Error creating review",
-					http.StatusInternalServerError)
-				return
-			}
+			var revisionId string
+			if isSharePoint {
+				// For SharePoint documents, we don't track revisions the same way
+				// Just use a placeholder revision ID
+				revisionId = "sharepoint-revision-" + fmt.Sprint(time.Now().Unix())
+				l.Info("SharePoint document, using placeholder revision",
+					"sharepoint_file_id", docID,
+					"revision_id", revisionId)
+			} else {
+				// Get latest Google Drive file revision.
+				latestRev, err := s.GetLatestRevision(docID)
+				if err != nil {
+					l.Error("error getting latest revision",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID)
+					http.Error(w, "Error creating review",
+						http.StatusInternalServerError)
+					return
+				}
 
-			// Mark latest revision to be kept forever.
-			_, err = s.KeepRevisionForever(docID, latestRev.Id)
-			if err != nil {
-				l.Error("error marking revision to keep forever",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", docID,
-					"rev_id", latestRev.Id)
-				http.Error(w, "Error creating review",
-					http.StatusInternalServerError)
-				return
+				// Mark latest revision to be kept forever.
+				_, err = s.KeepRevisionForever(docID, latestRev.Id)
+				if err != nil {
+					l.Error("error marking revision to keep forever",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID,
+						"rev_id", latestRev.Id)
+					http.Error(w, "Error creating review",
+						http.StatusInternalServerError)
+					return
+				}
+				revisionId = latestRev.Id
 			}
 
 			// Record file revision in the Algolia document object.
 			revisionName := fmt.Sprintf("Approved by %s", userEmail)
-			doc.SetFileRevision(latestRev.Id, revisionName)
+			doc.SetFileRevision(revisionId, revisionName)
 
 			// Convert document to Algolia object.
 			docObj, err := doc.ToAlgoliaObject(true)
@@ -456,17 +514,22 @@ func ApprovalHandler(
 			}
 
 			// Replace the doc header.
-			err = doc.ReplaceHeader(cfg.BaseURL, false, s)
-			if err != nil {
-				l.Error("error replacing doc header",
-					"error", err,
-					"doc_id", docID,
-					"method", r.Method,
-					"path", r.URL.Path,
-				)
-				http.Error(w, "Error approving document",
-					http.StatusInternalServerError)
-				return
+			if !isSharePoint {
+				err = doc.ReplaceHeader(cfg.BaseURL, false, s)
+				if err != nil {
+					l.Error("error replacing doc header",
+						"error", err,
+						"doc_id", docID,
+						"method", r.Method,
+						"path", r.URL.Path,
+					)
+					http.Error(w, "Error approving document",
+						http.StatusInternalServerError)
+					return
+				}
+			} else {
+				l.Info("SharePoint document, skipping header replacement",
+					"sharepoint_file_id", docID)
 			}
 
 			// Update document reviews in the database.
@@ -505,9 +568,11 @@ func ApprovalHandler(
 				return
 			}
 			// Get document from database.
-			dbDoc := models.Document{
-				GoogleFileID: docID,
-			}
+			var dbDoc models.Document
+			dbDoc = models.Document{
+					FileID: docID,
+				}
+
 			if err := dbDoc.Get(db); err != nil {
 				l.Error("error getting document from database for data comparison",
 					"error", err,
@@ -517,13 +582,17 @@ func ApprovalHandler(
 				)
 				return
 			}
+
 			// Get all reviews for the document.
 			var reviews models.DocumentReviews
-			if err := reviews.Find(db, models.DocumentReview{
-				Document: models.Document{
-					GoogleFileID: docID,
-				},
-			}); err != nil {
+			var reviewQuery models.DocumentReview
+			reviewQuery = models.DocumentReview{
+					Document: models.Document{
+						FileID: docID,
+					},
+				}
+
+			if err := reviews.Find(db, reviewQuery); err != nil {
 				l.Error("error getting all reviews for document for data comparison",
 					"error", err,
 					"method", r.Method,
@@ -554,25 +623,27 @@ func ApprovalHandler(
 // document reviews in the database.
 func updateDocumentReviewsInDatabase(doc document.Document, db *gorm.DB) error {
 	var docReviews []models.DocumentReview
+
 	for _, a := range doc.Approvers {
 		u := models.User{
 			EmailAddress: a,
 		}
+		
+		docModel := models.Document{
+				FileID: doc.ObjectID,
+			}
+
 		if helpers.StringSliceContains(doc.ApprovedBy, a) {
 			docReviews = append(docReviews, models.DocumentReview{
-				Document: models.Document{
-					GoogleFileID: doc.ObjectID,
-				},
-				User:   u,
-				Status: models.ApprovedDocumentReviewStatus,
+				Document: docModel,
+				User:     u,
+				Status:   models.ApprovedDocumentReviewStatus,
 			})
 		} else if helpers.StringSliceContains(doc.ChangesRequestedBy, a) {
 			docReviews = append(docReviews, models.DocumentReview{
-				Document: models.Document{
-					GoogleFileID: doc.ObjectID,
-				},
-				User:   u,
-				Status: models.ChangesRequestedDocumentReviewStatus,
+				Document: docModel,
+				User:     u,
+				Status:   models.ChangesRequestedDocumentReviewStatus,
 			})
 		}
 	}

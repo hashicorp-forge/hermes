@@ -36,7 +36,7 @@ func draftsShareableHandler(
 	case "GET":
 		// Get document from database.
 		d := models.Document{
-			GoogleFileID: docID,
+			FileID: docID,
 		}
 		if err := d.Get(db); err != nil {
 			l.Error("error getting document from database",
@@ -104,7 +104,7 @@ func draftsShareableHandler(
 
 		// Get document from database.
 		doc := models.Document{
-			GoogleFileID: docID,
+			FileID: docID,
 		}
 		if err := doc.Get(db); err != nil {
 			l.Error("error getting document from database",

@@ -41,7 +41,7 @@ func TestDocumentFileRevisionwModel(t *testing.T) {
 		t.Run("Create a document", func(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			d := Document{
-				GoogleFileID: "GoogleFileID1",
+				FileID: "FileID1",
 				DocumentType: DocumentType{
 					Name: "DT1",
 				},
@@ -58,10 +58,10 @@ func TestDocumentFileRevisionwModel(t *testing.T) {
 			_, require := assert.New(t), require.New(t)
 			fr := DocumentFileRevision{
 				Document: Document{
-					GoogleFileID: "GoogleFileID1",
+					FileID: "FileID1",
 				},
-				GoogleDriveFileRevisionID: "GoogleDriveFileRevisionID1",
-				Name:                      "Name1",
+				FileRevisionID: "FileRevisionID1",
+				Name:           "Name1",
 			}
 			err := fr.Create(db)
 			require.NoError(err)
@@ -70,12 +70,12 @@ func TestDocumentFileRevisionwModel(t *testing.T) {
 		t.Run("Find file revisions for the document", func(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			var frs DocumentFileRevisions
-			err := frs.Find(db, Document{GoogleFileID: "GoogleFileID1"})
+			err := frs.Find(db, Document{FileID: "FileID1"})
 			require.NoError(err)
 			require.Len(frs, 1)
 			assert.EqualValues(1, frs[0].DocumentID)
 			assert.Equal(
-				"GoogleDriveFileRevisionID1", frs[0].GoogleDriveFileRevisionID)
+				"FileRevisionID1", frs[0].FileRevisionID)
 			assert.Equal("Name1", frs[0].Name)
 		})
 
@@ -83,10 +83,10 @@ func TestDocumentFileRevisionwModel(t *testing.T) {
 			_, require := assert.New(t), require.New(t)
 			fr := DocumentFileRevision{
 				Document: Document{
-					GoogleFileID: "GoogleFileID1",
+					FileID: "FileID1",
 				},
-				GoogleDriveFileRevisionID: "GoogleDriveFileRevisionID2",
-				Name:                      "Name2",
+				FileRevisionID: "FileRevisionID2",
+				Name:           "Name2",
 			}
 			err := fr.Create(db)
 			require.NoError(err)
@@ -95,16 +95,16 @@ func TestDocumentFileRevisionwModel(t *testing.T) {
 		t.Run("Find file revisions for the document", func(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			var frs DocumentFileRevisions
-			err := frs.Find(db, Document{GoogleFileID: "GoogleFileID1"})
+			err := frs.Find(db, Document{FileID: "FileID1"})
 			require.NoError(err)
 			require.Len(frs, 2)
 			assert.EqualValues(1, frs[0].DocumentID)
 			assert.Equal(
-				"GoogleDriveFileRevisionID1", frs[0].GoogleDriveFileRevisionID)
+				"FileRevisionID1", frs[0].FileRevisionID)
 			assert.Equal("Name1", frs[0].Name)
 			assert.EqualValues(1, frs[1].DocumentID)
 			assert.Equal(
-				"GoogleDriveFileRevisionID2", frs[1].GoogleDriveFileRevisionID)
+				"FileRevisionID2", frs[1].FileRevisionID)
 			assert.Equal("Name2", frs[1].Name)
 		})
 	})

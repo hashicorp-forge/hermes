@@ -23,7 +23,7 @@ type ProjectRelatedResourcesGetResponseExternalLink struct {
 }
 
 type ProjectRelatedResourcesGetResponseHermesDocument struct {
-	GoogleFileID   string   `json:"googleFileID"`
+	FileID         string   `json:"FileID"`
 	Title          string   `json:"title"`
 	CreatedTime    int64    `json:"createdTime"`
 	DocumentType   string   `json:"documentType"`
@@ -48,8 +48,8 @@ type ProjectRelatedResourcesPutRequestExternalLink struct {
 }
 
 type ProjectRelatedResourcesPutRequestHermesDocument struct {
-	GoogleFileID string `json:"googleFileID"`
-	SortOrder    int    `json:"sortOrder"`
+	FileID    string `json:"FileID"`
+	SortOrder int    `json:"sortOrder"`
 }
 
 func projectsResourceRelatedResourcesHandler(
@@ -109,7 +109,7 @@ func projectsResourceRelatedResourcesHandler(
 		}
 		// Add Hermes document related resources.
 		for _, hdrr := range hdrrs {
-			logArgs = append(logArgs, "document_id", hdrr.Document.GoogleFileID)
+			logArgs = append(logArgs, "document_id", hdrr.Document.FileID)
 			// Convert database model to a document. We don't need document review
 			// data for this endpoint.
 			doc, err := document.NewFromDatabaseModel(
@@ -127,7 +127,7 @@ func projectsResourceRelatedResourcesHandler(
 			resp.HermesDocuments = append(
 				resp.HermesDocuments,
 				ProjectRelatedResourcesGetResponseHermesDocument{
-					GoogleFileID:   doc.ObjectID,
+					FileID:         doc.ObjectID,
 					Title:          doc.Title,
 					CreatedTime:    doc.CreatedTime,
 					DocumentType:   doc.DocType,
@@ -213,7 +213,7 @@ func projectsResourceRelatedResourcesHandler(
 					SortOrder: hdrr.SortOrder,
 				},
 				Document: models.Document{
-					GoogleFileID: hdrr.GoogleFileID,
+					FileID: hdrr.FileID,
 				},
 			})
 		}

@@ -151,7 +151,7 @@ func DocumentHandler(
 
 			// Get document from database.
 			model := models.Document{
-				GoogleFileID: docID,
+				FileID: docID,
 			}
 			if err := model.Get(db); err != nil {
 				l.Error("error getting document from database",
@@ -258,7 +258,7 @@ func DocumentHandler(
 			}
 			// Get document from database.
 			dbDoc := models.Document{
-				GoogleFileID: docID,
+				FileID: docID,
 			}
 			if err := dbDoc.Get(db); err != nil {
 				l.Error("error getting document from database for data comparison",
@@ -273,7 +273,7 @@ func DocumentHandler(
 			var reviews models.DocumentReviews
 			if err := reviews.Find(db, models.DocumentReview{
 				Document: models.Document{
-					GoogleFileID: docID,
+					FileID: docID,
 				},
 			}); err != nil {
 				l.Error("error getting all reviews for document for data comparison",
@@ -603,7 +603,7 @@ Hermes
 
 			// Get document record from database so we can modify it for updating.
 			model := models.Document{
-				GoogleFileID: docID,
+				FileID: docID,
 			}
 			if err := model.Get(db); err != nil {
 				l.Error("error getting document from database",
@@ -776,7 +776,7 @@ Hermes
 			}
 			// Get document from database.
 			dbDoc := models.Document{
-				GoogleFileID: docID,
+				FileID: docID,
 			}
 			if err := dbDoc.Get(db); err != nil {
 				l.Error("error getting document from database for data comparison",
@@ -791,7 +791,7 @@ Hermes
 			var reviews models.DocumentReviews
 			if err := reviews.Find(db, models.DocumentReview{
 				Document: models.Document{
-					GoogleFileID: docID,
+					FileID: docID,
 				},
 			}); err != nil {
 				l.Error("error getting all reviews for document for data comparison",
@@ -836,7 +836,7 @@ func updateRecentlyViewedDocs(
 
 	// Get viewed document in database.
 	doc := models.Document{
-		GoogleFileID: docID,
+		FileID: docID,
 	}
 	if err := doc.Get(db); err != nil {
 		return fmt.Errorf("error getting viewed document: %w", err)

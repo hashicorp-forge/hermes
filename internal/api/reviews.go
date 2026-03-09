@@ -11,7 +11,6 @@ import (
 
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/errs"
 	"github.com/hashicorp-forge/hermes/internal/config"
-	"github.com/hashicorp-forge/hermes/internal/email"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	"github.com/hashicorp-forge/hermes/pkg/document"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
@@ -410,7 +409,7 @@ func ReviewHandler(
 
 			// Update document in the database.
 			d := models.Document{
-				GoogleFileID: docID,
+				FileID: docID,
 			}
 			if err := d.Get(db); err != nil {
 				l.Error("error getting document in database",
@@ -470,42 +469,48 @@ func ReviewHandler(
 						http.StatusInternalServerError)
 					return
 				}
+				l.Debug("got document URL",
+					"doc_id", docID,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_url", docURL,
+				)
 
 				// Send emails to approvers.
-				if len(doc.Approvers) > 0 {
-					// TODO: use an asynchronous method for sending emails because we
-					// can't currently recover gracefully from a failure here.
-					for _, approverEmail := range doc.Approvers {
-						err := email.SendReviewRequestedEmail(
-							email.ReviewRequestedEmailData{
-								BaseURL:           cfg.BaseURL,
-								DocumentOwner:     doc.Owners[0],
-								DocumentShortName: doc.DocNumber,
-								DocumentTitle:     doc.Title,
-								DocumentURL:       docURL,
-							},
-							[]string{approverEmail},
-							cfg.Email.FromAddress,
-							s,
-						)
-						if err != nil {
-							l.Error("error sending approver email",
-								"error", err,
-								"doc_id", docID,
-								"method", r.Method,
-								"path", r.URL.Path,
-							)
-							http.Error(w, "Error creating review",
-								http.StatusInternalServerError)
-							return
-						}
-						l.Info("doc approver email sent",
-							"doc_id", docID,
-							"method", r.Method,
-							"path", r.URL.Path,
-						)
-					}
-				}
+				// if len(doc.Approvers) > 0 {
+				// 	// TODO: use an asynchronous method for sending emails because we
+				// 	// can't currently recover gracefully from a failure here.
+				// 	for _, approverEmail := range doc.Approvers {
+				// 		err := email.SendReviewRequestedEmail(
+				// 			email.ReviewRequestedEmailData{
+				// 				BaseURL:           cfg.BaseURL,
+				// 				DocumentOwner:     doc.Owners[0],
+				// 				DocumentShortName: doc.DocNumber,
+				// 				DocumentTitle:     doc.Title,
+				// 				DocumentURL:       docURL,
+				// 			},
+				// 			[]string{approverEmail},
+				// 			cfg.Email.FromAddress,
+				// 			s,
+				// 		)
+				// 		if err != nil {
+				// 			l.Error("error sending approver email",
+				// 				"error", err,
+				// 				"doc_id", docID,
+				// 				"method", r.Method,
+				// 				"path", r.URL.Path,
+				// 			)
+				// 			http.Error(w, "Error creating review",
+				// 				http.StatusInternalServerError)
+				// 			return
+				// 		}
+				// 		l.Info("doc approver email sent",
+				// 			"doc_id", docID,
+				// 			"method", r.Method,
+				// 			"path", r.URL.Path,
+				// 		)
+				// 	}
+				// }
 
 				// Send emails to product subscribers.
 				p := models.Product{
@@ -523,43 +528,43 @@ func ReviewHandler(
 					return
 				}
 
-				if len(p.UserSubscribers) > 0 {
-					// TODO: use an asynchronous method for sending emails because we
-					// can't currently recover gracefully from a failure here.
-					for _, subscriber := range p.UserSubscribers {
-						err := email.SendSubscriberDocumentPublishedEmail(
-							email.SubscriberDocumentPublishedEmailData{
-								BaseURL:           cfg.BaseURL,
-								DocumentOwner:     doc.Owners[0],
-								DocumentShortName: doc.DocNumber,
-								DocumentTitle:     doc.Title,
-								DocumentType:      doc.DocType,
-								DocumentURL:       docURL,
-								Product:           doc.Product,
-							},
-							[]string{subscriber.EmailAddress},
-							cfg.Email.FromAddress,
-							s,
-						)
-						if err != nil {
-							l.Error("error sending subscriber email",
-								"error", err,
-								"doc_id", docID,
-								"method", r.Method,
-								"path", r.URL.Path,
-							)
-							http.Error(w, "Error sending subscriber email",
-								http.StatusInternalServerError)
-							return
-						}
-						l.Info("doc subscriber email sent",
-							"doc_id", docID,
-							"method", r.Method,
-							"path", r.URL.Path,
-							"product", doc.Product,
-						)
-					}
-				}
+				// 	if len(p.UserSubscribers) > 0 {
+				// 		// TODO: use an asynchronous method for sending emails because we
+				// 		// can't currently recover gracefully from a failure here.
+				// 		for _, subscriber := range p.UserSubscribers {
+				// 			err := email.SendSubscriberDocumentPublishedEmail(
+				// 				email.SubscriberDocumentPublishedEmailData{
+				// 					BaseURL:           cfg.BaseURL,
+				// 					DocumentOwner:     doc.Owners[0],
+				// 					DocumentShortName: doc.DocNumber,
+				// 					DocumentTitle:     doc.Title,
+				// 					DocumentType:      doc.DocType,
+				// 					DocumentURL:       docURL,
+				// 					Product:           doc.Product,
+				// 				},
+				// 				[]string{subscriber.EmailAddress},
+				// 				cfg.Email.FromAddress,
+				// 				s,
+				// 			)
+				// 			if err != nil {
+				// 				l.Error("error sending subscriber email",
+				// 					"error", err,
+				// 					"doc_id", docID,
+				// 					"method", r.Method,
+				// 					"path", r.URL.Path,
+				// 				)
+				// 				http.Error(w, "Error sending subscriber email",
+				// 					http.StatusInternalServerError)
+				// 				return
+				// 			}
+				// 			l.Info("doc subscriber email sent",
+				// 				"doc_id", docID,
+				// 				"method", r.Method,
+				// 				"path", r.URL.Path,
+				// 				"product", doc.Product,
+				// 			)
+				// 		}
+				// 	}
 			}
 
 			// Write response.
@@ -587,7 +592,7 @@ func ReviewHandler(
 			}
 			// Get document from database.
 			dbDoc := models.Document{
-				GoogleFileID: docID,
+				FileID: docID,
 			}
 			if err := dbDoc.Get(db); err != nil {
 				l.Error("error getting document from database for data comparison",
@@ -602,7 +607,7 @@ func ReviewHandler(
 			var reviews models.DocumentReviews
 			if err := reviews.Find(db, models.DocumentReview{
 				Document: models.Document{
-					GoogleFileID: docID,
+					FileID: docID,
 				},
 			}); err != nil {
 				l.Error("error getting all reviews for document for data comparison",
@@ -680,6 +685,49 @@ func createShortcut(
 	return
 }
 
+// createSharePointShortcut creates a shortcut (.url file) in the hierarchical folder structure
+// ("Shortcuts Folder/RFC/MyProduct/") under docsFolder in SharePoint.
+// func createShortcut(
+// 	cfg *config.Config,
+// 	doc document.Document, targetWebURL string,
+// 	s *sharepointhelper.Service,
+// ) (shortcutID string, retErr error) {
+// 	// Get or create folder for doc type under ShortcutsFolder
+// 	docTypeFolder, err := s.GetSubfolder(cfg.SharePoint.ShortcutsFolder, doc.DocType)
+// 	if err != nil {
+// 		return "", fmt.Errorf("error getting doc type subfolder: %w", err)
+// 	}
+// 	if docTypeFolder == nil {
+// 		docTypeFolderID, err := s.CreateFolder(doc.DocType, cfg.SharePoint.ShortcutsFolder)
+// 		if err != nil {
+// 			return "", fmt.Errorf("error creating doc type subfolder: %w", err)
+// 		}
+// 		docTypeFolder = &sharepointhelper.DriveItem{ID: docTypeFolderID, Name: doc.DocType}
+// 	}
+
+// 	// Get or create folder for doc type + product
+// 	productFolder, err := s.GetSubfolder(docTypeFolder.ID, doc.Product)
+// 	if err != nil {
+// 		return "", fmt.Errorf("error getting product subfolder: %w", err)
+// 	}
+// 	if productFolder == nil {
+// 		productFolderID, err := s.CreateFolder(doc.Product, docTypeFolder.ID)
+// 		if err != nil {
+// 			return "", fmt.Errorf("error creating product subfolder: %w", err)
+// 		}
+// 		productFolder = &sharepointhelper.DriveItem{ID: productFolderID, Name: doc.Product}
+// 	}
+
+// 	// Create the .url shortcut file in the product folder
+// 	shortcutName := doc.Title // Or doc.DocNumber or any unique name
+// 	err = s.CreateShortcut(targetWebURL, shortcutName, productFolder.ID)
+// 	if err != nil {
+// 		return "", fmt.Errorf("error creating shortcut: %w", err)
+// 	}
+
+// 	return shortcutName, nil
+// }
+
 // getDocumentURL returns a Hermes document URL.
 func getDocumentURL(baseURL, docID string) (string, error) {
 	docURL, err := url.Parse(baseURL)
@@ -735,8 +783,8 @@ func revertReviewCreation(
 			result, fmt.Errorf("error moving doc back to drafts folder: %w", err))
 	}
 
-	// Change back document number to "ABC-???" and status to "WIP".
-	doc.DocNumber = fmt.Sprintf("%s-???", productAbbreviation)
+	// Change back document number to "ABC-xxx" and status to "WIP".
+	doc.DocNumber = fmt.Sprintf("%s-xxx", productAbbreviation)
 	doc.Status = "WIP"
 
 	// Replace the doc header.

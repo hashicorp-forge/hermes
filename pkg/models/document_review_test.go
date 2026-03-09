@@ -42,7 +42,7 @@ func TestDocumentReviewModel(t *testing.T) {
 			_, require := assert.New(t), require.New(t)
 			dr := DocumentReview{
 				Document: Document{
-					GoogleFileID: "fileID1",
+					FileID: "fileID1",
 				},
 				User: User{
 					EmailAddress: "a@approver.com",
@@ -56,7 +56,7 @@ func TestDocumentReviewModel(t *testing.T) {
 		t.Run("Create a document", func(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			d = Document{
-				GoogleFileID: "fileID1",
+				FileID: "fileID1",
 				Approvers: []*User{
 					{
 						EmailAddress: "a@approver.com",
@@ -81,7 +81,7 @@ func TestDocumentReviewModel(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			dr := DocumentReview{
 				Document: Document{
-					GoogleFileID: "fileID1",
+					FileID: "fileID1",
 				},
 				User: User{
 					EmailAddress: "b@approver.com",
@@ -90,7 +90,7 @@ func TestDocumentReviewModel(t *testing.T) {
 			err := dr.Get(db)
 			require.NoError(err)
 			assert.EqualValues(1, dr.DocumentID)
-			assert.Equal("fileID1", dr.Document.GoogleFileID)
+			assert.Equal("fileID1", dr.Document.FileID)
 			assert.EqualValues(2, dr.UserID)
 			assert.Equal("b@approver.com", dr.User.EmailAddress)
 			assert.Equal(UnspecifiedDocumentReviewStatus, dr.Status)
@@ -100,7 +100,7 @@ func TestDocumentReviewModel(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			dr := DocumentReview{
 				Document: Document{
-					GoogleFileID: "fileID1",
+					FileID: "fileID1",
 				},
 				User: User{
 					EmailAddress: "b@approver.com",
@@ -118,7 +118,7 @@ func TestDocumentReviewModel(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			dr := DocumentReview{
 				Document: Document{
-					GoogleFileID: "fileID1",
+					FileID: "fileID1",
 				},
 				User: User{
 					EmailAddress: "b@approver.com",
@@ -160,7 +160,7 @@ func TestDocumentReviewModel(t *testing.T) {
 		t.Run("Create first document", func(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			d1 = Document{
-				GoogleFileID: "fileID1",
+				FileID: "fileID1",
 				Approvers: []*User{
 					{
 						EmailAddress: "a@approver.com",
@@ -184,7 +184,7 @@ func TestDocumentReviewModel(t *testing.T) {
 		t.Run("Create second document", func(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			d2 = Document{
-				GoogleFileID: "fileID2",
+				FileID: "fileID2",
 				Approvers: []*User{
 					{
 						EmailAddress: "a@approver.com",
@@ -205,7 +205,7 @@ func TestDocumentReviewModel(t *testing.T) {
 		t.Run("Create third document", func(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			d3 = Document{
-				GoogleFileID: "fileID3",
+				FileID: "fileID3",
 				Approvers: []*User{
 					{
 						EmailAddress: "b@approver.com",
@@ -235,7 +235,7 @@ func TestDocumentReviewModel(t *testing.T) {
 			var revs DocumentReviews
 			err := revs.Find(db, DocumentReview{
 				Document: Document{
-					GoogleFileID: "fileID1",
+					FileID: "fileID1",
 				},
 			})
 			require.NoError(err)
@@ -254,8 +254,8 @@ func TestDocumentReviewModel(t *testing.T) {
 			})
 			require.NoError(err)
 			require.Len(revs, 2)
-			assert.Equal("fileID1", revs[0].Document.GoogleFileID)
-			assert.Equal("fileID3", revs[1].Document.GoogleFileID)
+			assert.Equal("fileID1", revs[0].Document.FileID)
+			assert.Equal("fileID3", revs[1].Document.FileID)
 			assert.Equal("b@approver.com", revs[0].User.EmailAddress)
 			assert.Equal("b@approver.com", revs[1].User.EmailAddress)
 		})
@@ -304,7 +304,7 @@ func TestDocumentReviewModel(t *testing.T) {
 			t.Run("Create a document", func(t *testing.T) {
 				assert, require := assert.New(t), require.New(t)
 				d := Document{
-					GoogleFileID: "fileID1",
+					FileID: "fileID1",
 					Approvers: []*User{
 						{
 							EmailAddress: "a@approver.com",
@@ -340,7 +340,7 @@ func TestDocumentReviewModel(t *testing.T) {
 				assert, require := assert.New(t), require.New(t)
 				dr := DocumentReview{
 					Document: Document{
-						GoogleFileID: "fileID1",
+						FileID: "fileID1",
 					},
 					User: User{
 						EmailAddress: "b@approver.com",

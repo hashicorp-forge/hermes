@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -177,7 +178,14 @@ func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
 
 	m := http.NewServeMux()
 	// TODO: remove hardcoded port.
-	s := http.Server{Addr: ":9999", Handler: m}
+	s := http.Server{
+		Addr:              ":9999",
+		Handler:           m,
+		ReadTimeout:       10 * time.Second,
+		ReadHeaderTimeout: 5 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		IdleTimeout:       30 * time.Second,
+	}
 	config.RedirectURL = "http://localhost:9999/callback"
 
 	m.HandleFunc("/callback", func(w http.ResponseWriter, r *http.Request) {

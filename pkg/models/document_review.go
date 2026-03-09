@@ -37,7 +37,7 @@ func (d *DocumentReview) BeforeSave(tx *gorm.DB) error {
 	// Validate required fields.
 	if err := validation.ValidateStruct(&d.Document,
 		validation.Field(
-			&d.Document.GoogleFileID, validation.Required),
+			&d.Document.FileID, validation.Required),
 	); err != nil {
 		return err
 	}
@@ -61,9 +61,9 @@ func (d *DocumentReviews) Find(db *gorm.DB, dr DocumentReview) error {
 	// Validate required fields.
 	if err := validation.ValidateStruct(&dr.Document,
 		validation.Field(
-			&dr.Document.GoogleFileID,
+			&dr.Document.FileID,
 			validation.When(dr.User.EmailAddress == "",
-				validation.Required.Error("at least a Document's GoogleFileID or User's EmailAddress is required"),
+				validation.Required.Error("at least a Document's FileID or User's EmailAddress is required"),
 			),
 		),
 	); err != nil {
@@ -72,8 +72,8 @@ func (d *DocumentReviews) Find(db *gorm.DB, dr DocumentReview) error {
 	if err := validation.ValidateStruct(&dr.User,
 		validation.Field(
 			&dr.User.EmailAddress,
-			validation.When(dr.Document.GoogleFileID == "",
-				validation.Required.Error("at least a Document's GoogleFileID or User's EmailAddress is required"),
+			validation.When(dr.Document.hasNoFileID(),
+				validation.Required.Error("at least a Document's FileID or User's EmailAddress is required"),
 			),
 		),
 	); err != nil {
@@ -81,7 +81,7 @@ func (d *DocumentReviews) Find(db *gorm.DB, dr DocumentReview) error {
 	}
 
 	// Get document.
-	if dr.Document.GoogleFileID != "" {
+	if !dr.Document.hasNoFileID() {
 		if err := dr.Document.Get(db); err != nil {
 			return fmt.Errorf("error getting document: %w", err)
 		}
@@ -111,7 +111,7 @@ func (d *DocumentReviews) Find(db *gorm.DB, dr DocumentReview) error {
 func (d *DocumentReview) Get(db *gorm.DB) error {
 	// Validate required fields.
 	if err := validation.ValidateStruct(&d.Document,
-		validation.Field(&d.Document.GoogleFileID, validation.Required),
+		validation.Field(&d.Document.FileID, validation.Required),
 	); err != nil {
 		return err
 	}

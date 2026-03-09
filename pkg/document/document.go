@@ -109,6 +109,10 @@ type Document struct {
 	// "Obsolete").
 	Status string `json:"status,omitempty"`
 
+	// Archived indicates whether the draft document is archived.
+	// Only applies to draft documents (status "WIP").
+	Archived bool `json:"archived,omitempty"`
+
 	// Tags is a slice of tags to help users discover the document based on their
 	// interests.
 	Tags []string `json:"tags,omitempty"`
@@ -245,7 +249,7 @@ func NewFromDatabaseModel(
 	doc := &Document{}
 
 	// ObjectID.
-	doc.ObjectID = model.GoogleFileID
+	doc.ObjectID = model.GetFileIdentifier()
 
 	// Title.
 	doc.Title = model.Title
@@ -348,7 +352,7 @@ func NewFromDatabaseModel(
 	// FileRevisions.
 	fileRevisions := make(map[string]string)
 	for _, fr := range model.FileRevisions {
-		fileRevisions[fr.GoogleDriveFileRevisionID] = fr.Name
+		fileRevisions[fr.FileRevisionID] = fr.Name
 	}
 	doc.FileRevisions = fileRevisions
 
@@ -388,6 +392,9 @@ func NewFromDatabaseModel(
 		status = "WIP"
 	}
 	doc.Status = status
+
+	// Archived.
+	doc.Archived = model.Archived
 
 	// Note: ThumbnailLink is not stored in the database.
 
@@ -435,8 +442,8 @@ func (d Document) ToDatabaseModels(
 	doc := models.Document{}
 	reviews := models.DocumentReviews{}
 
-	// GoogleFileID.
-	doc.GoogleFileID = d.ObjectID
+	// FileID.
+	doc.FileID = d.ObjectID
 
 	// Title.
 	doc.Title = d.Title
@@ -526,10 +533,10 @@ func (d Document) ToDatabaseModels(
 	for frID, frName := range d.FileRevisions {
 		fileRevisions = append(fileRevisions, models.DocumentFileRevision{
 			Document: models.Document{
-				GoogleFileID: doc.GoogleFileID,
+				FileID: doc.FileID,
 			},
-			GoogleDriveFileRevisionID: frID,
-			Name:                      frName,
+			FileRevisionID: frID,
+			Name:           frName,
 		})
 	}
 	doc.FileRevisions = fileRevisions
@@ -597,7 +604,7 @@ func (d Document) ToDatabaseModels(
 		if helpers.StringSliceContains(d.ApprovedBy, a) {
 			reviews = append(reviews, models.DocumentReview{
 				Document: models.Document{
-					GoogleFileID: d.ObjectID,
+					FileID: d.ObjectID,
 				},
 				User:   u,
 				Status: models.ApprovedDocumentReviewStatus,
@@ -605,7 +612,7 @@ func (d Document) ToDatabaseModels(
 		} else if helpers.StringSliceContains(d.ChangesRequestedBy, a) {
 			reviews = append(reviews, models.DocumentReview{
 				Document: models.Document{
-					GoogleFileID: d.ObjectID,
+					FileID: d.ObjectID,
 				},
 				User:   u,
 				Status: models.ChangesRequestedDocumentReviewStatus,

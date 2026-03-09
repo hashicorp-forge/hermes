@@ -43,7 +43,7 @@ func TestProjectRelatedResource(t *testing.T) {
 		t.Run("Create documents", func(t *testing.T) {
 			_, require := assert.New(t), require.New(t)
 			d := Document{
-				GoogleFileID: "GoogleFileID1",
+				FileID: "FileID1",
 				DocumentType: DocumentType{
 					Name: "DT1",
 				},
@@ -55,7 +55,7 @@ func TestProjectRelatedResource(t *testing.T) {
 			require.NoError(err)
 
 			d = Document{
-				GoogleFileID: "GoogleFileID2",
+				FileID: "FileID2",
 				DocumentType: DocumentType{
 					Name: "DT1",
 				},
@@ -67,7 +67,7 @@ func TestProjectRelatedResource(t *testing.T) {
 			require.NoError(err)
 
 			d = Document{
-				GoogleFileID: "GoogleFileID3",
+				FileID: "FileID3",
 				DocumentType: DocumentType{
 					Name: "DT1",
 				},
@@ -181,7 +181,7 @@ func TestProjectRelatedResource(t *testing.T) {
 						SortOrder: 2,
 					},
 					Document: Document{
-						GoogleFileID: "GoogleFileID1",
+						FileID: "FileID1",
 					},
 				}
 				err := rr.Create(db)
@@ -202,7 +202,7 @@ func TestProjectRelatedResource(t *testing.T) {
 						SortOrder: 3,
 					},
 					Document: Document{
-						GoogleFileID: "GoogleFileID1",
+						FileID: "FileID1",
 					},
 				}
 				err := rr.Create(db)

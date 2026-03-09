@@ -135,16 +135,16 @@ func compareAlgoliaAndDatabaseDocument(
 	var result *multierror.Error
 
 	// Compare objectID.
-	algoGoogleFileID, err := getStringValue(algoDoc, "objectID")
+	algoFileID, err := getStringValue(algoDoc, "objectID")
 	if err != nil {
 		result = multierror.Append(
 			result, fmt.Errorf("error getting objectID value: %w", err))
 	}
-	if algoGoogleFileID != dbDoc.GoogleFileID {
+	if algoFileID != dbDoc.FileID {
 		result = multierror.Append(result,
 			fmt.Errorf(
 				"objectID not equal, algolia=%v, db=%v",
-				algoGoogleFileID, dbDoc.GoogleFileID),
+				algoFileID, dbDoc.FileID),
 		)
 	}
 
@@ -185,10 +185,10 @@ func compareAlgoliaAndDatabaseDocument(
 		result = multierror.Append(
 			result, fmt.Errorf("error getting docNumber value: %w", err))
 	} else {
-		// Replace "-???" (how draft doc numbers are defined in Algolia) with a
+		// Replace "-xxx.docx" (how draft doc numbers are defined in Algolia) with a
 		// zero.
-		re := regexp.MustCompile(`-\?\?\?$`)
-		algoDocNumber = re.ReplaceAllString(algoDocNumber, "-000")
+		re := regexp.MustCompile(`-xxx.docx$`)
+		algoDocNumber = re.ReplaceAllString(algoDocNumber, "-000.docx")
 
 		var dbDocNumber string
 		// If document number in Algolia isn't empty, build the database document
@@ -412,7 +412,7 @@ func compareAlgoliaAndDatabaseDocument(
 	} else {
 		dbFileRevisions := make(map[string]string)
 		for _, fr := range dbDoc.FileRevisions {
-			dbFileRevisions[fr.GoogleDriveFileRevisionID] = fr.Name
+			dbFileRevisions[fr.FileRevisionID] = fr.Name
 		}
 		if !reflect.DeepEqual(algoFileRevisions, dbFileRevisions) {
 			result = multierror.Append(result,

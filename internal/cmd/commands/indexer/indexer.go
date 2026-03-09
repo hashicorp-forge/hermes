@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp-forge/hermes/internal/indexer"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
+	sp "github.com/hashicorp-forge/hermes/pkg/sharepointhelper"
 	"github.com/hashicorp/go-hclog"
 	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 )
@@ -130,26 +131,55 @@ func (c *Command) Run(args []string) int {
 		return 1
 	}
 
-	// Initialize Google Workspace service.
+	// Initialize SharePoint or Google Workspace service.
+	var sharepointSvc *sp.Service
 	var goog *gw.Service
-	if cfg.GoogleWorkspace.Auth != nil {
+	if cfg.SharePoint != nil {
+		// Initialize SharePoint service.
+		sharepointSvc = sp.NewService(cfg.SharePoint, log)
+
+		// Get a valid SharePoint token.
+		_, err := sharepointSvc.GetToken()
+		if err != nil {
+			ui.Error(fmt.Sprintf("error initializing SharePoint service: %v", err))
+			return 1
+		}
+		log.Info("Successfully initialized SharePoint service.")
+	} else if cfg.GoogleWorkspace.Auth != nil {
 		// Use Google Workspace auth if it is defined in the config.
 		goog = gw.NewFromConfig(cfg.GoogleWorkspace.Auth)
+		log.Info("Successfully initialized Google Workspace service.")
 	} else {
 		// Use OAuth if Google Workspace auth is not defined in the config.
 		goog = gw.New()
+		log.Info("Successfully initialized Google Workspace service with OAuth.")
 	}
 
+	// Configure indexer options.
 	idxOpts := []indexer.IndexerOption{
 		indexer.WithAlgoliaClient(algo),
 		indexer.WithBaseURL(cfg.BaseURL),
 		indexer.WithDatabase(db),
 		indexer.WithDocumentTypes(cfg.DocumentTypes.DocumentType),
-		indexer.WithDocumentsFolderID(cfg.GoogleWorkspace.DocsFolder),
-		indexer.WithDraftsFolderID(cfg.GoogleWorkspace.DraftsFolder),
-		indexer.WithGoogleWorkspaceService(goog),
 		indexer.WithLogger(log),
 	}
+
+	// Add SharePoint or Google Workspace-specific options.
+	if sharepointSvc != nil {
+		idxOpts = append(idxOpts,
+			indexer.WithSharePointService(sharepointSvc),
+			indexer.WithDocumentsFolderID(cfg.SharePoint.DocsFolder), // Use SharePoint DocsFolder
+			indexer.WithDraftsFolderID(cfg.SharePoint.DraftsFolder),  // Use SharePoint DraftsFolder
+		)
+	} else {
+		idxOpts = append(idxOpts,
+			indexer.WithGoogleWorkspaceService(goog),
+			indexer.WithDocumentsFolderID(cfg.GoogleWorkspace.DocsFolder),
+			indexer.WithDraftsFolderID(cfg.GoogleWorkspace.DraftsFolder),
+		)
+	}
+
+	// Add additional indexer options.
 	if cfg.Indexer.MaxParallelDocs != 0 {
 		idxOpts = append(idxOpts,
 			indexer.WithMaxParallelDocuments(cfg.Indexer.MaxParallelDocs))
@@ -166,7 +196,9 @@ func (c *Command) Run(args []string) int {
 		idxOpts = append(idxOpts,
 			indexer.WithUseDatabaseForDocumentData(true))
 	}
-	idx, err := indexer.NewIndexer(idxOpts...)
+
+	// Create the indexer.
+	idx, err := indexer.NewIndexer(cfg, idxOpts...)
 	if err != nil {
 		ui.Error(fmt.Sprintf("error creating indexer: %v", err))
 		return 1

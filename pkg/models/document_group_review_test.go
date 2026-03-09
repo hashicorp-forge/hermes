@@ -42,7 +42,7 @@ func TestDocumentGroupReviewModel(t *testing.T) {
 			_, require := assert.New(t), require.New(t)
 			dr := DocumentGroupReview{
 				Document: Document{
-					GoogleFileID: "fileID1",
+					FileID: "fileID1",
 				},
 				Group: Group{
 					EmailAddress: "team-a@approver.com",
@@ -56,7 +56,7 @@ func TestDocumentGroupReviewModel(t *testing.T) {
 		t.Run("Create a document", func(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			d = Document{
-				GoogleFileID: "fileID1",
+				FileID: "fileID1",
 				ApproverGroups: []*Group{
 					{
 						EmailAddress: "team-a@approver.com",
@@ -81,7 +81,7 @@ func TestDocumentGroupReviewModel(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			dr := DocumentGroupReview{
 				Document: Document{
-					GoogleFileID: "fileID1",
+					FileID: "fileID1",
 				},
 				Group: Group{
 					EmailAddress: "team-b@approver.com",
@@ -90,7 +90,7 @@ func TestDocumentGroupReviewModel(t *testing.T) {
 			err := dr.Get(db)
 			require.NoError(err)
 			assert.EqualValues(1, dr.DocumentID)
-			assert.Equal("fileID1", dr.Document.GoogleFileID)
+			assert.Equal("fileID1", dr.Document.FileID)
 			assert.EqualValues(2, dr.GroupID)
 			assert.Equal("team-b@approver.com", dr.Group.EmailAddress)
 		})
@@ -124,7 +124,7 @@ func TestDocumentGroupReviewModel(t *testing.T) {
 		t.Run("Create first document", func(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			d1 = Document{
-				GoogleFileID: "fileID1",
+				FileID: "fileID1",
 				ApproverGroups: []*Group{
 					{
 						EmailAddress: "team-a@approver.com",
@@ -148,7 +148,7 @@ func TestDocumentGroupReviewModel(t *testing.T) {
 		t.Run("Create second document", func(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			d2 = Document{
-				GoogleFileID: "fileID2",
+				FileID: "fileID2",
 				ApproverGroups: []*Group{
 					{
 						EmailAddress: "team-a@approver.com",
@@ -169,7 +169,7 @@ func TestDocumentGroupReviewModel(t *testing.T) {
 		t.Run("Create third document", func(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			d3 = Document{
-				GoogleFileID: "fileID3",
+				FileID: "fileID3",
 				ApproverGroups: []*Group{
 					{
 						EmailAddress: "team-b@approver.com",
@@ -199,7 +199,7 @@ func TestDocumentGroupReviewModel(t *testing.T) {
 			var revs DocumentGroupReviews
 			err := revs.Find(db, DocumentGroupReview{
 				Document: Document{
-					GoogleFileID: "fileID1",
+					FileID: "fileID1",
 				},
 			})
 			require.NoError(err)
@@ -218,8 +218,8 @@ func TestDocumentGroupReviewModel(t *testing.T) {
 			})
 			require.NoError(err)
 			require.Len(revs, 2)
-			assert.Equal("fileID1", revs[0].Document.GoogleFileID)
-			assert.Equal("fileID3", revs[1].Document.GoogleFileID)
+			assert.Equal("fileID1", revs[0].Document.FileID)
+			assert.Equal("fileID3", revs[1].Document.FileID)
 			assert.Equal("team-b@approver.com", revs[0].Group.EmailAddress)
 			assert.Equal("team-b@approver.com", revs[1].Group.EmailAddress)
 		})

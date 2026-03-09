@@ -24,7 +24,7 @@ type externalLinkRelatedResourcePutRequest struct {
 }
 
 type hermesDocumentRelatedResourcePutRequest struct {
-	GoogleFileID string `json:"googleFileID"`
+	FileID string `json:"FileID"`
 	SortOrder    int    `json:"sortOrder"`
 }
 
@@ -40,7 +40,7 @@ type externalLinkRelatedResourceGetResponse struct {
 }
 
 type hermesDocumentRelatedResourceGetResponse struct {
-	GoogleFileID   string   `json:"googleFileID"`
+	FileID   string   `json:"FileID"`
 	Title          string   `json:"title"`
 	DocumentType   string   `json:"documentType"`
 	DocumentNumber string   `json:"documentNumber"`
@@ -64,7 +64,7 @@ func documentsResourceRelatedResourcesHandler(
 	switch r.Method {
 	case "GET":
 		d := models.Document{
-			GoogleFileID: docID,
+			FileID: docID,
 		}
 		if err := d.Get(db); err != nil {
 			l.Error("error getting document from database",
@@ -122,14 +122,14 @@ func documentsResourceRelatedResourcesHandler(
 		for _, hdrr := range hdrrs {
 			// Get document object from Algolia.
 			var algoObj map[string]any
-			err = algoRead.Docs.GetObject(hdrr.Document.GoogleFileID, &algoObj)
+			err = algoRead.Docs.GetObject(hdrr.Document.FileID, &algoObj)
 			if err != nil {
 				l.Error("error getting related resource document from Algolia",
 					"error", err,
 					"path", r.URL.Path,
 					"method", r.Method,
 					"doc_id", docID,
-					"target_doc_id", hdrr.Document.GoogleFileID,
+					"target_doc_id", hdrr.Document.FileID,
 				)
 				http.Error(w, "Error accessing document",
 					http.StatusInternalServerError)
@@ -152,7 +152,7 @@ func documentsResourceRelatedResourcesHandler(
 			resp.HermesDocuments = append(
 				resp.HermesDocuments,
 				hermesDocumentRelatedResourceGetResponse{
-					GoogleFileID:   hdrr.Document.GoogleFileID,
+					FileID:   hdrr.Document.FileID,
 					Title:          doc.Title,
 					DocumentType:   doc.DocType,
 					DocumentNumber: doc.DocNumber,
@@ -208,7 +208,7 @@ func documentsResourceRelatedResourcesHandler(
 			elrrs = append(elrrs, models.DocumentRelatedResourceExternalLink{
 				RelatedResource: models.DocumentRelatedResource{
 					Document: models.Document{
-						GoogleFileID: docID,
+						FileID: docID,
 					},
 					SortOrder: elrr.SortOrder,
 				},
@@ -223,19 +223,19 @@ func documentsResourceRelatedResourcesHandler(
 			hdrrs = append(hdrrs, models.DocumentRelatedResourceHermesDocument{
 				RelatedResource: models.DocumentRelatedResource{
 					Document: models.Document{
-						GoogleFileID: docID,
+						FileID: docID,
 					},
 					SortOrder: hdrr.SortOrder,
 				},
 				Document: models.Document{
-					GoogleFileID: hdrr.GoogleFileID,
+					FileID: hdrr.FileID,
 				},
 			})
 		}
 
 		// Replace related resources for document.
 		doc := models.Document{
-			GoogleFileID: docID,
+			FileID: docID,
 		}
 		if err := doc.ReplaceRelatedResources(db, elrrs, hdrrs); err != nil {
 			l.Error("error replacing related resources for document",

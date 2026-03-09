@@ -96,7 +96,7 @@ func TestUserModel(t *testing.T) {
 		t.Run("Create document", func(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			doc1 = Document{
-				GoogleFileID: "fileID1",
+				FileID: "fileID1",
 				DocumentType: DocumentType{
 					Name: "DT1",
 				},
@@ -121,7 +121,7 @@ func TestUserModel(t *testing.T) {
 				require.NoError(err)
 				require.Equal(1, len(u.RecentlyViewedDocs))
 				assert.EqualValues(1, u.RecentlyViewedDocs[0].ID)
-				assert.Equal("fileID1", u.RecentlyViewedDocs[0].GoogleFileID)
+				assert.Equal("fileID1", u.RecentlyViewedDocs[0].FileID)
 			})
 
 		t.Run("Get the user and verify it was updated", func(t *testing.T) {
@@ -133,14 +133,14 @@ func TestUserModel(t *testing.T) {
 			require.NoError(err)
 			require.Equal(1, len(u.RecentlyViewedDocs))
 			assert.EqualValues(1, u.RecentlyViewedDocs[0].ID)
-			assert.Equal("fileID1", u.RecentlyViewedDocs[0].GoogleFileID)
+			assert.Equal("fileID1", u.RecentlyViewedDocs[0].FileID)
 		})
 
 		var doc2 Document
 		t.Run("Create another document", func(t *testing.T) {
 			assert, require := assert.New(t), require.New(t)
 			doc2 = Document{
-				GoogleFileID: "fileID2",
+				FileID: "fileID2",
 				DocumentType: DocumentType{
 					Name: "DT1",
 				},
@@ -160,10 +160,10 @@ func TestUserModel(t *testing.T) {
 					EmailAddress: "a@a.com",
 					RecentlyViewedDocs: []Document{
 						{
-							GoogleFileID: "fileID1",
+							FileID: "fileID1",
 						},
 						{
-							GoogleFileID: "fileID2",
+							FileID: "fileID2",
 						},
 					},
 				}
@@ -171,9 +171,9 @@ func TestUserModel(t *testing.T) {
 				require.NoError(err)
 				require.Equal(2, len(u.RecentlyViewedDocs))
 				assert.EqualValues(1, u.RecentlyViewedDocs[0].ID)
-				assert.Equal("fileID1", u.RecentlyViewedDocs[0].GoogleFileID)
+				assert.Equal("fileID1", u.RecentlyViewedDocs[0].FileID)
 				assert.EqualValues(2, u.RecentlyViewedDocs[1].ID)
-				assert.Equal("fileID2", u.RecentlyViewedDocs[1].GoogleFileID)
+				assert.Equal("fileID2", u.RecentlyViewedDocs[1].FileID)
 			})
 
 		t.Run("Get the user and verify it was updated", func(t *testing.T) {
@@ -185,9 +185,9 @@ func TestUserModel(t *testing.T) {
 			require.NoError(err)
 			require.Equal(2, len(u.RecentlyViewedDocs))
 			assert.EqualValues(1, u.RecentlyViewedDocs[0].ID)
-			assert.Equal("fileID1", u.RecentlyViewedDocs[0].GoogleFileID)
+			assert.Equal("fileID1", u.RecentlyViewedDocs[0].FileID)
 			assert.EqualValues(2, u.RecentlyViewedDocs[1].ID)
-			assert.Equal("fileID2", u.RecentlyViewedDocs[1].GoogleFileID)
+			assert.Equal("fileID2", u.RecentlyViewedDocs[1].FileID)
 		})
 
 		t.Run(
@@ -198,7 +198,7 @@ func TestUserModel(t *testing.T) {
 					EmailAddress: "a@a.com",
 					RecentlyViewedDocs: []Document{
 						{
-							GoogleFileID: "fileID2",
+							FileID: "fileID2",
 						},
 					},
 				}
@@ -206,7 +206,7 @@ func TestUserModel(t *testing.T) {
 				require.NoError(err)
 				require.Equal(1, len(u.RecentlyViewedDocs))
 				assert.EqualValues(2, u.RecentlyViewedDocs[0].ID)
-				assert.Equal("fileID2", u.RecentlyViewedDocs[0].GoogleFileID)
+				assert.Equal("fileID2", u.RecentlyViewedDocs[0].FileID)
 			})
 
 		t.Run("Get the user and verify it was updated", func(t *testing.T) {
@@ -218,7 +218,7 @@ func TestUserModel(t *testing.T) {
 			require.NoError(err)
 			require.Equal(1, len(u.RecentlyViewedDocs))
 			assert.EqualValues(2, u.RecentlyViewedDocs[0].ID)
-			assert.Equal("fileID2", u.RecentlyViewedDocs[0].GoogleFileID)
+			assert.Equal("fileID2", u.RecentlyViewedDocs[0].FileID)
 		})
 	})
 

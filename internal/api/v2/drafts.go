@@ -1,11 +1,12 @@
 package api
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
+
 	"reflect"
 	"strconv"
 	"strings"
@@ -15,14 +16,10 @@ import (
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/search"
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/internal/email"
+	"github.com/hashicorp-forge/hermes/internal/helpers"
 	"github.com/hashicorp-forge/hermes/internal/server"
 	"github.com/hashicorp-forge/hermes/pkg/document"
-	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
-	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp-forge/hermes/pkg/models"
-	"golang.org/x/oauth2/jwt"
-	"google.golang.org/api/drive/v3"
-	"google.golang.org/api/option"
 	"gorm.io/gorm"
 )
 
@@ -101,6 +98,10 @@ func DraftsHandler(srv server.Server) http.Handler {
 			}
 
 			if req.Title == "" {
+				srv.Logger.Warn("draft title is required",
+					"method", r.Method,
+					"path", r.URL.Path,
+					"user_email", userEmail)
 				http.Error(w, "Bad request: title is required", http.StatusBadRequest)
 				return
 			}
@@ -124,174 +125,162 @@ func DraftsHandler(srv server.Server) http.Handler {
 			if req.ProductAbbreviation == "" {
 				req.ProductAbbreviation = "TODO"
 			}
-			title := fmt.Sprintf("[%s-???] %s", req.ProductAbbreviation, req.Title)
 
-			var (
-				err error
-				f   *drive.File
+			// Create a filename based on product and title
+			fileNameBase := fmt.Sprintf("%s-%s", req.ProductAbbreviation, req.Title)
+
+			// Sanitize the title for SharePoint file name (remove characters that SharePoint doesn't allow)
+			// SharePoint doesn't allow: # % & * : < > ? / \ { | } ~
+			sanitizedTitle := strings.NewReplacer(
+				"[", "(",
+				"]", ")",
+				"#", "-",
+				"%", "-",
+				"&", "and",
+				"*", "-",
+				":", "-",
+				"<", "-",
+				">", "-",
+				"?", "",
+				"/", "-",
+				"\\", "-",
+				"{", "(",
+				"|", "-",
+				"}", ")",
+				"~", "-",
+			).Replace(fileNameBase)
+
+			// Add .docx extension explicitly
+			sanitizedTitle = fmt.Sprintf("%s.docx", sanitizedTitle)
+
+			// Log the filename we're going to create
+			srv.Logger.Info("Creating SharePoint document with filename",
+				"filename", sanitizedTitle,
+				"method", r.Method,
+				"path", r.URL.Path,
+				"template", template,
+				"drafts_folder", srv.Config.SharePoint.DraftsFolder,
 			)
 
-			// Copy template to new draft file.
-			if srv.Config.GoogleWorkspace.Auth != nil &&
-				srv.Config.GoogleWorkspace.Auth.CreateDocsAsUser {
-				// If configured to create documents as the logged-in Hermes user,
-				// create a new Google Drive service to do this.
-				ctx := context.Background()
-				conf := &jwt.Config{
-					Email:      srv.Config.GoogleWorkspace.Auth.ClientEmail,
-					PrivateKey: []byte(srv.Config.GoogleWorkspace.Auth.PrivateKey),
-					Scopes: []string{
-						"https://www.googleapis.com/auth/drive",
-					},
-					Subject:  userEmail,
-					TokenURL: srv.Config.GoogleWorkspace.Auth.TokenURL,
-				}
-				client := conf.Client(ctx)
-				copyTemplateSvc := *srv.GWService
-				copyTemplateSvc.Drive, err = drive.NewService(
-					ctx, option.WithHTTPClient(client))
-				if err != nil {
-					srv.Logger.Error("error creating impersonated Google Drive service",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-					)
-					http.Error(
-						w, "Error processing request", http.StatusInternalServerError)
-					return
-				}
+			var (
+				err    error
+				fileID string
+			)
 
-				// Copy template as user to new draft file in temporary drafts folder.
-				f, err = copyTemplateSvc.CopyFile(
-					template, title, srv.Config.GoogleWorkspace.TemporaryDraftsFolder)
-				if err != nil {
-					srv.Logger.Error(
-						"error copying template as user to temporary drafts folder",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"template", template,
-						"drafts_folder", srv.Config.GoogleWorkspace.DraftsFolder,
-						"temporary_drafts_folder", srv.Config.GoogleWorkspace.
-							TemporaryDraftsFolder,
-						"user", userEmail,
-					)
-					http.Error(w, "Error creating document draft",
-						http.StatusInternalServerError)
-					return
-				}
+			// Create draft in SharePoint
+			// Copy template to create a new document in SharePoint
+			fileDetails, err := srv.SharePoint.CopyFile(
+				template,                           // Template ID
+				sanitizedTitle,                     // New file name (sanitized for SharePoint)
+				srv.Config.SharePoint.DraftsFolder, // Destination folder
+			)
+			srv.Logger.Debug("File details from SharePoint CopyFile", "details=", fileDetails)
+			if err != nil {
+				srv.Logger.Error("error copying template to create draft in SharePoint",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"template", template,
+					"drafts_folder", srv.Config.SharePoint.DraftsFolder,
+				)
 
-				// Move draft file to drafts folder using service user.
-				_, err = srv.GWService.MoveFile(
-					f.Id, srv.Config.GoogleWorkspace.DraftsFolder)
-				if err != nil {
-					srv.Logger.Error(
-						"error moving draft file to drafts folder",
-						"error", err,
+				// Check if the error is a 409 Conflict due to name already exists
+				if strings.Contains(err.Error(), "409 Conflict") &&
+					strings.Contains(err.Error(), "nameAlreadyExists") {
+					srv.Logger.Warn("file with this name already exists",
 						"method", r.Method,
 						"path", r.URL.Path,
-						"doc_id", f.Id,
-						"drafts_folder", srv.Config.GoogleWorkspace.DraftsFolder,
-						"temporary_drafts_folder", srv.Config.GoogleWorkspace.
-							TemporaryDraftsFolder,
-					)
-					http.Error(w, "Error creating document draft",
-						http.StatusInternalServerError)
+						"user_email", userEmail,
+						"title", req.Title)
+					http.Error(w, "File with this name already exists. Please change the title.",
+						http.StatusConflict)
 					return
 				}
-			} else {
-				// Copy template to new draft file as service user.
-				f, err = srv.GWService.CopyFile(
-					template, title, srv.Config.GoogleWorkspace.DraftsFolder)
-				if err != nil {
-					srv.Logger.Error("error creating draft",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"template", template,
-						"drafts_folder", srv.Config.GoogleWorkspace.DraftsFolder,
-					)
-					http.Error(w, "Error creating document draft",
-						http.StatusInternalServerError)
-					return
-				}
+				http.Error(w, "Error creating document draft in SharePoint",
+					http.StatusInternalServerError)
+				return
 			}
 
+			// Set fileID
+			fileID = fileDetails.ID
+
 			// Build created date.
-			ct, err := time.Parse(time.RFC3339Nano, f.CreatedTime)
+			createdTime, err := time.Parse(time.RFC3339Nano, fileDetails.LastModified) // This file is copied from the template so createdAt will give us the original template date. We need LastModified instead because it is set to the current time when the file is copied.
 			if err != nil {
 				srv.Logger.Error("error parsing draft created time",
 					"error", err,
 					"method", r.Method,
 					"path", r.URL.Path,
-					"doc_id", f.Id,
+					"doc_id", fileID,
 				)
 				http.Error(w, "Error creating document draft",
 					http.StatusInternalServerError)
 				return
 			}
-			cd := ct.Format("Jan 2, 2006")
+			cd := createdTime.Format("Jan 2, 2006")
 
-			// Get owner photo by searching Google Workspace directory.
-			op := []string{}
-			people, err := srv.GWService.SearchPeople(userEmail, "photos")
-			if err != nil {
-				srv.Logger.Error(
-					"error searching directory for person",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"person", userEmail,
-				)
-			}
-			if len(people) > 0 {
-				if len(people[0].Photos) > 0 {
-					op = append(op, people[0].Photos[0].Url)
-				}
-			}
+			srv.Logger.Info("Created draft in SharePoint",
+				"file_id", fileID,
+				"method", r.Method,
+				"path", r.URL.Path,
+				"template", template,
+				"drafts_folder", srv.Config.SharePoint.DraftsFolder,
+				"user", userEmail,
+			)
 
-			// Create tag
-			// Note: The o_id tag may be empty for environments such as development.
-			// For environments like pre-prod and prod, it will be set as
-			// Okta authentication is enforced before this handler is called for
-			// those environments. Maybe, if id isn't set we use
-			// owner emails in the future?
-			id := r.Header.Get("x-amzn-oidc-identity")
 			metaTags := []string{
-				"o_id:" + id,
+				"o_id:" + userEmail,
 			}
 
 			// Build document.
 			doc := &document.Document{
-				ObjectID:     f.Id,
+				ObjectID:     fileID,
 				Title:        req.Title,
 				AppCreated:   true,
 				Contributors: req.Contributors,
 				Created:      cd,
-				CreatedTime:  ct.Unix(),
+				CreatedTime:  createdTime.Unix(),
 				DocNumber:    fmt.Sprintf("%s-???", req.ProductAbbreviation),
 				DocType:      req.DocType,
 				MetaTags:     metaTags,
-				ModifiedTime: ct.Unix(),
+				ModifiedTime: createdTime.Unix(),
 				Owners:       []string{userEmail},
-				OwnerPhotos:  op,
+				OwnerPhotos:  []string{}, //TODO: ownerPhotos field is being used in pkg hashicorpdocs. Check the usage.
 				Product:      req.Product,
 				Status:       "WIP",
 				Summary:      req.Summary,
 				// Tags:         req.Tags,
 			}
 
-			// Replace the doc header.
-			if err = doc.ReplaceHeader(
-				srv.Config.BaseURL, true, srv.GWService,
-			); err != nil {
-				srv.Logger.Error("error replacing draft doc header",
+			// Replace document header with custom properties in SharePoint
+			headerProps := map[string]string{
+				"Title":        req.Title,
+				"DocType":      req.DocType,
+				"DocNumber":    fmt.Sprintf("%s-???", req.ProductAbbreviation),
+				"Product":      req.Product,
+				"Status":       "WIP",
+				"Contributors": strings.Join(req.Contributors, ","),
+				"Summary":      req.Summary,
+				"Created":      createdTime.Format("Jan 2, 2006"),
+				"Owner":        userEmail,
+				"Approvers":    "N/A",
+				// Note: Any custom attributes can be added here which will be populated in the document header automatically
+			}
+
+			// Document header update with metadata (download, modify, upload)
+			err = srv.SharePoint.ReplaceDocumentHeaderWithContentUpdate(fileID, headerProps)
+			if err != nil {
+				srv.Logger.Error("error replacing document header with content update in SharePoint",
 					"error", err,
 					"method", r.Method,
 					"path", r.URL.Path,
-					"doc_id", f.Id,
+					"doc_id", fileID,
 				)
-				http.Error(w, "Error creating document draft",
+
+				// Clean up the file we just created to avoid orphaned files
+				srv.SharePoint.DeleteFile(fileID)
+
+				http.Error(w, "Error occurred during document header update",
 					http.StatusInternalServerError)
 				return
 			}
@@ -303,20 +292,9 @@ func DraftsHandler(srv server.Server) http.Handler {
 					EmailAddress: c,
 				})
 			}
-			createdTime, err := time.Parse(time.RFC3339Nano, f.CreatedTime)
-			if err != nil {
-				srv.Logger.Error("error parsing document created time",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", f.Id,
-				)
-				http.Error(w, "Error creating document draft",
-					http.StatusInternalServerError)
-				return
-			}
+
 			model := models.Document{
-				GoogleFileID:       f.Id,
+				FileID:             fileID, // Populating FileID field with SharePoint file ID
 				Contributors:       contributors,
 				DocumentCreatedAt:  createdTime,
 				DocumentModifiedAt: createdTime,
@@ -338,52 +316,102 @@ func DraftsHandler(srv server.Server) http.Handler {
 					"error", err,
 					"method", r.Method,
 					"path", r.URL.Path,
-					"doc_id", f.Id,
+					"doc_id", fileID,
 				)
 				http.Error(w, "Error creating document draft",
 					http.StatusInternalServerError)
 				return
 			}
 
-			// Share file with the owner
-			if err := srv.GWService.ShareFile(f.Id, userEmail, "writer"); err != nil {
-				srv.Logger.Error("error sharing file with the owner",
+			// Share the document with the owner
+			if err := srv.SharePoint.ShareFile(fileID, userEmail, "writer"); err != nil {
+				srv.Logger.Error("error sharing SharePoint file with owner",
 					"error", err,
 					"method", r.Method,
 					"path", r.URL.Path,
-					"doc_id", f.Id,
+					"doc_id", fileID,
+					"owner", userEmail,
 				)
-				http.Error(w, "Error creating document draft",
-					http.StatusInternalServerError)
-				return
+				// Continue despite sharing error
+				srv.Logger.Warn("continuing document creation despite sharing failure with owner")
+			} else {
+				srv.Logger.Info("successfully shared document with owner",
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", fileID,
+					"owner", userEmail,
+				)
 			}
 
-			// Share file with contributors.
-			// Google Drive API limitation is that you can only share files with one
-			// user at a time.
-			for _, c := range req.Contributors {
-				if err := srv.GWService.ShareFile(f.Id, c, "writer"); err != nil {
-					srv.Logger.Error("error sharing file with the contributor",
+			// Share the document with contributors
+			contributorsToEmail := []string{}
+			for _, contributor := range req.Contributors {
+				if strings.EqualFold(contributor, userEmail) {
+					// Skip if contributor is the owner (already shared)
+					continue
+				}
+
+				if err := srv.SharePoint.ShareFile(fileID, contributor, "writer"); err != nil {
+					srv.Logger.Error("error sharing SharePoint file with contributor",
 						"error", err,
 						"method", r.Method,
 						"path", r.URL.Path,
-						"doc_id", f.Id,
-						"contributor", c,
+						"doc_id", fileID,
+						"contributor", contributor,
 					)
-					http.Error(w, "Error creating document draft",
-						http.StatusInternalServerError)
-					return
+					// Continue despite sharing error
+					srv.Logger.Warn("continuing document creation despite sharing failure with contributor")
+				} else {
+					srv.Logger.Info("successfully shared document with contributor",
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", fileID,
+						"contributor", contributor,
+					)
+					// Add to email list if sharing was successful
+					contributorsToEmail = append(contributorsToEmail, contributor)
 				}
 			}
 
-			// TODO: Delete draft file in the case of an error.
+			if len(contributorsToEmail) > 0 {
+				docURL := fmt.Sprintf("%s/document/%s?draft=true", srv.Config.BaseURL, fileID)
 
-			// Write response.
+				srv.Logger.Info("contributor email queued",
+					"doc_id", fileID,
+					"contributor_count", len(contributorsToEmail),
+					"method", r.Method,
+					"path", r.URL.Path,
+				)
+
+				go helpers.SendEmailWithRetry(
+					&srv,
+					func() error {
+						return email.SendContributorAddedEmail(
+							email.ContributorAddedEmailData{
+								BaseURL:           srv.Config.BaseURL,
+								DocumentOwner:     userEmail,
+								DocumentShortName: fmt.Sprintf("%s-???", req.ProductAbbreviation),
+								DocumentTitle:     req.Title,
+								DocumentType:      req.DocType,
+								DocumentStatus:    "WIP",
+								DocumentURL:       docURL,
+								Product:           req.Product,
+							},
+							contributorsToEmail,
+							srv.Config.Email.FromAddress,
+							srv.SharePoint,
+						)
+					},
+					fileID,
+					"contributor_added",
+					r,
+				)
+			} // Write response.
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
 
 			resp := &DraftsResponse{
-				ID: f.Id,
+				ID: fileID,
 			}
 
 			enc := json.NewEncoder(w)
@@ -393,7 +421,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 					"error", err,
 					"method", r.Method,
 					"path", r.URL.Path,
-					"doc_id", f.Id,
+					"doc_id", fileID,
 				)
 				http.Error(w, "Error creating document draft",
 					http.StatusInternalServerError)
@@ -403,7 +431,15 @@ func DraftsHandler(srv server.Server) http.Handler {
 			srv.Logger.Info("created draft",
 				"method", r.Method,
 				"path", r.URL.Path,
-				"doc_id", f.Id,
+				"doc_id", fileID,
+			)
+
+			srv.Logger.Info("ACCESS",
+				"user_email", userEmail,
+				"doc_id", fileID,
+				"operation", "draft_created",
+				"updated_attributes", "[docType, product, title]",
+				"mode", "draft",
 			)
 
 			// Request post-processing.
@@ -415,7 +451,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 						"error", err,
 						"method", r.Method,
 						"path", r.URL.Path,
-						"doc_id", f.Id,
+						"doc_id", fileID,
 					)
 					http.Error(w, "Error creating document draft",
 						http.StatusInternalServerError)
@@ -427,7 +463,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 						"error", err,
 						"method", r.Method,
 						"path", r.URL.Path,
-						"doc_id", f.Id,
+						"doc_id", fileID,
 					)
 					http.Error(w, "Error creating document draft",
 						http.StatusInternalServerError)
@@ -437,19 +473,19 @@ func DraftsHandler(srv server.Server) http.Handler {
 				// Compare Algolia and database documents to find data inconsistencies.
 				// Get document object from Algolia.
 				var algoDoc map[string]any
-				err = srv.AlgoSearch.Drafts.GetObject(f.Id, &algoDoc)
+				err = srv.AlgoSearch.Drafts.GetObject(fileID, &algoDoc)
 				if err != nil {
 					srv.Logger.Error("error getting Algolia object for data comparison",
 						"error", err,
 						"method", r.Method,
 						"path", r.URL.Path,
-						"doc_id", f.Id,
+						"doc_id", fileID,
 					)
 					return
 				}
 				// Get document from database.
 				dbDoc := models.Document{
-					GoogleFileID: f.Id,
+					FileID: fileID,
 				}
 				if err := dbDoc.Get(srv.DB); err != nil {
 					srv.Logger.Error(
@@ -457,7 +493,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 						"error", err,
 						"path", r.URL.Path,
 						"method", r.Method,
-						"doc_id", f.Id,
+						"doc_id", fileID,
 					)
 					return
 				}
@@ -465,7 +501,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 				var reviews models.DocumentReviews
 				if err := reviews.Find(srv.DB, models.DocumentReview{
 					Document: models.Document{
-						GoogleFileID: f.Id,
+						FileID: fileID,
 					},
 				}); err != nil {
 					srv.Logger.Error(
@@ -473,7 +509,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 						"error", err,
 						"method", r.Method,
 						"path", r.URL.Path,
-						"doc_id", f.Id,
+						"doc_id", fileID,
 					)
 					return
 				}
@@ -485,7 +521,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 						"error", err,
 						"method", r.Method,
 						"path", r.URL.Path,
-						"doc_id", f.Id,
+						"doc_id", fileID,
 					)
 				}
 			}()
@@ -621,7 +657,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 
 		// Get document from database.
 		model := models.Document{
-			GoogleFileID: docID,
+			FileID: docID,
 		}
 		if err := model.Get(srv.DB); err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -649,7 +685,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 		var reviews models.DocumentReviews
 		if err := reviews.Find(srv.DB, models.DocumentReview{
 			Document: models.Document{
-				GoogleFileID: docID,
+				FileID: docID,
 			},
 		}); err != nil {
 			srv.Logger.Error("error getting reviews for document",
@@ -665,7 +701,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 		var groupReviews models.DocumentGroupReviews
 		if err := groupReviews.Find(srv.DB, models.DocumentGroupReview{
 			Document: models.Document{
-				GoogleFileID: docID,
+				FileID: docID,
 			},
 		}); err != nil {
 			srv.Logger.Error("error getting group reviews for document",
@@ -694,6 +730,11 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 
 		// Make sure document is a draft.
 		if doc.Status != "WIP" {
+			srv.Logger.Warn("document is not a draft",
+				"method", r.Method,
+				"path", r.URL.Path,
+				"doc_id", docID,
+				"status", doc.Status)
 			http.Error(w, "Draft not found", http.StatusNotFound)
 			return
 		}
@@ -703,13 +744,21 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 		// require owner access only.
 		userEmail := r.Context().Value("userEmail").(string)
 		var isOwner, isContributor bool
-		if len(doc.Owners) > 0 && doc.Owners[0] == userEmail {
+		if len(doc.Owners) > 0 && strings.EqualFold(doc.Owners[0], userEmail) {
 			isOwner = true
 		}
 		if contains(doc.Contributors, userEmail) {
 			isContributor = true
 		}
 		if !isOwner && !isContributor && !model.ShareableAsDraft {
+			srv.Logger.Warn("unauthorized draft access attempt",
+				"method", r.Method,
+				"path", r.URL.Path,
+				"doc_id", docID,
+				"user_email", userEmail,
+				"is_owner", isOwner,
+				"is_contributor", isContributor,
+				"shareable_as_draft", model.ShareableAsDraft)
 			http.Error(w,
 				"Only owners or contributors can access a non-shared draft document",
 				http.StatusUnauthorized)
@@ -725,18 +774,70 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 			return
 		case shareableDocumentSubcollectionRequestType:
 			draftsShareableHandler(w, r, docID, *doc, *srv.Config, srv.Logger,
-				srv.AlgoSearch, srv.GWService, srv.DB)
+				srv.AlgoSearch, srv.SharePoint, srv.DB)
+			return
+		case archivedDocumentSubcollectionRequestType:
+			draftsArchivedHandler(w, r, docID, *doc, *srv.Config, srv.Logger,
+				srv.AlgoWrite, srv.SharePoint, srv.DB)
 			return
 		}
 
 		switch r.Method {
+		case "HEAD":
+			fileDetails, err := srv.SharePoint.GetFileDetails(docID)
+			if err != nil {
+				srv.Logger.Error("error getting draft file from SharePoint (HEAD)",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error requesting document draft", http.StatusInternalServerError)
+				return
+			}
+			w.Header().Set("X-Direct-Edit-URL", fileDetails.WebURL)
+			w.Header().Set("Cache-Control", "private, no-store")
+			w.WriteHeader(http.StatusOK)
+
+			// Request post-processing for recently viewed documents
+			go func() {
+				// Update recently viewed documents if this is a document view event. The
+				// Add-To-Recently-Viewed header is set in the request from the frontend
+				// to differentiate between document views and requests to only retrieve
+				// document metadata.
+				if r.Header.Get("Add-To-Recently-Viewed") != "" {
+					if err := updateRecentlyViewedDocs(
+						userEmail, docID, srv.DB, time.Now(),
+					); err != nil {
+						srv.Logger.Error("error updating recently viewed docs",
+							"error", err,
+							"path", r.URL.Path,
+							"method", r.Method,
+							"doc_id", docID,
+						)
+					}
+				}
+			}()
+			return
 		case "GET":
 			now := time.Now()
 
-			// Get file from Google Drive so we can return the latest modified time.
-			file, err := srv.GWService.GetFile(docID)
+			// Get file details from SharePoint
+			if srv.Config.SharePoint == nil { //This is also not required here
+				srv.Logger.Error("SharePoint configuration is missing for SharePoint document",
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w,
+					"Error requesting document draft", http.StatusInternalServerError)
+				return
+			}
+
+			// Get file details from SharePoint with preview/embedding info
+			fileDetails, err := srv.SharePoint.GetFileDetails(docID)
 			if err != nil {
-				srv.Logger.Error("error getting document file from Google",
+				srv.Logger.Error("error getting document file from SharePoint",
 					"error", err,
 					"path", r.URL.Path,
 					"method", r.Method,
@@ -747,8 +848,8 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				return
 			}
 
-			// Parse and set modified time.
-			modifiedTime, err := time.Parse(time.RFC3339Nano, file.ModifiedTime)
+			// Parse modified time from SharePoint
+			modifiedTime, err := time.Parse(time.RFC3339, fileDetails.LastModified)
 			if err != nil {
 				srv.Logger.Error("error parsing modified time",
 					"error", err,
@@ -760,6 +861,8 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 					"Error requesting document draft", http.StatusInternalServerError)
 				return
 			}
+
+			// Set modified time in document
 			doc.ModifiedTime = modifiedTime.Unix()
 
 			// Convert document to Algolia object because this is how it is expected
@@ -776,6 +879,8 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 					http.StatusInternalServerError)
 				return
 			}
+
+			docObj["directEditURL"] = fileDetails.WebURL // Add direct edit URL
 
 			// Write response.
 			w.Header().Set("Content-Type", "application/json")
@@ -837,7 +942,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				}
 				// Get document from database.
 				dbDoc := models.Document{
-					GoogleFileID: docID,
+					FileID: docID,
 				}
 				if err := dbDoc.Get(srv.DB); err != nil {
 					srv.Logger.Error(
@@ -853,7 +958,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				var reviews models.DocumentReviews
 				if err := reviews.Find(srv.DB, models.DocumentReview{
 					Document: models.Document{
-						GoogleFileID: docID,
+						FileID: docID,
 					},
 				}); err != nil {
 					srv.Logger.Error(
@@ -881,20 +986,22 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 		case "DELETE":
 			// Authorize request.
 			if !isOwner {
+				srv.Logger.Warn("unauthorized draft deletion attempt",
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docID,
+					"user_email", userEmail)
 				http.Error(w,
 					"Only owners can delete a draft document",
 					http.StatusUnauthorized)
 				return
 			}
 
-			// Delete document in Google Drive.
-			err = srv.GWService.DeleteFile(docID)
-			if err != nil {
-				srv.Logger.Error(
-					"error deleting document",
+			if err := srv.SharePoint.DeleteFile(docID); err != nil {
+				srv.Logger.Error("error deleting document from SharePoint",
 					"error", err,
-					"method", r.Method,
 					"path", r.URL.Path,
+					"method", r.Method,
 					"doc_id", docID,
 				)
 				http.Error(w, "Error deleting document draft",
@@ -932,7 +1039,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 
 			// Delete document in the database.
 			d := models.Document{
-				GoogleFileID: docID,
+				FileID: docID,
 			}
 			if err := d.Delete(srv.DB); err != nil {
 				srv.Logger.Error(
@@ -973,9 +1080,27 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 		case "PATCH":
 			// Authorize request.
 			if !isOwner {
+				srv.Logger.Warn("unauthorized draft patch attempt",
+					"method", r.Method,
+					"path", r.URL.Path,
+					"doc_id", docID,
+					"user_email", userEmail)
 				http.Error(w,
 					"Only owners can patch a draft document",
-					http.StatusUnauthorized)
+					http.StatusForbidden)
+				return
+			}
+
+			permissions, err := srv.SharePoint.ListPermissions(docID)
+			if err != nil {
+				srv.Logger.Error("error getting SharePoint file permissions",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w,
+					"Error requesting document draft", http.StatusInternalServerError)
 				return
 			}
 
@@ -1066,23 +1191,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				}
 			}
 
-			// Check if document is locked.
-			locked, err := hcd.IsLocked(docID, srv.DB, srv.GWService, srv.Logger)
-			if err != nil {
-				srv.Logger.Error("error checking document locked status",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", docID,
-				)
-				http.Error(w, "Error getting document status", http.StatusNotFound)
-				return
-			}
-			// Don't continue if document is locked.
-			if locked {
-				http.Error(w, "Document is locked", http.StatusLocked)
-				return
-			}
+			// Locking the document is not required because header update is handled by Hermes Add-In for Microsoft Word
 
 			// Compare contributors in request and stored object in Algolia
 			// before we save the patched objected
@@ -1102,48 +1211,100 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				}
 				// Find out contributors to remove from sharing the document
 				// var contributorsToRemoveSharing []string
-				// TODO: figure out how we want to handle user removing all contributors
-				// from the sidebar select
-				if len(doc.Contributors) != 0 && len(*req.Contributors) != 0 {
-					// Compare contributors when there are stored contributors
-					// and there are contributors in the request
-					contributorsToRemoveSharing = compareSlices(
-						*req.Contributors, doc.Contributors)
+				if len(doc.Contributors) != 0 {
+					if len(*req.Contributors) == 0 {
+						// All contributors are being removed
+						contributorsToRemoveSharing = doc.Contributors
+					} else {
+						// Compare contributors when there are stored contributors
+						// and there are contributors in the request
+						// Find contributors that exist in current doc but NOT in the request
+						contributorsToRemoveSharing = compareSlices(
+							*req.Contributors, doc.Contributors)
+					}
 				}
 			}
 
 			// Share file with contributors.
 			// Google Drive API limitation is that you can only share files with one
 			// user at a time.
-			for _, c := range contributorsToAddSharing {
-				if err := srv.GWService.ShareFile(docID, c, "writer"); err != nil {
+
+			if len(contributorsToAddSharing) > 0 {
+				if err := srv.SharePoint.ShareFileWithMultipleUsers(docID, "writer", contributorsToAddSharing); err != nil {
 					srv.Logger.Error("error sharing file with the contributor",
 						"error", err,
 						"method", r.Method,
 						"path", r.URL.Path,
 						"doc_id", docID,
-						"contributor", c)
+						"contributor", contributorsToAddSharing)
 					http.Error(w, "Error patching document draft",
 						http.StatusInternalServerError)
 					return
 				}
-			}
-			if len(contributorsToAddSharing) > 0 {
 				srv.Logger.Info("shared document with contributors",
 					"method", r.Method,
 					"path", r.URL.Path,
 					"contributors_count", len(contributorsToAddSharing),
 				)
+
+				docURL := fmt.Sprintf("%s/document/%s?draft=true", srv.Config.BaseURL, docID)
+
+				srv.Logger.Info("contributor email queued",
+					"doc_id", docID,
+					"contributor_count", len(contributorsToAddSharing),
+					"method", r.Method,
+					"path", r.URL.Path,
+				)
+
+				go helpers.SendEmailWithRetry(
+					&srv,
+					func() error {
+						return email.SendContributorAddedEmail(
+							email.ContributorAddedEmailData{
+								BaseURL:           srv.Config.BaseURL,
+								DocumentOwner:     doc.Owners[0],
+								DocumentShortName: doc.DocNumber,
+								DocumentTitle:     doc.Title,
+								DocumentType:      doc.DocType,
+								DocumentStatus:    doc.Status,
+								DocumentURL:       docURL,
+								Product:           doc.Product,
+							},
+							contributorsToAddSharing,
+							srv.Config.Email.FromAddress,
+							srv.SharePoint,
+						)
+					},
+					docID,
+					"contributor_added",
+					r,
+				)
+			} // Remove contributors from file.
+			// This unfortunately needs to be done one user at a time
+			emailToPermissionIDsMap := make(map[string][]string)
+			for _, p := range permissions {
+				if p.GrantedTo.User.Email == "" {
+					continue
+				}
+				if slices.Contains(p.Role, "owner") {
+					continue
+				}
+				email := p.GrantedTo.User.Email
+
+				if _, exists := emailToPermissionIDsMap[email]; !exists {
+					emailToPermissionIDsMap[email] = make([]string, 0)
+				}
+
+				emailToPermissionIDsMap[email] = append(
+					emailToPermissionIDsMap[email], p.ID)
 			}
 
-			// Remove contributors from file.
-			// This unfortunately needs to be done one user at a time
 			for _, c := range contributorsToRemoveSharing {
 				// Only remove contributor if the email
 				// associated with the permission doesn't
 				// match owner email(s).
 				if !contains(doc.Owners, c) {
-					if err := removeSharing(srv.GWService, docID, c); err != nil {
+					if err := removeSharing(srv, docID, c, emailToPermissionIDsMap); err != nil {
 						srv.Logger.Error("error removing contributor from file",
 							"error", err,
 							"method", r.Method,
@@ -1208,7 +1369,12 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 
 			// Custom fields.
 			if req.CustomFields != nil {
+				srv.Logger.Info("processing custom fields",
+					"doc_id", docID,
+					"custom_fields_count", len(*req.CustomFields))
+
 				for _, cf := range *req.CustomFields {
+					
 					switch cf.Type {
 					case "STRING":
 						if v, ok := cf.Value.(string); ok {
@@ -1248,6 +1414,11 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 							return
 						}
 					case "PEOPLE":
+						srv.Logger.Info("processing PEOPLE custom field",
+							"cf_name", cf.Name,
+							"cf_type", cf.Type,
+							"doc_id", docID)
+
 						if reflect.TypeOf(cf.Value).Kind() != reflect.Slice {
 							srv.Logger.Error("invalid value type for people custom field",
 								"error", err,
@@ -1281,6 +1452,47 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 									),
 									http.StatusBadRequest)
 								return
+							}
+						}
+
+						// IMPORTANT: Query database for old stakeholders BEFORE any modifications
+						var oldStakeholders []string
+						if strings.EqualFold(cf.Name, "stakeholders") || strings.EqualFold(cf.DisplayName, "Stakeholders") {
+							srv.Logger.Info("querying database for old stakeholders",
+								"cf_name", cf.Name,
+								"doc_id", docID)
+
+							// Query the document's current custom fields directly from database
+							var dbDoc models.Document
+							err := srv.DB.
+								Preload("CustomFields.DocumentTypeCustomField").
+								Where("id = ?", model.ID).
+								First(&dbDoc).Error
+
+							if err == nil {
+								// Find the stakeholders custom field in the database result
+								for _, existingCF := range dbDoc.CustomFields {
+									if existingCF.DocumentTypeCustomField.Name == "Stakeholders" {
+										// Parse the JSON value from database
+										var stakeholderEmails []string
+										if err := json.Unmarshal([]byte(existingCF.Value), &stakeholderEmails); err == nil {
+											oldStakeholders = stakeholderEmails
+											srv.Logger.Info("found old stakeholders from database",
+												"old_stakeholders_count", len(oldStakeholders),
+												"doc_id", docID)
+										} else {
+											srv.Logger.Warn("failed to unmarshal old stakeholders",
+												"error", err,
+												"doc_id", docID,
+												"field_name", existingCF.DocumentTypeCustomField.Name)
+										}
+										break
+									}
+								}
+							} else {
+								srv.Logger.Warn("failed to query database for old stakeholders",
+									"error", err,
+									"doc_id", docID)
 							}
 						}
 
@@ -1320,6 +1532,91 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 								http.StatusBadRequest)
 							return
 						}
+
+						// Send email notification for new stakeholders
+						srv.Logger.Info("checking custom field for stakeholder email",
+							"cf_name", cf.Name,
+							"doc_id", docID)
+
+						if strings.EqualFold(cf.Name, "stakeholders") || strings.EqualFold(cf.DisplayName, "Stakeholders") {
+							// Expand groups recursively for both old and new stakeholders
+							oldStakeholdersExpanded, err := expandStakeholderGroups(oldStakeholders, srv)
+							if err != nil {
+								srv.Logger.Error("error expanding old stakeholder groups",
+									"error", err,
+									"doc_id", docID)
+								// Continue with unexpanded list if expansion fails
+								oldStakeholdersExpanded = oldStakeholders
+							}
+
+							newStakeholdersExpanded, err := expandStakeholderGroups(cfVal, srv)
+							if err != nil {
+								srv.Logger.Error("error expanding new stakeholder groups",
+									"error", err,
+									"doc_id", docID)
+								// Continue with unexpanded list if expansion fails
+								newStakeholdersExpanded = cfVal
+							}
+
+							// Find new stakeholders (those in expanded new list but not in expanded old list)
+							newStakeholders := compareSlices(oldStakeholdersExpanded, newStakeholdersExpanded)
+
+							srv.Logger.Debug("stakeholder change detected",
+								"doc_id", docID,
+								"new_count", len(newStakeholders))
+
+							if len(newStakeholders) > 0 {
+								// Build document URL
+								docURL := fmt.Sprintf("%s/document/%s?draft=true", srv.Config.BaseURL, docID)
+
+								srv.Logger.Info("sending stakeholder notification email",
+									"doc_id", docID,
+									"recipient_count", len(newStakeholders))
+
+								// Send email to new stakeholders asynchronously
+								go func() {
+									helpers.SendEmailWithRetry(
+										&srv,
+										func() error {
+											err := email.SendStakeholderAddedEmail(
+												email.StakeholderAddedEmailData{
+													BaseURL:           srv.Config.BaseURL,
+													DocumentOwner:     doc.Owners[0],
+													DocumentShortName: doc.DocNumber,
+													DocumentTitle:     doc.Title,
+													DocumentType:      doc.DocType,
+													DocumentStatus:    doc.Status,
+													DocumentURL:       docURL,
+													Product:           doc.Product,
+												},
+												newStakeholders,
+												srv.Config.Email.FromAddress,
+												srv.SharePoint,
+											)
+
+											if err != nil {
+												srv.Logger.Error("SendStakeholderAddedEmail failed",
+													"error", err,
+													"doc_id", docID,
+													"recipients", newStakeholders)
+												return err
+											}
+
+											srv.Logger.Info("SendStakeholderAddedEmail succeeded",
+												"doc_id", docID,
+												"recipients", newStakeholders)
+											return nil
+										},
+										docID,
+										"stakeholder_added",
+										r,
+									)
+
+									srv.Logger.Info("stakeholder email send complete",
+										"doc_id", docID)
+								}()
+							}
+						}
 					default:
 						srv.Logger.Error("invalid custom field type",
 							"error", err,
@@ -1355,8 +1652,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				}
 
 				// Share file with new owner.
-				if err := srv.GWService.ShareFile(
-					docID, doc.Owners[0], "writer"); err != nil {
+				if err := srv.SharePoint.ShareFile(docID, doc.Owners[0], "writer"); err != nil {
 					srv.Logger.Error("error sharing file with new owner",
 						"error", err,
 						"method", r.Method,
@@ -1392,90 +1688,40 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 			if req.Title != nil {
 				doc.Title = *req.Title
 				model.Title = *req.Title
+
+				// Rename the file in SharePoint to match the new title.
+				// Extract the product abbreviation from DocNumber (e.g., "HCP-???" -> "HCP").
+				abbr := strings.SplitN(doc.DocNumber, "-", 2)[0]
+				newFileName := fmt.Sprintf("%s-%s", abbr, *req.Title)
+
+				// Sanitize the file name for SharePoint.
+				newFileName = strings.NewReplacer(
+					"[", "(", "]", ")", "#", "-", "%", "-", "&", "and",
+					"*", "-", ":", "-", "<", "-", ">", "-", "?", "",
+					"/", "-", "\\", "-", "{", "(", "|", "-", "}", ")",
+					"~", "-",
+				).Replace(newFileName)
+				newFileName = fmt.Sprintf("%s.docx", newFileName)
+
+				if err := srv.SharePoint.RenameFile(docID, newFileName); err != nil {
+					srv.Logger.Error("error renaming file in SharePoint",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID,
+						"new_file_name", newFileName)
+					// Non-fatal: continue even if rename fails
+					srv.Logger.Warn("continuing draft patch despite file rename failure")
+				} else {
+					srv.Logger.Info("successfully renamed file in SharePoint",
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID,
+						"new_file_name", newFileName)
+				}
 			}
 
-			// Send email to new owner.
-			if srv.Config.Email != nil && srv.Config.Email.Enabled &&
-				req.Owners != nil {
-				// Get document URL.
-				docURL, err := getDocumentURL(srv.Config.BaseURL, docID)
-				if err != nil {
-					srv.Logger.Error("error getting document URL",
-						"error", err,
-						"doc_id", docID,
-						"method", r.Method,
-						"path", r.URL.Path,
-					)
-					http.Error(w, "Error updating document draft",
-						http.StatusInternalServerError)
-					return
-				}
-
-				// Get name of new document owner.
-				newOwner := email.User{
-					EmailAddress: doc.Owners[0],
-				}
-				ppl, err := srv.GWService.SearchPeople(
-					doc.Owners[0], "emailAddresses,names")
-				if err != nil {
-					srv.Logger.Warn("error searching directory for new owner",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", docID,
-						"person", doc.Owners[0],
-					)
-				}
-				if len(ppl) == 1 && ppl[0].Names != nil {
-					newOwner.Name = ppl[0].Names[0].DisplayName
-				}
-
-				// Get name of old document owner.
-				oldOwner := email.User{
-					EmailAddress: userEmail,
-				}
-				ppl, err = srv.GWService.SearchPeople(
-					userEmail, "emailAddresses,names")
-				if err != nil {
-					srv.Logger.Warn("error searching directory for old owner",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", docID,
-						"person", doc.Owners[0],
-					)
-				}
-				if len(ppl) == 1 && ppl[0].Names != nil {
-					oldOwner.Name = ppl[0].Names[0].DisplayName
-				}
-
-				if err := email.SendNewOwnerEmail(
-					email.NewOwnerEmailData{
-						BaseURL:           srv.Config.BaseURL,
-						DocumentShortName: doc.DocNumber,
-						DocumentStatus:    doc.Status,
-						DocumentTitle:     doc.Title,
-						DocumentType:      doc.DocType,
-						DocumentURL:       docURL,
-						NewDocumentOwner:  newOwner,
-						OldDocumentOwner:  oldOwner,
-						Product:           doc.Product,
-					},
-					[]string{doc.Owners[0]},
-					srv.Config.Email.FromAddress,
-					srv.GWService,
-				); err != nil {
-					srv.Logger.Error("error sending new owner email",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", docID,
-					)
-					http.Error(w, "Error updating document draft",
-						http.StatusInternalServerError)
-					return
-				}
-			}
+			// TODO: Transfer ownership is triggered when the owner is present in PATCH request, Send Hermes Invite email to new owner.
 
 			// Update document in the database.
 			if err := model.Upsert(srv.DB); err != nil {
@@ -1490,24 +1736,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				return
 			}
 
-			// Replace the doc header.
-			if err := doc.ReplaceHeader(
-				srv.Config.BaseURL, true, srv.GWService,
-			); err != nil {
-				srv.Logger.Error("error replacing draft doc header",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", docID,
-				)
-				http.Error(w, "Error replacing header of document draft",
-					http.StatusInternalServerError)
-				return
-			}
-
-			// Rename file with new title.
-			srv.GWService.RenameFile(docID,
-				fmt.Sprintf("[%s] %s", doc.DocNumber, doc.Title))
+			// Note: For all PATCH requests, the document header updates are handled by Microsoft Word Add-In for Hermes
 
 			w.WriteHeader(http.StatusOK)
 
@@ -1515,6 +1744,16 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				"method", r.Method,
 				"path", r.URL.Path,
 				"doc_id", docID,
+			)
+
+			// Log document access with Datadog ACCESS tag
+			operation, updatedAttrs := buildDraftOperation(req)
+			srv.Logger.Info("ACCESS",
+				"user_email", userEmail,
+				"doc_id", docID,
+				"operation", operation,
+				"updated_attributes", updatedAttrs,
+				"mode", "draft",
 			)
 
 			// Request post-processing.
@@ -1568,7 +1807,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				}
 				// Get document from database.
 				dbDoc := models.Document{
-					GoogleFileID: docID,
+					FileID: docID,
 				}
 				if err := dbDoc.Get(srv.DB); err != nil {
 					srv.Logger.Error(
@@ -1584,7 +1823,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				var reviews models.DocumentReviews
 				if err := reviews.Find(srv.DB, models.DocumentReview{
 					Document: models.Document{
-						GoogleFileID: docID,
+						FileID: docID,
 					},
 				}); err != nil {
 					srv.Logger.Error(
@@ -1649,17 +1888,94 @@ func validateDocType(
 	return false
 }
 
-// removeSharing lists permissions for a document and then
-// deletes the permission for the supplied user email
-func removeSharing(s *gw.Service, docID, email string) error {
-	permissions, err := s.ListPermissions(docID)
-	if err != nil {
-		return err
-	}
-	for _, p := range permissions {
-		if p.EmailAddress == email {
-			return s.DeletePermission(docID, p.Id)
+// TODO : Need to validate users permission for people not part of the Hermes Sharepoint Group. (Contributors/Approvers) Contributors validated, Need to check Approvers.
+
+// removeSharing handles permission removal for documents
+// For SharePoint, this would need to call the SharePoint API
+func removeSharing(srv server.Server, docID, email string, emailToPermissionIDMap map[string][]string) error {
+	// Check if it's a SharePoint document
+
+	if permissionIDs, exists := emailToPermissionIDMap[email]; exists {
+		// Remove all permissions associated with the email
+		for _, pid := range permissionIDs {
+			if err := srv.SharePoint.DeletePermission(docID, pid); err != nil {
+				return fmt.Errorf("error removing permission ID %s for email %s: %w", pid, email, err)
+			}
 		}
 	}
+
 	return nil
+}
+
+// buildDraftOperation determines the primary operation and builds a list of updated attributes
+// from a DraftsPatchRequest for logging purposes.
+func buildDraftOperation(req DraftsPatchRequest) (string, string) {
+	var attrs []string
+	var operation string
+
+	// Determine primary operation based on what's being changed
+	if req.Owners != nil {
+		operation = "ownership_transferred"
+		attrs = append(attrs, "owners")
+	}
+	if req.Product != nil {
+		if operation == "" {
+			operation = "product_changed"
+		}
+		attrs = append(attrs, "product")
+	}
+	if req.Approvers != nil {
+		if operation == "" {
+			operation = "approvers_updated"
+		}
+		attrs = append(attrs, "approvers")
+	}
+	if req.ApproverGroups != nil {
+		if operation == "" {
+			operation = "approver_groups_updated"
+		}
+		attrs = append(attrs, "approverGroups")
+	}
+	if req.Contributors != nil {
+		if operation == "" {
+			operation = "contributors_updated"
+		}
+		attrs = append(attrs, "contributors")
+	}
+	if req.CustomFields != nil {
+		if operation == "" {
+			operation = "custom_fields_updated"
+		}
+		attrs = append(attrs, "customFields")
+	}
+	if req.Summary != nil {
+		if operation == "" {
+			operation = "summary_updated"
+		}
+		attrs = append(attrs, "summary")
+	}
+	if req.Title != nil {
+		if operation == "" {
+			operation = "title_updated"
+		}
+		attrs = append(attrs, "title")
+	}
+
+	if operation == "" {
+		operation = "draft_updated"
+	}
+
+	// If multiple fields updated, mark as bulk update
+	if len(attrs) > 1 {
+		operation = "draft_bulk_update"
+	}
+
+	var attrsList string
+	if len(attrs) == 0 {
+		attrsList = "none"
+	} else {
+		attrsList = fmt.Sprintf("[%s]", strings.Join(attrs, ", "))
+	}
+
+	return operation, attrsList
 }

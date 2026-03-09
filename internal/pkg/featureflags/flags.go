@@ -2,6 +2,7 @@ package featureflags
 
 import (
 	"hash/fnv"
+	"strings"
 
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
@@ -107,7 +108,7 @@ func toggleFlagEmail(a *algolia.Client, flag string, email string, log hclog.Log
 	// is found in the list of user emails
 	// for the feature flag in Algolia
 	for _, k := range f.FeatureFlagUserEmails[flag] {
-		if email == k {
+		if strings.EqualFold(email, k) {
 			return true
 		}
 	}

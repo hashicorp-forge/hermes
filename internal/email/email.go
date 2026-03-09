@@ -5,11 +5,11 @@ import (
 	"embed"
 	"fmt"
 	"strings"
-	"text/template"
+	"html/template"
 	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
+	"github.com/hashicorp-forge/hermes/pkg/sharepointhelper"
 )
 
 //go:embed templates/*
@@ -73,11 +73,37 @@ type SubscriberDocumentPublishedEmailData struct {
 	Product           string
 }
 
+type ContributorAddedEmailData struct {
+	BaseURL             string
+	CurrentYear         int
+	DocumentOwner       string
+	DocumentShortName   string
+	DocumentTitle       string
+	DocumentType        string
+	DocumentStatus      string
+	DocumentStatusClass string
+	DocumentURL         string
+	Product             string
+}
+
+type StakeholderAddedEmailData struct {
+	BaseURL             string
+	CurrentYear         int
+	DocumentOwner       string
+	DocumentShortName   string
+	DocumentTitle       string
+	DocumentType        string
+	DocumentStatus      string
+	DocumentStatusClass string
+	DocumentURL         string
+	Product             string
+}
+
 func SendDocumentApprovedEmail(
 	data DocumentApprovedEmailData,
 	to []string,
 	from string,
-	svc *gw.Service,
+	svc *sharepointhelper.Service,
 ) error {
 	// Validate data.
 	if err := validation.ValidateStruct(&data,
@@ -126,7 +152,7 @@ func SendDocumentApprovedEmail(
 	)
 
 	// Send email.
-	_, err = svc.SendEmail(
+	err = svc.SendEmail(
 		to,
 		from,
 		subject,
@@ -139,7 +165,7 @@ func SendNewOwnerEmail(
 	data NewOwnerEmailData,
 	to []string,
 	from string,
-	svc *gw.Service,
+	svc *sharepointhelper.Service,
 ) error {
 	// Validate data.
 	if err := validation.ValidateStruct(&data,
@@ -184,7 +210,7 @@ func SendNewOwnerEmail(
 	}
 
 	// Send email.
-	_, err = svc.SendEmail(
+	err = svc.SendEmail(
 		to,
 		from,
 		fmt.Sprintf("%s transferred to you", data.DocumentShortName),
@@ -197,7 +223,7 @@ func SendReviewRequestedEmail(
 	d ReviewRequestedEmailData,
 	to []string,
 	from string,
-	s *gw.Service,
+	s *sharepointhelper.Service,
 ) error {
 	// Validate data.
 	if err := validation.ValidateStruct(&d,
@@ -228,7 +254,7 @@ func SendReviewRequestedEmail(
 		return fmt.Errorf("error executing template: %w", err)
 	}
 
-	_, err = s.SendEmail(
+	err = s.SendEmail(
 		to,
 		from,
 		fmt.Sprintf("Document review requested for %s", d.DocumentShortName),
@@ -241,7 +267,17 @@ func SendSubscriberDocumentPublishedEmail(
 	d SubscriberDocumentPublishedEmailData,
 	to []string,
 	from string,
-	s *gw.Service,
+	s *sharepointhelper.Service,
+) error {
+	return SendSubscriberDocumentPublishedEmailWithBCC(d, nil, to, from, s)
+}
+
+func SendSubscriberDocumentPublishedEmailWithBCC(
+	d SubscriberDocumentPublishedEmailData,
+	toRecipients []string,
+	bccRecipients []string,
+	from string,
+	s *sharepointhelper.Service,
 ) error {
 	// Validate data.
 	if err := validation.ValidateStruct(&d,
@@ -268,8 +304,9 @@ func SendSubscriberDocumentPublishedEmail(
 		return fmt.Errorf("error executing template: %w", err)
 	}
 
-	_, err = s.SendEmail(
-		to,
+	err = s.SendEmailWithBCC(
+		toRecipients,
+		bccRecipients,
 		from,
 		fmt.Sprintf("New %s: [%s] %s",
 			d.DocumentType,
@@ -281,6 +318,97 @@ func SendSubscriberDocumentPublishedEmail(
 	return err
 }
 
+func SendContributorAddedEmail(
+	data ContributorAddedEmailData,
+	to []string,
+	from string,
+	s *sharepointhelper.Service,
+) error {
+	if err := validation.ValidateStruct(&data,
+		validation.Field(&data.BaseURL, validation.Required),
+		validation.Field(&data.DocumentOwner, validation.Required),
+		validation.Field(&data.DocumentTitle, validation.Required),
+		validation.Field(&data.DocumentURL, validation.Required),
+		validation.Field(&data.Product, validation.Required),
+		validation.Field(&data.DocumentStatus, validation.Required),
+		validation.Field(&data.DocumentType, validation.Required),
+	); err != nil {
+		return fmt.Errorf("error validating email data: %w", err)
+	}
+
+	var body bytes.Buffer
+	tmpl, err := template.ParseFS(
+		tmplFS, "templates/contributor-added.html")
+	if err != nil {
+		return fmt.Errorf("error parsing template: %w", err)
+	}
+
+	data.CurrentYear = time.Now().Year()
+	data.DocumentStatusClass = dasherizeStatus(data.DocumentStatus)
+
+	if err := tmpl.Execute(&body, data); err != nil {
+		return fmt.Errorf("error executing template: %w", err)
+	}
+
+	err = s.SendEmail(
+		to,
+		from,
+		fmt.Sprintf("You've been added as contributor to %s",
+			data.DocumentShortName,
+		),
+		body.String(),
+	)
+	return err
+}
+
 func dasherizeStatus(status string) string {
 	return strings.ReplaceAll(strings.ToLower(status), " ", "-")
+}
+
+func SendStakeholderAddedEmail(
+	data StakeholderAddedEmailData,
+	to []string,
+	from string,
+	s *sharepointhelper.Service,
+) error {
+	if err := validation.ValidateStruct(&data,
+		validation.Field(&data.BaseURL, validation.Required),
+		validation.Field(&data.DocumentOwner, validation.Required),
+		validation.Field(&data.DocumentTitle, validation.Required),
+		validation.Field(&data.DocumentURL, validation.Required),
+		validation.Field(&data.Product, validation.Required),
+		validation.Field(&data.DocumentStatus, validation.Required),
+		validation.Field(&data.DocumentType, validation.Required),
+	); err != nil {
+		return fmt.Errorf("error validating email data: %w", err)
+	}
+
+	var body bytes.Buffer
+	tmpl, err := template.ParseFS(
+		tmplFS, "templates/stakeholder-added.html")
+	if err != nil {
+		return fmt.Errorf("error parsing template: %w", err)
+	}
+
+	data.CurrentYear = time.Now().Year()
+	data.DocumentStatusClass = dasherizeStatus(data.DocumentStatus)
+
+	if err := tmpl.Execute(&body, data); err != nil {
+		return fmt.Errorf("error executing template: %w", err)
+	}
+
+	subject := fmt.Sprintf("You've been added as stakeholder to %s",
+		data.DocumentShortName,
+	)
+
+	if err := s.SendEmail(
+		to,
+		from,
+		subject,
+		body.String(),
+	); err != nil {
+		return err
+	}
+
+	return nil
 }

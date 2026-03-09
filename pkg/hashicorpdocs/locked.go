@@ -2,6 +2,7 @@ package hashicorpdocs
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp-forge/hermes/pkg/googleworkspace"
 	"github.com/hashicorp-forge/hermes/pkg/models"
@@ -10,8 +11,18 @@ import (
 	"gorm.io/gorm"
 )
 
+// IsFileID checks if a fileID is in SharePoint format
+// SharePoint file IDs tend to be longer and have specific patterns
+func IsFileID(fileID string) bool {
+	// SharePoint file IDs typically start with "01" and contain more characters
+	// than Google file IDs, often with specific patterns
+	return strings.HasPrefix(fileID, "01") && len(fileID) >= 20
+}
+
 // IsLocked checks if a document contains one or more suggestions in the header,
 // locks/unlocks the document accordingly, and returns the lock status.
+// For SharePoint documents, we always return false (not locked) as the suggestion
+// tracking system is different.
 func IsLocked(
 	fileID string,
 	db *gorm.DB,
@@ -20,11 +31,36 @@ func IsLocked(
 ) (bool, error) {
 
 	// Get document from database.
-	doc := models.Document{
-		GoogleFileID: fileID,
+	doc := models.Document{}
+
+	// Determine if it's a SharePoint or Google document based on ID format
+	if IsFileID(fileID) {
+		// For SharePoint documents, set the FileID
+		doc.FileID = fileID
+		if err := doc.Get(db); err != nil {
+			return false, fmt.Errorf("error getting document from database: %w", err)
+		}
+
+		// For SharePoint documents, we don't check for suggestions in the same way
+		// Return false (not locked) for SharePoint documents
+		log.Info("SharePoint document, skipping lock check",
+			"sharepoint_file_id", fileID,
+		)
+		return false, nil
 	}
+
+	// This is a Google document
+	doc.GoogleFileID = fileID
 	if err := doc.Get(db); err != nil {
 		return false, fmt.Errorf("error getting document from database: %w", err)
+	}
+
+	// Only call GetDoc if we have a Google service
+	if goog == nil {
+		log.Warn("Google Workspace service not available, skipping lock check",
+			"google_file_id", fileID,
+		)
+		return false, nil
 	}
 
 	// Find out if the document header contains a suggestion. Deleting text which
@@ -35,6 +71,7 @@ func IsLocked(
 		return false, fmt.Errorf("error getting Google Doc: %w", err)
 	}
 
+	// Check for suggestions in Google Doc
 	hasSuggestion := containsSuggestionInHeader(gDoc)
 	if hasSuggestion {
 		// Lock document if it's not already locked.

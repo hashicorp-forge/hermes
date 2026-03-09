@@ -257,7 +257,7 @@ func migrateIndex(
 
 		// Check if document already exists in the database.
 		existingDoc := models.Document{
-			GoogleFileID: dbDoc.GoogleFileID,
+			FileID: dbDoc.FileID,
 		}
 		err = existingDoc.Get(m.Database)
 		if err != nil {
@@ -283,7 +283,7 @@ func migrateIndex(
 						m.Logger.Error("error creating document",
 							"error", err,
 						)
-						*m.DocsWithErrors = append(*m.DocsWithErrors, dbDoc.GoogleFileID)
+						*m.DocsWithErrors = append(*m.DocsWithErrors, dbDoc.FileID)
 						continue
 					}
 
@@ -294,7 +294,7 @@ func migrateIndex(
 				} else {
 					*m.DocsCreated += 1
 
-					logArgs := []any{"document_id", dbDoc.GoogleFileID}
+					logArgs := []any{"document_id", dbDoc.FileID}
 					// Log additional document information if the verbose flag is true.
 					if m.Verbose {
 						if err == nil {
@@ -317,7 +317,7 @@ func migrateIndex(
 					"error", err,
 					"document_id", doc.ObjectID,
 				)
-				*m.DocsWithErrors = append(*m.DocsWithErrors, dbDoc.GoogleFileID)
+				*m.DocsWithErrors = append(*m.DocsWithErrors, dbDoc.FileID)
 				continue
 			}
 		} else {
@@ -337,7 +337,7 @@ func migrateIndex(
 			var cmpReviews models.DocumentReviews
 			if err := cmpReviews.Find(m.Database, models.DocumentReview{
 				Document: models.Document{
-					GoogleFileID: doc.ObjectID,
+					FileID: doc.ObjectID,
 				},
 			}); err != nil {
 				m.Logger.Error(
@@ -345,7 +345,7 @@ func migrateIndex(
 					"error", err,
 					"document_id", doc.ObjectID,
 				)
-				*m.DocsWithErrors = append(*m.DocsWithErrors, dbDoc.GoogleFileID)
+				*m.DocsWithErrors = append(*m.DocsWithErrors, dbDoc.FileID)
 				continue
 			}
 
@@ -367,7 +367,7 @@ func migrateIndex(
 						// Find all file revisions for the document.
 						var dbFileRevs models.DocumentFileRevisions
 						if err := dbFileRevs.Find(
-							tx, models.Document{GoogleFileID: doc.ObjectID},
+							tx, models.Document{FileID: doc.ObjectID},
 						); err != nil {
 							return fmt.Errorf("error finding all file revisions: %w", err)
 						}
@@ -376,7 +376,7 @@ func migrateIndex(
 						for revID, revName := range doc.FileRevisions {
 							frExists := false
 							for _, fr := range dbFileRevs {
-								if fr.GoogleDriveFileRevisionID == revID && fr.Name == revName {
+								if fr.FileRevisionID == revID && fr.Name == revName {
 									frExists = true
 									break
 								}
@@ -384,10 +384,10 @@ func migrateIndex(
 							if !frExists {
 								fr := models.DocumentFileRevision{
 									Document: models.Document{
-										GoogleFileID: doc.ObjectID,
+										FileID: doc.ObjectID,
 									},
-									GoogleDriveFileRevisionID: revID,
-									Name:                      revName,
+									FileRevisionID: revID,
+									Name:           revName,
 								}
 								if err := fr.Create(tx); err != nil {
 									return fmt.Errorf("error creating new file revision: %w", err)
@@ -408,7 +408,7 @@ func migrateIndex(
 							"error", err,
 							"document_id", doc.ObjectID,
 						)
-						*m.DocsWithErrors = append(*m.DocsWithErrors, dbDoc.GoogleFileID)
+						*m.DocsWithErrors = append(*m.DocsWithErrors, dbDoc.FileID)
 						continue
 					}
 

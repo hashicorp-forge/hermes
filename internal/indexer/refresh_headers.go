@@ -70,16 +70,16 @@ func refreshDocumentHeaders(
 	}
 	var lockedDocIDs []string
 	for _, d := range lockedDocs {
-		f, err := idx.GoogleWorkspaceService.GetFile(d.GoogleFileID)
+		f, err := idx.GoogleWorkspaceService.GetFile(d.FileID)
 		if err != nil {
-			return fmt.Errorf("error getting file (%s): %w", d.GoogleFileID, err)
+			return fmt.Errorf("error getting file (%s): %w", d.FileID, err)
 		}
 
 		// Find if locked document is already in slice of updated documents and
 		// append it if not.
 		alreadyInDocs := false
 		for _, doc := range docs {
-			if doc.Id == d.GoogleFileID {
+			if doc.Id == d.FileID {
 				alreadyInDocs = true
 				break
 			}
@@ -87,7 +87,7 @@ func refreshDocumentHeaders(
 		if !alreadyInDocs {
 			docs = append(docs, f)
 		}
-		lockedDocIDs = append(lockedDocIDs, d.GoogleFileID)
+		lockedDocIDs = append(lockedDocIDs, d.FileID)
 	}
 	if ft == draftsFolderType {
 		log.Info(fmt.Sprintf("locked draft document IDs: %v", lockedDocIDs))
@@ -177,7 +177,7 @@ func refreshDocumentHeader(
 	if idx.UseDatabaseForDocumentData {
 		// Get document from database.
 		model := models.Document{
-			GoogleFileID: file.Id,
+			FileID: file.Id,
 		}
 		if err := model.Get(idx.Database); err != nil {
 			log.Error("error getting document from database",
@@ -191,7 +191,7 @@ func refreshDocumentHeader(
 		var reviews models.DocumentReviews
 		if err := reviews.Find(idx.Database, models.DocumentReview{
 			Document: models.Document{
-				GoogleFileID: file.Id,
+				FileID: file.Id,
 			},
 		}); err != nil {
 			log.Error("error getting reviews for document",
@@ -205,7 +205,7 @@ func refreshDocumentHeader(
 		var groupReviews models.DocumentGroupReviews
 		if err := groupReviews.Find(idx.Database, models.DocumentGroupReview{
 			Document: models.Document{
-				GoogleFileID: file.Id,
+				FileID: file.Id,
 			},
 		}); err != nil {
 			log.Error("error getting group reviews for document",

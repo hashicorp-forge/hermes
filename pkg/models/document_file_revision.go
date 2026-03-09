@@ -18,11 +18,14 @@ type DocumentFileRevision struct {
 	Document   Document
 	DocumentID uint `gorm:"primaryKey"`
 
-	// GoogleDriveFileRevisionID is the ID of the Google Drive file revision.
-	GoogleDriveFileRevisionID string `gorm:"primaryKey"`
+	// FileRevisionID is the universal ID for the file revision (SharePoint or Google Drive).
+	FileRevisionID string `gorm:"primaryKey"`
 
 	// Name is the name of the document file revision.
 	Name string `gorm:"primaryKey"`
+
+	// GoogleDriveFileRevisionID is the original Google Drive revision ID (nullable after migration).
+	GoogleDriveFileRevisionID *string `gorm:"default:null"`
 }
 
 // DocumentFileRevisions is a slice of document file revisions.
@@ -45,7 +48,7 @@ func (fr *DocumentFileRevision) Create(db *gorm.DB) error {
 	// Validate fields.
 	if err := validation.ValidateStruct(fr,
 		validation.Field(&fr.DocumentID, validation.Required),
-		validation.Field(&fr.GoogleDriveFileRevisionID, validation.Required),
+		validation.Field(&fr.FileRevisionID, validation.Required),
 		validation.Field(&fr.Name, validation.Required),
 	); err != nil {
 		return err
@@ -95,7 +98,7 @@ func (fr *DocumentFileRevision) Get(db *gorm.DB) error {
 	// Validate fields.
 	if err := validation.ValidateStruct(fr,
 		validation.Field(&fr.DocumentID, validation.Required),
-		validation.Field(&fr.GoogleDriveFileRevisionID, validation.Required),
+		validation.Field(&fr.FileRevisionID, validation.Required),
 		validation.Field(&fr.Name, validation.Required),
 	); err != nil {
 		return err

@@ -3,11 +3,29 @@ package config
 import (
 	"fmt"
 
+	"github.com/hashicorp-forge/hermes/internal/auth/oidcalb"
 	"github.com/hashicorp-forge/hermes/internal/auth/oktaalb"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
 	"github.com/hashicorp/hcl/v2/hclsimple"
 )
+
+type SharePointConfig struct {
+	ClientID        string `hcl:"client_id"`
+	ClientSecret    string `hcl:"client_secret"`
+	RedirectURI     string `hcl:"redirect_uri"`
+	TenantID        string `hcl:"tenant_id"`
+	SiteID          string `hcl:"site_id"`
+	DriveID         string `hcl:"drive_id"`
+	Domain          string `hcl:"domain"`           // Email Domain
+	DocsFolder      string `hcl:"docs_folder"`      // Folder for published documents
+	DraftsFolder    string `hcl:"drafts_folder"`    // Folder for draft documents
+	ShortcutsFolder string `hcl:"shortcuts_folder"` // Folder for document shortcuts
+
+	// GroupApprovals is the configuration for using Microsoft distribution lists as
+	// document approvers.
+	GroupApprovals *SharePointGroupApprovals `hcl:"group_approvals,block"`
+}
 
 // Config contains the Hermes configuration.
 type Config struct {
@@ -35,6 +53,8 @@ type Config struct {
 	// GoogleWorkspace configures Hermes to work with Google Workspace.
 	GoogleWorkspace *GoogleWorkspace `hcl:"google_workspace,block"`
 
+	SharePoint *SharePointConfig `hcl:"sharepoint,block"`
+
 	// Indexer contains the configuration for the Hermes indexer.
 	Indexer *Indexer `hcl:"indexer,block"`
 
@@ -45,7 +65,11 @@ type Config struct {
 	// "json".
 	LogFormat string `hcl:"log_format,optional"`
 
-	// Okta configures Hermes to work with Okta.
+	// OidcAlb configures Hermes to work with OIDC ALB authentication (supports any OIDC provider).
+	OidcAlb *oidcalb.Config `hcl:"oidc_alb,block"`
+
+	// Okta configures Hermes to work with Okta (deprecated: use oidc_alb instead).
+	// Kept for backward compatibility with existing Google Hermes deployments.
 	Okta *oktaalb.Config `hcl:"okta,block"`
 
 	// Products contain available products.
@@ -108,6 +132,10 @@ type DocumentType struct {
 	// document type.
 	Template string `hcl:"template"`
 
+	// MSTemplate is the Microsoft file path or ID for the document template used for this
+	// document type.
+	MSTemplate string `hcl:"ms_template,optional"`
+
 	// MoreInfoLink defines a link to more info for the document type.
 	// Example: "When should I create an RFC?"
 	MoreInfoLink *DocumentTypeLink `hcl:"more_info_link,block" json:"moreInfoLink"`
@@ -162,6 +190,25 @@ type Email struct {
 
 	// FromAddress is the email address to send emails from.
 	FromAddress string `hcl:"from_address,optional"`
+
+	// BCCBatchSize is the maximum number of BCC recipients per email.
+	BCCBatchSize int `hcl:"bcc_batch_size,optional"`
+
+	// Retry configures email retry behavior.
+	Retry *EmailRetry `hcl:"retry,block"`
+}
+
+// EmailRetry configures email retry behavior with exponential backoff.
+type EmailRetry struct {
+	// MaxAttempts is the maximum number of send attempts (including initial attempt).
+	MaxAttempts int `hcl:"max_attempts,optional"`
+
+	// InitialDelayMinutes is the delay before the first retry in minutes.
+	// Subsequent retries use exponential backoff.
+	InitialDelayMinutes int `hcl:"initial_delay_minutes,optional"`
+
+	// FinalDelayMinutes is the delay before the final retry attempt in minutes.
+	FinalDelayMinutes int `hcl:"final_delay_minutes,optional"`
 }
 
 // FeatureFlags contain available feature flags.
@@ -252,6 +299,16 @@ type GoogleWorkspaceGroupApprovals struct {
 	SearchPrefix string `hcl:"search_prefix,optional"`
 }
 
+// SharePointGroupApprovals is the configuration for using Microsoft distribution lists as
+// document approvers.
+type SharePointGroupApprovals struct {
+	// Enabled enables using Microsoft distribution lists as document approvers.
+	Enabled bool `hcl:"enabled,optional"`
+
+	// SearchPrefix is the prefix to use when searching for distribution lists.
+	SearchPrefix string `hcl:"search_prefix,optional"`
+}
+
 // GoogleWorkspaceOAuth2 is the configuration to use OAuth 2.0 to access Google
 // Workspace APIs.
 type GoogleWorkspaceOAuth2 struct {
@@ -333,9 +390,15 @@ type Product struct {
 type Server struct {
 	// Addr is the address to bind to for listening.
 	Addr string `hcl:"addr,optional"`
-}
 
-// NewConfig parses an HCL configuration file and returns the Hermes config.
+	// DevMode enables development mode with permissive CORS policy
+	DevMode bool `hcl:"dev_mode,optional"`
+
+	// TLS configuration
+	TLSEnabled bool   `hcl:"tls_enabled,optional"`
+	TLSCert    string `hcl:"tls_cert,optional"`
+	TLSKey     string `hcl:"tls_key,optional"`
+} // NewConfig parses an HCL configuration file and returns the Hermes config.
 func NewConfig(filename string) (*Config, error) {
 	c := &Config{
 		Algolia:         &algolia.Config{},
@@ -343,8 +406,9 @@ func NewConfig(filename string) (*Config, error) {
 		FeatureFlags:    &FeatureFlags{},
 		GoogleWorkspace: &GoogleWorkspace{},
 		Indexer:         &Indexer{},
-		Okta:            &oktaalb.Config{},
+		OidcAlb:         &oidcalb.Config{},
 		Server:          &Server{},
+		SharePoint:      &SharePointConfig{},
 	}
 	err := hclsimple.DecodeFile(filename, nil, c)
 	if err != nil {

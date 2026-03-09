@@ -7,8 +7,8 @@ import (
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	"github.com/hashicorp-forge/hermes/pkg/document"
-	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
 	"github.com/hashicorp-forge/hermes/pkg/models"
+	"github.com/hashicorp-forge/hermes/pkg/sharepointhelper"
 	"github.com/hashicorp/go-hclog"
 	"gorm.io/gorm"
 )
@@ -29,14 +29,14 @@ func draftsShareableHandler(
 	cfg config.Config,
 	l hclog.Logger,
 	algoRead *algolia.Client,
-	goog *gw.Service,
+	sharePoint *sharepointhelper.Service,
 	db *gorm.DB,
 ) {
 	switch r.Method {
 	case "GET":
 		// Get document from database.
 		d := models.Document{
-			GoogleFileID: docID,
+			FileID: docID,
 		}
 		if err := d.Get(db); err != nil {
 			l.Error("error getting document from database",
@@ -71,6 +71,12 @@ func draftsShareableHandler(
 		// Authorize request (only the document owner is authorized).
 		userEmail := r.Context().Value("userEmail").(string)
 		if doc.Owners[0] != userEmail {
+			l.Warn("unauthorized attempt to change draft shareable settings",
+				"method", r.Method,
+				"path", r.URL.Path,
+				"doc_id", docID,
+				"user_email", userEmail,
+				"owner", doc.Owners[0])
 			http.Error(w, "Only the document owner can change shareable settings",
 				http.StatusForbidden)
 			return
@@ -104,7 +110,7 @@ func draftsShareableHandler(
 
 		// Get document from database.
 		doc := models.Document{
-			GoogleFileID: docID,
+			FileID: docID,
 		}
 		if err := doc.Get(db); err != nil {
 			l.Error("error getting document from database",
@@ -118,47 +124,7 @@ func draftsShareableHandler(
 			return
 		}
 
-		// Find out if the draft is already shared with the domain.
-		perms, err := goog.ListPermissions(docID)
-		if err != nil {
-			l.Error("error listing Google Drive permissions",
-				"error", err,
-				"path", r.URL.Path,
-				"method", r.Method,
-				"doc_id", docID,
-			)
-			http.Error(w,
-				"Error updating document permissions",
-				http.StatusInternalServerError)
-			return
-		}
-		alreadySharedPermIDs := []string{}
-		for _, p := range perms {
-			isInherited := false
-			for _, pd := range p.PermissionDetails {
-				if pd.Inherited {
-					isInherited = true
-				}
-			}
-			if p.Domain == cfg.GoogleWorkspace.Domain &&
-				p.Role == "commenter" &&
-				!isInherited {
-				alreadySharedPermIDs = append(alreadySharedPermIDs, p.Id)
-			}
-		}
-
-		// Update file permissions, if necessary.
-		if *req.IsShareable {
-			if len(alreadySharedPermIDs) == 0 {
-				// File is not already shared with domain, so share it.
-				goog.ShareFileWithDomain(docID, cfg.GoogleWorkspace.Domain, "commenter")
-			}
-		} else {
-			for _, id := range alreadySharedPermIDs {
-				// File is already shared with domain, so remove the permission.
-				goog.DeletePermission(docID, id)
-			}
-		}
+		// TODO : Enable the access to organisation when isShareable is true.
 
 		// Update ShareableAsDraft for document in the database.
 		if err := db.Model(&doc).
