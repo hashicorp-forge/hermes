@@ -243,3 +243,69 @@ server {
   // addr is the address to bind to for listening.
   addr = "127.0.0.1:8000"
 }
+
+// --------------------------------------------------------------------------
+// SharePoint Backend Configuration (alternative to google_workspace)
+// --------------------------------------------------------------------------
+// Uncomment and configure these blocks to use SharePoint instead of Google.
+
+// sharepoint {
+//   client_id  = "YOUR_SHAREPOINT_CLIENT_ID"
+//   client_secret = "YOUR_SHAREPOINT_CLIENT_SECRET"
+//   tenant_id  = "YOUR_AZURE_AD_TENANT_ID"
+//   site_id    = "YOUR_SHAREPOINT_SITE_ID"
+//   drive_id   = "YOUR_SHAREPOINT_DRIVE_ID"
+//   domain     = "your-domain.com"
+//
+//   // templates_folder_id is the ID of the folder containing document templates.
+//   templates_folder_id = ""
+//
+//   // docs_folder_id is the ID of the published documents folder.
+//   docs_folder_id = ""
+//
+//   // drafts_folder_id is the ID of the drafts folder.
+//   drafts_folder_id = ""
+// }
+
+// microsoft_auth {
+//   client_id     = "YOUR_AZURE_AD_CLIENT_ID"
+//   client_secret = "YOUR_AZURE_AD_CLIENT_SECRET"
+//   tenant_id     = "YOUR_AZURE_AD_TENANT_ID"
+//   redirect_uri  = "https://localhost:8443/auth/callback"
+// }
+
+// microsoft_graph {
+//   client_id     = "YOUR_GRAPH_API_CLIENT_ID"
+//   client_secret = "YOUR_GRAPH_API_CLIENT_SECRET"
+//   tenant_id     = "YOUR_AZURE_AD_TENANT_ID"
+// }
+
+// oidc_alb {
+//   // auth_server_url is the OIDC discovery URL.
+//   auth_server_url = "https://your-oidc-provider.com"
+//   // aws_region is the region of the AWS ALB.
+//   aws_region = "us-east-1"
+//   // client_id is the OIDC client ID.
+//   client_id = ""
+//   // disabled disables OIDC ALB authorization.
+//   disabled = false
+//   // jwt_signer is the ARN of the ALB for JWT verification.
+//   jwt_signer = "arn:aws:elasticloadbalancing:..."
+// }
+
+// For SharePoint deployments, configure SMTP email:
+// email {
+//   enabled      = true
+//   from_address = "hermes@your-domain.com"
+//   smtp_host    = "smtp.your-domain.com"
+//   smtp_port    = 587
+//   smtp_user    = ""
+//   smtp_pass    = ""
+// }
+
+// For TLS (required for SharePoint/Office Add-in):
+// server {
+//   addr     = "0.0.0.0:8443"
+//   tls_cert = "/path/to/cert.pem"
+//   tls_key  = "/path/to/key.pem"
+// }
