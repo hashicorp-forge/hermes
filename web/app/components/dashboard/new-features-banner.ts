@@ -22,19 +22,44 @@ export default class DashboardNewFeaturesBanner extends Component<DashboardNewFe
 
   /**
    * Whether the banner should be shown.
-   * PERMANENT MIGRATION BANNER - Always shown, cannot be dismissed
+   * Set true on first visit to the dashboard and remains true
+   * until the user dismisses the banner.
    */
   protected get isShown(): boolean {
-    // Always return true for permanent banner
-    return true;
+    /**
+     * If the banner has been dismissed, don't show it.
+     * This check causes the property to recompute when dismissed.
+     */
+    if (this.isDismissed) {
+      return false;
+    }
+
+    const storageItem = window.localStorage.getItem(
+      NEW_FEATURES_BANNER_LOCAL_STORAGE_ITEM,
+    );
+
+    if (storageItem === null) {
+      window.localStorage.setItem(
+        NEW_FEATURES_BANNER_LOCAL_STORAGE_ITEM,
+        "true",
+      );
+      return true;
+    } else if (storageItem === "true") {
+      return true;
+    } else return false;
   }
 
   /**
-   * PERMANENT BANNER - No dismiss action needed
-   * This action is removed for permanent migration banner
+   * The action called when the user clicks the dismiss button.
+   * Sets the local storage item to false and sets the isDismissed
+   * property to true so the banner is immediately hidden.
    */
   @action protected dismiss() {
-    // No-op for permanent banner - cannot be dismissed
+    window.localStorage.setItem(
+      NEW_FEATURES_BANNER_LOCAL_STORAGE_ITEM,
+      "false",
+    );
+    this.isDismissed = true;
   }
 }
 
