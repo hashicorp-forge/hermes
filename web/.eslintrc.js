@@ -1,0 +1,85 @@
+module.exports = {
+  root: true,
+  plugins: ["ember", "@typescript-eslint"],
+  parser: "@typescript-eslint/parser",
+  parserOptions: {
+    project: "./tsconfig.json",
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+  },
+  ignorePatterns: ["*.js", "/mirage/**/*", "/node_modules/**/*", "/dist/**/*"],
+  extends: [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+  ],
+
+  rules: {
+    "@typescript-eslint/consistent-type-imports": "error",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-unsafe-member-access": "off",
+    "@typescript-eslint/no-unsafe-call": "off",
+    "@typescript-eslint/no-unsafe-assignment": "off",
+    "@typescript-eslint/no-unsafe-argument": "off",
+    "@typescript-eslint/no-unsafe-return": "off",
+    "@typescript-eslint/ban-ts-comment": "off",
+    "@typescript-eslint/ban-types": "off",
+    "@typescript-eslint/no-redundant-type-constituents": "off",
+    "@typescript-eslint/require-await": "off",
+    "@typescript-eslint/no-floating-promises": "off",
+    "@typescript-eslint/unbound-method": "off",
+    "@typescript-eslint/no-misused-promises": "off",
+    "@typescript-eslint/restrict-template-expressions": "off",
+    "@typescript-eslint/no-misused-new": "off",
+    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/restrict-plus-operands": "off",
+    "@typescript-eslint/await-thenable": "off",
+    "@typescript-eslint/no-unsafe-enum-comparison": "off",
+    "no-case-declarations": "off",
+    "no-fallthrough": "off",
+    "prefer-const": "off",
+    "no-empty-pattern": "off",
+    "no-control-regex": "off",
+    "no-self-assign": "off",
+    "prefer-rest-params": "off",
+    "no-empty": "off",
+    "require-yield": "off",
+  },
+  overrides: [
+    // node files
+    {
+      files: [
+        './.eslintrc.js',
+        './.prettierrc.js',
+        './.stylelintrc.js',
+        './.template-lintrc.js',
+        './ember-cli-build.js',
+        './testem.js',
+        './blueprints/*/index.js',
+        './config/**/*.js',
+        './lib/*/index.js',
+        './server/**/*.js',
+      ],
+      parser: '@babel/eslint-parser',
+      parserOptions: {
+        sourceType: 'script',
+        requireConfigFile: false,
+        babelOptions: {
+          plugins: [
+            ['@babel/plugin-proposal-decorators', { decoratorsBeforeExport: true }],
+          ],
+        },
+      },
+      env: {
+        browser: false,
+        node: true,
+      },
+      extends: ['plugin:n/recommended'],
+    },
+    {
+      // test files
+      files: ['tests/**/*-test.{js,ts}'],
+      extends: ['plugin:qunit/recommended'],
+    },
+  ],
+};
