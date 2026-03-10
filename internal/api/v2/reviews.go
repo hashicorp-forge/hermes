@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp-forge/hermes/internal/server"
 	"github.com/hashicorp-forge/hermes/internal/structs"
 	"github.com/hashicorp-forge/hermes/pkg/document"
+	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp-forge/hermes/pkg/links"
 	"github.com/hashicorp-forge/hermes/pkg/models"
 	"github.com/hashicorp-forge/hermes/pkg/sharepointhelper"
@@ -61,6 +62,26 @@ func handleCreateReview(srv *server.Server, w http.ResponseWriter, r *http.Reque
 		)
 		http.Error(w, "Document ID not found", http.StatusNotFound)
 		return
+	}
+
+	// Check if document is locked (Google-only).
+	if !srv.IsSharePoint() {
+		locked, err := hcd.IsLocked(docID, srv.DB, srv.GWService, srv.Logger)
+		if err != nil {
+			srv.Logger.Error("error checking document locked status",
+				"error", err,
+				"path", r.URL.Path,
+				"method", r.Method,
+				"doc_id", docID,
+			)
+			http.Error(w, "Error getting document status", http.StatusNotFound)
+			return
+		}
+		// Don't continue if document is locked.
+		if locked {
+			http.Error(w, "Document is locked", http.StatusLocked)
+			return
+		}
 	}
 
 	// Begin database transaction.
@@ -507,7 +528,7 @@ func processDocumentForReview(srv *server.Server, r *http.Request, tx *gorm.DB, 
 
 	// Create file revision in the database.
 	fr := models.DocumentFileRevision{
-		Document: srv.NewDocumentByFileID(docID),
+		Document:       srv.NewDocumentByFileID(docID),
 		FileRevisionID: latestRevisionID,
 		Name:           revisionName,
 	}
@@ -550,6 +571,45 @@ func completeReviewCreation(srv *server.Server, r *http.Request, tx *gorm.DB, do
 			httpErr := structs.NewHTTPError(http.StatusInternalServerError, "Error creating review", err)
 			return &httpErr
 		}
+	}
+
+	// Move document to published docs location in Google Drive (Google-only).
+	if !srv.IsSharePoint() {
+		_, err := srv.GWService.MoveFile(
+			docID, srv.Config.GoogleWorkspace.DocsFolder)
+		*revertFuncs = append(*revertFuncs, func() error {
+			// Move document back to drafts folder in Google Drive.
+			if _, err := srv.GWService.MoveFile(
+				doc.ObjectID, srv.Config.GoogleWorkspace.DraftsFolder); err != nil {
+
+				return fmt.Errorf("error moving doc back to drafts folder: %w", err)
+
+			}
+
+			return nil
+		})
+		if err != nil {
+			srv.Logger.Error("error moving file to docs folder",
+				"error", err,
+				"doc_id", docID,
+				"method", r.Method,
+				"path", r.URL.Path)
+			httpErr := structs.NewHTTPError(http.StatusInternalServerError, "Error creating review", err)
+
+			if err := revertReviewsPost(*revertFuncs); err != nil {
+				srv.Logger.Error("error reverting review creation",
+					"error", err,
+					"doc_id", docID,
+					"method", r.Method,
+					"path", r.URL.Path)
+			}
+			return &httpErr
+		}
+		srv.Logger.Info("doc moved to published document folder",
+			"doc_id", docID,
+			"method", r.Method,
+			"path", r.URL.Path,
+		)
 	}
 
 	// TODO: Implement shortcut creation in hierarchical folder structure.

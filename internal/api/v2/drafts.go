@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -19,7 +20,11 @@ import (
 	"github.com/hashicorp-forge/hermes/internal/helpers"
 	"github.com/hashicorp-forge/hermes/internal/server"
 	"github.com/hashicorp-forge/hermes/pkg/document"
+	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp-forge/hermes/pkg/models"
+	"golang.org/x/oauth2/jwt"
+	"google.golang.org/api/drive/v3"
+	"google.golang.org/api/option"
 	"gorm.io/gorm"
 )
 
@@ -277,19 +282,92 @@ func DraftsHandler(srv server.Server) http.Handler {
 					return
 				}
 			} else {
-				// Create draft in Google Drive
-				f, err := srv.GWService.CopyFile(
-					template, req.Title, srv.Config.GoogleWorkspace.DraftsFolder)
-				if err != nil {
-					srv.Logger.Error("error creating draft",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"template", template,
-					)
-					http.Error(w, "Error creating document draft",
-						http.StatusInternalServerError)
-					return
+				// Create draft in Google Drive.
+				var f *drive.File
+
+				// Copy template to new draft file.
+				if srv.Config.GoogleWorkspace.Auth != nil &&
+					srv.Config.GoogleWorkspace.Auth.CreateDocsAsUser {
+					// If configured to create documents as the logged-in Hermes user,
+					// create a new Google Drive service to do this.
+					ctx := context.Background()
+					conf := &jwt.Config{
+						Email:      srv.Config.GoogleWorkspace.Auth.ClientEmail,
+						PrivateKey: []byte(srv.Config.GoogleWorkspace.Auth.PrivateKey),
+						Scopes: []string{
+							"https://www.googleapis.com/auth/drive",
+						},
+						Subject:  userEmail,
+						TokenURL: srv.Config.GoogleWorkspace.Auth.TokenURL,
+					}
+					client := conf.Client(ctx)
+					copyTemplateSvc := *srv.GWService
+					copyTemplateSvc.Drive, err = drive.NewService(
+						ctx, option.WithHTTPClient(client))
+					if err != nil {
+						srv.Logger.Error("error creating impersonated Google Drive service",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+						)
+						http.Error(
+							w, "Error processing request", http.StatusInternalServerError)
+						return
+					}
+
+					// Copy template as user to new draft file in temporary drafts folder.
+					f, err = copyTemplateSvc.CopyFile(
+						template, req.Title, srv.Config.GoogleWorkspace.TemporaryDraftsFolder)
+					if err != nil {
+						srv.Logger.Error(
+							"error copying template as user to temporary drafts folder",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"template", template,
+							"drafts_folder", srv.Config.GoogleWorkspace.DraftsFolder,
+							"temporary_drafts_folder", srv.Config.GoogleWorkspace.
+								TemporaryDraftsFolder,
+							"user", userEmail,
+						)
+						http.Error(w, "Error creating document draft",
+							http.StatusInternalServerError)
+						return
+					}
+
+					// Move draft file to drafts folder using service user.
+					_, err = srv.GWService.MoveFile(
+						f.Id, srv.Config.GoogleWorkspace.DraftsFolder)
+					if err != nil {
+						srv.Logger.Error(
+							"error moving draft file to drafts folder",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"doc_id", f.Id,
+							"drafts_folder", srv.Config.GoogleWorkspace.DraftsFolder,
+							"temporary_drafts_folder", srv.Config.GoogleWorkspace.
+								TemporaryDraftsFolder,
+						)
+						http.Error(w, "Error creating document draft",
+							http.StatusInternalServerError)
+						return
+					}
+				} else {
+					// Copy template to new draft file as service user.
+					f, err = srv.GWService.CopyFile(
+						template, req.Title, srv.Config.GoogleWorkspace.DraftsFolder)
+					if err != nil {
+						srv.Logger.Error("error creating draft",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"template", template,
+						)
+						http.Error(w, "Error creating document draft",
+							http.StatusInternalServerError)
+						return
+					}
 				}
 
 				fileID = f.Id
@@ -307,6 +385,24 @@ func DraftsHandler(srv server.Server) http.Handler {
 					return
 				}
 				cd := ct.Format("Jan 2, 2006")
+
+				// Get owner photo by searching Google Workspace directory.
+				op := []string{}
+				people, err := srv.GWService.SearchPeople(userEmail, "photos")
+				if err != nil {
+					srv.Logger.Error(
+						"error searching directory for person",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"person", userEmail,
+					)
+				}
+				if len(people) > 0 {
+					if len(people[0].Photos) > 0 {
+						op = append(op, people[0].Photos[0].Url)
+					}
+				}
 
 				srv.Logger.Info("Created draft",
 					"file_id", fileID,
@@ -332,7 +428,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 					MetaTags:     metaTags,
 					ModifiedTime: ct.Unix(),
 					Owners:       []string{userEmail},
-					OwnerPhotos:  []string{},
+					OwnerPhotos:  op,
 					Product:      req.Product,
 					Status:       "WIP",
 					Summary:      req.Summary,
@@ -1162,7 +1258,25 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				}
 			}
 
-			// Locking the document is not required because header update is handled by Hermes Add-In for Microsoft Word
+			// Check if document is locked (Google-only).
+			if !srv.IsSharePoint() {
+				locked, err := hcd.IsLocked(docID, srv.DB, srv.GWService, srv.Logger)
+				if err != nil {
+					srv.Logger.Error("error checking document locked status",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID,
+					)
+					http.Error(w, "Error getting document status", http.StatusNotFound)
+					return
+				}
+				// Don't continue if document is locked.
+				if locked {
+					http.Error(w, "Document is locked", http.StatusLocked)
+					return
+				}
+			}
 
 			// Compare contributors in request and stored object in Algolia
 			// before we save the patched objected
@@ -1768,7 +1882,89 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				}
 			}
 
-			// TODO: Transfer ownership is triggered when the owner is present in PATCH request, Send Hermes Invite email to new owner.
+			// Send email to new owner (Google-only; uses Google Workspace
+			// directory to look up names).
+			if !srv.IsSharePoint() && srv.Config.Email != nil && srv.Config.Email.Enabled &&
+				req.Owners != nil {
+				// Get document URL.
+				docURL, err := getDocumentURL(srv.Config.BaseURL, docID)
+				if err != nil {
+					srv.Logger.Error("error getting document URL",
+						"error", err,
+						"doc_id", docID,
+						"method", r.Method,
+						"path", r.URL.Path,
+					)
+					http.Error(w, "Error updating document draft",
+						http.StatusInternalServerError)
+					return
+				}
+
+				// Get name of new document owner.
+				newOwner := email.User{
+					EmailAddress: doc.Owners[0],
+				}
+				ppl, err := srv.GWService.SearchPeople(
+					doc.Owners[0], "emailAddresses,names")
+				if err != nil {
+					srv.Logger.Warn("error searching directory for new owner",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID,
+						"person", doc.Owners[0],
+					)
+				}
+				if len(ppl) == 1 && ppl[0].Names != nil {
+					newOwner.Name = ppl[0].Names[0].DisplayName
+				}
+
+				// Get name of old document owner.
+				oldOwner := email.User{
+					EmailAddress: userEmail,
+				}
+				ppl, err = srv.GWService.SearchPeople(
+					userEmail, "emailAddresses,names")
+				if err != nil {
+					srv.Logger.Warn("error searching directory for old owner",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID,
+						"person", doc.Owners[0],
+					)
+				}
+				if len(ppl) == 1 && ppl[0].Names != nil {
+					oldOwner.Name = ppl[0].Names[0].DisplayName
+				}
+
+				if err := email.SendNewOwnerEmail(
+					email.NewOwnerEmailData{
+						BaseURL:           srv.Config.BaseURL,
+						DocumentShortName: doc.DocNumber,
+						DocumentStatus:    doc.Status,
+						DocumentTitle:     doc.Title,
+						DocumentType:      doc.DocType,
+						DocumentURL:       docURL,
+						NewDocumentOwner:  newOwner,
+						OldDocumentOwner:  oldOwner,
+						Product:           doc.Product,
+					},
+					[]string{doc.Owners[0]},
+					srv.Config.Email.FromAddress,
+					srv.GetEmailSender(),
+				); err != nil {
+					srv.Logger.Error("error sending new owner email",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID,
+					)
+					http.Error(w, "Error updating document draft",
+						http.StatusInternalServerError)
+					return
+				}
+			}
 
 			// Update document in the database.
 			if err := model.Upsert(srv.DB); err != nil {
