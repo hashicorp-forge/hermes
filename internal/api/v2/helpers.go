@@ -53,8 +53,8 @@ func compareSlices(a, b []string) []string {
 }
 
 // expandStakeholderGroups expands any groups in the stakeholders list to their individual members recursively.
-// It handles nested groups (group within group within group) by using the SharePoint service's
-// GetGroupMemberEmails method which already implements recursive expansion.
+// It handles nested groups (group within group within group) by using the backend service's
+// group member expansion methods.
 // Individual email addresses are added directly without making unnecessary API calls.
 func expandStakeholderGroups(stakeholders []string, srv server.Server) ([]string, error) {
 	if len(stakeholders) == 0 {
@@ -70,42 +70,68 @@ func expandStakeholderGroups(stakeholders []string, srv server.Server) ([]string
 			continue
 		}
 
-		// Always try to expand as a group first, even if it looks like an email.
-		// This is important because mail-enabled groups (e.g., team@example.com)
-		// need to be expanded to their members. GetGroupMemberEmails will return
-		// an error if it's not a group, and we'll treat it as an individual email.
-		members, err := srv.SharePoint.GetGroupMemberEmails(stakeholder)
+		if srv.SharePoint != nil {
+			// SharePoint path: try to expand as a group using Microsoft Graph
+			members, err := srv.SharePoint.GetGroupMemberEmails(stakeholder)
+			if err != nil {
+				// Not a group or error expanding - treat as individual email
+				srv.Logger.Debug("treating stakeholder as individual email",
+					"stakeholder", stakeholder,
+					"reason", "not a group or expansion failed")
 
-		if err != nil {
-			// Not a group or error expanding - treat as individual email
-			srv.Logger.Debug("treating stakeholder as individual email",
-				"stakeholder", stakeholder,
-				"reason", "not a group or expansion failed")
+				key := strings.ToLower(stakeholder)
+				if _, exists := uniqueEmails[key]; !exists {
+					uniqueEmails[key] = stakeholder
+				}
+			} else {
+				// Successfully expanded group
+				srv.Logger.Debug("expanded stakeholder group",
+					"group", stakeholder,
+					"member_count", len(members))
 
-			// Add as individual email
-			key := strings.ToLower(stakeholder)
-			if _, exists := uniqueEmails[key]; !exists {
-				uniqueEmails[key] = stakeholder
+				for _, member := range members {
+					member = strings.TrimSpace(member)
+					if member == "" {
+						continue
+					}
+					key := strings.ToLower(member)
+					if _, exists := uniqueEmails[key]; !exists {
+						uniqueEmails[key] = member
+					}
+				}
 			}
 		} else {
-			// Successfully expanded group - add all members
-			srv.Logger.Debug("expanded stakeholder group",
-				"group", stakeholder,
-				"member_count", len(members))
+			// Google path: try to expand as a Google Group using Admin Directory
+			groupMembers, err := srv.GWService.AdminDirectory.Members.List(stakeholder).Do()
+			if err != nil {
+				// Not a group or error expanding - treat as individual email
+				srv.Logger.Debug("treating stakeholder as individual email",
+					"stakeholder", stakeholder,
+					"reason", "not a group or expansion failed")
 
-			for _, member := range members {
-				member = strings.TrimSpace(member)
-				if member == "" {
-					continue
-				}
-				key := strings.ToLower(member)
+				key := strings.ToLower(stakeholder)
 				if _, exists := uniqueEmails[key]; !exists {
-					uniqueEmails[key] = member
+					uniqueEmails[key] = stakeholder
+				}
+			} else {
+				// Successfully expanded group
+				srv.Logger.Debug("expanded stakeholder group",
+					"group", stakeholder,
+					"member_count", len(groupMembers.Members))
+
+				for _, member := range groupMembers.Members {
+					email := member.Email
+					if email == "" {
+						continue
+					}
+					key := strings.ToLower(email)
+					if _, exists := uniqueEmails[key]; !exists {
+						uniqueEmails[key] = email
+					}
 				}
 			}
 		}
 	}
-
 
 	// Convert map to slice
 	result := make([]string, 0, len(uniqueEmails))
@@ -597,45 +623,64 @@ func CompareAlgoliaAndDatabaseDocument(
 }
 
 // isUserInGroups returns true if a user is in any supplied groups, false
-// otherwise.
+// otherwise. Works with both SharePoint (Microsoft Graph) and Google backends.
 func isUserInGroups(
-	userEmail string, groupEmails []string, svc *sharepointhelper.Service) (bool, error) {
-	// Construct Microsoft Graph API URL to get the groups a user is a member of
-	url := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/memberOf?$select=id,displayName,mail",
-		url.QueryEscape(userEmail))
+	userEmail string, groupEmails []string, srv server.Server) (bool, error) {
 
-	options := &sharepointhelper.APIOptions{
-		Headers: map[string]string{
-			"Content-Type": "application/json",
-		},
+	if srv.SharePoint != nil {
+		// SharePoint path: use Microsoft Graph API
+		graphURL := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/memberOf?$select=id,displayName,mail",
+			url.QueryEscape(userEmail))
+
+		options := &sharepointhelper.APIOptions{
+			Headers: map[string]string{
+				"Content-Type": "application/json",
+			},
+		}
+
+		resp, err := srv.SharePoint.InvokeAPIWithOptions("GET", graphURL, nil, options)
+		if err != nil {
+			return false, fmt.Errorf("error making Graph API request for user groups: %w", err)
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			return false, fmt.Errorf("microsoft Graph API returned status %d when fetching user groups", resp.StatusCode)
+		}
+
+		// Parse the response
+		var response struct {
+			Value []struct {
+				ID          string `json:"id"`
+				DisplayName string `json:"displayName"`
+				Mail        string `json:"mail"`
+			} `json:"value"`
+		}
+
+		if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+			return false, fmt.Errorf("error decoding user groups response: %w", err)
+		}
+
+		// Check if any of the user's groups match the provided group emails
+		for _, group := range response.Value {
+			if group.Mail != "" && contains(groupEmails, group.Mail) {
+				return true, nil
+			}
+		}
+
+		return false, nil
 	}
 
-	resp, err := svc.InvokeAPIWithOptions("GET", url, nil, options)
+	// Google path: use Admin Directory API
+	userGroups, err := srv.GWService.AdminDirectory.Groups.List().
+		UserKey(userEmail).
+		Do()
 	if err != nil {
-		return false, fmt.Errorf("error making Graph API request for user groups: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return false, fmt.Errorf("microsoft Graph API returned status %d when fetching user groups", resp.StatusCode)
+		return false, fmt.Errorf("error getting groups for user: %w", err)
 	}
 
-	// Parse the response
-	var response struct {
-		Value []struct {
-			ID          string `json:"id"`
-			DisplayName string `json:"displayName"`
-			Mail        string `json:"mail"`
-		} `json:"value"`
-	}
-
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return false, fmt.Errorf("error decoding user groups response: %w", err)
-	}
-
-	// Check if any of the user's groups match the provided group emails
-	for _, group := range response.Value {
-		if group.Mail != "" && contains(groupEmails, group.Mail) {
+	for _, g := range userGroups.Groups {
+		if contains(groupEmails, g.Email) {
 			return true, nil
 		}
 	}

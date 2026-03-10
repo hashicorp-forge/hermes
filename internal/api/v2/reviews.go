@@ -159,7 +159,7 @@ func handleCreateReview(srv *server.Server, w http.ResponseWriter, r *http.Reque
 						},
 						approverEmailAddresses,
 						srv.Config.Email.FromAddress,
-						srv.SharePoint,
+						srv.GetEmailSender(),
 					)
 				},
 				docID,
@@ -343,72 +343,142 @@ func processDocumentForReview(srv *server.Server, r *http.Request, tx *gorm.DB, 
 
 	// Grant read access to configured groups asynchronously
 	go func() {
-		grantedGroups, err := srv.SharePoint.GrantGroupsReadAccess(docID, "reader", publishReaderGroups, publishGroupDisplayNames)
-		if err != nil {
-			srv.Logger.Error("error granting reader access to publish groups",
-				"error", err,
-				"doc_id", docID,
-			)
-			return
-		}
-		if len(grantedGroups) > 0 {
-			srv.Logger.Info("granted group access on document publish",
-				"doc_id", docID,
-				"groups", grantedGroups,
-			)
+		if srv.SharePoint != nil {
+			grantedGroups, err := srv.SharePoint.GrantGroupsReadAccess(docID, "reader", publishReaderGroups, publishGroupDisplayNames)
+			if err != nil {
+				srv.Logger.Error("error granting reader access to publish groups",
+					"error", err,
+					"doc_id", docID,
+				)
+				return
+			}
+			if len(grantedGroups) > 0 {
+				srv.Logger.Info("granted group access on document publish",
+					"doc_id", docID,
+					"groups", grantedGroups,
+				)
+			}
+		} else {
+			var grantedGroups []string
+			for _, group := range publishReaderGroups {
+				if err := srv.GWService.ShareFile(docID, group, "reader"); err != nil {
+					srv.Logger.Error("error granting reader access to publish group",
+						"error", err,
+						"doc_id", docID,
+						"group", group,
+					)
+					return
+				}
+				grantedGroups = append(grantedGroups, group)
+			}
+			if len(grantedGroups) > 0 {
+				srv.Logger.Info("granted group access on document publish",
+					"doc_id", docID,
+					"groups", grantedGroups,
+				)
+			}
 		}
 	}()
 
-	file, err := srv.SharePoint.GetFile(docID)
-	if err != nil {
-		srv.Logger.Error("error getting document file from SharePoint",
-			"error", err,
-			"path", r.URL.Path,
-			"method", r.Method,
-			"doc_id", docID,
-		)
-		httpErr := structs.NewHTTPError(http.StatusInternalServerError, "Error creating review", err)
-		return time.Time{}, time.Time{}, 0, &httpErr
-	}
-
-	// Parse and set modified time.
-	modifiedTime, err := time.Parse(time.RFC3339Nano, file.LastModifiedTime)
-	if err != nil {
-		srv.Logger.Error("error parsing modified time",
-			"error", err,
-			"path", r.URL.Path,
-			"method", r.Method,
-			"doc_id", docID,
-		)
-		httpErr := structs.NewHTTPError(http.StatusInternalServerError, "Error creating review", err)
-		return time.Time{}, time.Time{}, 0, &httpErr
+	// Get file and parse modified time.
+	var modifiedTime time.Time
+	if srv.SharePoint != nil {
+		file, err := srv.SharePoint.GetFile(docID)
+		if err != nil {
+			srv.Logger.Error("error getting document file",
+				"error", err,
+				"path", r.URL.Path,
+				"method", r.Method,
+				"doc_id", docID,
+			)
+			httpErr := structs.NewHTTPError(http.StatusInternalServerError, "Error creating review", err)
+			return time.Time{}, time.Time{}, 0, &httpErr
+		}
+		modifiedTime, err = time.Parse(time.RFC3339Nano, file.LastModifiedTime)
+		if err != nil {
+			srv.Logger.Error("error parsing modified time",
+				"error", err,
+				"path", r.URL.Path,
+				"method", r.Method,
+				"doc_id", docID,
+			)
+			httpErr := structs.NewHTTPError(http.StatusInternalServerError, "Error creating review", err)
+			return time.Time{}, time.Time{}, 0, &httpErr
+		}
+	} else {
+		file, err := srv.GWService.GetFile(docID)
+		if err != nil {
+			srv.Logger.Error("error getting document file",
+				"error", err,
+				"path", r.URL.Path,
+				"method", r.Method,
+				"doc_id", docID,
+			)
+			httpErr := structs.NewHTTPError(http.StatusInternalServerError, "Error creating review", err)
+			return time.Time{}, time.Time{}, 0, &httpErr
+		}
+		modifiedTime, err = time.Parse(time.RFC3339, file.ModifiedTime)
+		if err != nil {
+			srv.Logger.Error("error parsing modified time",
+				"error", err,
+				"path", r.URL.Path,
+				"method", r.Method,
+				"doc_id", docID,
+			)
+			httpErr := structs.NewHTTPError(http.StatusInternalServerError, "Error creating review", err)
+			return time.Time{}, time.Time{}, 0, &httpErr
+		}
 	}
 	doc.ModifiedTime = modifiedTime.Unix()
 
-	// Get latest Sharepoint file revision.
-	latestVersion, err := srv.SharePoint.GetLatestVersion(docID)
-	if err != nil {
-		srv.Logger.Error("error getting latest revision",
-			"error", err,
-			"method", r.Method,
-			"path", r.URL.Path,
-			"doc_id", docID)
-		httpErr := structs.NewHTTPError(http.StatusInternalServerError, "Error creating review", err)
-		return time.Time{}, time.Time{}, 0, &httpErr
-	}
+	// Get latest file revision.
+	var latestRevisionID string
+	if srv.SharePoint != nil {
+		latestVersion, err := srv.SharePoint.GetLatestVersion(docID)
+		if err != nil {
+			srv.Logger.Error("error getting latest revision",
+				"error", err,
+				"method", r.Method,
+				"path", r.URL.Path,
+				"doc_id", docID)
+			httpErr := structs.NewHTTPError(http.StatusInternalServerError, "Error creating review", err)
+			return time.Time{}, time.Time{}, 0, &httpErr
+		}
+		latestRevisionID = latestVersion.ID
+	} else {
+		latestRev, err := srv.GWService.GetLatestRevision(docID)
+		if err != nil {
+			srv.Logger.Error("error getting latest revision",
+				"error", err,
+				"method", r.Method,
+				"path", r.URL.Path,
+				"doc_id", docID)
+			httpErr := structs.NewHTTPError(http.StatusInternalServerError, "Error creating review", err)
+			return time.Time{}, time.Time{}, 0, &httpErr
+		}
+		latestRevisionID = latestRev.Id
 
-	// Note: File retention policies can be set Microsoft 365 retention policies.
+		// Keep revision forever for Google Drive.
+		if _, err := srv.GWService.KeepRevisionForever(docID, latestRev.Id); err != nil {
+			srv.Logger.Error("error keeping revision forever",
+				"error", err,
+				"method", r.Method,
+				"path", r.URL.Path,
+				"doc_id", docID)
+			// Non-fatal: continue even if keep-forever fails.
+		}
+	}
 
 	// Record file revision in the Algolia document object.
 	revisionName := "Requested review"
-	doc.SetFileRevision(latestVersion.ID, revisionName)
+	doc.SetFileRevision(latestRevisionID, revisionName)
 
 	// Create file revision in the database.
 	fr := models.DocumentFileRevision{
 		Document: models.Document{
 			FileID: docID,
 		},
-		FileRevisionID: latestVersion.ID,
+		FileRevisionID: latestRevisionID,
 		Name:           revisionName,
 	}
 	if err := fr.Create(tx); err != nil {
@@ -417,7 +487,7 @@ func processDocumentForReview(srv *server.Server, r *http.Request, tx *gorm.DB, 
 			"method", r.Method,
 			"path", r.URL.Path,
 			"doc_id", docID,
-			"rev_id", latestVersion.ID)
+			"rev_id", latestRevisionID)
 		httpErr := structs.NewHTTPError(http.StatusInternalServerError, "Error creating review", err)
 		return time.Time{}, time.Time{}, 0, &httpErr
 	}
@@ -427,16 +497,29 @@ func processDocumentForReview(srv *server.Server, r *http.Request, tx *gorm.DB, 
 
 // completeReviewCreation handles the final database updates and reviewer setup
 func completeReviewCreation(srv *server.Server, r *http.Request, tx *gorm.DB, doc *document.Document, docID string, creationTime time.Time, modifiedTime time.Time, nextDocNum int, revertFuncs *[]func() error) *structs.HTTPError {
-	// Create shortcut to the document in the hierarchical folder structure.
-	_, err := srv.SharePoint.GetFileDetails(docID)
-	if err != nil {
-		srv.Logger.Error("error getting file details from SharePoint",
-			"error", err,
-			"doc_id", docID,
-			"method", r.Method,
-			"path", r.URL.Path)
-		httpErr := structs.NewHTTPError(http.StatusInternalServerError, "Error creating review", err)
-		return &httpErr
+	// Verify the document file exists.
+	if srv.SharePoint != nil {
+		_, err := srv.SharePoint.GetFileDetails(docID)
+		if err != nil {
+			srv.Logger.Error("error getting file details",
+				"error", err,
+				"doc_id", docID,
+				"method", r.Method,
+				"path", r.URL.Path)
+			httpErr := structs.NewHTTPError(http.StatusInternalServerError, "Error creating review", err)
+			return &httpErr
+		}
+	} else {
+		_, err := srv.GWService.GetFile(docID)
+		if err != nil {
+			srv.Logger.Error("error getting file details",
+				"error", err,
+				"doc_id", docID,
+				"method", r.Method,
+				"path", r.URL.Path)
+			httpErr := structs.NewHTTPError(http.StatusInternalServerError, "Error creating review", err)
+			return &httpErr
+		}
 	}
 
 	// TODO: Implement shortcut creation in hierarchical folder structure.
@@ -450,7 +533,7 @@ func completeReviewCreation(srv *server.Server, r *http.Request, tx *gorm.DB, do
 	// TODO: Check if the short link functionality is working as expected with addin
 	// Create go-link.
 	// TODO: use database for this instead of Algolia.
-	err = links.SaveDocumentRedirectDetails(
+	err := links.SaveDocumentRedirectDetails(
 		srv.AlgoWrite, docID, doc.DocType, doc.DocNumber)
 	*revertFuncs = append(*revertFuncs, func() error {
 		if err := links.DeleteDocumentRedirectDetails(
@@ -509,29 +592,55 @@ func completeReviewCreation(srv *server.Server, r *http.Request, tx *gorm.DB, do
 
 	// Share with individual approvers.
 	for _, approver := range doc.Approvers {
-		if err := srv.SharePoint.ShareFile(docID, approver, "writer"); err != nil {
-			srv.Logger.Error("error sharing file with user approver",
-				"error", err,
-				"doc_id", docID,
-				"method", r.Method,
-				"path", r.URL.Path,
-				"approver", approver)
-			httpErr := structs.NewHTTPError(http.StatusInternalServerError, "Error creating review", err)
-			return &httpErr
+		if srv.SharePoint != nil {
+			if err := srv.SharePoint.ShareFile(docID, approver, "writer"); err != nil {
+				srv.Logger.Error("error sharing file with user approver",
+					"error", err,
+					"doc_id", docID,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"approver", approver)
+				httpErr := structs.NewHTTPError(http.StatusInternalServerError, "Error creating review", err)
+				return &httpErr
+			}
+		} else {
+			if err := srv.GWService.ShareFile(docID, approver, "writer"); err != nil {
+				srv.Logger.Error("error sharing file with user approver",
+					"error", err,
+					"doc_id", docID,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"approver", approver)
+				httpErr := structs.NewHTTPError(http.StatusInternalServerError, "Error creating review", err)
+				return &httpErr
+			}
 		}
 	}
 
 	// Share with group approvers (attempt direct group share, fallback to expansion).
 	for _, groupEmail := range doc.ApproverGroups {
-		if err := srv.SharePoint.ShareFileWithGroupOrMembers(docID, groupEmail, "writer"); err != nil {
-			srv.Logger.Error("error sharing file with group approver (direct or expanded)",
-				"error", err,
-				"doc_id", docID,
-				"method", r.Method,
-				"path", r.URL.Path,
-				"group", groupEmail)
-			httpErr := structs.NewHTTPError(http.StatusInternalServerError, "Error creating review", err)
-			return &httpErr
+		if srv.SharePoint != nil {
+			if err := srv.SharePoint.ShareFileWithGroupOrMembers(docID, groupEmail, "writer"); err != nil {
+				srv.Logger.Error("error sharing file with group approver",
+					"error", err,
+					"doc_id", docID,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"group", groupEmail)
+				httpErr := structs.NewHTTPError(http.StatusInternalServerError, "Error creating review", err)
+				return &httpErr
+			}
+		} else {
+			if err := srv.GWService.ShareFile(docID, groupEmail, "writer"); err != nil {
+				srv.Logger.Error("error sharing file with group approver",
+					"error", err,
+					"doc_id", docID,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"group", groupEmail)
+				httpErr := structs.NewHTTPError(http.StatusInternalServerError, "Error creating review", err)
+				return &httpErr
+			}
 		}
 	}
 
@@ -739,7 +848,7 @@ func notifyProductSubscribers(
 					[]string{from},  // Add sender as TO recipient to avoid spam filters
 					batchRecipients, // Batch of subscribers in BCC
 					from,
-					srv.SharePoint,
+					srv.GetEmailSender(),
 				)
 			},
 			docID,

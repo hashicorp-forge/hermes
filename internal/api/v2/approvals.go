@@ -111,7 +111,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 			}
 
 			inApproverGroup, err := isUserInGroups(
-				userEmail, doc.ApproverGroups, srv.SharePoint)
+				userEmail, doc.ApproverGroups, srv)
 			if err != nil {
 				srv.Logger.Error("error calculating if user is in an approver group",
 					"error", err,
@@ -183,31 +183,59 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 			}
 			doc.ApprovedBy = newApprovedBy
 
-			// Get latest Sharepoint file version.
-			latestRev, err := srv.SharePoint.GetLatestVersion(docID)
-			if err != nil {
-				srv.Logger.Error("error getting latest revision",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", docID)
-				http.Error(w, "Error requesting changes of document",
-					http.StatusInternalServerError)
-				return
+			// Get latest file revision.
+			var revisionID string
+			if srv.SharePoint != nil {
+				latestRev, err := srv.SharePoint.GetLatestVersion(docID)
+				if err != nil {
+					srv.Logger.Error("error getting latest revision",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID)
+					http.Error(w, "Error requesting changes of document",
+						http.StatusInternalServerError)
+					return
+				}
+				revisionID = latestRev.ID
+			} else {
+				latestRev, err := srv.GWService.GetLatestRevision(docID)
+				if err != nil {
+					srv.Logger.Error("error getting latest revision",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID)
+					http.Error(w, "Error requesting changes of document",
+						http.StatusInternalServerError)
+					return
+				}
+				// Mark latest revision to be kept forever.
+				_, err = srv.GWService.KeepRevisionForever(docID, latestRev.Id)
+				if err != nil {
+					srv.Logger.Error("error marking revision to keep forever",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID,
+						"rev_id", latestRev.Id)
+					http.Error(w, "Error updating document status",
+						http.StatusInternalServerError)
+					return
+				}
+				revisionID = latestRev.Id
 			}
-
-			// Note: File retention for Sharepoint is configured in Microsoft 365 Retention Policies.
 
 			// Record file revision in the Algolia document object.
 			revisionName := fmt.Sprintf("Changes requested by %s", userEmail)
-			doc.SetFileRevision(latestRev.ID, revisionName)
+			doc.SetFileRevision(revisionID, revisionName)
 
 			// Create file revision in the database.
 			fr := models.DocumentFileRevision{
 				Document: models.Document{
 					FileID: docID,
 				},
-				FileRevisionID: latestRev.ID,
+				FileRevisionID: revisionID,
 				Name:           revisionName,
 			}
 			if err := fr.Create(srv.DB); err != nil {
@@ -216,7 +244,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 					"method", r.Method,
 					"path", r.URL.Path,
 					"doc_id", docID,
-					"rev_id", latestRev.ID)
+					"rev_id", revisionID)
 				http.Error(w, "Error updating document status",
 					http.StatusInternalServerError)
 				return
@@ -367,7 +395,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 
 			// User is not an approver or in an approver group.
 			inApproverGroup, err := isUserInGroups(
-				userEmail, doc.ApproverGroups, srv.SharePoint)
+				userEmail, doc.ApproverGroups, srv)
 			if err != nil {
 				srv.Logger.Error("error calculating if user is in an approver group",
 					"error", err,
@@ -414,7 +442,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 				return
 			}
 			inApproverGroup, err := isUserInGroups(
-				userEmail, doc.ApproverGroups, srv.SharePoint)
+				userEmail, doc.ApproverGroups, srv)
 			if err != nil {
 				srv.Logger.Error("error calculating if user is in an approver group",
 					"error", err,
@@ -473,31 +501,58 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 			}
 			doc.ChangesRequestedBy = newChangesRequestedBy
 
-			// Get latest SharePoint.
-			latestRev, err := srv.SharePoint.GetLatestVersion(docID)
-			if err != nil {
-				srv.Logger.Error("error getting latest revision",
-					"error", err,
-					"method", r.Method,
-					"path", r.URL.Path,
-					"doc_id", docID)
-				http.Error(w, "Error creating review",
-					http.StatusInternalServerError)
-				return
+			// Get latest file revision.
+			var revisionID string
+			if srv.SharePoint != nil {
+				latestRev, err := srv.SharePoint.GetLatestVersion(docID)
+				if err != nil {
+					srv.Logger.Error("error getting latest revision",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID)
+					http.Error(w, "Error creating review",
+						http.StatusInternalServerError)
+					return
+				}
+				revisionID = latestRev.ID
+			} else {
+				latestRev, err := srv.GWService.GetLatestRevision(docID)
+				if err != nil {
+					srv.Logger.Error("error getting latest revision",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID)
+					http.Error(w, "Error creating review",
+						http.StatusInternalServerError)
+					return
+				}
+				_, err = srv.GWService.KeepRevisionForever(docID, latestRev.Id)
+				if err != nil {
+					srv.Logger.Error("error marking revision to keep forever",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID,
+						"rev_id", latestRev.Id)
+					http.Error(w, "Error updating document status",
+						http.StatusInternalServerError)
+					return
+				}
+				revisionID = latestRev.Id
 			}
-
-			// Note: File retentions policies are configured in Microsoft 365 Retention Policies.
 
 			// Record file revision in the Algolia document object.
 			revisionName := fmt.Sprintf("Approved by %s", userEmail)
-			doc.SetFileRevision(latestRev.ID, revisionName)
+			doc.SetFileRevision(revisionID, revisionName)
 
 			// Create file revision in the database.
 			fr := models.DocumentFileRevision{
 				Document: models.Document{
 					FileID: docID,
 				},
-				FileRevisionID: latestRev.ID,
+				FileRevisionID: revisionID,
 				Name:           revisionName,
 			}
 			if err := fr.Create(srv.DB); err != nil {
@@ -506,7 +561,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 					"method", r.Method,
 					"path", r.URL.Path,
 					"doc_id", docID,
-					"rev_id", latestRev.ID)
+					"rev_id", revisionID)
 				http.Error(w, "Error updating document status",
 					http.StatusInternalServerError)
 				return
@@ -555,17 +610,33 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 					approver := email.User{
 						EmailAddress: userEmail,
 					}
-					ppl, err := srv.SharePoint.GetPersonByEmail(userEmail)
-					if err != nil {
-						srv.Logger.Warn("error searching directory for approver",
-							"error", err,
-							"method", r.Method,
-							"path", r.URL.Path,
-							"doc_id", docID,
-							"person", doc.Owners[0],
-						)
+					if srv.SharePoint != nil {
+						ppl, err := srv.SharePoint.GetPersonByEmail(userEmail)
+						if err != nil {
+							srv.Logger.Warn("error searching directory for approver",
+								"error", err,
+								"method", r.Method,
+								"path", r.URL.Path,
+								"doc_id", docID,
+								"person", doc.Owners[0],
+							)
+						} else {
+							approver.Name = ppl.DisplayName
+						}
 					} else {
-						approver.Name = ppl.DisplayName
+						ppl, err := srv.GWService.SearchPeople(
+							userEmail, "emailAddresses,names")
+						if err != nil {
+							srv.Logger.Warn("error searching directory for approver",
+								"error", err,
+								"method", r.Method,
+								"path", r.URL.Path,
+								"doc_id", docID,
+								"person", doc.Owners[0],
+							)
+						} else if len(ppl) == 1 {
+							approver.Name = ppl[0].Names[0].DisplayName
+						}
 					}
 
 					// Get document URL.
@@ -589,7 +660,20 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 
 						// Expand approver groups to include all members.
 						for _, g := range doc.ApproverGroups {
-							members, gErr := srv.SharePoint.GetGroupMemberEmails(g)
+							var members []string
+							var gErr error
+							if srv.SharePoint != nil {
+								members, gErr = srv.SharePoint.GetGroupMemberEmails(g)
+							} else {
+								groupMembers, err := srv.GWService.AdminDirectory.Members.List(g).Do()
+								if err != nil {
+									gErr = err
+								} else {
+									for _, m := range groupMembers.Members {
+										members = append(members, m.Email)
+									}
+								}
+							}
 							if gErr != nil {
 								srv.Logger.Warn("error expanding approver group members",
 									"group", g,
@@ -641,7 +725,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 										},
 										recipients,
 										srv.Config.Email.FromAddress,
-										srv.SharePoint,
+										srv.GetEmailSender(),
 									)
 								},
 								docID,

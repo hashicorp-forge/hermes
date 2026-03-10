@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	fileFields = "id, lastModifyingUser, modifiedTime, name, parents, thumbnailLink"
+	fileFields = "id, lastModifyingUser, modifiedTime, name, parents, thumbnailLink, webViewLink"
 )
 
 // CopyFile copies a Google Drive file.

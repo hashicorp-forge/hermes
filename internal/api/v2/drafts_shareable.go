@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	"github.com/hashicorp-forge/hermes/pkg/document"
 	"github.com/hashicorp-forge/hermes/pkg/models"
-	"github.com/hashicorp-forge/hermes/pkg/sharepointhelper"
 	"github.com/hashicorp/go-hclog"
 	"gorm.io/gorm"
 )
@@ -29,7 +28,6 @@ func draftsShareableHandler(
 	cfg config.Config,
 	l hclog.Logger,
 	algoRead *algolia.Client,
-	sharePoint *sharepointhelper.Service,
 	db *gorm.DB,
 ) {
 	switch r.Method {

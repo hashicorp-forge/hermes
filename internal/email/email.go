@@ -4,16 +4,23 @@ import (
 	"bytes"
 	"embed"
 	"fmt"
-	"strings"
 	"html/template"
+	"strings"
 	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/hashicorp-forge/hermes/pkg/sharepointhelper"
 )
 
 //go:embed templates/*
 var tmplFS embed.FS
+
+// EmailSender is an interface for sending emails.
+// Both *sharepointhelper.Service and *googleworkspace.Service satisfy this
+// (Google's SendEmail returns (*gmail.Message, error) so we use a wrapper).
+type EmailSender interface {
+	SendEmail(to []string, from, subject, body string) error
+	SendEmailWithBCC(to []string, bcc []string, from, subject, body string) error
+}
 
 type User struct {
 	EmailAddress string
@@ -103,7 +110,7 @@ func SendDocumentApprovedEmail(
 	data DocumentApprovedEmailData,
 	to []string,
 	from string,
-	svc *sharepointhelper.Service,
+	svc EmailSender,
 ) error {
 	// Validate data.
 	if err := validation.ValidateStruct(&data,
@@ -165,7 +172,7 @@ func SendNewOwnerEmail(
 	data NewOwnerEmailData,
 	to []string,
 	from string,
-	svc *sharepointhelper.Service,
+	svc EmailSender,
 ) error {
 	// Validate data.
 	if err := validation.ValidateStruct(&data,
@@ -223,7 +230,7 @@ func SendReviewRequestedEmail(
 	d ReviewRequestedEmailData,
 	to []string,
 	from string,
-	s *sharepointhelper.Service,
+	s EmailSender,
 ) error {
 	// Validate data.
 	if err := validation.ValidateStruct(&d,
@@ -267,7 +274,7 @@ func SendSubscriberDocumentPublishedEmail(
 	d SubscriberDocumentPublishedEmailData,
 	to []string,
 	from string,
-	s *sharepointhelper.Service,
+	s EmailSender,
 ) error {
 	return SendSubscriberDocumentPublishedEmailWithBCC(d, nil, to, from, s)
 }
@@ -277,7 +284,7 @@ func SendSubscriberDocumentPublishedEmailWithBCC(
 	toRecipients []string,
 	bccRecipients []string,
 	from string,
-	s *sharepointhelper.Service,
+	s EmailSender,
 ) error {
 	// Validate data.
 	if err := validation.ValidateStruct(&d,
@@ -322,7 +329,7 @@ func SendContributorAddedEmail(
 	data ContributorAddedEmailData,
 	to []string,
 	from string,
-	s *sharepointhelper.Service,
+	s EmailSender,
 ) error {
 	if err := validation.ValidateStruct(&data,
 		validation.Field(&data.BaseURL, validation.Required),
@@ -369,7 +376,7 @@ func SendStakeholderAddedEmail(
 	data StakeholderAddedEmailData,
 	to []string,
 	from string,
-	s *sharepointhelper.Service,
+	s EmailSender,
 ) error {
 	if err := validation.ValidateStruct(&data,
 		validation.Field(&data.BaseURL, validation.Required),

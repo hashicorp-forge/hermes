@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/hashicorp-forge/hermes/internal/config"
+	"github.com/hashicorp-forge/hermes/internal/email"
 	"github.com/hashicorp-forge/hermes/internal/jira"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
@@ -38,4 +39,13 @@ type Server struct {
 
 	//Sharepoint
 	SharePoint *sp.Service
+}
+
+// GetEmailSender returns the appropriate email.EmailSender based on which
+// backend is configured (SharePoint or Google Workspace).
+func (s Server) GetEmailSender() email.EmailSender {
+	if s.SharePoint != nil {
+		return s.SharePoint
+	}
+	return &gw.EmailSenderAdapter{Svc: s.GWService}
 }

@@ -13,6 +13,130 @@ import (
 	"github.com/hashicorp-forge/hermes/pkg/sharepointhelper"
 )
 
+// handleGetUserProfileGoogle handles the GET request for user profile data using Google Workspace.
+func handleGetUserProfileGoogle(srv server.Server, w http.ResponseWriter, r *http.Request, userEmail string) {
+	errResp := func(
+		httpCode int, userErrMsg, logErrMsg string, err error,
+		extraArgs ...interface{}) {
+		srv.Logger.Error(logErrMsg,
+			append([]interface{}{
+				"error", err,
+				"method", r.Method,
+				"path", r.URL.Path,
+			}, extraArgs...)...,
+		)
+		http.Error(w, userErrMsg, httpCode)
+	}
+
+	ppl, err := srv.GWService.SearchPeople(
+		userEmail, "emailAddresses,names,photos")
+	if err != nil {
+		errResp(
+			http.StatusInternalServerError,
+			"Error getting user information",
+			"error searching people directory",
+			err,
+		)
+		return
+	}
+
+	// Verify that the result only contains one person.
+	if len(ppl) != 1 {
+		errResp(
+			http.StatusInternalServerError,
+			"Error getting user information",
+			fmt.Sprintf(
+				"wrong number of people in search result: %d", len(ppl)),
+			nil,
+			"user_email", userEmail,
+		)
+
+		// If configured, send an email to the user to notify them that their
+		// account was not found in the directory.
+		if srv.Config.Email != nil && srv.Config.Email.Enabled &&
+			srv.Config.GoogleWorkspace != nil &&
+			srv.Config.GoogleWorkspace.UserNotFoundEmail != nil &&
+			srv.Config.GoogleWorkspace.UserNotFoundEmail.Enabled &&
+			srv.Config.GoogleWorkspace.UserNotFoundEmail.Body != "" &&
+			srv.Config.GoogleWorkspace.UserNotFoundEmail.Subject != "" {
+			_, err = srv.GWService.SendEmail(
+				[]string{userEmail},
+				srv.Config.Email.FromAddress,
+				srv.Config.GoogleWorkspace.UserNotFoundEmail.Subject,
+				srv.Config.GoogleWorkspace.UserNotFoundEmail.Body,
+			)
+			if err != nil {
+				srv.Logger.Error("error sending user not found email",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"user_email", userEmail,
+				)
+			} else {
+				srv.Logger.Info("user not found email sent",
+					"method", r.Method,
+					"path", r.URL.Path,
+					"user_email", userEmail,
+				)
+			}
+		}
+
+		return
+	}
+	p := ppl[0]
+
+	// Make sure that the result's email address is the same as the
+	// authenticated user, is the primary email address, and is verified.
+	if len(p.EmailAddresses) == 0 ||
+		p.EmailAddresses[0].Value != userEmail ||
+		!p.EmailAddresses[0].Metadata.Primary ||
+		!p.EmailAddresses[0].Metadata.Verified {
+		errResp(
+			http.StatusInternalServerError,
+			"Error getting user information",
+			"wrong user in search result",
+			err,
+		)
+		return
+	}
+
+	// Verify other required values are set.
+	if len(p.Names) == 0 {
+		errResp(
+			http.StatusInternalServerError,
+			"Error getting user information",
+			"no names in result",
+			err,
+		)
+		return
+	}
+
+	// Write response.
+	resp := MeGetResponse{
+		ID:         p.EmailAddresses[0].Metadata.Source.Id,
+		Email:      p.EmailAddresses[0].Value,
+		Name:       p.Names[0].DisplayName,
+		GivenName:  p.Names[0].GivenName,
+		FamilyName: p.Names[0].FamilyName,
+	}
+	if len(p.Photos) > 0 {
+		resp.Picture = p.Photos[0].Url
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	enc := json.NewEncoder(w)
+	err = enc.Encode(resp)
+	if err != nil {
+		errResp(
+			http.StatusInternalServerError,
+			"Error getting user information",
+			"error encoding response",
+			err,
+		)
+		return
+	}
+}
+
 type MeGetResponse struct {
 	ID         string `json:"id"`
 	Email      string `json:"email"`
@@ -62,7 +186,8 @@ func convertGraphUserToMeResponse(user *sharepointhelper.Person) MeGetResponse {
 	}
 }
 
-// handleGetUserProfile handles the GET request for user profile data
+// handleGetUserProfile handles the GET request for user profile data.
+// It delegates to SharePoint or Google depending on which backend is configured.
 func handleGetUserProfile(srv server.Server, w http.ResponseWriter, r *http.Request, userEmail string) {
 	srv.Logger.Info("me handler called",
 		"method", r.Method,
@@ -70,13 +195,15 @@ func handleGetUserProfile(srv server.Server, w http.ResponseWriter, r *http.Requ
 		"user_email", userEmail,
 	)
 
-	// Check if Microsoft Graph service is available
-	if srv.SharePoint == nil {
-		srv.Logger.Error("Microsoft Graph service not initialized")
-		http.Error(w, "Microsoft Graph service not available", http.StatusInternalServerError)
-		return
+	if srv.SharePoint != nil {
+		handleGetUserProfileSharePoint(srv, w, r, userEmail)
+	} else {
+		handleGetUserProfileGoogle(srv, w, r, userEmail)
 	}
+}
 
+// handleGetUserProfileSharePoint handles the GET request for user profile data using Microsoft Graph.
+func handleGetUserProfileSharePoint(srv server.Server, w http.ResponseWriter, r *http.Request, userEmail string) {
 	// Get user directly from Microsoft Graph API
 	user, err := srv.SharePoint.GetPersonByEmail(userEmail)
 	if err != nil {
