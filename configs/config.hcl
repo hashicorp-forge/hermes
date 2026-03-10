@@ -267,19 +267,6 @@ server {
 //   drafts_folder_id = ""
 // }
 
-// microsoft_auth {
-//   client_id     = "YOUR_AZURE_AD_CLIENT_ID"
-//   client_secret = "YOUR_AZURE_AD_CLIENT_SECRET"
-//   tenant_id     = "YOUR_AZURE_AD_TENANT_ID"
-//   redirect_uri  = "https://localhost:8443/auth/callback"
-// }
-
-// microsoft_graph {
-//   client_id     = "YOUR_GRAPH_API_CLIENT_ID"
-//   client_secret = "YOUR_GRAPH_API_CLIENT_SECRET"
-//   tenant_id     = "YOUR_AZURE_AD_TENANT_ID"
-// }
-
 // oidc_alb {
 //   // auth_server_url is the OIDC discovery URL.
 //   auth_server_url = "https://your-oidc-provider.com"

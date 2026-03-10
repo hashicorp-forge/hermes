@@ -9,6 +9,9 @@
 .DS_Store
 .env
 
+# TLS certs (local dev)
+/certs
+
 # Web application
 node_modules
 /web/.pnp.*
