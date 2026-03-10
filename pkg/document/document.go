@@ -531,7 +531,7 @@ func (d Document) ToDatabaseModels(
 	fileRevisions := models.DocumentFileRevisions{}
 	for frID, frName := range d.FileRevisions {
 		fileRevisions = append(fileRevisions, models.DocumentFileRevision{
-			Document: models.NewDocumentByFileID(doc.GetFileIdentifier(), useSharePoint),
+			Document:       models.NewDocumentByFileID(doc.GetFileIdentifier(), useSharePoint),
 			FileRevisionID: frID,
 			Name:           frName,
 		})
@@ -601,14 +601,14 @@ func (d Document) ToDatabaseModels(
 		if helpers.StringSliceContains(d.ApprovedBy, a) {
 			reviews = append(reviews, models.DocumentReview{
 				Document: models.NewDocumentByFileID(d.ObjectID, useSharePoint),
-				User:   u,
-				Status: models.ApprovedDocumentReviewStatus,
+				User:     u,
+				Status:   models.ApprovedDocumentReviewStatus,
 			})
 		} else if helpers.StringSliceContains(d.ChangesRequestedBy, a) {
 			reviews = append(reviews, models.DocumentReview{
 				Document: models.NewDocumentByFileID(d.ObjectID, useSharePoint),
-				User:   u,
-				Status: models.ChangesRequestedDocumentReviewStatus,
+				User:     u,
+				Status:   models.ChangesRequestedDocumentReviewStatus,
 			})
 		}
 	}

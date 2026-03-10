@@ -204,7 +204,7 @@ func documentsResourceRelatedResourcesHandler(
 		for _, elrr := range req.ExternalLinks {
 			elrrs = append(elrrs, models.DocumentRelatedResourceExternalLink{
 				RelatedResource: models.DocumentRelatedResource{
-					Document: models.NewDocumentByFileID(docID, useSharePoint),
+					Document:  models.NewDocumentByFileID(docID, useSharePoint),
 					SortOrder: elrr.SortOrder,
 				},
 				Name: elrr.Name,
@@ -217,7 +217,7 @@ func documentsResourceRelatedResourcesHandler(
 		for _, hdrr := range req.HermesDocuments {
 			hdrrs = append(hdrrs, models.DocumentRelatedResourceHermesDocument{
 				RelatedResource: models.DocumentRelatedResource{
-					Document: models.NewDocumentByFileID(docID, useSharePoint),
+					Document:  models.NewDocumentByFileID(docID, useSharePoint),
 					SortOrder: hdrr.SortOrder,
 				},
 				Document: models.NewDocumentByFileID(hdrr.FileID, useSharePoint),

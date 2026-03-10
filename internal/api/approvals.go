@@ -281,8 +281,8 @@ func ApprovalHandler(
 			var reviews models.DocumentReviews
 			var reviewQuery models.DocumentReview
 			reviewQuery = models.DocumentReview{
-					Document: models.NewDocumentByFileID(docID, false),
-				}
+				Document: models.NewDocumentByFileID(docID, false),
+			}
 
 			if err := reviews.Find(db, reviewQuery); err != nil {
 				l.Error("error getting all reviews for document for data comparison",
@@ -561,8 +561,8 @@ func ApprovalHandler(
 			var reviews models.DocumentReviews
 			var reviewQuery models.DocumentReview
 			reviewQuery = models.DocumentReview{
-					Document: models.NewDocumentByFileID(docID, false),
-				}
+				Document: models.NewDocumentByFileID(docID, false),
+			}
 
 			if err := reviews.Find(db, reviewQuery); err != nil {
 				l.Error("error getting all reviews for document for data comparison",
@@ -600,7 +600,7 @@ func updateDocumentReviewsInDatabase(doc document.Document, db *gorm.DB) error {
 		u := models.User{
 			EmailAddress: a,
 		}
-		
+
 		docModel := models.NewDocumentByFileID(doc.ObjectID, false)
 
 		if helpers.StringSliceContains(doc.ApprovedBy, a) {

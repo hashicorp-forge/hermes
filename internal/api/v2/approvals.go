@@ -226,7 +226,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 
 			// Create file revision in the database.
 			fr := models.DocumentFileRevision{
-				Document: srv.NewDocumentByFileID(docID),
+				Document:       srv.NewDocumentByFileID(docID),
 				FileRevisionID: revisionID,
 				Name:           revisionName,
 			}
@@ -537,7 +537,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 
 			// Create file revision in the database.
 			fr := models.DocumentFileRevision{
-				Document: srv.NewDocumentByFileID(docID),
+				Document:       srv.NewDocumentByFileID(docID),
 				FileRevisionID: revisionID,
 				Name:           revisionName,
 			}
@@ -835,14 +835,14 @@ func updateDocumentReviewsInDatabase(doc document.Document, db *gorm.DB, useShar
 		if helpers.StringSliceContains(doc.ApprovedBy, a) {
 			docReviews = append(docReviews, models.DocumentReview{
 				Document: models.NewDocumentByFileID(doc.ObjectID, useSharePoint),
-				User:   u,
-				Status: models.ApprovedDocumentReviewStatus,
+				User:     u,
+				Status:   models.ApprovedDocumentReviewStatus,
 			})
 		} else if helpers.StringSliceContains(doc.ChangesRequestedBy, a) {
 			docReviews = append(docReviews, models.DocumentReview{
 				Document: models.NewDocumentByFileID(doc.ObjectID, useSharePoint),
-				User:   u,
-				Status: models.ChangesRequestedDocumentReviewStatus,
+				User:     u,
+				Status:   models.ChangesRequestedDocumentReviewStatus,
 			})
 		}
 	}
