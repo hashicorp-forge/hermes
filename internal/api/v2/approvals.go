@@ -165,22 +165,25 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 				return
 			}
 
-			// Check if document is locked.
-			locked, err := hcd.IsLocked(docID, srv.DB, srv.GWService, srv.Logger)
-			if err != nil {
-				srv.Logger.Error("error checking document locked status",
-					"error", err,
-					"path", r.URL.Path,
-					"method", r.Method,
-					"doc_id", docID,
-				)
-				http.Error(w, "Error getting document status", http.StatusNotFound)
-				return
-			}
-			// Don't continue if document is locked.
-			if locked {
-				http.Error(w, "Document is locked", http.StatusLocked)
-				return
+			// Check if document is locked (Google-only: suggestions in
+			// Google Docs headers can cause internal API errors).
+			if !srv.IsSharePoint() {
+				locked, err := hcd.IsLocked(docID, srv.DB, srv.GWService, srv.Logger)
+				if err != nil {
+					srv.Logger.Error("error checking document locked status",
+						"error", err,
+						"path", r.URL.Path,
+						"method", r.Method,
+						"doc_id", docID,
+					)
+					http.Error(w, "Error getting document status", http.StatusNotFound)
+					return
+				}
+				// Don't continue if document is locked.
+				if locked {
+					http.Error(w, "Document is locked", http.StatusLocked)
+					return
+				}
 			}
 
 			// Add email to slice of users who have requested changes of the document.
@@ -473,22 +476,25 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 				return
 			}
 
-			// Check if document is locked.
-			locked, err := hcd.IsLocked(docID, srv.DB, srv.GWService, srv.Logger)
-			if err != nil {
-				srv.Logger.Error("error checking document locked status",
-					"error", err,
-					"path", r.URL.Path,
-					"method", r.Method,
-					"doc_id", docID,
-				)
-				http.Error(w, "Error getting document status", http.StatusNotFound)
-				return
-			}
-			// Don't continue if document is locked.
-			if locked {
-				http.Error(w, "Document is locked", http.StatusLocked)
-				return
+			// Check if document is locked (Google-only: suggestions in
+			// Google Docs headers can cause internal API errors).
+			if !srv.IsSharePoint() {
+				locked, err := hcd.IsLocked(docID, srv.DB, srv.GWService, srv.Logger)
+				if err != nil {
+					srv.Logger.Error("error checking document locked status",
+						"error", err,
+						"path", r.URL.Path,
+						"method", r.Method,
+						"doc_id", docID,
+					)
+					http.Error(w, "Error getting document status", http.StatusNotFound)
+					return
+				}
+				// Don't continue if document is locked.
+				if locked {
+					http.Error(w, "Document is locked", http.StatusLocked)
+					return
+				}
 			}
 
 			// If the user is a group approver, they won't be in the approvers list.
