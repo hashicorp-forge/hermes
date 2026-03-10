@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp-forge/hermes/internal/jira"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
+	"github.com/hashicorp-forge/hermes/pkg/models"
 	sp "github.com/hashicorp-forge/hermes/pkg/sharepointhelper"
 	"github.com/hashicorp/go-hclog"
 	"gorm.io/gorm"
@@ -48,4 +49,16 @@ func (s Server) GetEmailSender() email.EmailSender {
 		return s.SharePoint
 	}
 	return &gw.EmailSenderAdapter{Svc: s.GWService}
+}
+
+// IsSharePoint returns true when the server is configured for a SharePoint
+// backend, false when it is configured for Google Workspace.
+func (s Server) IsSharePoint() bool {
+	return s.SharePoint != nil
+}
+
+// NewDocumentByFileID returns a models.Document with the correct file-ID
+// field populated based on the configured backend.
+func (s Server) NewDocumentByFileID(fileID string) models.Document {
+	return models.NewDocumentByFileID(fileID, s.IsSharePoint())
 }

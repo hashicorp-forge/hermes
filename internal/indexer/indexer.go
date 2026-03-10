@@ -371,9 +371,7 @@ func processSharePointDocs(docs []sp.Document, docType string, idx *Indexer) {
 		logInfo("processing document")
 
 		// Get document from database.
-		dbDoc := models.Document{
-			FileID: doc.ID, // Use SharePoint-specific field
-		}
+		dbDoc := models.NewDocumentByFileID(doc.ID, true)
 		if err := dbDoc.Get(idx.Database); err != nil {
 			logError("error getting document from the database", err)
 			continue
@@ -385,9 +383,7 @@ func processSharePointDocs(docs []sp.Document, docType string, idx *Indexer) {
 		// Get reviews for the document from the database.
 		var reviews models.DocumentReviews
 		if err := reviews.Find(idx.Database, models.DocumentReview{
-			Document: models.Document{
-				FileID: doc.ID, // Use SharePoint-specific field
-			},
+			Document: models.NewDocumentByFileID(doc.ID, true),
 		}); err != nil {
 			log.Error("error getting reviews for document",
 				"error", err,
@@ -399,9 +395,7 @@ func processSharePointDocs(docs []sp.Document, docType string, idx *Indexer) {
 		// Get group reviews for the document.
 		var groupReviews models.DocumentGroupReviews
 		if err := groupReviews.Find(idx.Database, models.DocumentGroupReview{
-			Document: models.Document{
-				FileID: doc.ID, // Use SharePoint-specific field
-			},
+			Document: models.NewDocumentByFileID(doc.ID, true),
 		}); err != nil {
 			log.Error("error getting group reviews for document",
 				"error", err,

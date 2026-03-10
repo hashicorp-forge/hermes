@@ -72,8 +72,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 			return
 		}
 
-		model := models.Document{}
-		model.FileID = docID
+		model := srv.NewDocumentByFileID(docID)
 
 		// Get document from database.
 		if err := model.Get(srv.DB); err != nil {
@@ -101,9 +100,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 		// Get reviews for the document.
 		var reviews models.DocumentReviews
 		if err := reviews.Find(srv.DB, models.DocumentReview{
-			Document: models.Document{
-				FileID: docID,
-			},
+			Document: srv.NewDocumentByFileID(docID),
 		}); err != nil {
 			srv.Logger.Error("error getting reviews for document",
 				"error", err,
@@ -118,9 +115,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 		// Get group reviews for the document.
 		var groupReviews models.DocumentGroupReviews
 		if err := groupReviews.Find(srv.DB, models.DocumentGroupReview{
-			Document: models.Document{
-				FileID: docID,
-			},
+			Document: srv.NewDocumentByFileID(docID),
 		}); err != nil {
 			srv.Logger.Error("error getting group reviews for document",
 				"error", err,
@@ -163,7 +158,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 		switch reqType {
 		case relatedResourcesDocumentSubcollectionRequestType:
 			documentsResourceRelatedResourcesHandler(
-				w, r, docID, *doc, srv.Config, srv.Logger, srv.AlgoSearch, srv.DB)
+				w, r, docID, *doc, srv.Config, srv.Logger, srv.AlgoSearch, srv.DB, srv.IsSharePoint())
 			return
 		case shareableDocumentSubcollectionRequestType:
 			srv.Logger.Warn("invalid shareable request for documents collection",
@@ -218,7 +213,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 			if r.Header.Get("Add-To-Recently-Viewed") != "" {
 				go func() {
 					email := r.Context().Value("userEmail").(string)
-					if err := updateRecentlyViewedDocs(email, docID, srv.DB, now); err != nil {
+					if err := updateRecentlyViewedDocs(email, docID, srv.DB, now, srv.IsSharePoint()); err != nil {
 						srv.Logger.Error("error updating recently viewed docs (HEAD)",
 							"error", err,
 							"doc_id", docID,
@@ -365,7 +360,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 					email := r.Context().Value("userEmail").(string)
 
 					if err := updateRecentlyViewedDocs(
-						email, docID, srv.DB, now,
+						email, docID, srv.DB, now, srv.IsSharePoint(),
 					); err != nil {
 						srv.Logger.Error("error updating recently viewed docs",
 							"error", err,
@@ -392,9 +387,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 					return
 				}
 				// Get document from database.
-				dbDoc := models.Document{
-					FileID: docID,
-				}
+				dbDoc := srv.NewDocumentByFileID(docID)
 				if err := dbDoc.Get(srv.DB); err != nil {
 					srv.Logger.Error(
 						"error getting document from database for data comparison",
@@ -408,9 +401,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 				// Get all reviews for the document.
 				var reviews models.DocumentReviews
 				if err := reviews.Find(srv.DB, models.DocumentReview{
-					Document: models.Document{
-						FileID: docID,
-					},
+					Document: srv.NewDocumentByFileID(docID),
 				}); err != nil {
 					srv.Logger.Error(
 						"error getting all reviews for document for data comparison",
@@ -1105,9 +1096,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 			// Note: Header replacement for sharepoint documents will be handled by Hermes Add-In for Microsoft Word
 
 			// Get document record from database so we can modify it for updating.
-			model := models.Document{
-				FileID: docID,
-			}
+			model := srv.NewDocumentByFileID(docID)
 			if err := model.Get(srv.DB); err != nil {
 				srv.Logger.Error("error getting document from database",
 					"error", err,
@@ -1607,8 +1596,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 					return
 				}
 				// Get document from database.
-				dbDoc := models.Document{}
-				dbDoc.FileID = docID
+				dbDoc := srv.NewDocumentByFileID(docID)
 
 				if err := dbDoc.Get(srv.DB); err != nil {
 					srv.Logger.Error(
@@ -1623,9 +1611,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 				// Get all reviews for the document.
 				var reviews models.DocumentReviews
 				if err := reviews.Find(srv.DB, models.DocumentReview{
-					Document: models.Document{
-						FileID: docID,
-					},
+					Document: srv.NewDocumentByFileID(docID),
 				}); err != nil {
 					srv.Logger.Error(
 						"error getting all reviews for document for data comparison",
@@ -1660,7 +1646,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 // provided email address, using the document file ID and viewed at time for a
 // document view event.
 func updateRecentlyViewedDocs(
-	email, docID string, db *gorm.DB, viewedAt time.Time) error {
+	email, docID string, db *gorm.DB, viewedAt time.Time, useSharePoint bool) error {
 	// Get user (if exists).
 	u := models.User{
 		EmailAddress: email,
@@ -1671,9 +1657,7 @@ func updateRecentlyViewedDocs(
 	}
 
 	// Get viewed document in database.
-	doc := models.Document{
-		FileID: docID,
-	}
+	doc := models.NewDocumentByFileID(docID, useSharePoint)
 	if err := doc.Get(db); err != nil {
 		return fmt.Errorf("error getting viewed document: %w", err)
 	}

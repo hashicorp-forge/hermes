@@ -408,9 +408,7 @@ func ReviewHandler(
 			)
 
 			// Update document in the database.
-			d := models.Document{
-				FileID: docID,
-			}
+			d := models.NewDocumentByFileID(docID, false)
 			if err := d.Get(db); err != nil {
 				l.Error("error getting document in database",
 					"error", err,
@@ -591,9 +589,7 @@ func ReviewHandler(
 				return
 			}
 			// Get document from database.
-			dbDoc := models.Document{
-				FileID: docID,
-			}
+			dbDoc := models.NewDocumentByFileID(docID, false)
 			if err := dbDoc.Get(db); err != nil {
 				l.Error("error getting document from database for data comparison",
 					"error", err,
@@ -606,9 +602,7 @@ func ReviewHandler(
 			// Get all reviews for the document.
 			var reviews models.DocumentReviews
 			if err := reviews.Find(db, models.DocumentReview{
-				Document: models.Document{
-					FileID: docID,
-				},
+				Document: models.NewDocumentByFileID(docID, false),
 			}); err != nil {
 				l.Error("error getting all reviews for document for data comparison",
 					"error", err,

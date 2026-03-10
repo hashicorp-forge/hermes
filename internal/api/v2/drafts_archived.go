@@ -29,13 +29,12 @@ func draftsArchivedHandler(
 	l hclog.Logger,
 	algoWrite *algolia.Client,
 	db *gorm.DB,
+	useSharePoint bool,
 ) {
 	switch r.Method {
 	case "GET":
 		// Get document from database.
-		d := models.Document{
-			FileID: docID,
-		}
+		d := models.NewDocumentByFileID(docID, useSharePoint)
 		if err := d.Get(db); err != nil {
 			l.Error("error getting document from database",
 				"error", err,
@@ -108,9 +107,7 @@ func draftsArchivedHandler(
 		}
 
 		// Get document from database.
-		doc := models.Document{
-			FileID: docID,
-		}
+		doc := models.NewDocumentByFileID(docID, useSharePoint)
 		if err := doc.Get(db); err != nil {
 			l.Error("error getting document from database",
 				"error", err,
@@ -150,9 +147,7 @@ func draftsArchivedHandler(
 		// Update Algolia in the background.
 		go func() {
 			// Get updated document from database to get all fields.
-			updatedDoc := models.Document{
-				FileID: docID,
-			}
+			updatedDoc := models.NewDocumentByFileID(docID, useSharePoint)
 			if err := updatedDoc.Get(db); err != nil {
 				l.Error("error getting updated document from database for Algolia",
 					"error", err,
@@ -164,9 +159,7 @@ func draftsArchivedHandler(
 			// Get reviews for the document.
 			var reviews models.DocumentReviews
 			if err := reviews.Find(db, models.DocumentReview{
-				Document: models.Document{
-					FileID: docID,
-				},
+				Document: models.NewDocumentByFileID(docID, useSharePoint),
 			}); err != nil {
 				l.Error("error getting reviews for document for Algolia",
 					"error", err,
@@ -178,9 +171,7 @@ func draftsArchivedHandler(
 			// Get group reviews for the document.
 			var groupReviews models.DocumentGroupReviews
 			if err := groupReviews.Find(db, models.DocumentGroupReview{
-				Document: models.Document{
-					FileID: docID,
-				},
+				Document: models.NewDocumentByFileID(docID, useSharePoint),
 			}); err != nil {
 				l.Error("error getting group reviews for document for Algolia",
 					"error", err,

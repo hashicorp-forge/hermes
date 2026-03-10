@@ -222,9 +222,7 @@ func handleCreateReview(srv *server.Server, w http.ResponseWriter, r *http.Reque
 // validateAndPrepareReview validates the request and prepares the document for review
 func validateAndPrepareReview(srv *server.Server, r *http.Request, tx *gorm.DB, docID string) (*document.Document, *structs.HTTPError) {
 	// Get document from database.
-	model := models.Document{
-		FileID: docID,
-	}
+	model := srv.NewDocumentByFileID(docID)
 	if err := model.Get(tx); err != nil {
 		srv.Logger.Error("error getting document from database",
 			"error", err,
@@ -239,9 +237,7 @@ func validateAndPrepareReview(srv *server.Server, r *http.Request, tx *gorm.DB, 
 	// Get reviews for the document.
 	var reviews models.DocumentReviews
 	if err := reviews.Find(tx, models.DocumentReview{
-		Document: models.Document{
-			FileID: docID,
-		},
+		Document: srv.NewDocumentByFileID(docID),
 	}); err != nil {
 		srv.Logger.Error("error getting reviews for document",
 			"error", err,
@@ -256,9 +252,7 @@ func validateAndPrepareReview(srv *server.Server, r *http.Request, tx *gorm.DB, 
 	// Get group reviews for the document.
 	var groupReviews models.DocumentGroupReviews
 	if err := groupReviews.Find(srv.DB, models.DocumentGroupReview{
-		Document: models.Document{
-			FileID: docID,
-		},
+		Document: srv.NewDocumentByFileID(docID),
 	}); err != nil {
 		srv.Logger.Error("error getting group reviews for document",
 			"error", err,
@@ -475,9 +469,7 @@ func processDocumentForReview(srv *server.Server, r *http.Request, tx *gorm.DB, 
 
 	// Create file revision in the database.
 	fr := models.DocumentFileRevision{
-		Document: models.Document{
-			FileID: docID,
-		},
+		Document: srv.NewDocumentByFileID(docID),
 		FileRevisionID: latestRevisionID,
 		Name:           revisionName,
 	}
@@ -563,9 +555,7 @@ func completeReviewCreation(srv *server.Server, r *http.Request, tx *gorm.DB, do
 	)
 
 	// Update document in the database.
-	d := models.Document{
-		FileID: docID,
-	}
+	d := srv.NewDocumentByFileID(docID)
 	if err := d.Get(tx); err != nil {
 		srv.Logger.Error("error getting document in database",
 			"error", err,
@@ -953,9 +943,7 @@ func handleReviewPostProcessing(srv *server.Server, doc *document.Document, docI
 		return
 	}
 	// Get document from database.
-	dbDoc := models.Document{
-		FileID: docID,
-	}
+	dbDoc := srv.NewDocumentByFileID(docID)
 	if err := dbDoc.Get(srv.DB); err != nil {
 		srv.Logger.Error(
 			"error getting document from database for data comparison",
@@ -969,9 +957,7 @@ func handleReviewPostProcessing(srv *server.Server, doc *document.Document, docI
 	// Get all reviews for the document.
 	var reviews models.DocumentReviews
 	if err := reviews.Find(srv.DB, models.DocumentReview{
-		Document: models.Document{
-			FileID: docID,
-		},
+		Document: srv.NewDocumentByFileID(docID),
 	}); err != nil {
 		srv.Logger.Error(
 			"error getting all reviews for document for data comparison",

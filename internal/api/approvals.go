@@ -40,34 +40,24 @@ func ApprovalHandler(
 				return
 			}
 
-			// Check if this is a SharePoint document
+			// v1 handlers are always Google Workspace.
 			isSharePoint := false
-			// Try to find the document with FileID first
-			spDoc := models.Document{
-				FileID: docID,
+
+			// Perform lock check for Google Workspace documents.
+			locked, err := hcd.IsLocked(docID, db, s, l)
+			if err != nil {
+				l.Error("error checking document locked status",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error getting document status", http.StatusNotFound)
+				return
 			}
-			if err := spDoc.Get(db); err == nil {
-				isSharePoint = true
-				l.Info("SharePoint document, skipping lock check",
-					"sharepoint_file_id", docID)
-			} else {
-				// For Google Workspace documents, perform lock check
-				locked, err := hcd.IsLocked(docID, db, s, l)
-				if err != nil {
-					l.Error("error checking document locked status",
-						"error", err,
-						"path", r.URL.Path,
-						"method", r.Method,
-						"doc_id", docID,
-					)
-					http.Error(w, "Error getting document status", http.StatusNotFound)
-					return
-				}
-				// Don't continue if document is locked.
-				if locked {
-					http.Error(w, "Document is locked", http.StatusLocked)
-					return
-				}
+			if locked {
+				http.Error(w, "Document is locked", http.StatusLocked)
+				return
 			}
 
 			// Get document object from Algolia.
@@ -275,9 +265,7 @@ func ApprovalHandler(
 			}
 			// Get document from database.
 			var dbDoc models.Document
-			dbDoc = models.Document{
-					FileID: docID,
-				}
+			dbDoc = models.NewDocumentByFileID(docID, false)
 
 			if err := dbDoc.Get(db); err != nil {
 				l.Error("error getting document from database for data comparison",
@@ -293,9 +281,7 @@ func ApprovalHandler(
 			var reviews models.DocumentReviews
 			var reviewQuery models.DocumentReview
 			reviewQuery = models.DocumentReview{
-					Document: models.Document{
-						FileID: docID,
-					},
+					Document: models.NewDocumentByFileID(docID, false),
 				}
 
 			if err := reviews.Find(db, reviewQuery); err != nil {
@@ -331,34 +317,24 @@ func ApprovalHandler(
 				return
 			}
 
-			// Check if this is a SharePoint document
+			// v1 handlers are always Google Workspace.
 			isSharePoint := false
-			// Try to find the document with FileID first
-			spDoc := models.Document{
-				FileID: docID,
+
+			// Perform lock check for Google Workspace documents.
+			locked, err := hcd.IsLocked(docID, db, s, l)
+			if err != nil {
+				l.Error("error checking document locked status",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error getting document status", http.StatusNotFound)
+				return
 			}
-			if err := spDoc.Get(db); err == nil {
-				isSharePoint = true
-				l.Info("SharePoint document, skipping lock check",
-					"sharepoint_file_id", docID)
-			} else {
-				// For Google Workspace documents, perform lock check
-				locked, err := hcd.IsLocked(docID, db, s, l)
-				if err != nil {
-					l.Error("error checking document locked status",
-						"error", err,
-						"path", r.URL.Path,
-						"method", r.Method,
-						"doc_id", docID,
-					)
-					http.Error(w, "Error getting document status", http.StatusNotFound)
-					return
-				}
-				// Don't continue if document is locked.
-				if locked {
-					http.Error(w, "Document is locked", http.StatusLocked)
-					return
-				}
+			if locked {
+				http.Error(w, "Document is locked", http.StatusLocked)
+				return
 			}
 
 			// Get document object from Algolia.
@@ -569,9 +545,7 @@ func ApprovalHandler(
 			}
 			// Get document from database.
 			var dbDoc models.Document
-			dbDoc = models.Document{
-					FileID: docID,
-				}
+			dbDoc = models.NewDocumentByFileID(docID, false)
 
 			if err := dbDoc.Get(db); err != nil {
 				l.Error("error getting document from database for data comparison",
@@ -587,9 +561,7 @@ func ApprovalHandler(
 			var reviews models.DocumentReviews
 			var reviewQuery models.DocumentReview
 			reviewQuery = models.DocumentReview{
-					Document: models.Document{
-						FileID: docID,
-					},
+					Document: models.NewDocumentByFileID(docID, false),
 				}
 
 			if err := reviews.Find(db, reviewQuery); err != nil {
@@ -629,9 +601,7 @@ func updateDocumentReviewsInDatabase(doc document.Document, db *gorm.DB) error {
 			EmailAddress: a,
 		}
 		
-		docModel := models.Document{
-				FileID: doc.ObjectID,
-			}
+		docModel := models.NewDocumentByFileID(doc.ObjectID, false)
 
 		if helpers.StringSliceContains(doc.ApprovedBy, a) {
 			docReviews = append(docReviews, models.DocumentReview{

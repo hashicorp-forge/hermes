@@ -70,16 +70,16 @@ func refreshDocumentHeaders(
 	}
 	var lockedDocIDs []string
 	for _, d := range lockedDocs {
-		f, err := idx.GoogleWorkspaceService.GetFile(d.FileID)
+		f, err := idx.GoogleWorkspaceService.GetFile(d.GoogleFileID)
 		if err != nil {
-			return fmt.Errorf("error getting file (%s): %w", d.FileID, err)
+			return fmt.Errorf("error getting file (%s): %w", d.GoogleFileID, err)
 		}
 
 		// Find if locked document is already in slice of updated documents and
 		// append it if not.
 		alreadyInDocs := false
 		for _, doc := range docs {
-			if doc.Id == d.FileID {
+			if doc.Id == d.GoogleFileID {
 				alreadyInDocs = true
 				break
 			}
@@ -87,7 +87,7 @@ func refreshDocumentHeaders(
 		if !alreadyInDocs {
 			docs = append(docs, f)
 		}
-		lockedDocIDs = append(lockedDocIDs, d.FileID)
+		lockedDocIDs = append(lockedDocIDs, d.GoogleFileID)
 	}
 	if ft == draftsFolderType {
 		log.Info(fmt.Sprintf("locked draft document IDs: %v", lockedDocIDs))
@@ -176,9 +176,7 @@ func refreshDocumentHeader(
 	var doc *document.Document
 	if idx.UseDatabaseForDocumentData {
 		// Get document from database.
-		model := models.Document{
-			FileID: file.Id,
-		}
+		model := models.NewDocumentByFileID(file.Id, false)
 		if err := model.Get(idx.Database); err != nil {
 			log.Error("error getting document from database",
 				"error", err,
@@ -190,9 +188,7 @@ func refreshDocumentHeader(
 		// Get reviews for the document from the database.
 		var reviews models.DocumentReviews
 		if err := reviews.Find(idx.Database, models.DocumentReview{
-			Document: models.Document{
-				FileID: file.Id,
-			},
+			Document: models.NewDocumentByFileID(file.Id, false),
 		}); err != nil {
 			log.Error("error getting reviews for document",
 				"error", err,
@@ -204,9 +200,7 @@ func refreshDocumentHeader(
 		// Get group reviews for the document.
 		var groupReviews models.DocumentGroupReviews
 		if err := groupReviews.Find(idx.Database, models.DocumentGroupReview{
-			Document: models.Document{
-				FileID: file.Id,
-			},
+			Document: models.NewDocumentByFileID(file.Id, false),
 		}); err != nil {
 			log.Error("error getting group reviews for document",
 				"error", err,

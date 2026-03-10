@@ -433,17 +433,16 @@ func (d Document) ToAlgoliaObject(
 }
 
 // ToDatabaseModels converts a document to a document and document reviews
-// database records.
+// database records. useSharePoint controls which file ID field is populated:
+// true → FileID (SharePoint), false → GoogleFileID (Google).
 func (d Document) ToDatabaseModels(
 	docTypes []*config.DocumentType, products []*config.Product,
+	useSharePoint bool,
 ) (
 	models.Document, models.DocumentReviews, error,
 ) {
-	doc := models.Document{}
+	doc := models.NewDocumentByFileID(d.ObjectID, useSharePoint)
 	reviews := models.DocumentReviews{}
-
-	// FileID.
-	doc.FileID = d.ObjectID
 
 	// Title.
 	doc.Title = d.Title
@@ -532,9 +531,7 @@ func (d Document) ToDatabaseModels(
 	fileRevisions := models.DocumentFileRevisions{}
 	for frID, frName := range d.FileRevisions {
 		fileRevisions = append(fileRevisions, models.DocumentFileRevision{
-			Document: models.Document{
-				FileID: doc.FileID,
-			},
+			Document: models.NewDocumentByFileID(doc.GetFileIdentifier(), useSharePoint),
 			FileRevisionID: frID,
 			Name:           frName,
 		})
@@ -603,17 +600,13 @@ func (d Document) ToDatabaseModels(
 
 		if helpers.StringSliceContains(d.ApprovedBy, a) {
 			reviews = append(reviews, models.DocumentReview{
-				Document: models.Document{
-					FileID: d.ObjectID,
-				},
+				Document: models.NewDocumentByFileID(d.ObjectID, useSharePoint),
 				User:   u,
 				Status: models.ApprovedDocumentReviewStatus,
 			})
 		} else if helpers.StringSliceContains(d.ChangesRequestedBy, a) {
 			reviews = append(reviews, models.DocumentReview{
-				Document: models.Document{
-					FileID: d.ObjectID,
-				},
+				Document: models.NewDocumentByFileID(d.ObjectID, useSharePoint),
 				User:   u,
 				Status: models.ChangesRequestedDocumentReviewStatus,
 			})

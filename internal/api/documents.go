@@ -150,9 +150,7 @@ func DocumentHandler(
 			doc.ModifiedTime = modifiedTime.Unix()
 
 			// Get document from database.
-			model := models.Document{
-				FileID: docID,
-			}
+			model := models.NewDocumentByFileID(docID, false)
 			if err := model.Get(db); err != nil {
 				l.Error("error getting document from database",
 					"error", err,
@@ -257,9 +255,7 @@ func DocumentHandler(
 				return
 			}
 			// Get document from database.
-			dbDoc := models.Document{
-				FileID: docID,
-			}
+			dbDoc := models.NewDocumentByFileID(docID, false)
 			if err := dbDoc.Get(db); err != nil {
 				l.Error("error getting document from database for data comparison",
 					"error", err,
@@ -272,9 +268,7 @@ func DocumentHandler(
 			// Get all reviews for the document.
 			var reviews models.DocumentReviews
 			if err := reviews.Find(db, models.DocumentReview{
-				Document: models.Document{
-					FileID: docID,
-				},
+				Document: models.NewDocumentByFileID(docID, false),
 			}); err != nil {
 				l.Error("error getting all reviews for document for data comparison",
 					"error", err,
@@ -602,9 +596,7 @@ Hermes
 				fmt.Sprintf("[%s] %s", doc.DocNumber, doc.Title))
 
 			// Get document record from database so we can modify it for updating.
-			model := models.Document{
-				FileID: docID,
-			}
+			model := models.NewDocumentByFileID(docID, false)
 			if err := model.Get(db); err != nil {
 				l.Error("error getting document from database",
 					"error", err,
@@ -775,9 +767,7 @@ Hermes
 				return
 			}
 			// Get document from database.
-			dbDoc := models.Document{
-				FileID: docID,
-			}
+			dbDoc := models.NewDocumentByFileID(docID, false)
 			if err := dbDoc.Get(db); err != nil {
 				l.Error("error getting document from database for data comparison",
 					"error", err,
@@ -790,9 +780,7 @@ Hermes
 			// Get all reviews for the document.
 			var reviews models.DocumentReviews
 			if err := reviews.Find(db, models.DocumentReview{
-				Document: models.Document{
-					FileID: docID,
-				},
+				Document: models.NewDocumentByFileID(docID, false),
 			}); err != nil {
 				l.Error("error getting all reviews for document for data comparison",
 					"error", err,
@@ -835,9 +823,7 @@ func updateRecentlyViewedDocs(
 	}
 
 	// Get viewed document in database.
-	doc := models.Document{
-		FileID: docID,
-	}
+	doc := models.NewDocumentByFileID(docID, false)
 	if err := doc.Get(db); err != nil {
 		return fmt.Errorf("error getting viewed document: %w", err)
 	}

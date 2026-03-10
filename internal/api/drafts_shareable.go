@@ -35,9 +35,7 @@ func draftsShareableHandler(
 	switch r.Method {
 	case "GET":
 		// Get document from database.
-		d := models.Document{
-			FileID: docID,
-		}
+		d := models.NewDocumentByFileID(docID, false)
 		if err := d.Get(db); err != nil {
 			l.Error("error getting document from database",
 				"error", err,
@@ -103,9 +101,7 @@ func draftsShareableHandler(
 		}
 
 		// Get document from database.
-		doc := models.Document{
-			FileID: docID,
-		}
+		doc := models.NewDocumentByFileID(docID, false)
 		if err := doc.Get(db); err != nil {
 			l.Error("error getting document from database",
 				"error", err,

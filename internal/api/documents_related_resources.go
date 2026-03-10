@@ -63,9 +63,7 @@ func documentsResourceRelatedResourcesHandler(
 ) {
 	switch r.Method {
 	case "GET":
-		d := models.Document{
-			FileID: docID,
-		}
+		d := models.NewDocumentByFileID(docID, false)
 		if err := d.Get(db); err != nil {
 			l.Error("error getting document from database",
 				"error", err,
@@ -207,9 +205,7 @@ func documentsResourceRelatedResourcesHandler(
 		for _, elrr := range req.ExternalLinks {
 			elrrs = append(elrrs, models.DocumentRelatedResourceExternalLink{
 				RelatedResource: models.DocumentRelatedResource{
-					Document: models.Document{
-						FileID: docID,
-					},
+					Document: models.NewDocumentByFileID(docID, false),
 					SortOrder: elrr.SortOrder,
 				},
 				Name: elrr.Name,
@@ -222,21 +218,15 @@ func documentsResourceRelatedResourcesHandler(
 		for _, hdrr := range req.HermesDocuments {
 			hdrrs = append(hdrrs, models.DocumentRelatedResourceHermesDocument{
 				RelatedResource: models.DocumentRelatedResource{
-					Document: models.Document{
-						FileID: docID,
-					},
+					Document: models.NewDocumentByFileID(docID, false),
 					SortOrder: hdrr.SortOrder,
 				},
-				Document: models.Document{
-					FileID: hdrr.FileID,
-				},
+				Document: models.NewDocumentByFileID(hdrr.FileID, false),
 			})
 		}
 
 		// Replace related resources for document.
-		doc := models.Document{
-			FileID: docID,
-		}
+		doc := models.NewDocumentByFileID(docID, false)
 		if err := doc.ReplaceRelatedResources(db, elrrs, hdrrs); err != nil {
 			l.Error("error replacing related resources for document",
 				"error", err,

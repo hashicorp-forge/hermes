@@ -434,9 +434,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 					return
 				}
 				// Get document from database.
-				dbDoc := models.Document{
-					FileID: fileID,
-				}
+				dbDoc := srv.NewDocumentByFileID(fileID)
 				if err := dbDoc.Get(srv.DB); err != nil {
 					srv.Logger.Error(
 						"error getting document from database for data comparison",
@@ -450,9 +448,7 @@ func DraftsHandler(srv server.Server) http.Handler {
 				// Get all reviews for the document.
 				var reviews models.DocumentReviews
 				if err := reviews.Find(srv.DB, models.DocumentReview{
-					Document: models.Document{
-						FileID: fileID,
-					},
+					Document: srv.NewDocumentByFileID(fileID),
 				}); err != nil {
 					srv.Logger.Error(
 						"error getting all reviews for document for data comparison",
@@ -606,9 +602,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 		}
 
 		// Get document from database.
-		model := models.Document{
-			FileID: docID,
-		}
+		model := srv.NewDocumentByFileID(docID)
 		if err := model.Get(srv.DB); err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				srv.Logger.Warn("document draft record not found",
@@ -634,9 +628,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 		// Get reviews for the document.
 		var reviews models.DocumentReviews
 		if err := reviews.Find(srv.DB, models.DocumentReview{
-			Document: models.Document{
-				FileID: docID,
-			},
+			Document: srv.NewDocumentByFileID(docID),
 		}); err != nil {
 			srv.Logger.Error("error getting reviews for document",
 				"error", err,
@@ -650,9 +642,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 		// Get group reviews for the document.
 		var groupReviews models.DocumentGroupReviews
 		if err := groupReviews.Find(srv.DB, models.DocumentGroupReview{
-			Document: models.Document{
-				FileID: docID,
-			},
+			Document: srv.NewDocumentByFileID(docID),
 		}); err != nil {
 			srv.Logger.Error("error getting group reviews for document",
 				"error", err,
@@ -720,15 +710,15 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 		switch reqType {
 		case relatedResourcesDocumentSubcollectionRequestType:
 			documentsResourceRelatedResourcesHandler(
-				w, r, docID, *doc, srv.Config, srv.Logger, srv.AlgoSearch, srv.DB)
+				w, r, docID, *doc, srv.Config, srv.Logger, srv.AlgoSearch, srv.DB, srv.IsSharePoint())
 			return
 		case shareableDocumentSubcollectionRequestType:
 			draftsShareableHandler(w, r, docID, *doc, *srv.Config, srv.Logger,
-				srv.AlgoSearch, srv.DB)
+				srv.AlgoSearch, srv.DB, srv.IsSharePoint())
 			return
 		case archivedDocumentSubcollectionRequestType:
 			draftsArchivedHandler(w, r, docID, *doc, *srv.Config, srv.Logger,
-				srv.AlgoWrite, srv.DB)
+				srv.AlgoWrite, srv.DB, srv.IsSharePoint())
 			return
 		}
 
@@ -774,7 +764,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				// document metadata.
 				if r.Header.Get("Add-To-Recently-Viewed") != "" {
 					if err := updateRecentlyViewedDocs(
-						userEmail, docID, srv.DB, time.Now(),
+						userEmail, docID, srv.DB, time.Now(), srv.IsSharePoint(),
 					); err != nil {
 						srv.Logger.Error("error updating recently viewed docs",
 							"error", err,
@@ -900,7 +890,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				// document metadata.
 				if r.Header.Get("Add-To-Recently-Viewed") != "" {
 					if err := updateRecentlyViewedDocs(
-						userEmail, docID, srv.DB, now,
+						userEmail, docID, srv.DB, now, srv.IsSharePoint(),
 					); err != nil {
 						srv.Logger.Error("error updating recently viewed docs",
 							"error", err,
@@ -927,9 +917,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 					return
 				}
 				// Get document from database.
-				dbDoc := models.Document{
-					FileID: docID,
-				}
+				dbDoc := srv.NewDocumentByFileID(docID)
 				if err := dbDoc.Get(srv.DB); err != nil {
 					srv.Logger.Error(
 						"error getting document from database for data comparison",
@@ -943,9 +931,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				// Get all reviews for the document.
 				var reviews models.DocumentReviews
 				if err := reviews.Find(srv.DB, models.DocumentReview{
-					Document: models.Document{
-						FileID: docID,
-					},
+					Document: srv.NewDocumentByFileID(docID),
 				}); err != nil {
 					srv.Logger.Error(
 						"error getting all reviews for document for data comparison",
@@ -1038,9 +1024,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 			}
 
 			// Delete document in the database.
-			d := models.Document{
-				FileID: docID,
-			}
+			d := srv.NewDocumentByFileID(docID)
 			if err := d.Delete(srv.DB); err != nil {
 				srv.Logger.Error(
 					"error deleting document draft in database",
@@ -1869,9 +1853,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 					return
 				}
 				// Get document from database.
-				dbDoc := models.Document{
-					FileID: docID,
-				}
+				dbDoc := srv.NewDocumentByFileID(docID)
 				if err := dbDoc.Get(srv.DB); err != nil {
 					srv.Logger.Error(
 						"error getting document from database for data comparison",
@@ -1885,9 +1867,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				// Get all reviews for the document.
 				var reviews models.DocumentReviews
 				if err := reviews.Find(srv.DB, models.DocumentReview{
-					Document: models.Document{
-						FileID: docID,
-					},
+					Document: srv.NewDocumentByFileID(docID),
 				}); err != nil {
 					srv.Logger.Error(
 						"error getting all reviews for document for data comparison",
@@ -1969,8 +1949,10 @@ func createDraftDBAndShare(
 		})
 	}
 
+	docByFileID := srv.NewDocumentByFileID(fileID)
 	model := models.Document{
-		FileID:             fileID,
+		GoogleFileID:       docByFileID.GoogleFileID,
+		FileID:             docByFileID.FileID,
 		Contributors:       contributors,
 		DocumentCreatedAt:  createdTime,
 		DocumentModifiedAt: createdTime,

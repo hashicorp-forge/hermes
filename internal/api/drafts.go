@@ -373,8 +373,10 @@ func DraftsHandler(
 					http.StatusInternalServerError)
 				return
 			}
+			docByFileID := models.NewDocumentByFileID(f.Id, false)
 			model := models.Document{
-				FileID:             f.Id,
+				GoogleFileID:       docByFileID.GoogleFileID,
+				FileID:             docByFileID.FileID,
 				Approvers:          approvers,
 				Contributors:       contributors,
 				DocumentCreatedAt:  createdTime,
@@ -460,9 +462,7 @@ func DraftsHandler(
 				return
 			}
 			// Get document from database.
-			dbDoc := models.Document{
-				FileID: f.Id,
-			}
+			dbDoc := models.NewDocumentByFileID(f.Id, false)
 			if err := dbDoc.Get(db); err != nil {
 				l.Error("error getting document from database for data comparison",
 					"error", err,
@@ -475,9 +475,7 @@ func DraftsHandler(
 			// Get all reviews for the document.
 			var reviews models.DocumentReviews
 			if err := reviews.Find(db, models.DocumentReview{
-				Document: models.Document{
-					FileID: f.Id,
-				},
+				Document: models.NewDocumentByFileID(f.Id, false),
 			}); err != nil {
 				l.Error("error getting all reviews for document for data comparison",
 					"error", err,
@@ -646,9 +644,7 @@ func DraftsDocumentHandler(
 		}
 
 		// Get document from database.
-		model := models.Document{
-			FileID: docId,
-		}
+		model := models.NewDocumentByFileID(docId, false)
 		if err := model.Get(db); err != nil {
 			l.Error("error getting document draft from database",
 				"error", err,
@@ -786,9 +782,7 @@ func DraftsDocumentHandler(
 				return
 			}
 			// Get document from database.
-			dbDoc := models.Document{
-				FileID: docId,
-			}
+			dbDoc := models.NewDocumentByFileID(docId, false)
 			if err := dbDoc.Get(db); err != nil {
 				l.Error("error getting document from database for data comparison",
 					"error", err,
@@ -801,9 +795,7 @@ func DraftsDocumentHandler(
 			// Get all reviews for the document.
 			var reviews models.DocumentReviews
 			if err := reviews.Find(db, models.DocumentReview{
-				Document: models.Document{
-					FileID: docId,
-				},
+				Document: models.NewDocumentByFileID(docId, false),
 			}); err != nil {
 				l.Error("error getting all reviews for document for data comparison",
 					"error", err,
@@ -865,9 +857,7 @@ func DraftsDocumentHandler(
 			}
 
 			// Delete document in the database.
-			d := models.Document{
-				FileID: docId,
-			}
+			d := models.NewDocumentByFileID(docId, false)
 			if err := d.Delete(db); err != nil {
 				l.Error("error deleting document in database",
 					"error", err,
@@ -1335,9 +1325,7 @@ func DraftsDocumentHandler(
 				return
 			}
 			// Get document from database.
-			dbDoc := models.Document{
-				FileID: docId,
-			}
+			dbDoc := models.NewDocumentByFileID(docId, false)
 			if err := dbDoc.Get(db); err != nil {
 				l.Error("error getting document from database for data comparison",
 					"error", err,
@@ -1350,9 +1338,7 @@ func DraftsDocumentHandler(
 			// Get all reviews for the document.
 			var reviews models.DocumentReviews
 			if err := reviews.Find(db, models.DocumentReview{
-				Document: models.Document{
-					FileID: docId,
-				},
+				Document: models.NewDocumentByFileID(docId, false),
 			}); err != nil {
 				l.Error("error getting all reviews for document for data comparison",
 					"error", err,

@@ -28,9 +28,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 		}
 
 		// Get document from database.
-		model := models.Document{
-			FileID: docID,
-		}
+		model := srv.NewDocumentByFileID(docID)
 		if err := model.Get(srv.DB); err != nil {
 			srv.Logger.Error("error getting document from database",
 				"error", err,
@@ -46,9 +44,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 		// Get reviews for the document.
 		var reviews models.DocumentReviews
 		if err := reviews.Find(srv.DB, models.DocumentReview{
-			Document: models.Document{
-				FileID: docID,
-			},
+			Document: srv.NewDocumentByFileID(docID),
 		}); err != nil {
 			srv.Logger.Error("error getting reviews for document",
 				"error", err,
@@ -62,9 +58,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 		// Get group reviews for the document.
 		var groupReviews models.DocumentGroupReviews
 		if err := groupReviews.Find(srv.DB, models.DocumentGroupReview{
-			Document: models.Document{
-				FileID: docID,
-			},
+			Document: srv.NewDocumentByFileID(docID),
 		}); err != nil {
 			srv.Logger.Error("error getting group reviews for document",
 				"error", err,
@@ -232,9 +226,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 
 			// Create file revision in the database.
 			fr := models.DocumentFileRevision{
-				Document: models.Document{
-					FileID: docID,
-				},
+				Document: srv.NewDocumentByFileID(docID),
 				FileRevisionID: revisionID,
 				Name:           revisionName,
 			}
@@ -251,7 +243,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 			}
 
 			// Update document reviews in the database.
-			if err := updateDocumentReviewsInDatabase(*doc, srv.DB); err != nil {
+			if err := updateDocumentReviewsInDatabase(*doc, srv.DB, srv.IsSharePoint()); err != nil {
 				srv.Logger.Error("error updating document reviews in the database",
 					"error", err,
 					"doc_id", docID,
@@ -338,9 +330,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 					return
 				}
 				// Get document from database.
-				dbDoc := models.Document{
-					FileID: docID,
-				}
+				dbDoc := srv.NewDocumentByFileID(docID)
 				if err := dbDoc.Get(srv.DB); err != nil {
 					srv.Logger.Error(
 						"error getting document from database for data comparison",
@@ -354,9 +344,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 				// Get all reviews for the document.
 				var reviews models.DocumentReviews
 				if err := reviews.Find(srv.DB, models.DocumentReview{
-					Document: models.Document{
-						FileID: docID,
-					},
+					Document: srv.NewDocumentByFileID(docID),
 				}); err != nil {
 					srv.Logger.Error(
 						"error getting all reviews for document for data comparison",
@@ -549,9 +537,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 
 			// Create file revision in the database.
 			fr := models.DocumentFileRevision{
-				Document: models.Document{
-					FileID: docID,
-				},
+				Document: srv.NewDocumentByFileID(docID),
 				FileRevisionID: revisionID,
 				Name:           revisionName,
 			}
@@ -568,7 +554,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 			}
 
 			// Update document reviews in the database.
-			if err := updateDocumentReviewsInDatabase(*doc, srv.DB); err != nil {
+			if err := updateDocumentReviewsInDatabase(*doc, srv.DB, srv.IsSharePoint()); err != nil {
 				srv.Logger.Error("error updating document reviews in the database",
 					"error", err,
 					"doc_id", docID,
@@ -793,9 +779,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 					return
 				}
 				// Get document from database.
-				dbDoc := models.Document{
-					FileID: docID,
-				}
+				dbDoc := srv.NewDocumentByFileID(docID)
 				if err := dbDoc.Get(srv.DB); err != nil {
 					srv.Logger.Error(
 						"error getting document from database for data comparison",
@@ -809,9 +793,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 				// Get all reviews for the document.
 				var reviews models.DocumentReviews
 				if err := reviews.Find(srv.DB, models.DocumentReview{
-					Document: models.Document{
-						FileID: docID,
-					},
+					Document: srv.NewDocumentByFileID(docID),
 				}); err != nil {
 					srv.Logger.Error(
 						"error getting all reviews for document for data comparison",
@@ -844,7 +826,7 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 
 // updateDocumentReviewsInDatabase takes a document and updates the associated
 // document reviews in the database.
-func updateDocumentReviewsInDatabase(doc document.Document, db *gorm.DB) error {
+func updateDocumentReviewsInDatabase(doc document.Document, db *gorm.DB, useSharePoint bool) error {
 	var docReviews []models.DocumentReview
 	for _, a := range doc.Approvers {
 		u := models.User{
@@ -852,17 +834,13 @@ func updateDocumentReviewsInDatabase(doc document.Document, db *gorm.DB) error {
 		}
 		if helpers.StringSliceContains(doc.ApprovedBy, a) {
 			docReviews = append(docReviews, models.DocumentReview{
-				Document: models.Document{
-					FileID: doc.ObjectID,
-				},
+				Document: models.NewDocumentByFileID(doc.ObjectID, useSharePoint),
 				User:   u,
 				Status: models.ApprovedDocumentReviewStatus,
 			})
 		} else if helpers.StringSliceContains(doc.ChangesRequestedBy, a) {
 			docReviews = append(docReviews, models.DocumentReview{
-				Document: models.Document{
-					FileID: doc.ObjectID,
-				},
+				Document: models.NewDocumentByFileID(doc.ObjectID, useSharePoint),
 				User:   u,
 				Status: models.ChangesRequestedDocumentReviewStatus,
 			})

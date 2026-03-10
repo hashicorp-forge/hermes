@@ -245,7 +245,7 @@ func migrateIndex(
 
 		// Convert document to a document database model.
 		dbDoc, reviews, err := doc.ToDatabaseModels(
-			m.Config.DocumentTypes.DocumentType, m.Config.Products.Product)
+			m.Config.DocumentTypes.DocumentType, m.Config.Products.Product, false)
 		if err != nil {
 			m.Logger.Error("error converting document to database models",
 				"error", err,
@@ -257,7 +257,7 @@ func migrateIndex(
 
 		// Check if document already exists in the database.
 		existingDoc := models.Document{
-			FileID: dbDoc.FileID,
+			GoogleFileID: dbDoc.GoogleFileID,
 		}
 		err = existingDoc.Get(m.Database)
 		if err != nil {
@@ -283,7 +283,7 @@ func migrateIndex(
 						m.Logger.Error("error creating document",
 							"error", err,
 						)
-						*m.DocsWithErrors = append(*m.DocsWithErrors, dbDoc.FileID)
+						*m.DocsWithErrors = append(*m.DocsWithErrors, dbDoc.GetFileIdentifier())
 						continue
 					}
 
@@ -294,7 +294,7 @@ func migrateIndex(
 				} else {
 					*m.DocsCreated += 1
 
-					logArgs := []any{"document_id", dbDoc.FileID}
+					logArgs := []any{"document_id", dbDoc.GetFileIdentifier()}
 					// Log additional document information if the verbose flag is true.
 					if m.Verbose {
 						if err == nil {
@@ -317,7 +317,7 @@ func migrateIndex(
 					"error", err,
 					"document_id", doc.ObjectID,
 				)
-				*m.DocsWithErrors = append(*m.DocsWithErrors, dbDoc.FileID)
+				*m.DocsWithErrors = append(*m.DocsWithErrors, dbDoc.GetFileIdentifier())
 				continue
 			}
 		} else {
@@ -337,7 +337,7 @@ func migrateIndex(
 			var cmpReviews models.DocumentReviews
 			if err := cmpReviews.Find(m.Database, models.DocumentReview{
 				Document: models.Document{
-					FileID: doc.ObjectID,
+					GoogleFileID: doc.ObjectID,
 				},
 			}); err != nil {
 				m.Logger.Error(
@@ -345,7 +345,7 @@ func migrateIndex(
 					"error", err,
 					"document_id", doc.ObjectID,
 				)
-				*m.DocsWithErrors = append(*m.DocsWithErrors, dbDoc.FileID)
+				*m.DocsWithErrors = append(*m.DocsWithErrors, dbDoc.GetFileIdentifier())
 				continue
 			}
 
@@ -367,7 +367,7 @@ func migrateIndex(
 						// Find all file revisions for the document.
 						var dbFileRevs models.DocumentFileRevisions
 						if err := dbFileRevs.Find(
-							tx, models.Document{FileID: doc.ObjectID},
+							tx, models.Document{GoogleFileID: doc.ObjectID},
 						); err != nil {
 							return fmt.Errorf("error finding all file revisions: %w", err)
 						}
@@ -384,7 +384,7 @@ func migrateIndex(
 							if !frExists {
 								fr := models.DocumentFileRevision{
 									Document: models.Document{
-										FileID: doc.ObjectID,
+										GoogleFileID: doc.ObjectID,
 									},
 									FileRevisionID: revID,
 									Name:           revName,
@@ -408,7 +408,7 @@ func migrateIndex(
 							"error", err,
 							"document_id", doc.ObjectID,
 						)
-						*m.DocsWithErrors = append(*m.DocsWithErrors, dbDoc.FileID)
+						*m.DocsWithErrors = append(*m.DocsWithErrors, dbDoc.GetFileIdentifier())
 						continue
 					}
 

@@ -107,6 +107,16 @@ const (
 	ObsoleteDocumentStatus
 )
 
+// NewDocumentByFileID creates a Document with the correct file-ID field
+// populated based on whether SharePoint is in use.
+// When useSharePoint is true it sets FileID; otherwise it sets GoogleFileID.
+func NewDocumentByFileID(fileID string, useSharePoint bool) Document {
+	if useSharePoint {
+		return Document{FileID: fileID}
+	}
+	return Document{GoogleFileID: fileID}
+}
+
 // GetFileIdentifier returns the active file ID regardless of which provider
 // is active. SharePoint docs use FileID; Google docs use GoogleFileID.
 func (d *Document) GetFileIdentifier() string {
