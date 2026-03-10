@@ -1093,7 +1093,19 @@ func DocumentHandler(srv server.Server) http.Handler {
 				}
 			}
 
-			// Note: Header replacement for sharepoint documents will be handled by Hermes Add-In for Microsoft Word
+			// Replace the doc header (Google-only; SharePoint headers
+			// are managed by the Hermes Add-In for Word).
+			if !srv.IsSharePoint() {
+				if err := doc.ReplaceHeader(
+					srv.Config.BaseURL, false, srv.GWService,
+				); err != nil {
+					srv.Logger.Error("error replacing document header",
+						"error", err, "doc_id", docID)
+					http.Error(w, "Error patching document",
+						http.StatusInternalServerError)
+					return
+				}
+			}
 
 			// Get document record from database so we can modify it for updating.
 			model := srv.NewDocumentByFileID(docID)

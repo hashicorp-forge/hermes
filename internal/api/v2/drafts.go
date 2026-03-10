@@ -1783,7 +1783,23 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				return
 			}
 
-			// Note: For all PATCH requests, the document header updates are handled by Microsoft Word Add-In for Hermes
+			// Replace the doc header (Google-only; SharePoint headers
+			// are managed by the Hermes Add-In for Word).
+			if !srv.IsSharePoint() {
+				if err := doc.ReplaceHeader(
+					srv.Config.BaseURL, true, srv.GWService,
+				); err != nil {
+					srv.Logger.Error("error replacing draft doc header",
+						"error", err,
+						"method", r.Method,
+						"path", r.URL.Path,
+						"doc_id", docID,
+					)
+					http.Error(w, "Error replacing header of document draft",
+						http.StatusInternalServerError)
+					return
+				}
+			}
 
 			w.WriteHeader(http.StatusOK)
 

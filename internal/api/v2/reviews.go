@@ -335,6 +335,44 @@ func processDocumentForReview(srv *server.Server, r *http.Request, tx *gorm.DB, 
 		nextDocNum)
 	doc.Status = "In-Review"
 
+	// Replace the doc header (Google-only; SharePoint headers
+	// are managed by the Hermes Add-In for Word).
+	if !srv.IsSharePoint() {
+		err = doc.ReplaceHeader(srv.Config.BaseURL, false, srv.GWService)
+		*revertFuncs = append(*revertFuncs, func() error {
+			// Change back document number to "ABC-???" and status to "WIP".
+			doc.DocNumber = fmt.Sprintf("%s-???", product.Abbreviation)
+			doc.Status = "WIP"
+
+			if err = doc.ReplaceHeader(
+				srv.Config.BaseURL, false, srv.GWService,
+			); err != nil {
+				return fmt.Errorf("error replacing doc header: %w", err)
+			}
+
+			return nil
+		})
+		if err != nil {
+			srv.Logger.Error("error replacing doc header",
+				"error", err, "doc_id", docID)
+			httpErr := structs.NewHTTPError(
+				http.StatusInternalServerError, "Error creating review", err)
+			if err := revertReviewsPost(*revertFuncs); err != nil {
+				srv.Logger.Error("error reverting review creation",
+					"error", err,
+					"doc_id", docID,
+					"method", r.Method,
+					"path", r.URL.Path)
+			}
+			return time.Time{}, time.Time{}, 0, &httpErr
+		}
+		srv.Logger.Info("doc header replaced",
+			"doc_id", docID,
+			"method", r.Method,
+			"path", r.URL.Path,
+		)
+	}
+
 	// Grant read access to configured groups asynchronously
 	go func() {
 		if srv.SharePoint != nil {

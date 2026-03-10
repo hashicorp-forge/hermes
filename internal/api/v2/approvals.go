@@ -277,7 +277,23 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 				return
 			}
 
-			// Note: The document headers are managed by Hermes Add-In for Word
+			// Replace the doc header (Google-only; SharePoint headers
+			// are managed by the Hermes Add-In for Word).
+			if !srv.IsSharePoint() {
+				if err := doc.ReplaceHeader(
+					srv.Config.BaseURL, false, srv.GWService,
+				); err != nil {
+					srv.Logger.Error("error replacing doc header",
+						"error", err,
+						"doc_id", docID,
+						"method", r.Method,
+						"path", r.URL.Path,
+					)
+					http.Error(w, "Error updating document status",
+						http.StatusInternalServerError)
+					return
+				}
+			}
 
 			// Write response.
 			w.WriteHeader(http.StatusOK)
@@ -609,7 +625,22 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 				return
 			}
 
-			// Note: Document headers are managed by Hermes Add-In for Word.
+			// Replace the doc header (Google-only; SharePoint headers
+			// are managed by the Hermes Add-In for Word).
+			if !srv.IsSharePoint() {
+				err = doc.ReplaceHeader(srv.Config.BaseURL, false, srv.GWService)
+				if err != nil {
+					srv.Logger.Error("error replacing doc header",
+						"error", err,
+						"doc_id", docID,
+						"method", r.Method,
+						"path", r.URL.Path,
+					)
+					http.Error(w, "Error approving document",
+						http.StatusInternalServerError)
+					return
+				}
+			}
 
 			// Write response.
 			w.WriteHeader(http.StatusOK)
