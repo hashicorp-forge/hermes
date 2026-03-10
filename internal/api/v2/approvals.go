@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp-forge/hermes/internal/helpers"
 	"github.com/hashicorp-forge/hermes/internal/server"
 	"github.com/hashicorp-forge/hermes/pkg/document"
+	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp-forge/hermes/pkg/models"
 	"gorm.io/gorm"
 )
@@ -161,6 +162,24 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 					"user_email", userEmail)
 				http.Error(w, "Document already has changes requested by user",
 					http.StatusBadRequest)
+				return
+			}
+
+			// Check if document is locked.
+			locked, err := hcd.IsLocked(docID, srv.DB, srv.GWService, srv.Logger)
+			if err != nil {
+				srv.Logger.Error("error checking document locked status",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error getting document status", http.StatusNotFound)
+				return
+			}
+			// Don't continue if document is locked.
+			if locked {
+				http.Error(w, "Document is locked", http.StatusLocked)
 				return
 			}
 
@@ -451,6 +470,24 @@ func ApprovalsHandler(srv server.Server) http.Handler {
 				http.Error(w,
 					"Not authorized as a document approver",
 					http.StatusUnauthorized)
+				return
+			}
+
+			// Check if document is locked.
+			locked, err := hcd.IsLocked(docID, srv.DB, srv.GWService, srv.Logger)
+			if err != nil {
+				srv.Logger.Error("error checking document locked status",
+					"error", err,
+					"path", r.URL.Path,
+					"method", r.Method,
+					"doc_id", docID,
+				)
+				http.Error(w, "Error getting document status", http.StatusNotFound)
+				return
+			}
+			// Don't continue if document is locked.
+			if locked {
+				http.Error(w, "Document is locked", http.StatusLocked)
 				return
 			}
 
