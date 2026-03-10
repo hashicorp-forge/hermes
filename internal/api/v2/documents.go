@@ -44,19 +44,9 @@ const (
 	archivedDocumentSubcollectionRequestType
 )
 
-var publishReaderGroups = []string{
-	"DEPT-AutomationPillar@ibm.onmicrosoft.com",
-	//"DEPT-AutomationPillarILM@ibm.onmicrosoft.com",
-	//"DEPT-AutomationPillarSLM@ibm.onmicrosoft.com",
-	//"DEPT-AutomationPillarObserv@ibm.onmicrosoft.com",
-}
+var publishReaderGroups = []string{}
 
-var publishGroupDisplayNames = map[string]string{
-	"DEPT-AutomationPillar@ibm.onmicrosoft.com": "DEPT-Automation Pillar Members",
-	//"DEPT-AutomationPillarILM@ibm.onmicrosoft.com":    "DEPT-Automation Pillar ILM Members",
-	//"DEPT-AutomationPillarSLM@ibm.onmicrosoft.com":    "DEPT-Automation Pillar SLM Members",
-	//"DEPT-AutomationPillarObserv@ibm.onmicrosoft.com": "DEPT-Automation Pillar Observ Members",
-}
+var publishGroupDisplayNames = map[string]string{}
 
 func DocumentHandler(srv server.Server) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

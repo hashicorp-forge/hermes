@@ -19,8 +19,13 @@ type DocumentRelatedResourceHermesDocument struct {
 func (rr *DocumentRelatedResourceHermesDocument) Create(db *gorm.DB) error {
 	// Preload Document.
 	if rr.DocumentID == 0 {
-		if err := db.
-			Where(Document{FileID: rr.Document.FileID}).
+		query := db
+		if rr.Document.GoogleFileID != "" {
+			query = query.Where("google_file_id = ?", rr.Document.GoogleFileID)
+		} else {
+			query = query.Where("file_id = ?", rr.Document.FileID)
+		}
+		if err := query.
 			First(&rr.Document).
 			Error; err != nil {
 			return fmt.Errorf("error preloading RelatedResource.Document: %w", err)
@@ -30,8 +35,13 @@ func (rr *DocumentRelatedResourceHermesDocument) Create(db *gorm.DB) error {
 
 	// Preload RelatedResource.Document.
 	if rr.RelatedResource.DocumentID == 0 {
-		if err := db.
-			Where(Document{FileID: rr.RelatedResource.Document.FileID}).
+		query := db
+		if rr.RelatedResource.Document.GoogleFileID != "" {
+			query = query.Where("google_file_id = ?", rr.RelatedResource.Document.GoogleFileID)
+		} else {
+			query = query.Where("file_id = ?", rr.RelatedResource.Document.FileID)
+		}
+		if err := query.
 			First(&rr.RelatedResource.Document).
 			Error; err != nil {
 			return fmt.Errorf("error preloading RelatedResource.Document: %w", err)

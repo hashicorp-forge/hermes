@@ -40,8 +40,13 @@ func (rr *ProjectRelatedResourceHermesDocument) Create(db *gorm.DB) error {
 
 	// Preload Document.
 	if rr.DocumentID == 0 {
-		if err := db.
-			Where(Document{FileID: rr.Document.FileID}).
+		query := db
+		if rr.Document.GoogleFileID != "" {
+			query = query.Where("google_file_id = ?", rr.Document.GoogleFileID)
+		} else {
+			query = query.Where("file_id = ?", rr.Document.FileID)
+		}
+		if err := query.
 			First(&rr.Document).
 			Error; err != nil {
 			return fmt.Errorf("error preloading RelatedResource.Document: %w", err)

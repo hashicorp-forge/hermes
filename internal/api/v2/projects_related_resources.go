@@ -109,7 +109,7 @@ func projectsResourceRelatedResourcesHandler(
 		}
 		// Add Hermes document related resources.
 		for _, hdrr := range hdrrs {
-			logArgs = append(logArgs, "document_id", hdrr.Document.FileID)
+			logArgs = append(logArgs, "document_id", hdrr.Document.GetFileIdentifier())
 			// Convert database model to a document. We don't need document review
 			// data for this endpoint.
 			doc, err := document.NewFromDatabaseModel(

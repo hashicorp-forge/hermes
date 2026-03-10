@@ -131,34 +131,39 @@ func DraftsHandler(srv server.Server) http.Handler {
 				req.ProductAbbreviation = "TODO"
 			}
 
-			// Create a filename based on product and title
+			// Create a filename based on product and title.
 			fileNameBase := fmt.Sprintf("%s-%s", req.ProductAbbreviation, req.Title)
 
-			// Sanitize the title for SharePoint file name (remove characters that SharePoint doesn't allow)
-			// SharePoint doesn't allow: # % & * : < > ? / \ { | } ~
-			sanitizedTitle := strings.NewReplacer(
-				"[", "(",
-				"]", ")",
-				"#", "-",
-				"%", "-",
-				"&", "and",
-				"*", "-",
-				":", "-",
-				"<", "-",
-				">", "-",
-				"?", "",
-				"/", "-",
-				"\\", "-",
-				"{", "(",
-				"|", "-",
-				"}", ")",
-				"~", "-",
-			).Replace(fileNameBase)
+			// Sanitize the filename for SharePoint (remove characters that
+			// SharePoint doesn't allow: # % & * : < > ? / \ { | } ~).
+			// Google Drive doesn't need this sanitization.
+			var sanitizedTitle string
+			if srv.SharePoint != nil {
+				sanitizedTitle = strings.NewReplacer(
+					"[", "(",
+					"]", ")",
+					"#", "-",
+					"%", "-",
+					"&", "and",
+					"*", "-",
+					":", "-",
+					"<", "-",
+					">", "-",
+					"?", "",
+					"/", "-",
+					"\\", "-",
+					"{", "(",
+					"|", "-",
+					"}", ")",
+					"~", "-",
+				).Replace(fileNameBase)
+				// Add .docx extension for SharePoint.
+				sanitizedTitle = fmt.Sprintf("%s.docx", sanitizedTitle)
+			} else {
+				sanitizedTitle = fileNameBase
+			}
 
-			// Add .docx extension explicitly
-			sanitizedTitle = fmt.Sprintf("%s.docx", sanitizedTitle)
-
-			// Log the filename we're going to create
+			// Log the filename we're going to create.
 			srv.Logger.Info("Creating document with filename",
 				"filename", sanitizedTitle,
 				"method", r.Method,

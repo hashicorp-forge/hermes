@@ -116,15 +116,16 @@ func documentsResourceRelatedResourcesHandler(
 		// Add Hermes document related resources.
 		for _, hdrr := range hdrrs {
 			// Get document object from Algolia.
+			targetDocID := hdrr.Document.GetFileIdentifier()
 			var algoObj map[string]any
-			err = algoRead.Docs.GetObject(hdrr.Document.FileID, &algoObj)
+			err = algoRead.Docs.GetObject(targetDocID, &algoObj)
 			if err != nil {
 				l.Error("error getting related resource document from Algolia",
 					"error", err,
 					"path", r.URL.Path,
 					"method", r.Method,
 					"doc_id", docID,
-					"target_doc_id", hdrr.Document.FileID,
+					"target_doc_id", targetDocID,
 				)
 				http.Error(w, "Error accessing document",
 					http.StatusInternalServerError)
@@ -147,7 +148,7 @@ func documentsResourceRelatedResourcesHandler(
 			resp.HermesDocuments = append(
 				resp.HermesDocuments,
 				hermesDocumentRelatedResourceGetResponse{
-					FileID:         hdrr.Document.FileID,
+					FileID:         targetDocID,
 					Title:          doc.Title,
 					DocumentType:   doc.DocType,
 					DocumentNumber: doc.DocNumber,
