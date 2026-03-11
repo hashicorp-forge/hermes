@@ -58,13 +58,12 @@ export default class SessionService extends EmberSimpleAuthSessionService {
   @tracked reauthFlashMessage: FlashObject | null = null;
 
   /**
-   * Whether the app is configured to use Oidc.
-   * Dictates reauthButton text and behavior.
-   * Determines whether we poll the back end for a 401
-   * while the reauthentication message is shown.
+   * Whether the app is configured to use OIDC/Okta (or SharePoint).
+   * When true, Google auth is not active and reauth is handled by page reload.
+   * When false, Google auth is active and reauth uses Torii.
    */
   get isUsingOidc(): boolean {
-    return this.configSvc.config.skip_microsoft_auth;
+    return this.configSvc.config.skip_google_auth;
   }
 
   /**
@@ -129,7 +128,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
     type: "warning" | "critical",
     onDestroy?: () => void,
   ) {
-    const buttonIcon = this.isUsingOidc ? "okta" : "microsoft"; //TODO: Update icon
+    const buttonIcon = this.isUsingOidc ? "okta" : "google";
 
     const buttonText = `Authenticate with ${capitalize(buttonIcon)}`;
 
@@ -157,7 +156,12 @@ export default class SessionService extends EmberSimpleAuthSessionService {
    */
   protected reauthenticate = dropTask(async () => {
     try {
-       window.location.reload();
+      if (this.isUsingOidc) {
+        // Reload to redirect to OIDC/Okta login.
+        window.location.reload();
+      } else {
+        await this.authenticate("authenticator:torii", "google-oauth2-bearer");
+      }
 
       this.reauthFlashMessage?.destroyMessage();
 
@@ -243,10 +247,7 @@ export default class SessionService extends EmberSimpleAuthSessionService {
 
   // Override the prohibitAuthentication method
   prohibitAuthentication(routeOrCallback: string | ((...args: unknown[]) => void)): boolean {
-    console.log("SessionService: Checking if authenticated with Microsoft or Google");
-
     if (this.isAuthenticated()) {
-      console.log("SessionService: User is authenticated, redirecting to", routeOrCallback);
       if (typeof routeOrCallback === "string") {
         this.router.replaceWith(routeOrCallback);
       } else if (typeof routeOrCallback === "function") {
@@ -254,7 +255,6 @@ export default class SessionService extends EmberSimpleAuthSessionService {
       }
       return true;
     } else {
-      console.log("SessionService: User is not authenticated");
       return false;
     }
   }

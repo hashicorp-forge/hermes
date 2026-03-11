@@ -26,6 +26,7 @@ declare module 'hermes/config/environment' {
         docFolders: string;
     };
     shortLinkBaseURL: string;
+    skipGoogleAuth: boolean;
     skipMicrosoftAuth: boolean;
     groupApprovals: boolean;
     showEmberAnimatedTools: boolean;

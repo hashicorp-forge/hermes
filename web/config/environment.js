@@ -58,6 +58,7 @@ module.exports = function (environment) {
       docFolders: getEnv("GOOGLE_DOCFOLDERS", "").split(","),
     },
 
+    skipGoogleAuth: getEnv("SKIP_GOOGLE_AUTH"),
     skipMicrosoftAuth: getEnv("SKIP_MICROSOFT_AUTH"),
 
     shortLinkBaseURL: getEnv("SHORT_LINK_BASE_URL"),

@@ -73,12 +73,9 @@ export default class AlgoliaService extends Service {
       window.location.hostname === "127.0.0.1" ||
       window.location.hostname === "localhost"
     ) {
-      console.log(
-        "Running locally as production environment: Algolia client configured to proxy requests through the Hermes API.",
-      );
       return algoliaSearch("", "", {
         headers: {
-          "Hermes-Access-Token":
+          "Hermes-Google-Access-Token":
             this.session.data.authenticated.access_token,
         },
         hosts: [
@@ -100,7 +97,7 @@ export default class AlgoliaService extends Service {
      */
     return algoliaSearch("", "", {
       headers: {
-        "Hermes-Access-Token":
+        "Hermes-Google-Access-Token":
           this.session.data.authenticated.access_token,
       },
       hosts: [

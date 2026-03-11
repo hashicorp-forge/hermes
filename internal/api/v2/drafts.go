@@ -825,7 +825,10 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 
 		switch r.Method {
 		case "HEAD":
-			var editURL string
+			// HEAD: respond with 200, and for SharePoint documents expose
+			// the direct edit URL header so the frontend can redirect.
+			// For Google documents, return 200 without the header so the
+			// frontend falls through to normal in-app document viewing.
 			if srv.SharePoint != nil {
 				fileDetails, err := srv.SharePoint.GetFileDetails(docID)
 				if err != nil {
@@ -838,22 +841,9 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 					http.Error(w, "Error requesting document draft", http.StatusInternalServerError)
 					return
 				}
-				editURL = fileDetails.WebURL
-			} else {
-				file, err := srv.GWService.GetFile(docID)
-				if err != nil {
-					srv.Logger.Error("error getting draft file (HEAD)",
-						"error", err,
-						"path", r.URL.Path,
-						"method", r.Method,
-						"doc_id", docID,
-					)
-					http.Error(w, "Error requesting document draft", http.StatusInternalServerError)
-					return
-				}
-				editURL = file.WebViewLink
+				w.Header().Set("X-Direct-Edit-URL", fileDetails.WebURL)
 			}
-			w.Header().Set("X-Direct-Edit-URL", editURL)
+
 			w.Header().Set("Cache-Control", "private, no-store")
 			w.WriteHeader(http.StatusOK)
 

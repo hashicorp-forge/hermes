@@ -214,52 +214,52 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
       // Wait for document to be available.
       await timeout(AWAIT_DOC_DELAY);
 
-      // Initialize retry counter and max attempts
-      let retryCount = 0;
-      const maxRetries = 8;
-      const retryInterval = 3000; // 3 seconds
-      let documentData = null;
+      // SharePoint mode: poll for the directEditUrl so we can redirect
+      // to the SharePoint editor. Google mode skips this and goes
+      // straight to the in-app document view.
+      if (this.configSvc.config.skip_google_auth) {
+        let retryCount = 0;
+        const maxRetries = 8;
+        const retryInterval = 3000; // 3 seconds
+        let documentData = null;
 
-      // Retry fetching document details until we get directEditUrl or max retries
-      while (retryCount < maxRetries) {
-        try {
-          console.log(`Attempt ${retryCount + 1}/${maxRetries} to fetch document details for ID: ${doc.id}`);
-          
-          // Fetch the complete document data to get directEditUrl
-          documentData = await this.fetchSvc
-            .fetch(`/api/${this.configSvc.config.api_version}/drafts/${doc.id}`)
-            .then((response) => response?.json());
-                    
-          // If we have directEditURL or directEditUrl, break out of the loop
-          if (documentData && (documentData.directEditURL || documentData.directEditUrl)) {
-            break;
+        while (retryCount < maxRetries) {
+          try {
+            documentData = await this.fetchSvc
+              .fetch(
+                `/api/${this.configSvc.config.api_version}/drafts/${doc.id}`,
+              )
+              .then((response) => response?.json());
+
+            if (
+              documentData &&
+              (documentData.directEditURL || documentData.directEditUrl)
+            ) {
+              break;
+            }
+
+            retryCount++;
+            if (retryCount < maxRetries) {
+              await timeout(retryInterval);
+            }
+          } catch (error) {
+            retryCount++;
+            if (retryCount < maxRetries) {
+              await timeout(retryInterval);
+            }
           }
-          
-          // If no directEditUrl, wait and retry
-          retryCount++;
-          if (retryCount < maxRetries) {
-            console.log(`No directEditUrl found, waiting ${retryInterval/1000}s before retry...`);
-            await timeout(retryInterval);
-          }
-        } catch (error) {
-          console.error(`Error fetching document details (attempt ${retryCount + 1}):`, error);
-          retryCount++;
-          if (retryCount < maxRetries) {
-            await timeout(retryInterval);
-          }
+        }
+
+        const editUrl =
+          documentData &&
+          (documentData.directEditURL || documentData.directEditUrl);
+        if (editUrl) {
+          window.location.replace(editUrl);
+          return;
         }
       }
 
-      // Check if directEditURL or directEditUrl exists and redirect to it
-      const editUrl = documentData && (documentData.directEditURL || documentData.directEditUrl);
-      if (editUrl) {
-        window.location.replace(editUrl);
-        return;
-      } else {
-        console.log('Max retries reached or no direct edit URL found, falling back to default route');
-      }
-
-      // Fallback to the original route if directEditUrl is not available
+      // Navigate to the in-app document view (Google mode, or SharePoint fallback).
       this.router
         .transitionTo("authenticated.document", doc.id, {
           queryParams: { draft: true },

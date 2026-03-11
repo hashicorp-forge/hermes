@@ -58,9 +58,6 @@ export default class DocumentIndexComponent extends Component<DocumentIndexCompo
     if ("FileID" in doc && doc.FileID) {
       return doc.FileID;
     }
-    if ("FileID" in doc && doc.FileID) {
-      return doc.FileID;
-    }
     return doc.objectID || '';
   }
 
@@ -70,17 +67,13 @@ export default class DocumentIndexComponent extends Component<DocumentIndexCompo
    */
   get sharepointDirectUrl(): string {
     const doc = this.args.document as any;
-    // Log document keys for debugging
-    console.log('Document object keys:', Object.keys(doc));
-    
+
     // Check for directEditURL first (note the uppercase URL - matches the backend naming)
     if ("directEditURL" in doc && doc.directEditURL) {
-      console.log('Using directEditURL:', doc.directEditURL);
       return doc.directEditURL;
     }
-    
+
     // Fall back to webUrl if directEditURL is not available
-    console.log('directEditURL not found, using webUrl:', doc.webUrl);
     return ("webUrl" in doc && doc.webUrl) ? doc.webUrl : '';
   }
 }

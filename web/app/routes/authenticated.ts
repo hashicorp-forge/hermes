@@ -23,29 +23,35 @@ export default class AuthenticatedRoute extends Route {
       );
     }
 
-    if (!this.configSvc.config.skip_microsoft_auth) {
-      // ESA 7.x - requireAuthentication works correctly
+    /**
+     * Require frontend-managed authentication (Google or Microsoft) if
+     * applicable. When both skip_google_auth AND skip_microsoft_auth are
+     * true, external auth (ALB/OIDC) handles authentication at the
+     * infrastructure level and ESA session checks are not needed.
+     */
+    if (
+      !this.configSvc.config.skip_google_auth ||
+      !this.configSvc.config.skip_microsoft_auth
+    ) {
       this.session.requireAuthentication(transition, "authenticate");
     }
   }
 
   async afterModel() {
-    try {
-      const loadInfoPromise = this.authenticatedUser.loadInfo.perform();
+    /**
+     * Load user info and product areas in parallel.
+     */
+    const loadInfoPromise = this.authenticatedUser.loadInfo.perform();
+    const loadProductAreasPromise = this.productAreas.fetch.perform();
+    await Promise.all([loadInfoPromise, loadProductAreasPromise]);
 
-      const loadProductAreasPromise = this.productAreas.fetch.perform();
-
-      await Promise.all([loadInfoPromise, loadProductAreasPromise]);
-
-      void this.session.pollForExpiredAuth.perform();
-
-      // Check if we're in an Office Dialog and notify parent add-in
-      this.notifyOfficeDialogIfPresent();
-    } catch (error) {
-      throw error;
-    }
-
+    /**
+     * Kick off the task to poll for expired auth.
+     */
     void this.session.pollForExpiredAuth.perform();
+
+    // Check if we're in an Office Dialog and notify parent add-in.
+    this.notifyOfficeDialogIfPresent();
   }
 
   /**

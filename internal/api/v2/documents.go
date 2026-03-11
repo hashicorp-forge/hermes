@@ -163,9 +163,18 @@ func DocumentHandler(srv server.Server) http.Handler {
 
 		switch r.Method {
 		case "HEAD":
-			// HEAD: respond with 200 and expose edit URL header.
+			// HEAD: respond with 200, and for SharePoint documents expose
+			// the direct edit URL header so the frontend can redirect.
+			// For Google documents, return 200 without the header so the
+			// frontend falls through to normal in-app document viewing.
 			now := time.Now()
-			var editURL string
+
+			// Drafts are not accessible via documents API (mirror GET behavior)
+			if doc.AppCreated && doc.Status == "WIP" {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+
 			if srv.SharePoint != nil {
 				fileDetails, err := srv.SharePoint.GetFileDetails(docID)
 				if err != nil {
@@ -178,27 +187,9 @@ func DocumentHandler(srv server.Server) http.Handler {
 					http.Error(w, "Error requesting document", http.StatusInternalServerError)
 					return
 				}
-				editURL = fileDetails.WebURL
-			} else {
-				file, err := srv.GWService.GetFile(docID)
-				if err != nil {
-					srv.Logger.Error("error getting document file (HEAD)",
-						"error", err,
-						"path", r.URL.Path,
-						"method", r.Method,
-						"doc_id", docID,
-					)
-					http.Error(w, "Error requesting document", http.StatusInternalServerError)
-					return
-				}
-				editURL = file.WebViewLink
+				w.Header().Set("X-Direct-Edit-URL", fileDetails.WebURL)
 			}
-			// Drafts are not accessible via documents API (mirror GET behavior)
-			if doc.AppCreated && doc.Status == "WIP" {
-				w.WriteHeader(http.StatusNotFound)
-				return
-			}
-			w.Header().Set("X-Direct-Edit-URL", editURL)
+
 			w.Header().Set("Cache-Control", "private, no-store")
 			w.WriteHeader(http.StatusOK)
 			if r.Header.Get("Add-To-Recently-Viewed") != "" {

@@ -20,6 +20,7 @@ export default class ConfigService extends Service {
     feature_flags: config.featureFlags,
     google_doc_folders: config.google.docFolders ?? "",
     short_link_base_url: config.shortLinkBaseURL,
+    skip_google_auth: config.skipGoogleAuth,
     skip_microsoft_auth: config.skipMicrosoftAuth,
     google_analytics_tag_id: undefined,
     jira_url: config.jiraURL,

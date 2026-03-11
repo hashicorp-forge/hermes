@@ -3,7 +3,6 @@ import { inject as service } from "@ember/service";
 import type ConfigService from "hermes/services/config";
 import type RouterService from "@ember/routing/router-service";
 import type SessionService from "hermes/services/session";
-import config from "hermes/config/environment";
 
 export default class AuthenticateRoute extends Route {
   @service("config") declare configSvc: ConfigService;
@@ -11,14 +10,18 @@ export default class AuthenticateRoute extends Route {
   @service declare session: SessionService;
 
   async beforeModel() {
-    console.log("AuthenticateRoute: Entering beforeModel");
-
     /**
-     * If we're skipping auth, redirect right away because this route
-     * isn't useful.
+     * If both Google and Microsoft auth are skipped, it means external auth
+     * (OIDC ALB, Okta) handles authentication — skip this route.
+     * - Google mode: skip_google=false → DON'T skip (show Google login)
+     * - OIDC/Okta mode: skip_google=true, skip_ms=true → SKIP
+     * - SharePoint+ALB: skip_google=true, skip_ms=true → SKIP
+     * - SharePoint-no-ALB: skip_google=true, skip_ms=false → DON'T skip (show MS login)
      */
-    if (this.configSvc.config.skip_microsoft_auth) {
-      console.log("AuthenticateRoute: Skipping authentication, redirecting to `/`");
+    if (
+      this.configSvc.config.skip_google_auth &&
+      this.configSvc.config.skip_microsoft_auth
+    ) {
       this.router.replaceWith("/");
       return;
     }
@@ -28,28 +31,25 @@ export default class AuthenticateRoute extends Route {
      * and if it is, transitions to the specified route.
      * If it's not, the route will render normally.
      */
-    console.log("AuthenticateRoute: Checking if session is already authenticated");
     this.session.prohibitAuthentication("/");
-    console.log("AuthenticateRoute: Session is not authenticated, rendering route");
   }
 
   async model() {
-    // Check for Microsoft token
+    // Check for Microsoft token (SharePoint mode without ALB).
     const microsoftToken = document.cookie
       .split("; ")
       .find((row) => row.startsWith("microsoft_token="))
       ?.split("=")[1];
 
     if (microsoftToken) {
-      console.log("AuthenticateRoute: Found Microsoft token, authenticating with Ember Simple Auth");
       try {
-        // Create a custom authenticator for Microsoft or adapt an existing one
-        await this.session.authenticate("authenticator:microsoft", { token: microsoftToken });
-        console.log("AuthenticateRoute: Successfully authenticated with Ember Simple Auth");
+        await this.session.authenticate("authenticator:microsoft", {
+          token: microsoftToken,
+        });
         this.router.replaceWith("/");
         return;
       } catch (error) {
-        console.error("AuthenticateRoute: Error authenticating with Ember Simple Auth", error);
+        console.error("Error authenticating with Microsoft token", error);
       }
     }
   }

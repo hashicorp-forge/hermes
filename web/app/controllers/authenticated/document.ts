@@ -1,10 +1,10 @@
 import Controller from "@ember/controller";
 import { tracked } from "@glimmer/tracking";
-import type AuthenticatedDocumentViewRoute from "hermes/routes/authenticated/document-view";
+import type AuthenticatedDocumentRoute from "hermes/routes/authenticated/document";
 import type { ModelFrom } from "hermes/types/route-models";
 
 export default class AuthenticatedDocumentController extends Controller {
-  declare model: ModelFrom<AuthenticatedDocumentViewRoute>;
+  declare model: ModelFrom<AuthenticatedDocumentRoute>;
 
   queryParams = ["draft"];
   draft = false;

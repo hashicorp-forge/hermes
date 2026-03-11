@@ -67,6 +67,7 @@ type ConfigResponse struct {
 	GroupApprovals           bool            `json:"group_approvals"`
 	JiraURL                  string          `json:"jira_url"`
 	ShortLinkBaseURL         string          `json:"short_link_base_url"`
+	SkipGoogleAuth           bool            `json:"skip_google_auth"`
 	SkipMicrosoftAuth        bool            `json:"skip_microsoft_auth"`
 	SupportLinkURL           string          `json:"support_link_url"`
 	ShortRevision            string          `json:"short_revision"`
@@ -108,7 +109,17 @@ func ConfigHandler(
 			shortLinkBaseURL = strings.TrimSuffix(cfg.BaseURL, "/") + "/l"
 		}
 
-		// Skip Microsoft auth if OIDC ALB is not disabled in the config.
+// Skip Google auth if any non-Google auth method is configured.
+				// When OIDC ALB, Okta, or SharePoint is configured, Google
+				// auth tokens are not needed (those systems handle auth).
+				skipGoogleAuth := false
+				if (cfg.OidcAlb != nil && !cfg.OidcAlb.Disabled) ||
+					(cfg.Okta != nil && !cfg.Okta.Disabled) ||
+					cfg.SharePoint != nil {
+					skipGoogleAuth = true
+				}
+
+				// Skip Microsoft auth if OIDC ALB is not disabled in the config.
 		skipMicrosoftAuth := false
 		if cfg.OidcAlb == nil || (cfg.OidcAlb != nil && !cfg.OidcAlb.Disabled) {
 			skipMicrosoftAuth = true
@@ -146,8 +157,7 @@ func ConfigHandler(
 			GoogleOAuth2HD:           cfg.GoogleWorkspace.OAuth2.HD,
 			GroupApprovals:           groupApprovals,
 			JiraURL:                  jiraURL,
-			ShortLinkBaseURL:         shortLinkBaseURL,
-			SkipMicrosoftAuth:        skipMicrosoftAuth,
+			ShortLinkBaseURL:         shortLinkBaseURL,					SkipGoogleAuth:           skipGoogleAuth,			SkipMicrosoftAuth:        skipMicrosoftAuth,
 			SupportLinkURL:           cfg.SupportLinkURL,
 			ShortRevision:            version.GetShortRevision(),
 			Version:                  version.GetVersion(),
