@@ -109,19 +109,21 @@ func ConfigHandler(
 			shortLinkBaseURL = strings.TrimSuffix(cfg.BaseURL, "/") + "/l"
 		}
 
-// Skip Google auth if any non-Google auth method is configured.
-				// When OIDC ALB, Okta, or SharePoint is configured, Google
-				// auth tokens are not needed (those systems handle auth).
-				skipGoogleAuth := false
-				if (cfg.OidcAlb != nil && !cfg.OidcAlb.Disabled) ||
-					(cfg.Okta != nil && !cfg.Okta.Disabled) ||
-					cfg.SharePoint != nil {
-					skipGoogleAuth = true
-				}
+		// Skip Google auth if any non-Google auth method is configured.
+		// When OIDC ALB, Okta, or SharePoint is configured, Google
+		// auth tokens are not needed (those systems handle auth).
+		skipGoogleAuth := false
+		if (cfg.OidcAlb != nil && !cfg.OidcAlb.Disabled) ||
+			(cfg.Okta != nil && !cfg.Okta.Disabled) ||
+			cfg.SharePoint != nil {
+			skipGoogleAuth = true
+		}
 
-				// Skip Microsoft auth if OIDC ALB is not disabled in the config.
+		// Skip Microsoft auth when:
+		// - OIDC ALB handles auth (ALB not disabled), OR
+		// - SharePoint is not configured (Google mode — no Microsoft auth needed)
 		skipMicrosoftAuth := false
-		if cfg.OidcAlb == nil || (cfg.OidcAlb != nil && !cfg.OidcAlb.Disabled) {
+		if (cfg.OidcAlb != nil && !cfg.OidcAlb.Disabled) || cfg.SharePoint == nil {
 			skipMicrosoftAuth = true
 		}
 
@@ -134,7 +136,8 @@ func ConfigHandler(
 
 		// Set GroupApprovals if enabled in the config.
 		groupApprovals := false
-		if cfg.SharePoint.GroupApprovals != nil &&
+		if cfg.SharePoint != nil &&
+			cfg.SharePoint.GroupApprovals != nil &&
 			cfg.SharePoint.GroupApprovals.Enabled {
 			groupApprovals = true
 		}
@@ -157,10 +160,10 @@ func ConfigHandler(
 			GoogleOAuth2HD:           cfg.GoogleWorkspace.OAuth2.HD,
 			GroupApprovals:           groupApprovals,
 			JiraURL:                  jiraURL,
-			ShortLinkBaseURL:         shortLinkBaseURL,					SkipGoogleAuth:           skipGoogleAuth,			SkipMicrosoftAuth:        skipMicrosoftAuth,
-			SupportLinkURL:           cfg.SupportLinkURL,
-			ShortRevision:            version.GetShortRevision(),
-			Version:                  version.GetVersion(),
+			ShortLinkBaseURL:         shortLinkBaseURL, SkipGoogleAuth: skipGoogleAuth, SkipMicrosoftAuth: skipMicrosoftAuth,
+			SupportLinkURL: cfg.SupportLinkURL,
+			ShortRevision:  version.GetShortRevision(),
+			Version:        version.GetVersion(),
 		}
 
 		w.Header().Set("Content-Type", "application/json")

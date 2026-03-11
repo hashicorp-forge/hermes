@@ -408,7 +408,6 @@ func NewConfig(filename string) (*Config, error) {
 		Indexer:         &Indexer{},
 		OidcAlb:         &oidcalb.Config{},
 		Server:          &Server{},
-		SharePoint:      &SharePointConfig{},
 	}
 	err := hclsimple.DecodeFile(filename, nil, c)
 	if err != nil {
