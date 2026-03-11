@@ -195,7 +195,7 @@ export default class AuthenticatedDocumentRoute extends Route {
         const typedError = err as Error;
         this.showErrorMessage(typedError);
 
-        if (transition.from && transition.from.name !== transition.to.name) {
+        if (transition.from && transition.to && transition.from.name !== transition.to.name) {
           this.router.transitionTo(transition.from.name);
         } else {
           this.router.transitionTo("authenticated.dashboard");
@@ -275,7 +275,7 @@ export default class AuthenticatedDocumentRoute extends Route {
 
     return {
       doc: typedDoc,
-      docType: this.docType(typedDoc),
+      docType: await this.docType(typedDoc),
       viewerIsGroupApprover,
     };
   }
