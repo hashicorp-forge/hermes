@@ -490,7 +490,7 @@ func (c *Command) Run(args []string) int {
 		{"/pub/", http.StripPrefix("/pub/", pub.Handler())},
 	}
 
-	// Web endpoints are conditionally authenticated based on if Oidc is enabled.
+	// Web endpoints are conditionally authenticated based on if auth is enabled.
 	webEndpoints1 := []endpoint{
 		{"/", web.Handler()},
 		{"/addin/", addin.AddinHandler(c.Log)},
@@ -501,10 +501,20 @@ func (c *Command) Run(args []string) int {
 		{"/l/", links.RedirectHandler(algoSearch, cfg.Algolia, c.Log)},
 	}
 
-	// If Oidc is enabled, add the web endpoints for the single page app as
-	// authenticated endpoints.
-	//if cfg.Oidc != nil && cfg.Oidc.Disabled {
-	authenticatedEndpoints = append(authenticatedEndpoints, webEndpoints1...)
+	// Determine if authentication is enabled (via OidcAlb or Okta).
+	authEnabled := (cfg.OidcAlb != nil && !cfg.OidcAlb.Disabled) ||
+		(cfg.Okta != nil && !cfg.Okta.Disabled)
+
+	if authEnabled {
+		// If auth is enabled, add the web SPA endpoints as authenticated
+		// endpoints.
+		authenticatedEndpoints = append(authenticatedEndpoints, webEndpoints1...)
+	} else {
+		// If auth is disabled, add the web SPA endpoints as unauthenticated
+		// endpoints so the application will load.
+		unauthenticatedEndpoints = append(unauthenticatedEndpoints, webEndpoints1...)
+	}
+	// Config and redirect endpoints are always unauthenticated.
 	unauthenticatedEndpoints = append(unauthenticatedEndpoints, webEndpoints2...)
 
 	// Register handlers.

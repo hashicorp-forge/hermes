@@ -26,11 +26,8 @@ type DocumentGroupReviews []DocumentGroupReview
 // BeforeSave is a hook to find or create associations before saving.
 func (d *DocumentGroupReview) BeforeSave(tx *gorm.DB) error {
 	// Validate required fields.
-	if err := validation.ValidateStruct(&d.Document,
-		validation.Field(
-			&d.Document.FileID, validation.Required),
-	); err != nil {
-		return err
+	if d.Document.hasNoFileID() {
+		return fmt.Errorf("document must have either GoogleFileID or FileID")
 	}
 	if err := validation.ValidateStruct(&d.Group,
 		validation.Field(
@@ -50,16 +47,8 @@ func (d *DocumentGroupReview) BeforeSave(tx *gorm.DB) error {
 // them to the receiver.
 func (d *DocumentGroupReviews) Find(db *gorm.DB, dr DocumentGroupReview) error {
 	// Validate required fields.
-	if err := validation.ValidateStruct(&dr.Document,
-		validation.Field(
-			&dr.Document.FileID,
-			validation.When(dr.Group.EmailAddress == "",
-				validation.Required.Error(
-					"at least a Document's FileID or Group's EmailAddress is required"),
-			),
-		),
-	); err != nil {
-		return err
+	if dr.Document.hasNoFileID() && dr.Group.EmailAddress == "" {
+		return fmt.Errorf("at least a Document's file ID or Group's EmailAddress is required")
 	}
 	if err := validation.ValidateStruct(&dr.Group,
 		validation.Field(
@@ -103,10 +92,8 @@ func (d *DocumentGroupReviews) Find(db *gorm.DB, dr DocumentGroupReview) error {
 // receiver.
 func (d *DocumentGroupReview) Get(db *gorm.DB) error {
 	// Validate required fields.
-	if err := validation.ValidateStruct(&d.Document,
-		validation.Field(&d.Document.FileID, validation.Required),
-	); err != nil {
-		return err
+	if d.Document.hasNoFileID() {
+		return fmt.Errorf("document must have either GoogleFileID or FileID")
 	}
 	if err := validation.ValidateStruct(&d.Group,
 		validation.Field(&d.Group.EmailAddress, validation.Required),

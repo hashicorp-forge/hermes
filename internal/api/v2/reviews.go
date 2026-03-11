@@ -14,11 +14,13 @@ import (
 	"github.com/hashicorp-forge/hermes/internal/server"
 	"github.com/hashicorp-forge/hermes/internal/structs"
 	"github.com/hashicorp-forge/hermes/pkg/document"
+	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
 	hcd "github.com/hashicorp-forge/hermes/pkg/hashicorpdocs"
 	"github.com/hashicorp-forge/hermes/pkg/links"
 	"github.com/hashicorp-forge/hermes/pkg/models"
 	"github.com/hashicorp-forge/hermes/pkg/sharepointhelper"
 	"github.com/hashicorp/go-multierror"
+	"google.golang.org/api/drive/v3"
 	"gorm.io/gorm"
 )
 
@@ -612,15 +614,38 @@ func completeReviewCreation(srv *server.Server, r *http.Request, tx *gorm.DB, do
 		)
 	}
 
-	// TODO: Implement shortcut creation in hierarchical folder structure.
-	// Currently disabled pending review of implementation.
-	// shortcutFileId, err := createShortcut(srv.Config, doc, fileDetails.WebURL, srv.SharePoint)
-	// if err != nil {
-	// 	srv.Logger.Error("error creating shortcut", ...)
-	// 	return &httpErr
-	// }
+	// Create shortcut in hierarchical folder structure.
+	if srv.SharePoint != nil {
+		// TODO: Implement SharePoint shortcut creation.
+		// SharePoint shortcut creation is disabled pending review of
+		// implementation and permission behavior.
+		// shortcutFileId, err := createSharePointShortcut(srv.Config, doc, fileDetails.WebURL, srv.SharePoint)
+	} else {
+		_, err := createGoogleShortcut(srv.Config, *doc, srv.GWService)
+		if err != nil {
+			srv.Logger.Error("error creating shortcut",
+				"error", err,
+				"doc_id", docID,
+				"method", r.Method,
+				"path", r.URL.Path)
+			httpErr := structs.NewHTTPError(http.StatusInternalServerError, "Error creating review", err)
 
-	// TODO: Check if the short link functionality is working as expected with addin
+			if err := revertReviewsPost(*revertFuncs); err != nil {
+				srv.Logger.Error("error reverting review creation",
+					"error", err,
+					"doc_id", docID,
+					"method", r.Method,
+					"path", r.URL.Path)
+			}
+			return &httpErr
+		}
+		srv.Logger.Info("doc shortcut created",
+			"doc_id", docID,
+			"method", r.Method,
+			"path", r.URL.Path,
+		)
+	}
+
 	// Create go-link.
 	// TODO: use database for this instead of Algolia.
 	err := links.SaveDocumentRedirectDetails(
@@ -735,9 +760,58 @@ func completeReviewCreation(srv *server.Server, r *http.Request, tx *gorm.DB, do
 	return nil
 }
 
-// createShortcut creates a shortcut (.url file) in the hierarchical folder structure
+// createGoogleShortcut creates a Google Drive shortcut in the hierarchical
+// folder structure ("Shortcuts Folder/RFC/MyProduct/") under docsFolder.
+func createGoogleShortcut(
+	cfg *config.Config,
+	doc document.Document,
+	s *gw.Service,
+) (shortcut *drive.File, retErr error) {
+	// Get folder for doc type.
+	docTypeFolder, err := s.GetSubfolder(
+		cfg.GoogleWorkspace.ShortcutsFolder, doc.DocType)
+	if err != nil {
+		return nil, fmt.Errorf("error getting doc type subfolder: %w", err)
+	}
+
+	// Doc type folder wasn't found, so create it.
+	if docTypeFolder == nil {
+		docTypeFolder, err = s.CreateFolder(
+			doc.DocType, cfg.GoogleWorkspace.ShortcutsFolder)
+		if err != nil {
+			return nil, fmt.Errorf("error creating doc type subfolder: %w", err)
+		}
+	}
+
+	// Get folder for doc type + product.
+	productFolder, err := s.GetSubfolder(docTypeFolder.Id, doc.Product)
+	if err != nil {
+		return nil, fmt.Errorf("error getting product subfolder: %w", err)
+	}
+
+	// Product folder wasn't found, so create it.
+	if productFolder == nil {
+		productFolder, err = s.CreateFolder(
+			doc.Product, docTypeFolder.Id)
+		if err != nil {
+			return nil, fmt.Errorf("error creating product subfolder: %w", err)
+		}
+	}
+
+	// Create shortcut.
+	if shortcut, err = s.CreateShortcut(
+		doc.ObjectID,
+		productFolder.Id); err != nil {
+
+		return nil, fmt.Errorf("error creating shortcut: %w", err)
+	}
+
+	return
+}
+
+// createSharePointShortcut creates a shortcut (.url file) in the hierarchical folder structure
 // ("Shortcuts Folder/RFC/MyProduct/") under docsFolder in SharePoint.
-func createShortcut(
+func createSharePointShortcut(
 	cfg *config.Config,
 	doc *document.Document, targetWebURL string,
 	s *sharepointhelper.Service,

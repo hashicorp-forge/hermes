@@ -16,8 +16,18 @@ type Document struct {
 
 	// GoogleFileID is the Google Drive file ID. Used when running in Google Workspace mode.
 	// For SharePoint deployments, this field is empty/null.
-	// DESIGN DECISION: We keep both GoogleFileID and FileID to avoid modifying any
-	// Google-path code. See README "Dual-Provider Architecture" section for rationale.
+	//
+	// DUAL-PROVIDER DESIGN:
+	//   We keep both GoogleFileID and FileID as separate columns so that:
+	//   1. Existing Google-path code continues to work without changes.
+	//   2. SharePoint-path code uses FileID without touching GoogleFileID.
+	//   3. Database rows from Google deployments retain their original IDs;
+	//      a migration script can populate FileID from GoogleFileID if a
+	//      deployment later switches providers.
+	//   4. Rollback is safe — the GoogleFileID column is never dropped.
+	//   Use GetFileIdentifier() to read the active ID regardless of provider.
+	//   Use NewDocumentByFileID(id, useSharePoint) to construct a Document
+	//   with the correct field populated.
 	GoogleFileID string `gorm:"index;default:null"`
 
 	// FileID is the SharePoint/generic file ID. Used when running in SharePoint mode.

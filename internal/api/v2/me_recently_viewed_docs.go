@@ -98,7 +98,7 @@ func MeRecentlyViewedDocsHandler(srv server.Server) http.Handler {
 				}
 
 				res = append(res, recentlyViewedDoc{
-					ID:         doc.FileID,
+					ID:         doc.GetFileIdentifier(),
 					IsDraft:    isDraft,
 					ViewedTime: d.ViewedAt.Unix(),
 				})

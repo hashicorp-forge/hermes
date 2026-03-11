@@ -815,7 +815,7 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 			return
 		case shareableDocumentSubcollectionRequestType:
 			draftsShareableHandler(w, r, docID, *doc, *srv.Config, srv.Logger,
-				srv.AlgoSearch, srv.DB, srv.IsSharePoint())
+				srv.AlgoSearch, srv.GWService, srv.DB, srv.IsSharePoint())
 			return
 		case archivedDocumentSubcollectionRequestType:
 			draftsArchivedHandler(w, r, docID, *doc, *srv.Config, srv.Logger,
@@ -1887,9 +1887,8 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				}
 			}
 
-			// Send email to new owner (Google-only; uses Google Workspace
-			// directory to look up names).
-			if !srv.IsSharePoint() && srv.Config.Email != nil && srv.Config.Email.Enabled &&
+			// Send email to new owner.
+			if srv.Config.Email != nil && srv.Config.Email.Enabled &&
 				req.Owners != nil {
 				// Get document URL.
 				docURL, err := getDocumentURL(srv.Config.BaseURL, docID)
@@ -1909,38 +1908,69 @@ func DraftsDocumentHandler(srv server.Server) http.Handler {
 				newOwner := email.User{
 					EmailAddress: doc.Owners[0],
 				}
-				ppl, err := srv.GWService.SearchPeople(
-					doc.Owners[0], "emailAddresses,names")
-				if err != nil {
-					srv.Logger.Warn("error searching directory for new owner",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", docID,
-						"person", doc.Owners[0],
-					)
-				}
-				if len(ppl) == 1 && ppl[0].Names != nil {
-					newOwner.Name = ppl[0].Names[0].DisplayName
-				}
-
 				// Get name of old document owner.
 				oldOwner := email.User{
 					EmailAddress: userEmail,
 				}
-				ppl, err = srv.GWService.SearchPeople(
-					userEmail, "emailAddresses,names")
-				if err != nil {
-					srv.Logger.Warn("error searching directory for old owner",
-						"error", err,
-						"method", r.Method,
-						"path", r.URL.Path,
-						"doc_id", docID,
-						"person", doc.Owners[0],
-					)
-				}
-				if len(ppl) == 1 && ppl[0].Names != nil {
-					oldOwner.Name = ppl[0].Names[0].DisplayName
+
+				if srv.SharePoint != nil {
+					// Look up display names via Microsoft Graph.
+					newPerson, err := srv.SharePoint.GetPersonByEmail(doc.Owners[0])
+					if err != nil {
+						srv.Logger.Warn("error looking up new owner in Microsoft Graph",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"doc_id", docID,
+							"person", doc.Owners[0],
+						)
+					} else {
+						newOwner.Name = newPerson.DisplayName
+					}
+
+					oldPerson, err := srv.SharePoint.GetPersonByEmail(userEmail)
+					if err != nil {
+						srv.Logger.Warn("error looking up old owner in Microsoft Graph",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"doc_id", docID,
+							"person", userEmail,
+						)
+					} else {
+						oldOwner.Name = oldPerson.DisplayName
+					}
+				} else {
+					// Look up display names via Google Workspace directory.
+					ppl, err := srv.GWService.SearchPeople(
+						doc.Owners[0], "emailAddresses,names")
+					if err != nil {
+						srv.Logger.Warn("error searching directory for new owner",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"doc_id", docID,
+							"person", doc.Owners[0],
+						)
+					}
+					if len(ppl) == 1 && ppl[0].Names != nil {
+						newOwner.Name = ppl[0].Names[0].DisplayName
+					}
+
+					ppl, err = srv.GWService.SearchPeople(
+						userEmail, "emailAddresses,names")
+					if err != nil {
+						srv.Logger.Warn("error searching directory for old owner",
+							"error", err,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"doc_id", docID,
+							"person", userEmail,
+						)
+					}
+					if len(ppl) == 1 && ppl[0].Names != nil {
+						oldOwner.Name = ppl[0].Names[0].DisplayName
+					}
 				}
 
 				if err := email.SendNewOwnerEmail(

@@ -11,6 +11,7 @@ import (
 
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/errs"
 	"github.com/hashicorp-forge/hermes/internal/config"
+	"github.com/hashicorp-forge/hermes/internal/email"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
 	"github.com/hashicorp-forge/hermes/pkg/document"
 	gw "github.com/hashicorp-forge/hermes/pkg/googleworkspace"
@@ -475,40 +476,43 @@ func ReviewHandler(
 				)
 
 				// Send emails to approvers.
-				// if len(doc.Approvers) > 0 {
-				// 	// TODO: use an asynchronous method for sending emails because we
-				// 	// can't currently recover gracefully from a failure here.
-				// 	for _, approverEmail := range doc.Approvers {
-				// 		err := email.SendReviewRequestedEmail(
-				// 			email.ReviewRequestedEmailData{
-				// 				BaseURL:           cfg.BaseURL,
-				// 				DocumentOwner:     doc.Owners[0],
-				// 				DocumentShortName: doc.DocNumber,
-				// 				DocumentTitle:     doc.Title,
-				// 				DocumentURL:       docURL,
-				// 			},
-				// 			[]string{approverEmail},
-				// 			cfg.Email.FromAddress,
-				// 			s,
-				// 		)
-				// 		if err != nil {
-				// 			l.Error("error sending approver email",
-				// 				"error", err,
-				// 				"doc_id", docID,
-				// 				"method", r.Method,
-				// 				"path", r.URL.Path,
-				// 			)
-				// 			http.Error(w, "Error creating review",
-				// 				http.StatusInternalServerError)
-				// 			return
-				// 		}
-				// 		l.Info("doc approver email sent",
-				// 			"doc_id", docID,
-				// 			"method", r.Method,
-				// 			"path", r.URL.Path,
-				// 		)
-				// 	}
-				// }
+				if len(doc.Approvers) > 0 {
+					// TODO: use an asynchronous method for sending emails because we
+					// can't currently recover gracefully from a failure here.
+					for _, approverEmail := range doc.Approvers {
+						err := email.SendReviewRequestedEmail(
+							email.ReviewRequestedEmailData{
+								BaseURL:           cfg.BaseURL,
+								DocumentOwner:     doc.Owners[0],
+								DocumentShortName: doc.DocNumber,
+								DocumentTitle:     doc.Title,
+								DocumentType:      doc.DocType,
+								DocumentStatus:    doc.Status,
+								DocumentURL:       docURL,
+								Product:           doc.Product,
+							},
+							[]string{approverEmail},
+							cfg.Email.FromAddress,
+							&gw.EmailSenderAdapter{Svc: s},
+						)
+						if err != nil {
+							l.Error("error sending approver email",
+								"error", err,
+								"doc_id", docID,
+								"method", r.Method,
+								"path", r.URL.Path,
+							)
+							http.Error(w, "Error creating review",
+								http.StatusInternalServerError)
+							return
+						}
+						l.Info("doc approver email sent",
+							"doc_id", docID,
+							"method", r.Method,
+							"path", r.URL.Path,
+						)
+					}
+				}
 
 				// Send emails to product subscribers.
 				p := models.Product{
@@ -526,43 +530,43 @@ func ReviewHandler(
 					return
 				}
 
-				// 	if len(p.UserSubscribers) > 0 {
-				// 		// TODO: use an asynchronous method for sending emails because we
-				// 		// can't currently recover gracefully from a failure here.
-				// 		for _, subscriber := range p.UserSubscribers {
-				// 			err := email.SendSubscriberDocumentPublishedEmail(
-				// 				email.SubscriberDocumentPublishedEmailData{
-				// 					BaseURL:           cfg.BaseURL,
-				// 					DocumentOwner:     doc.Owners[0],
-				// 					DocumentShortName: doc.DocNumber,
-				// 					DocumentTitle:     doc.Title,
-				// 					DocumentType:      doc.DocType,
-				// 					DocumentURL:       docURL,
-				// 					Product:           doc.Product,
-				// 				},
-				// 				[]string{subscriber.EmailAddress},
-				// 				cfg.Email.FromAddress,
-				// 				s,
-				// 			)
-				// 			if err != nil {
-				// 				l.Error("error sending subscriber email",
-				// 					"error", err,
-				// 					"doc_id", docID,
-				// 					"method", r.Method,
-				// 					"path", r.URL.Path,
-				// 				)
-				// 				http.Error(w, "Error sending subscriber email",
-				// 					http.StatusInternalServerError)
-				// 				return
-				// 			}
-				// 			l.Info("doc subscriber email sent",
-				// 				"doc_id", docID,
-				// 				"method", r.Method,
-				// 				"path", r.URL.Path,
-				// 				"product", doc.Product,
-				// 			)
-				// 		}
-				// 	}
+				if len(p.UserSubscribers) > 0 {
+					// TODO: use an asynchronous method for sending emails because we
+					// can't currently recover gracefully from a failure here.
+					for _, subscriber := range p.UserSubscribers {
+						err := email.SendSubscriberDocumentPublishedEmail(
+							email.SubscriberDocumentPublishedEmailData{
+								BaseURL:           cfg.BaseURL,
+								DocumentOwner:     doc.Owners[0],
+								DocumentShortName: doc.DocNumber,
+								DocumentTitle:     doc.Title,
+								DocumentType:      doc.DocType,
+								DocumentURL:       docURL,
+								Product:           doc.Product,
+							},
+							[]string{subscriber.EmailAddress},
+							cfg.Email.FromAddress,
+							&gw.EmailSenderAdapter{Svc: s},
+						)
+						if err != nil {
+							l.Error("error sending subscriber email",
+								"error", err,
+								"doc_id", docID,
+								"method", r.Method,
+								"path", r.URL.Path,
+							)
+							http.Error(w, "Error sending subscriber email",
+								http.StatusInternalServerError)
+							return
+						}
+						l.Info("doc subscriber email sent",
+							"doc_id", docID,
+							"method", r.Method,
+							"path", r.URL.Path,
+							"product", doc.Product,
+						)
+					}
+				}
 			}
 
 			// Write response.

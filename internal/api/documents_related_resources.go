@@ -24,8 +24,8 @@ type externalLinkRelatedResourcePutRequest struct {
 }
 
 type hermesDocumentRelatedResourcePutRequest struct {
-	FileID string `json:"FileID"`
-	SortOrder    int    `json:"sortOrder"`
+	FileID    string `json:"FileID"`
+	SortOrder int    `json:"sortOrder"`
 }
 
 type relatedResourcesGetResponse struct {
@@ -40,7 +40,7 @@ type externalLinkRelatedResourceGetResponse struct {
 }
 
 type hermesDocumentRelatedResourceGetResponse struct {
-	FileID   string   `json:"FileID"`
+	FileID         string   `json:"FileID"`
 	Title          string   `json:"title"`
 	DocumentType   string   `json:"documentType"`
 	DocumentNumber string   `json:"documentNumber"`
@@ -119,15 +119,16 @@ func documentsResourceRelatedResourcesHandler(
 		// Add Hermes document related resources.
 		for _, hdrr := range hdrrs {
 			// Get document object from Algolia.
+			targetDocID := hdrr.Document.GetFileIdentifier()
 			var algoObj map[string]any
-			err = algoRead.Docs.GetObject(hdrr.Document.FileID, &algoObj)
+			err = algoRead.Docs.GetObject(targetDocID, &algoObj)
 			if err != nil {
 				l.Error("error getting related resource document from Algolia",
 					"error", err,
 					"path", r.URL.Path,
 					"method", r.Method,
 					"doc_id", docID,
-					"target_doc_id", hdrr.Document.FileID,
+					"target_doc_id", targetDocID,
 				)
 				http.Error(w, "Error accessing document",
 					http.StatusInternalServerError)
@@ -150,7 +151,7 @@ func documentsResourceRelatedResourcesHandler(
 			resp.HermesDocuments = append(
 				resp.HermesDocuments,
 				hermesDocumentRelatedResourceGetResponse{
-					FileID:   hdrr.Document.FileID,
+					FileID:         targetDocID,
 					Title:          doc.Title,
 					DocumentType:   doc.DocType,
 					DocumentNumber: doc.DocNumber,
@@ -205,7 +206,7 @@ func documentsResourceRelatedResourcesHandler(
 		for _, elrr := range req.ExternalLinks {
 			elrrs = append(elrrs, models.DocumentRelatedResourceExternalLink{
 				RelatedResource: models.DocumentRelatedResource{
-					Document: models.NewDocumentByFileID(docID, false),
+					Document:  models.NewDocumentByFileID(docID, false),
 					SortOrder: elrr.SortOrder,
 				},
 				Name: elrr.Name,
@@ -218,7 +219,7 @@ func documentsResourceRelatedResourcesHandler(
 		for _, hdrr := range req.HermesDocuments {
 			hdrrs = append(hdrrs, models.DocumentRelatedResourceHermesDocument{
 				RelatedResource: models.DocumentRelatedResource{
-					Document: models.NewDocumentByFileID(docID, false),
+					Document:  models.NewDocumentByFileID(docID, false),
 					SortOrder: hdrr.SortOrder,
 				},
 				Document: models.NewDocumentByFileID(hdrr.FileID, false),

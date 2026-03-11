@@ -102,7 +102,7 @@ func MeRecentlyViewedDocsHandler(
 				}
 
 				res = append(res, recentlyViewedDoc{
-					ID:      doc.FileID,
+					ID:      doc.GetFileIdentifier(),
 					IsDraft: isDraft,
 				})
 			}

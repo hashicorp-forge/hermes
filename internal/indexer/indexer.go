@@ -3,6 +3,8 @@ package indexer
 import (
 	"errors"
 	"fmt"
+	"io"
+	"os"
 	"sync"
 	"time"
 
@@ -103,23 +105,33 @@ func NewIndexer(cfg *config.Config, opts ...IndexerOption) (*Indexer, error) {
 		return nil, err
 	}
 
-	// Load SharePointDriveID from configuration
-	idx.SharePointDriveID = cfg.SharePoint.DriveID
+	// Load SharePointDriveID from configuration if SharePoint is configured.
+	if cfg.SharePoint != nil {
+		idx.SharePointDriveID = cfg.SharePoint.DriveID
+	}
 
 	return idx, nil
 }
 
 // validate validates the indexer configuration.
 func (idx *Indexer) validate() error {
-	return validation.ValidateStruct(idx,
+	if err := validation.ValidateStruct(idx,
 		validation.Field(&idx.AlgoliaClient, validation.Required),
 		validation.Field(&idx.BaseURL, validation.Required),
 		validation.Field(&idx.Database, validation.Required),
 		validation.Field(&idx.DocumentTypes, validation.Required),
-		validation.Field(&idx.sharepointSvc, validation.Required),     // Ensure SharePoint service is set
-		validation.Field(&idx.DraftsFolderID, validation.Required),    // Validate SharePoint drafts folder
-		validation.Field(&idx.DocumentsFolderID, validation.Required), // Validate SharePoint documents folder
-	)
+		validation.Field(&idx.DraftsFolderID, validation.Required),
+		validation.Field(&idx.DocumentsFolderID, validation.Required),
+	); err != nil {
+		return err
+	}
+
+	// Ensure at least one backend service is configured.
+	if idx.sharepointSvc == nil && idx.GoogleWorkspaceService == nil {
+		return fmt.Errorf("either SharePoint or Google Workspace service must be configured")
+	}
+
+	return nil
 }
 
 // WithAlgoliaClient sets the Algolia client.
@@ -220,11 +232,361 @@ func WithSharePointService(sharepointSvc *sp.Service) IndexerOption {
 func (idx *Indexer) Run() error {
 	log := idx.Logger
 
-	for {
-		if err := idx.runSharePoint(); err != nil {
-			log.Error("SharePoint indexing error", "error", err)
+	if idx.sharepointSvc != nil {
+		// SharePoint indexing loop.
+		for {
+			if err := idx.runSharePoint(); err != nil {
+				log.Error("SharePoint indexing error", "error", err)
+			}
+			log.Info("sleeping for a minute before the next indexing run...")
+			time.Sleep(1 * time.Minute)
 		}
-		log.Info("Sleeping for a minute before the next indexing run...")
+	} else {
+		// Google Workspace indexing loop.
+		return idx.runGoogleWorkspace()
+	}
+}
+
+// runGoogleWorkspace runs the Google Workspace indexing loop.
+func (idx *Indexer) runGoogleWorkspace() error {
+	algo := idx.AlgoliaClient
+	db := idx.Database
+	gwSvc := idx.GoogleWorkspaceService
+	log := idx.Logger
+
+	for {
+		runStartedAt := time.Now().UTC()
+
+		// Get indexer metadata.
+		md := models.IndexerMetadata{}
+		if err := md.Get(db); err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				// This is the first time that the indexer is being run, so set last
+				// full index timestamp to the Unix epoch.
+				md.LastFullIndexAt = time.Unix(0, 0).UTC()
+			} else {
+				log.Error("error getting indexer metadata",
+					"error", err,
+				)
+				os.Exit(1)
+			}
+		}
+
+		// Update draft document headers, if configured.
+		if idx.UpdateDraftHeaders {
+			log.Info("refreshing draft document headers",
+				"folder_id", idx.DraftsFolderID,
+			)
+			currentTime := time.Now().UTC()
+
+			// Get drafts folder data (headers) from the database.
+			// Note: we add a "refreshHeaders:" prefix for the Google Drive ID here
+			// to not conflict with the actual last indexed time of the folder
+			// (if we're indexing it, that is).
+			fd := models.IndexerFolder{
+				GoogleDriveID: fmt.Sprintf("refreshHeaders:%s", idx.DraftsFolderID),
+			}
+			if err := fd.Get(db); err != nil && !errors.Is(
+				err, gorm.ErrRecordNotFound) {
+				log.Error("error getting drafts headers folder indexer data",
+					"error", err,
+				)
+				os.Exit(1)
+			}
+
+			// If the last indexed timestamp doesn't exist, set it to the Unix epoch.
+			if fd.LastIndexedAt.IsZero() {
+				fd.LastIndexedAt = time.Unix(0, 0).UTC()
+			}
+
+			// Create safe last indexed time for the folder so we can pass this to
+			// goroutines.
+			safeLastIndexedAt := &safeTime{
+				fd.LastIndexedAt,
+				sync.RWMutex{},
+			}
+
+			if err := refreshDocumentHeaders(
+				*idx,
+				idx.DraftsFolderID,
+				draftsFolderType,
+				safeLastIndexedAt,
+				currentTime,
+			); err != nil {
+				log.Error("error refreshing draft document headers",
+					"error", err,
+				)
+				os.Exit(1)
+			}
+
+			// Save last indexed time for the drafts folder (headers).
+			fd.LastIndexedAt = safeLastIndexedAt.time
+			if err := fd.Upsert(db); err != nil {
+				log.Error(
+					"error upserting last indexed time for the drafts headers folder",
+					"folder_id", idx.DraftsFolderID,
+					"last_indexed_at", fd.LastIndexedAt,
+				)
+			}
+
+			log.Info("done refreshing draft document headers")
+		}
+
+		// Update published document headers, if configured.
+		if idx.UpdateDocumentHeaders {
+			log.Info("refreshing published document headers",
+				"folder_id", idx.DocumentsFolderID,
+			)
+			currentTime := time.Now().UTC()
+
+			// Get documents folder data (headers) from the database.
+			// Note: we add a "refreshHeaders:" prefix for the Google Drive ID here
+			// to not conflict with the actual last indexed time of the folder
+			// (if we're indexing it, that is).
+			fd := models.IndexerFolder{
+				GoogleDriveID: fmt.Sprintf("refreshHeaders:%s", idx.DocumentsFolderID),
+			}
+			if err := fd.Get(db); err != nil && !errors.Is(
+				err, gorm.ErrRecordNotFound) {
+				log.Error("error getting documents headers folder indexer data",
+					"error", err,
+				)
+				os.Exit(1)
+			}
+
+			// If the last indexed timestamp doesn't exist, set it to the Unix epoch.
+			if fd.LastIndexedAt.IsZero() {
+				fd.LastIndexedAt = time.Unix(0, 0).UTC()
+			}
+
+			// Create safe last indexed time for the folder so we can pass this to
+			// goroutines.
+			safeLastIndexedAt := &safeTime{
+				fd.LastIndexedAt,
+				sync.RWMutex{},
+			}
+
+			if err := refreshDocumentHeaders(
+				*idx,
+				idx.DocumentsFolderID,
+				documentsFolderType,
+				safeLastIndexedAt,
+				currentTime,
+			); err != nil {
+				log.Error("error refreshing published document headers",
+					"error", err,
+				)
+				os.Exit(1)
+			}
+
+			// Save last indexed time for the documents folder (headers).
+			fd.LastIndexedAt = safeLastIndexedAt.time
+			if err := fd.Upsert(db); err != nil {
+				log.Error(
+					"error upserting last indexed time for the documents headers folder",
+					"folder_id", idx.DocumentsFolderID,
+					"last_indexed_at", fd.LastIndexedAt,
+				)
+			}
+
+			log.Info("done refreshing published document headers")
+		}
+
+		// Get documents folder data from the database.
+		docsFolderData := models.IndexerFolder{
+			GoogleDriveID: idx.DocumentsFolderID,
+		}
+		if err := docsFolderData.Get(db); err != nil && !errors.Is(
+			err, gorm.ErrRecordNotFound) {
+			log.Error("error getting documents folder indexer data",
+				"error", err,
+			)
+			os.Exit(1)
+		}
+
+		// If the last indexed timestamp doesn't exist, set it to the Unix epoch.
+		if docsFolderData.LastIndexedAt.IsZero() {
+			docsFolderData.LastIndexedAt = time.Unix(0, 0).UTC()
+		}
+		lastIndexedAtStr := docsFolderData.LastIndexedAt.UTC().Format(
+			time.RFC3339Nano)
+
+		log.Info("indexing documents folder",
+			"folder_id", idx.DocumentsFolderID,
+			"last_indexed_at", lastIndexedAtStr,
+		)
+		currentTime := time.Now().UTC()
+		currentTimeStr := currentTime.UTC().Format(time.RFC3339Nano)
+
+		// Get documents that have been updated in the folder since it was last
+		// indexed.
+		docFiles, err := gwSvc.GetUpdatedDocsBetween(
+			idx.DocumentsFolderID, lastIndexedAtStr, currentTimeStr)
+		if err != nil {
+			log.Error("error getting updated document files",
+				"error", err,
+				"folder_id", idx.DocumentsFolderID,
+				"after_time", lastIndexedAtStr,
+				"before_time", currentTimeStr,
+			)
+			os.Exit(1)
+		}
+		if len(docFiles) == 0 {
+			log.Info("no new document updates since the last indexed time",
+				"folder_id", idx.DocumentsFolderID,
+				"last_indexed_at", lastIndexedAtStr,
+			)
+		}
+
+		for _, file := range docFiles {
+			logError := func(errMsg string, err error) {
+				log.Error(errMsg,
+					"error", err,
+					"google_file_id", file.Id,
+					"folder_id", idx.DocumentsFolderID,
+					"last_indexed_at", lastIndexedAtStr,
+				)
+			}
+
+			log.Info("indexing document",
+				"google_file_id", file.Id,
+				"folder_id", idx.DocumentsFolderID,
+				"last_indexed_at", lastIndexedAtStr,
+			)
+
+			// Get document from database.
+			dbDoc := models.Document{
+				GoogleFileID: file.Id,
+			}
+			if err := dbDoc.Get(db); err != nil {
+				logError("error getting document from the database", err)
+				os.Exit(1)
+			}
+
+			// Get reviews for the document from the database.
+			var reviews models.DocumentReviews
+			if err := reviews.Find(idx.Database, models.DocumentReview{
+				Document: models.Document{
+					GoogleFileID: file.Id,
+				},
+			}); err != nil {
+				log.Error("error getting reviews for document",
+					"error", err,
+					"google_file_id", file.Id,
+				)
+				os.Exit(1)
+			}
+
+			// Get group reviews for the document.
+			var groupReviews models.DocumentGroupReviews
+			if err := groupReviews.Find(idx.Database, models.DocumentGroupReview{
+				Document: models.Document{
+					GoogleFileID: file.Id,
+				},
+			}); err != nil {
+				log.Error("error getting group reviews for document",
+					"error", err,
+					"google_file_id", file.Id,
+				)
+				os.Exit(1)
+			}
+
+			// Parse document modified time.
+			modifiedTime, err := time.Parse(time.RFC3339Nano, file.ModifiedTime)
+			if err != nil {
+				logError("error parsing document modified time", err)
+				os.Exit(1)
+			}
+
+			// Set new modified time for document record.
+			dbDoc.DocumentModifiedAt = modifiedTime
+
+			// Update document in database.
+			if err := dbDoc.Upsert(db); err != nil {
+				logError("error upserting document", err)
+				os.Exit(1)
+			}
+
+			var doc *document.Document
+			if idx.UseDatabaseForDocumentData {
+				// Convert database record to a document.
+				doc, err = document.NewFromDatabaseModel(dbDoc, reviews, groupReviews)
+				if err != nil {
+					log.Error("error converting database record to document",
+						"error", err,
+						"google_file_id", file.Id,
+					)
+					os.Exit(1)
+				}
+			} else {
+				// Get document object from Algolia.
+				var algoObj map[string]any
+				if err = algo.Docs.GetObject(file.Id, &algoObj); err != nil {
+					logError("error retrieving document object from Algolia", err)
+					os.Exit(1)
+				}
+
+				// Convert Algolia object to a document.
+				doc, err = document.NewFromAlgoliaObject(algoObj, idx.DocumentTypes)
+				if err != nil {
+					logError("error converting Algolia object to document", err)
+					os.Exit(1)
+				}
+			}
+
+			// Get document content.
+			exp, err := gwSvc.Drive.Files.Export(file.Id, "text/plain").Download()
+			if err != nil {
+				logError("error exporting document", err)
+				os.Exit(1)
+			}
+			content, err := io.ReadAll(exp.Body)
+			if err != nil {
+				logError("error reading exported document", err)
+				os.Exit(1)
+			}
+			// Trim doc content if it is larger than the maximum size.
+			if len(content) > maxContentSize {
+				content = content[:maxContentSize]
+			}
+
+			// Update document object with content and latest modified time.
+			doc.Content = (string(content))
+			doc.ModifiedTime = modifiedTime.Unix()
+
+			// Save the document in Algolia.
+			if err := saveDocInAlgolia(*doc, idx.AlgoliaClient); err != nil {
+				return fmt.Errorf("error saving document in Algolia: %w", err)
+			}
+
+			// Update last indexed time for folder if document modified time is later.
+			if modifiedTime.After(docsFolderData.LastIndexedAt) {
+				docsFolderData.LastIndexedAt = modifiedTime
+			}
+
+			log.Info("indexed document",
+				"google_file_id", file.Id,
+				"folder_id", idx.DocumentsFolderID,
+			)
+		}
+
+		// Save last indexed time for the documents folder.
+		if err := docsFolderData.Upsert(db); err != nil {
+			log.Error("error upserting last indexed time for the folder",
+				"folder_id", idx.DocumentsFolderID,
+				"last_indexed_at", docsFolderData.LastIndexedAt,
+			)
+		}
+
+		// Update the last full index time.
+		md.LastFullIndexAt = runStartedAt.UTC()
+		if err := md.Upsert(db); err != nil {
+			log.Error("error upserting metadata with last full index time: %w", err)
+			os.Exit(1)
+		}
+
+		log.Info("sleeping for a minute before the next indexing run...")
+		// TODO: make sleep time configurable.
 		time.Sleep(1 * time.Minute)
 	}
 }
@@ -251,14 +613,11 @@ func (idx *Indexer) runSharePoint() error {
 	}
 
 	// Published
-	// Not using published folder
-	/*
-		if idx.UpdateDocumentHeaders {
-			if err := idx.refreshSharePointFolder(idx.DocumentsFolderID, "published"); err != nil {
-				return err
-			}
+	if idx.UpdateDocumentHeaders {
+		if err := idx.refreshSharePointFolder(idx.DocumentsFolderID, "published"); err != nil {
+			return err
 		}
-	*/
+	}
 
 	// Update metadata
 	md.LastFullIndexAt = runStartedAt.UTC()

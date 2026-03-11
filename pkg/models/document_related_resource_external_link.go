@@ -22,8 +22,13 @@ type DocumentRelatedResourceExternalLinks []DocumentRelatedResourceExternalLink
 func (rr *DocumentRelatedResourceExternalLink) Create(db *gorm.DB) error {
 	// Preload RelatedResource.Document.
 	if rr.RelatedResource.DocumentID == 0 {
-		if err := db.
-			Where(Document{FileID: rr.RelatedResource.Document.FileID}).
+		query := db
+		if rr.RelatedResource.Document.GoogleFileID != "" {
+			query = query.Where("google_file_id = ?", rr.RelatedResource.Document.GoogleFileID)
+		} else {
+			query = query.Where("file_id = ?", rr.RelatedResource.Document.FileID)
+		}
+		if err := query.
 			First(&rr.RelatedResource.Document).
 			Error; err != nil {
 			return fmt.Errorf("error preloading RelatedResource.Document: %w", err)

@@ -140,11 +140,11 @@ func compareAlgoliaAndDatabaseDocument(
 		result = multierror.Append(
 			result, fmt.Errorf("error getting objectID value: %w", err))
 	}
-	if algoFileID != dbDoc.FileID {
+	if algoFileID != dbDoc.GetFileIdentifier() {
 		result = multierror.Append(result,
 			fmt.Errorf(
 				"objectID not equal, algolia=%v, db=%v",
-				algoFileID, dbDoc.FileID),
+				algoFileID, dbDoc.GetFileIdentifier()),
 		)
 	}
 

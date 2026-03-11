@@ -24,7 +24,15 @@ type DocumentFileRevision struct {
 	// Name is the name of the document file revision.
 	Name string `gorm:"primaryKey"`
 
-	// GoogleDriveFileRevisionID is the original Google Drive revision ID (nullable after migration).
+	// GoogleDriveFileRevisionID is the legacy Google Drive revision ID.
+	// RETAINED FOR MIGRATION: Existing Google-deployed databases have rows keyed
+	// by this column. It is preserved as a nullable field so that:
+	//   1. Existing data is not lost during the schema migration (GORM AutoMigrate
+	//      adds the new FileRevisionID column; the old column stays).
+	//   2. Rollback to a pre-merge version is possible without data loss.
+	//   3. Migration scripts can copy GoogleDriveFileRevisionID → FileRevisionID
+	//      for existing rows, then this column can be dropped in a future release.
+	// New code should read/write FileRevisionID exclusively.
 	GoogleDriveFileRevisionID *string `gorm:"default:null"`
 }
 
