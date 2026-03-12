@@ -968,6 +968,21 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
         },
       );
     } catch (error) {
+      const shouldRetryAsPublishedDoc =
+        endpoint === "drafts" && this.fetchSvc.getErrorCode(error as Error) === 404;
+
+      if (shouldRetryAsPublishedDoc) {
+        await this.fetchSvc.fetch(
+          `/api/${this.configSvc.config.api_version}/documents/${this.docID}`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(fields),
+          },
+        );
+        return;
+      }
+
       /**
        * Errors are normally handled in a flash message, but if the
        * consuming method needs special treatment, such as to trigger

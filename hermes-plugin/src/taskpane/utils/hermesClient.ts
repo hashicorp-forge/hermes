@@ -437,7 +437,6 @@ export default class HermesClient {
     isDraft: boolean;
   }): Promise<void> {
     try {
-      const updateEndpoint = `${this.baseUrl}/api/v2/${isDraft ? "drafts" : "documents"}/${fileID}`;
       const header = this.reqHeader;
       header.method = "PATCH";
       header.body = JSON.stringify(updatePayload);
@@ -447,7 +446,13 @@ export default class HermesClient {
 
       header.headers["Content-Type"] = "application/json";
 
-      const res = await fetch(updateEndpoint, header);
+      const primaryEndpoint = `${this.baseUrl}/api/v2/${isDraft ? "drafts" : "documents"}/${fileID}`;
+      let res = await fetch(primaryEndpoint, header);
+      if (!res.ok && isDraft && res.status === 404) {
+        const publishedEndpoint = `${this.baseUrl}/api/v2/documents/${fileID}`;
+        res = await fetch(publishedEndpoint, header);
+      }
+
       if (res.ok) {
         return;
       }
