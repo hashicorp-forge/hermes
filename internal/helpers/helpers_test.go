@@ -58,3 +58,29 @@ func TestStringSliceContains(t *testing.T) {
 		assert.Equal(t, tc.want, got)
 	}
 }
+
+func TestStringSliceContainsFold(t *testing.T) {
+	type testCase struct {
+		values []string
+		s      string
+		want   bool
+	}
+
+	testCases := []testCase{
+		{
+			values: []string{"hello", "world", "gopher"},
+			s:      "WORLD",
+			want:   true,
+		},
+		{
+			values: []string{"hello", "world", "gopher"},
+			s:      "foo",
+			want:   false,
+		},
+	}
+
+	for _, tc := range testCases {
+		got := StringSliceContainsFold(tc.values, tc.s)
+		assert.Equal(t, tc.want, got)
+	}
+}

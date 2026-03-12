@@ -458,7 +458,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 			previousStatus := doc.Status
 
 			// Additional validation for contributor ownership acquisition
-			if req.Owners != nil && helpers.StringSliceContains(doc.Contributors, userEmail) {
+			if isContributorAcquiringOwnership(userEmail, *doc, req) {
 				// Check if current owner is still active in the company
 				currentOwner := doc.Owners[0]
 				srv.Logger.Info("validating ownership acquisition: checking if current owner is alumni",
@@ -771,8 +771,7 @@ func DocumentHandler(srv server.Server) http.Handler {
 			// Owner.
 			if req.Owners != nil {
 				// Check if this is a contributor acquiring ownership
-				isAcquireOwnership := helpers.StringSliceContains(doc.Contributors, userEmail) &&
-					len(*req.Owners) == 1 && strings.EqualFold((*req.Owners)[0], userEmail)
+				isAcquireOwnership := isContributorAcquiringOwnership(userEmail, *doc, req)
 
 				if isAcquireOwnership {
 					srv.Logger.Info("contributor acquiring document ownership",
@@ -1801,6 +1800,26 @@ func parseDocumentsURLPath(path, collection string) (
 	}
 }
 
+func isContributorAcquiringOwnership(
+	userEmail string,
+	doc document.Document,
+	req DocumentPatchRequest,
+) bool {
+	if req.Owners == nil || len(*req.Owners) != 1 {
+		return false
+	}
+
+	if strings.EqualFold(doc.Owners[0], userEmail) {
+		return false
+	}
+
+	if !helpers.StringSliceContainsFold(doc.Contributors, userEmail) {
+		return false
+	}
+
+	return strings.EqualFold((*req.Owners)[0], userEmail)
+}
+
 // authorizeDocumentPatchRequest authorizes a PATCH request to a document.
 //   - Document owners can patch any field.
 //   - Approvers can only patch the Approvers field to remove themselves.
@@ -1856,7 +1875,7 @@ func authorizeDocumentPatchRequest(
 	}
 
 	// Contributors can only patch the Owners field to acquire ownership of the document.
-	if helpers.StringSliceContains(doc.Contributors, userEmail) {
+	if helpers.StringSliceContainsFold(doc.Contributors, userEmail) {
 		// Request should only have one non-nil field, Owners.
 		numNonNilFields := 0
 		reqValue := reflect.ValueOf(req)
@@ -1878,7 +1897,7 @@ func authorizeDocumentPatchRequest(
 		}
 
 		// The email in the Owners field must match the requesting user's email.
-		if (*req.Owners)[0] != userEmail {
+		if !strings.EqualFold((*req.Owners)[0], userEmail) {
 			return errors.New(
 				"contributors can only acquire ownership by setting themselves as the owner")
 		}

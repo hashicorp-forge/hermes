@@ -77,6 +77,14 @@ func TestAuthorizeDocumentPatchRequest(t *testing.T) {
 			req:       DocumentPatchRequest{},
 			shouldErr: false,
 		},
+		"owner should be authorized ignoring case": {
+			userEmail: "OWNER@example.com",
+			doc: document.Document{
+				Owners: []string{"owner@example.com"},
+			},
+			req:       DocumentPatchRequest{},
+			shouldErr: false,
+		},
 		"not owner should not be authorized": {
 			userEmail: "not.owner@example.com",
 			doc: document.Document{
@@ -169,6 +177,17 @@ func TestAuthorizeDocumentPatchRequest(t *testing.T) {
 			},
 			shouldErr: true,
 		},
+		"contributor should be authorized to acquire ownership ignoring case": {
+			userEmail: "Contributor@Example.com",
+			doc: document.Document{
+				Owners:       []string{"owner@example.com"},
+				Contributors: []string{"contributor@example.com"},
+			},
+			req: DocumentPatchRequest{
+				Owners: &[]string{"contributor@example.com"},
+			},
+			shouldErr: false,
+		},
 	}
 
 	for name, c := range cases {
@@ -181,6 +200,44 @@ func TestAuthorizeDocumentPatchRequest(t *testing.T) {
 			} else {
 				assert.NoError(err)
 			}
+		})
+	}
+}
+
+func TestIsContributorAcquiringOwnership(t *testing.T) {
+	cases := map[string]struct {
+		userEmail string
+		doc       document.Document
+		req       DocumentPatchRequest
+		want      bool
+	}{
+		"contributor acquiring ownership is detected ignoring case": {
+			userEmail: "Contributor@Example.com",
+			doc: document.Document{
+				Owners:       []string{"owner@example.com"},
+				Contributors: []string{"contributor@example.com"},
+			},
+			req: DocumentPatchRequest{
+				Owners: &[]string{"CONTRIBUTOR@example.com"},
+			},
+			want: true,
+		},
+		"owner transfer is not treated as contributor acquisition even if owner is also contributor": {
+			userEmail: "owner@example.com",
+			doc: document.Document{
+				Owners:       []string{"owner@example.com"},
+				Contributors: []string{"owner@example.com", "contributor@example.com"},
+			},
+			req: DocumentPatchRequest{
+				Owners: &[]string{"new.owner@example.com"},
+			},
+			want: false,
+		},
+	}
+
+	for name, c := range cases {
+		t.Run(name, func(t *testing.T) {
+			assert.Equal(t, c.want, isContributorAcquiringOwnership(c.userEmail, c.doc, c.req))
 		})
 	}
 }

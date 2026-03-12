@@ -1,5 +1,7 @@
 package helpers
 
+import "strings"
+
 // RemoveStringSliceDuplicates removes duplicate strings from a string slice.
 func RemoveStringSliceDuplicates(in []string) []string {
 	keys := make(map[string]bool)
@@ -18,6 +20,17 @@ func RemoveStringSliceDuplicates(in []string) []string {
 func StringSliceContains(values []string, s string) bool {
 	for _, v := range values {
 		if s == v {
+			return true
+		}
+	}
+	return false
+}
+
+// StringSliceContainsFold returns true if a string is present in a slice of
+// strings using case-insensitive comparison.
+func StringSliceContainsFold(values []string, s string) bool {
+	for _, v := range values {
+		if strings.EqualFold(s, v) {
 			return true
 		}
 	}
