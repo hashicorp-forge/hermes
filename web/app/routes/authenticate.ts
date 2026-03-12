@@ -35,21 +35,19 @@ export default class AuthenticateRoute extends Route {
   }
 
   async model() {
-    // Check for Microsoft token (SharePoint mode without ALB).
-    const microsoftToken = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("microsoft_token="))
-      ?.split("=")[1];
-
-    if (microsoftToken) {
+    // In SharePoint mode, authentication is backend-managed via secure cookies.
+    // If a valid backend session exists, establish the frontend session and
+    // continue to the app.
+    if (
+      this.configSvc.config.skip_google_auth &&
+      !this.configSvc.config.skip_microsoft_auth
+    ) {
       try {
-        await this.session.authenticate("authenticator:microsoft", {
-          token: microsoftToken,
-        });
+        await this.session.authenticate("authenticator:cookie");
         this.router.replaceWith("/");
         return;
       } catch (error) {
-        console.error("Error authenticating with Microsoft token", error);
+        // No backend session yet. Allow the route to render normally.
       }
     }
   }

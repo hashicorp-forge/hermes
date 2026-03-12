@@ -68,7 +68,7 @@ export default class ApplicationRoute extends Route {
 
     // Try to authenticate with backend-managed cookie session
     // This will check if /api/v2/me is accessible (backend session valid)
-    if (!this.session.isAuthenticated && !this.config.config.skip_microsoft_auth) {
+  if (!this.session.hasAuthentication() && !this.config.config.skip_microsoft_auth) {
       try {
         await this.session.authenticate("authenticator:cookie");
       } catch (error) {

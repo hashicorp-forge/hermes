@@ -6,6 +6,8 @@ import IProduct from "../interfaces/products";
 import { RelatedResourcesResponse, RelatedResourcesUpdateRequest, RelatedHermesDocument } from "../interfaces/relatedResources";
 import { HermesProject, ProjectStatus } from "../interfaces/project";
 
+export const HERMES_AUTH_REQUIRED_EVENT = "hermes-auth-required";
+
 /**
  * `HermesClient` provides a set of methods for interacting with the Hermes API.
  *
@@ -41,6 +43,62 @@ export default class HermesClient {
    */
   private getErrorMessage(result: { error?: { message?: string; status?: number }; response?: Response; success: boolean }): string {
     return result.error?.message || (result.response ? `Status ${result.response.status}` : 'Unknown error');
+  }
+
+  private notifyAuthenticationRequired(detail?: unknown): void {
+    window.dispatchEvent(
+      new CustomEvent(HERMES_AUTH_REQUIRED_EVENT, { detail })
+    );
+  }
+
+  private isAuthenticationError(input: Response | unknown): boolean {
+    if (input instanceof Response) {
+      return (
+        input.status === 401 ||
+        input.status === 302 ||
+        input.status === 0 ||
+        input.type === "opaqueredirect"
+      );
+    }
+
+    const error = input as {
+      status?: number;
+      type?: string;
+      message?: string;
+      response?: { status?: number; type?: string };
+    } | null;
+
+    if (!error) {
+      return false;
+    }
+
+    if (error.status === 401 || error.status === 302 || error.status === 0) {
+      return true;
+    }
+
+    if (error.type === "opaqueredirect" || error.response?.type === "opaqueredirect") {
+      return true;
+    }
+
+    if (error.response?.status === 401 || error.response?.status === 302) {
+      return true;
+    }
+
+    return Boolean(
+      error.message && (
+        error.message.includes("401") ||
+        error.message.includes("302") ||
+        error.message.includes("Authentication required") ||
+        error.message.includes("redirect to login") ||
+        error.message.includes("opaqueredirect")
+      )
+    );
+  }
+
+  private signalAuthIfNeeded(input: Response | unknown): void {
+    if (this.isAuthenticationError(input)) {
+      this.notifyAuthenticationRequired(input);
+    }
   }
 
   /**
@@ -192,6 +250,7 @@ export default class HermesClient {
         // Throw an error that preserves the status for isAuthenticationError to detect
         const authError = new Error('Authentication required - redirect to login detected');
         (authError as any).status = 302;
+        this.signalAuthIfNeeded(authError);
         throw authError;
       }
 
@@ -202,6 +261,7 @@ export default class HermesClient {
       throw new Error(`getDocumentDetails failed - Draft: ${draftError}, Doc: ${docError}`);
     } catch (error) {
       console.log("Error in getDocumentDetails: ", error);
+      this.signalAuthIfNeeded(error);
       throw error;
     }
   }
@@ -216,6 +276,7 @@ export default class HermesClient {
       if (res.type === 'opaqueredirect' || res.status === 0) {
         const authError = new Error('Authentication required - redirect to login detected');
         (authError as any).status = 302;
+        this.signalAuthIfNeeded(authError);
         throw authError;
       }
 
@@ -231,9 +292,11 @@ export default class HermesClient {
         };
       }
 
+      this.signalAuthIfNeeded(res);
       throw new Error(`getDocument failed with status: ${res.status} and body ${await res.text()}`);
     } catch (error) {
       console.log("Error in getDocumentDetails: ", error);
+      this.signalAuthIfNeeded(error);
       throw error;
     }
   }
@@ -253,11 +316,13 @@ export default class HermesClient {
         return await res.json();
       }
 
+      this.signalAuthIfNeeded(res);
       throw new Error(
         `getPeopleDetailsFromEmail has failed with status: ${res.status} and body ${await res.text()}`
       );
     } catch (err) {
       console.log("getPeopleDetailsFromEmail has failed with err:", err);
+      this.signalAuthIfNeeded(err);
       throw err;
     }
   }
@@ -281,11 +346,13 @@ export default class HermesClient {
         return await res.json();
       }
 
+      this.signalAuthIfNeeded(res);
       throw new Error(
         `searchPeople has failed with status: ${res.status} and body ${await res.text()}`
       );
     } catch (err) {
       console.log("searchPeople has failed with err: ", err);
+      this.signalAuthIfNeeded(err);
       throw err;
     }
   }
@@ -307,11 +374,13 @@ export default class HermesClient {
         return await res.json();
       }
 
+      this.signalAuthIfNeeded(res);
       throw new Error(
         `searchGroups has failed with status: ${res.status} and body ${await res.text()}`
       );
     } catch (err) {
       console.log("searchGroups has failed with err: ", err);
+      this.signalAuthIfNeeded(err);
       throw err;
     }
   }
@@ -486,12 +555,14 @@ export default class HermesClient {
         return await res.json();
       }
 
+      this.signalAuthIfNeeded(res);
 
       throw new Error(
         `getCurrentUserDetails has failed with status: ${res.status} and body ${await res.text()}`
       )
     } catch (error) {
       console.log("getCurrentUserDetails has failed with err: ", error);
+      this.signalAuthIfNeeded(error);
       throw error;
     }
   }

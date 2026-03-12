@@ -82,6 +82,13 @@ func validateUserEmail(
 		return
 	}
 
+	// Skip validation for the pre-authenticate route. Some auth providers, such
+	// as SharePoint/Microsoft auth without ALB, must serve and handle
+	// /authenticate before a user context exists.
+	if r.URL.Path == "/authenticate" {
+		return
+	}
+
 	if r.Context().Value("userEmail") == nil {
 		log.Error("userEmail is not set in the request context",
 			"method", r.Method,

@@ -6,6 +6,7 @@ import DarkTheme from "../utils/darkTheme";
 import LightTheme from "../utils/lightTheme";
 import { ThemeProvider, useTheme } from "../utils/themeContext";
 import { authenticateWithPopup, checkAuthStatus, grantStorageAccess, initializeStorageAccess } from "../utils/authPopup";
+import { HERMES_AUTH_REQUIRED_EVENT } from "../utils/hermesClient";
 
 interface AppProps {
   controller: WordPluginController;
@@ -406,6 +407,22 @@ const AppCore: React.FC<AppProps> = ({ controller }: AppProps) => {
         setIsInitializing(false);
       }
     })()
+  }, []);
+
+  React.useEffect(() => {
+    const handleAuthRequired = () => {
+      setAuthError(null);
+      setIsAuthenticating(false);
+      setIsGrantingAccess(false);
+      setPopupAuthComplete(false);
+      setDocStatus(DocumentManageStatus.AuthenticationRequired);
+    };
+
+    window.addEventListener(HERMES_AUTH_REQUIRED_EVENT, handleAuthRequired);
+
+    return () => {
+      window.removeEventListener(HERMES_AUTH_REQUIRED_EVENT, handleAuthRequired);
+    };
   }, []);
 
   /**

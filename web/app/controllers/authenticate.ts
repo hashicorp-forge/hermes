@@ -3,7 +3,6 @@ import { inject as service } from "@ember/service";
 import type SessionService from "hermes/services/session";
 import type ConfigService from "hermes/services/config";
 import { dropTask } from "ember-concurrency";
-import config from "hermes/config/environment";
 
 export default class AuthenticateController extends Controller {
   @service declare session: SessionService;
@@ -30,24 +29,19 @@ export default class AuthenticateController extends Controller {
         "authenticator:torii",
         "google-oauth2-bearer",
       );
-    } else if (
-      config.microsoft &&
-      config.microsoft.clientId &&
-      config.microsoft.tenantId &&
-      config.microsoft.redirectUri
-    ) {
-      // Microsoft OAuth flow (SharePoint mode without ALB).
-      const { tenantId, clientId, redirectUri } = config.microsoft;
-      const params = new URLSearchParams({
-        client_id: clientId,
-        response_type: "code",
-        redirect_uri: redirectUri,
-        scope: "openid profile email User.Read",
-        response_mode: "query",
-        state: `${Date.now()}`,
-      });
-      window.location.href = `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/authorize?${params.toString()}`;
+      return;
     }
+
+    if (!this.configSvc.config.skip_microsoft_auth) {
+      // SharePoint/Microsoft auth is backend-managed. The Go middleware will
+      // initiate the Microsoft login flow and handle the callback.
+      window.location.href = "/authenticate?init=true";
+      return;
+    }
+
+    console.error(
+      "Microsoft authentication is not properly configured. Missing one of clientId, tenantId, redirectUri.",
+    );
   });
 }
 declare module "@ember/controller" {

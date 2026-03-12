@@ -503,7 +503,8 @@ func (c *Command) Run(args []string) int {
 
 	// Determine if authentication is enabled (via OidcAlb or Okta).
 	authEnabled := (cfg.OidcAlb != nil && !cfg.OidcAlb.Disabled) ||
-		(cfg.Okta != nil && !cfg.Okta.Disabled)
+		(cfg.Okta != nil && !cfg.Okta.Disabled) ||
+		cfg.SharePoint != nil
 
 	if authEnabled {
 		// If auth is enabled, add the web SPA endpoints as authenticated

@@ -227,13 +227,13 @@ export default class SessionService extends EmberSimpleAuthSessionService {
     });
   }
 
-  isAuthenticated() {
-    // Check if authenticated in Ember Simple Auth
-    if (this.get('isAuthenticated')) {
+  hasAuthentication() {
+    // Check if authenticated in Ember Simple Auth.
+    if ((this as SessionService & { isAuthenticated?: boolean }).isAuthenticated) {
       return true;
     }
-    
-    // Check for Microsoft token if ESA is not authenticated
+
+    // Check for Microsoft token if ESA is not authenticated.
     const microsoftToken = this.getMicrosoftTokenFromCookie();
     return !!microsoftToken;
   }
@@ -245,9 +245,28 @@ export default class SessionService extends EmberSimpleAuthSessionService {
       ?.split("=")[1];
   }
 
+  // Override requireAuthentication so SharePoint/Microsoft auth can rely on
+  // the backend cookie as well as ESA session state.
+  requireAuthentication(
+    _transition: unknown,
+    routeOrCallback: string | ((...args: unknown[]) => void),
+  ): boolean {
+    if (this.hasAuthentication()) {
+      return true;
+    }
+
+    if (typeof routeOrCallback === "string") {
+      this.router.transitionTo(routeOrCallback);
+    } else if (typeof routeOrCallback === "function") {
+      routeOrCallback();
+    }
+
+    return false;
+  }
+
   // Override the prohibitAuthentication method
   prohibitAuthentication(routeOrCallback: string | ((...args: unknown[]) => void)): boolean {
-    if (this.isAuthenticated()) {
+    if (this.hasAuthentication()) {
       if (typeof routeOrCallback === "string") {
         this.router.replaceWith(routeOrCallback);
       } else if (typeof routeOrCallback === "function") {
