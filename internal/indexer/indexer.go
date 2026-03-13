@@ -613,11 +613,12 @@ func (idx *Indexer) runSharePoint() error {
 	}
 
 	// Published
-	if idx.UpdateDocumentHeaders {
-		if err := idx.refreshSharePointFolder(idx.DocumentsFolderID, "published"); err != nil {
-			return err
-		}
-	}
+	/*
+		if idx.UpdateDocumentHeaders {
+			if err := idx.refreshSharePointFolder(idx.DocumentsFolderID, "published"); err != nil {
+				return err
+			}
+		}*/
 
 	// Update metadata
 	md.LastFullIndexAt = runStartedAt.UTC()
