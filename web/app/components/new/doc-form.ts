@@ -49,6 +49,18 @@ export default class NewDocFormComponent extends Component<NewDocFormComponentSi
 
   @tracked protected summaryIsLong = false;
 
+  protected get draftButtonText(): string {
+    return this.configSvc.config.skip_google_auth
+      ? "Create draft in SharePoint"
+      : "Create draft in Google Docs";
+  }
+
+  protected get draftRunningHeadline(): string {
+    return this.configSvc.config.skip_google_auth
+      ? "Creating draft in SharePoint..."
+      : "Creating draft in Google Docs...";
+  }
+
   /**
    * Whether the document is being created, or in the process of
    * transitioning to the document screen after successful creation.

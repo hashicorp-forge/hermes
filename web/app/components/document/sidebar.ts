@@ -44,7 +44,7 @@ interface DocumentSidebarComponentSignature {
   Args: {
     profile: PersonModel;
     document: HermesDocument;
-    docType: Promise<HermesDocumentType>;
+    docType: HermesDocumentType | Promise<HermesDocumentType>;
     isCollapsed: boolean;
     viewerIsGroupApprover: boolean;
     toggleCollapsed: () => void;
@@ -717,6 +717,18 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
     this.deleteModalIsShown = false;
   }
 
+  @action protected showDeleteModal(event?: Event) {
+    event?.preventDefault();
+    event?.stopPropagation();
+    this.deleteModalIsShown = true;
+  }
+
+  @action protected showRequestReviewModal(event?: Event) {
+    event?.preventDefault();
+    event?.stopPropagation();
+    this.requestReviewModalIsShown = true;
+  }
+
   @action closeRequestReviewModal() {
     this.requestReviewModalIsShown = false;
   }
@@ -750,7 +762,7 @@ export default class DocumentSidebarComponent extends Component<DocumentSidebarC
       void this.getDraftPermissions.perform();
 
       // get docType for the "request review?" modal
-      this.args.docType.then((docType) => {
+      void Promise.resolve(this.args.docType).then((docType) => {
         this.docType = docType;
       });
     }

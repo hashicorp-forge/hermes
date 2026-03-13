@@ -51,17 +51,6 @@ export default class DocumentIndexComponent extends Component<DocumentIndexCompo
   }
 
   /**
-   * Get the document ID (prefer SharePoint ID if available, otherwise use Google ID)
-   */
-  get docId(): string {
-    const doc = this.args.document as any;
-    if ("FileID" in doc && doc.FileID) {
-      return doc.FileID;
-    }
-    return doc.objectID || '';
-  }
-
-  /**
    * Get the direct SharePoint URL for opening the document directly in SharePoint
    * This returns the directEditURL if available, or falls back to webUrl
    */

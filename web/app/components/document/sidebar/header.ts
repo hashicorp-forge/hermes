@@ -17,6 +17,38 @@ interface DocumentSidebarHeaderComponentSignature {
 }
 
 export default class DocumentSidebarHeaderComponent extends Component<DocumentSidebarHeaderComponentSignature> {
+  protected get externalLinkHref(): string {
+    const document = this.args.document as HermesDocument & {
+      directEditURL?: string;
+      webUrl?: string;
+    };
+
+    return (
+      document.directEditURL ??
+      document.webUrl ??
+      `https://docs.google.com/document/d/${document.objectID}`
+    );
+  }
+
+  protected get externalLinkTooltipText(): string {
+    const document = this.args.document as HermesDocument & {
+      directEditURL?: string;
+      webUrl?: string;
+    };
+    const url = document.directEditURL ?? document.webUrl;
+
+    if (!url) return "Open in Google";
+
+    try {
+      const hostname = new URL(url).hostname;
+      return hostname.endsWith(".sharepoint.com") || hostname === "sharepoint.com"
+        ? "Open in SharePoint"
+        : "Open in Google";
+    } catch {
+      return "Open in Google";
+    }
+  }
+
   /**
    * Whether the tooltip is forced open, regardless of hover state.
    * True if the parent component has passed a tooltip text prop,

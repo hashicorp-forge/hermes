@@ -80,13 +80,21 @@ export default class AuthenticatedDocumentRoute extends Route {
     const endpoint = `/api/${this.configSvc.config.api_version}/${base}/${params.document_id}`;
 
     try {
-      const resp = await fetch(endpoint, {
+      const resp = await this.fetchSvc.fetch(endpoint, {
         method: "HEAD",
         redirect: "manual",
         headers: { "Add-To-Recently-Viewed": "true" },
       });
 
-      if (resp.status === 404) {
+      const loc = resp?.headers.get("X-Direct-Edit-URL");
+      if (loc) {
+        return loc; // SharePoint document
+      }
+
+      // No header — Google document, fall through
+      return null;
+    } catch (e) {
+      if (this.fetchSvc.getErrorCode(e as Error) === 404) {
         this.flashMessages.critical("Document not found", {
           title: "Error accessing document",
           timeout: FLASH_MESSAGES_LONG_TIMEOUT,
@@ -95,22 +103,6 @@ export default class AuthenticatedDocumentRoute extends Route {
         throw new Error("Document not found");
       }
 
-      if (resp.ok) {
-        const loc = resp.headers.get("X-Direct-Edit-URL");
-        if (loc) {
-          return loc; // SharePoint document
-        }
-        // No header — Google document, fall through
-        return null;
-      }
-
-      // Other HTTP error (403, 500, etc) — fall through to GET flow
-      // which will provide a more detailed error
-      return null;
-    } catch (e) {
-      if ((e as Error).message === "Document not found") {
-        throw e; // Re-throw 404
-      }
       // Network error or CORS — fall through to GET flow
       return null;
     }

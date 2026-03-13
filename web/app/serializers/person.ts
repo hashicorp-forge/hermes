@@ -9,6 +9,27 @@ interface GoogleUser {
 }
 
 export default class PersonSerializer extends JSONSerializer {
+  private normalizePerson(p: GoogleUser, type: string) {
+    const email = p.emailAddresses?.[0]?.value;
+
+    if (!email) return;
+
+    const name = p.names?.[0]?.displayName;
+    const firstName = p.names?.[0]?.givenName;
+    const picture = p.photos?.[0]?.url;
+
+    return {
+      id: email,
+      type,
+      attributes: {
+        name: name ?? email,
+        firstName: firstName ?? name ?? email,
+        email,
+        picture,
+      },
+    };
+  }
+
   /**
    * The serializer for the `person` model.
    * Handles `query` and `queryRecord` requests to the EmberData store.
@@ -32,18 +53,10 @@ export default class PersonSerializer extends JSONSerializer {
        */
       if (!payload.results) return { data: [] };
 
-      const people = payload.results.map((p) => {
-        return {
-          id: p.emailAddresses[0]?.value,
-          type,
-          attributes: {
-            name: p.names[0]?.displayName,
-            firstName: p.names[0]?.givenName,
-            email: p.emailAddresses[0]?.value,
-            picture: p.photos[0]?.url,
-          },
-        };
-      });
+      const people = payload.results
+        .map((p) => this.normalizePerson(p, type))
+        .filter(Boolean);
+
       return { data: people };
     } else if (requestType === "queryRecord") {
       assert(
@@ -55,18 +68,11 @@ export default class PersonSerializer extends JSONSerializer {
 
       if (!record) return {};
 
-      return {
-        data: {
-          id: record.emailAddresses?.[0]?.value,
-          type,
-          attributes: {
-            name: record.names[0]?.displayName,
-            firstName: record.names[0]?.givenName,
-            email: record.emailAddresses[0]?.value,
-            picture: record.photos[0]?.url,
-          },
-        },
-      };
+      const person = this.normalizePerson(record, type);
+
+      if (!person) return {};
+
+      return { data: person };
     } else {
       // Currently only `query` and `queryRecord` requests are used.
       return {};

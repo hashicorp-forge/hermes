@@ -5,7 +5,6 @@ import { action } from "@ember/object";
 import { debounce } from "@ember/runloop";
 import Ember from "ember";
 import type ConfigService from "hermes/services/config";
-import type FetchService from "hermes/services/fetch";
 import type StoreService from "hermes/services/store";
 import type PersonModel from "hermes/models/person";
 import type GroupModel from "hermes/models/group";
@@ -31,7 +30,6 @@ const INITIAL_RETRY_DELAY = Ember.testing ? 0 : 500;
 
 export default class InputsPeopleSelectComponent extends Component<InputsPeopleSelectComponentSignature> {
   @service("config") declare configSvc: ConfigService;
-  @service("fetch") declare fetchSvc: FetchService;
   @service declare authenticatedUser: AuthenticatedUserService;
   @service declare store: StoreService;
 
@@ -177,16 +175,22 @@ export default class InputsPeopleSelectComponent extends Component<InputsPeopleS
       let retryDelay = INITIAL_RETRY_DELAY;
 
       try {
-        let promises: Promise<any>[] = [
-          this.store.query("person", { query }),
-        ];
+        let promises: Promise<any>[] = [this.store.query("person", { query })];
 
         if (this.args.includeGroups) {
           promises.push(this.store.query("group", { query }));
         }
 
-        const results = await Promise.all(promises);
-        const [people, groups] = results;
+        const results = await Promise.allSettled(promises);
+        const peopleResult = results[0];
+        const groupsResult = results[1];
+
+        if (!peopleResult || peopleResult.status === "rejected") {
+          throw peopleResult?.reason ?? new Error("Unable to search people");
+        }
+
+        const people = peopleResult.value;
+        const groups = groupsResult?.status === "fulfilled" ? groupsResult.value : undefined;
 
         let p: string[] = [];
         let g: string[] = [];

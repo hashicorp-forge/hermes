@@ -32,13 +32,8 @@
     <ExternalLink
       data-test-sidebar-external-link
       class="quarternary-button"
-      {{!-- Use directEditURL directly as href if available, otherwise fall back to webUrl or Google URL --}}
-      href="{{if @document.directEditURL 
-               @document.directEditURL
-               (if @document.webUrl 
-                 @document.webUrl 
-                 (concat "https://docs.google.com/document/d/" @document.objectID))}}"
-      {{tooltip (if @document.webUrl "Open in SharePoint" "Open in Google") placement=(if @isCollapsed "right" "bottom")}}
+      href={{this.externalLinkHref}}
+      {{tooltip this.externalLinkTooltipText placement=(if @isCollapsed "right" "bottom")}}
     >
       <FlightIcon @name="external-link" />
     </ExternalLink>

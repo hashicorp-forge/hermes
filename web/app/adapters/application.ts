@@ -14,9 +14,15 @@ export default class ApplicationAdapter extends JSONAdapter {
   }
 
   get headers() {
+    if (!this.configSvc.config.skip_google_auth) {
+      return {
+        "Hermes-Google-Access-Token":
+          this.session.data.authenticated.access_token,
+      };
+    }
+
     return {
-      "Hermes-Access-Token":
-        this.session.data.authenticated.access_token,
+      "Hermes-Access-Token": this.session.data.authenticated.access_token,
     };
   }
 }

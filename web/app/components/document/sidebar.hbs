@@ -484,7 +484,7 @@
                   data-test-sidebar-publish-for-review-button
                   @text="Publish for review..."
                   class="w-full"
-                  {{on "click" (set this "requestReviewModalIsShown" true)}}
+                  {{on "click" this.showRequestReviewModal}}
                 />
                 {{! Delete... }}
                 <Hds::Button
@@ -495,7 +495,7 @@
                   @isIconOnly={{true}}
                   class="basis-0"
                   {{tooltip "Delete..."}}
-                  {{on "click" (fn (set this "deleteModalIsShown" true))}}
+                  {{on "click" this.showDeleteModal}}
                 />
               {{else}}
                 {{! isApprover or isGroupApproverOnly}}

@@ -74,7 +74,7 @@ module.exports = function (environment) {
         "google-oauth2-bearer-v2": {
           apiKey: getEnv("GOOGLE_OAUTH2_CLIENT_ID", ""),
           hd: getEnv("GOOGLE_OAUTH2_HD", ""),
-          redirectUri: getEnv("GOOGLE_OAUTH2_REDIRECT_URI", ""),
+          scope: "email profile https://www.googleapis.com/auth/drive.appdata",
         },
       },
     },

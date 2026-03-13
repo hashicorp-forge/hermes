@@ -20,6 +20,12 @@ export default class DashboardNewFeaturesBanner extends Component<DashboardNewFe
 
   @tracked protected isDismissed = false;
 
+  protected get title(): string {
+    return this.configSvc.config.skip_google_auth
+      ? "Welcome to new Hermes with SharePoint support!"
+      : "Welcome to the new Hermes experience!";
+  }
+
   /**
    * Whether the banner should be shown.
    * Set true on first visit to the dashboard and remains true

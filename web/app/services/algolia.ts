@@ -73,11 +73,16 @@ export default class AlgoliaService extends Service {
       window.location.hostname === "127.0.0.1" ||
       window.location.hostname === "localhost"
     ) {
+      const headers: Record<string, string> | undefined =
+        this.configSvc.config.skip_google_auth
+          ? undefined
+          : {
+              "Hermes-Google-Access-Token":
+                this.session.data.authenticated.access_token,
+            };
+
       return algoliaSearch("", "", {
-        headers: {
-          "Hermes-Google-Access-Token":
-            this.session.data.authenticated.access_token,
-        },
+        headers,
         hosts: [
           {
             protocol: window.location.protocol.replace(":", ""),
@@ -95,11 +100,16 @@ export default class AlgoliaService extends Service {
      * If running remotely as production, use HTTPS and route Algolia requests
      * through the Hermes API.
      */
+    const headers: Record<string, string> | undefined =
+      this.configSvc.config.skip_google_auth
+        ? undefined
+        : {
+            "Hermes-Google-Access-Token":
+              this.session.data.authenticated.access_token,
+          };
+
     return algoliaSearch("", "", {
-      headers: {
-        "Hermes-Google-Access-Token":
-          this.session.data.authenticated.access_token,
-      },
+      headers,
       hosts: [
         {
           protocol: "https",
@@ -118,7 +128,9 @@ export default class AlgoliaService extends Service {
    * An Algolia SearchClient.
    * Used to initialize an environment-scoped SearchIndex.
    */
-  private client: SearchClient = this.createClient();
+  private get client(): SearchClient {
+    return this.createClient();
+  }
 
   /**
    * An Algolia SearchIndex scoped to the environment.

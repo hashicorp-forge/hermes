@@ -31,36 +31,34 @@
           so that any SRC changes don't add history entries,
           which would cause the back button to break.
         }}
-        {{#if @document.webUrl}}
+        {{#if this.isSharePointDocument}}
           {{! SharePoint document - try embedding with Office Online }}
-                  <iframe 
-          id="doc-frame" 
-          width="100%" 
-          height="100%" 
-          src={{this.webUrl}} 
+          <iframe
+          id="doc-frame"
+          width="100%"
+          height="100%"
+          src={{this.webUrl}}
           sandbox="allow-scripts allow-same-origin allow-top-navigation allow-popups allow-forms"
           style="border: none;"
-          onload={{this.onFrameLoad}}
-          onerror={{this.onFrameError}}>
+          >
         </iframe>
-        
+
         {{!-- Fallback content if iframe fails to load --}}
         <div id="iframe-fallback" style="display: none; padding: 20px; text-align: center;">
           <h3>Document Viewer</h3>
           <p>Unable to embed document. <a href={{this.webUrl}} target="_blank" rel="noopener noreferrer">Open in new tab</a></p>
-          
+
           {{!-- Additional Office Online fallback options --}}
           {{#if this.isSharePointDocument}}
             <div style="margin-top: 15px;">
               <p>Alternative viewing options:</p>
               <div style="margin: 10px 0;">
-                {{debug-document @document}}
-                <button type="button" onclick="window.tryOfficeOnlineEmbed('{{this.docId}}')" 
+                <button type="button" onclick="window.tryOfficeOnlineEmbed()"
                         style="margin: 5px; padding: 10px 15px; background: #0078d4; color: white; border: none; border-radius: 4px; cursor: pointer;">
                   Try Office Online
                 </button>
-                <button type="button" 
-                        onclick="window.open('{{@document.directEditURL}}', '_blank', 'noopener,noreferrer')" 
+                <button type="button"
+                        onclick="window.open('{{this.sharepointDirectUrl}}', '_blank', 'noopener,noreferrer')"
                         style="margin: 5px; padding: 10px 15px; background: #107c10; color: white; border: none; border-radius: 4px; cursor: pointer;">
                   Open in SharePoint
                 </button>
@@ -116,10 +114,10 @@
             };
             
             // Global helper functions for fallback buttons
-            window.tryOfficeOnlineEmbed = function(docId) {
+            window.tryOfficeOnlineEmbed = function() {
               // For embedding, we use the Office Online viewer with the web URL
               const webUrl = '{{this.webUrl}}';
-              
+
               // Construct the Office Online embed URL using the webUrl
               const officeUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(webUrl)}`;
               iframe.src = officeUrl;
@@ -128,35 +126,9 @@
               fallbackShown = false;
               console.log('Trying Office Online embed:', officeUrl);
             };
-            
+
           })();
         </script>
-          <script>
-            (function() {
-              const iframe = document.getElementById('sharepoint-iframe-{{@document.objectID}}');
-              const fallback = document.getElementById('sharepoint-fallback-{{@document.objectID}}');
-              let loadTimeout;
-              
-              const showFallback = () => {
-                iframe.style.display = 'none';
-                fallback.style.display = 'flex';
-              };
-              
-              const showIframe = () => {
-                iframe.style.opacity = '1';
-                clearTimeout(loadTimeout);
-              };
-              
-              // Set a timeout to show fallback if iframe doesn't load
-              loadTimeout = setTimeout(showFallback, 10000); // 10 seconds
-              
-              iframe.onload = showIframe;
-              iframe.onerror = showFallback;
-              
-              // Also check for blocked content
-              iframe.onabort = showFallback;
-            })();
-          </script>
         {{else}}
           {{! Google Drive document - show iframe }}
           <iframe

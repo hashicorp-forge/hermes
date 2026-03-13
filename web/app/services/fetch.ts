@@ -5,6 +5,7 @@ import type SessionService from "./session";
 
 interface FetchOptions {
   method?: string;
+  redirect?: RequestRedirect;
   headers?: {
     [key: string]: string;
   };

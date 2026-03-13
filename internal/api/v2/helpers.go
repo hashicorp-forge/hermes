@@ -626,6 +626,9 @@ func CompareAlgoliaAndDatabaseDocument(
 // otherwise. Works with both SharePoint (Microsoft Graph) and Google backends.
 func isUserInGroups(
 	userEmail string, groupEmails []string, srv server.Server) (bool, error) {
+	if len(groupEmails) == 0 {
+		return false, nil
+	}
 
 	if srv.SharePoint != nil {
 		// SharePoint path: use Microsoft Graph API
@@ -668,6 +671,11 @@ func isUserInGroups(
 			}
 		}
 
+		return false, nil
+	}
+
+	if srv.Config.GoogleWorkspace.GroupApprovals == nil ||
+		!srv.Config.GoogleWorkspace.GroupApprovals.Enabled {
 		return false, nil
 	}
 

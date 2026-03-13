@@ -3,9 +3,9 @@
   @icon={{or this.docTypeIcon "file-text"}}
   @headline="Create your {{@docType}}"
   @buttonIsActive={{this.buttonIsActive}}
-  @taskIsRunningHeadline="Creating draft in Sharepoint..."
+  @taskIsRunningHeadline={{this.draftRunningHeadline}}
   @taskIsRunningDescription="This usually takes 10-20 seconds."
-  @buttonText="Create draft in Sharepoint"
+  @buttonText={{this.draftButtonText}}
   {{did-insert this.registerForm}}
   {{on "submit" this.submit}}
   data-test-new-doc-form
