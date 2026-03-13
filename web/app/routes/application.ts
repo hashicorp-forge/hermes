@@ -63,19 +63,6 @@ export default class ApplicationRoute extends Route {
       );
     }
 
-  // Initialize ESA session (required by ESA 7.x)
-  await this.session.setup();
-
-    // Try to authenticate with backend-managed cookie session
-    // This will check if /api/v2/me is accessible (backend session valid)
-  if (!this.session.hasAuthentication() && !this.config.config.skip_microsoft_auth) {
-      try {
-        await this.session.authenticate("authenticator:cookie");
-      } catch (error) {
-        // Not authenticated yet - user will be redirected to /authenticate by requireAuthentication
-      }
-    }
-
     await this.fetchSvc
       .fetch(`/api/${this.config.config.api_version}/web/config`)
       .then((response) => response?.json())
@@ -86,6 +73,23 @@ export default class ApplicationRoute extends Route {
         // Log error for debugging, but do not expose to user
         console.error("Failed to fetch web config:", error);
       });
+
+    // Initialize ESA session (required by ESA 7.x)
+    await this.session.setup();
+
+    // Try to authenticate with a backend-managed cookie session only when
+    // running in SharePoint/Microsoft mode without external auth.
+    if (
+      this.config.config.skip_google_auth &&
+      !this.config.config.skip_microsoft_auth &&
+      !this.session.hasAuthentication()
+    ) {
+      try {
+        await this.session.authenticate("authenticator:cookie");
+      } catch (_error) {
+        // Not authenticated yet - user will be redirected to /authenticate by requireAuthentication.
+      }
+    }
 
   // Initialize the metrics service
   this.metrics;

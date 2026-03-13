@@ -16,11 +16,22 @@ export default class CookieAuthenticator extends BaseAuthenticator {
   @service("config") declare configSvc: ConfigService;
   @service("fetch") declare fetchSvc: FetchService;
 
+  private get isBackendManagedAuth(): boolean {
+    return (
+      this.configSvc.config.skip_google_auth &&
+      !this.configSvc.config.skip_microsoft_auth
+    );
+  }
+
   /**
    * Authenticate by checking if the backend session is valid.
    * Since the backend manages auth, we just verify we can access /api/v2/me
    */
   async authenticate() {
+    if (!this.isBackendManagedAuth) {
+      throw new Error("Cookie authentication is only available in Microsoft auth mode");
+    }
+
     try {
       // Check if backend session is valid by calling /api/v2/me
       // Note: Using v2 directly since backend supports v2 API
@@ -45,6 +56,10 @@ export default class CookieAuthenticator extends BaseAuthenticator {
    * Called on app initialization to restore previous session.
    */
   async restore(data: any) {
+    if (!this.isBackendManagedAuth) {
+      throw new Error("Session restore failed - cookie auth is not active");
+    }
+
     // Check if backend session is still valid
     try {
       const response = await this.fetchSvc.fetch("/api/v2/me", {

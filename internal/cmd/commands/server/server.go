@@ -493,7 +493,9 @@ func (c *Command) Run(args []string) int {
 	// Web endpoints are conditionally authenticated based on if auth is enabled.
 	webEndpoints1 := []endpoint{
 		{"/", web.Handler()},
-		{"/addin/", addin.AddinHandler(c.Log)},
+	}
+	if cfg.SharePoint != nil {
+		webEndpoints1 = append(webEndpoints1, endpoint{"/addin/", addin.AddinHandler(c.Log)})
 	}
 	webEndpoints2 := []endpoint{
 		{"/api/v1/web/config", web.ConfigHandler(cfg, algoSearch, c.Log)},
@@ -706,17 +708,33 @@ func logInstanceOverview(log hclog.Logger, cfg *config.Config) {
 			"client_id_configured", cfg.OidcAlb.ClientID != "",
 			"aws_region", cfg.OidcAlb.AWSRegion,
 		}
-	} else {
+	} else if cfg.Okta != nil && !cfg.Okta.Disabled {
+		authMethod = "Okta ALB"
+		authDetails = []interface{}{
+			"auth_server_configured", cfg.Okta.AuthServerURL != "",
+			"client_id_configured", cfg.Okta.ClientID != "",
+			"aws_region", cfg.Okta.AWSRegion,
+		}
+	} else if cfg.SharePoint != nil {
 		authMethod = "Microsoft Auth / SharePoint"
 		authDetails = []interface{}{
-			"sharepoint_configured", cfg.SharePoint != nil,
+			"sharepoint_configured", true,
 		}
-		if cfg.SharePoint != nil {
+		authDetails = append(authDetails,
+			"tenant_id_configured", cfg.SharePoint.TenantID != "",
+			"site_id_configured", cfg.SharePoint.SiteID != "",
+			"drive_id_configured", cfg.SharePoint.DriveID != "",
+			"domain", cfg.SharePoint.Domain,
+		)
+	} else {
+		authMethod = "Google OAuth"
+		authDetails = []interface{}{
+			"google_workspace_configured", cfg.GoogleWorkspace != nil,
+		}
+		if cfg.GoogleWorkspace != nil {
 			authDetails = append(authDetails,
-				"tenant_id_configured", cfg.SharePoint.TenantID != "",
-				"site_id_configured", cfg.SharePoint.SiteID != "",
-				"drive_id_configured", cfg.SharePoint.DriveID != "",
-				"domain", cfg.SharePoint.Domain,
+				"gw_domain", cfg.GoogleWorkspace.Domain,
+				"oauth2_configured", cfg.GoogleWorkspace.OAuth2 != nil,
 			)
 		}
 	}

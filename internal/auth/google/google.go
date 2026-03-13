@@ -24,11 +24,16 @@ func AuthenticateRequest(
 		// Validate access token.
 		ti, err := s.ValidateAccessToken(tok)
 		if err != nil || !ti.VerifiedEmail {
-			log.Error("error validating Google access token",
-				"error", err,
-				"method", r.Method,
-				"path", r.URL.Path,
-			)
+			isAuthProbe := r.Method == http.MethodHead &&
+				(r.URL.Path == "/api/v1/me" || r.URL.Path == "/api/v2/me")
+
+			if !isAuthProbe {
+				log.Error("error validating Google access token",
+					"error", err,
+					"method", r.Method,
+					"path", r.URL.Path,
+				)
+			}
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
