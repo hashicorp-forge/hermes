@@ -270,7 +270,7 @@ oidc_alb {
   // client_id is the OIDC client ID.
   client_id = "ClientID"
   // disabled disables OIDC ALB authorization.
-  disabled = false
+  disabled = true
   // jwt_signer is the ARN of the ALB for JWT verification.
   jwt_signer = "arn:aws:elasticloadbalancing:..."
 }
@@ -278,6 +278,7 @@ oidc_alb {
 // server contains the configuration for the server.
 server {
   addr = "127.0.0.1:8000"
+//   tls_enabled = true
 //   addr     = "0.0.0.0:8443"
 //   tls_cert = "/path/to/cert.pem"
 //   tls_key  = "/path/to/key.pem"
