@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/hashicorp-forge/hermes/internal/config"
 	"github.com/hashicorp-forge/hermes/pkg/algolia"
@@ -67,7 +68,7 @@ func draftsArchivedHandler(
 	case "PATCH":
 		// Authorize request (only the document owner is authorized).
 		userEmail := r.Context().Value("userEmail").(string)
-		if doc.Owners[0] != userEmail {
+		if !strings.EqualFold(doc.Owners[0], userEmail) {
 			http.Error(w, "Only the document owner can archive documents",
 				http.StatusForbidden)
 			return
