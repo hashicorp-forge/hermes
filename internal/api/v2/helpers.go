@@ -641,34 +641,41 @@ func isUserInGroups(
 			},
 		}
 
-		resp, err := srv.SharePoint.InvokeAPIWithOptions("GET", graphURL, nil, options)
-		if err != nil {
-			return false, fmt.Errorf("error making Graph API request for user groups: %w", err)
-		}
-		defer resp.Body.Close()
-
-		if resp.StatusCode != http.StatusOK {
-			return false, fmt.Errorf("microsoft Graph API returned status %d when fetching user groups", resp.StatusCode)
-		}
-
-		// Parse the response
-		var response struct {
-			Value []struct {
-				ID          string `json:"id"`
-				DisplayName string `json:"displayName"`
-				Mail        string `json:"mail"`
-			} `json:"value"`
-		}
-
-		if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-			return false, fmt.Errorf("error decoding user groups response: %w", err)
-		}
-
-		// Check if any of the user's groups match the provided group emails
-		for _, group := range response.Value {
-			if group.Mail != "" && contains(groupEmails, group.Mail) {
-				return true, nil
+		for graphURL != "" {
+			resp, err := srv.SharePoint.InvokeAPIWithOptions("GET", graphURL, nil, options)
+			if err != nil {
+				return false, fmt.Errorf("error making Graph API request for user groups: %w", err)
 			}
+
+			if resp.StatusCode != http.StatusOK {
+				resp.Body.Close()
+				return false, fmt.Errorf("microsoft Graph API returned status %d when fetching user groups", resp.StatusCode)
+			}
+
+			// Parse the response page.
+			var response struct {
+				Value []struct {
+					ID          string `json:"id"`
+					DisplayName string `json:"displayName"`
+					Mail        string `json:"mail"`
+				} `json:"value"`
+				NextLink string `json:"@odata.nextLink"`
+			}
+
+			if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+				resp.Body.Close()
+				return false, fmt.Errorf("error decoding user groups response: %w", err)
+			}
+			resp.Body.Close()
+
+			// Check if any of the user's groups match the provided group emails.
+			for _, group := range response.Value {
+				if group.Mail != "" && contains(groupEmails, group.Mail) {
+					return true, nil
+				}
+			}
+
+			graphURL = response.NextLink
 		}
 
 		return false, nil
