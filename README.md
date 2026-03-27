@@ -15,6 +15,11 @@ Hermes was created and is currently maintained by HashiCorp Labs, a small team i
 
 ## Setup
 
+Hermes supports two backend modes:
+
+- Google Workspace
+- SharePoint / Microsoft 365
+
 ### Google
 
 1. Sign up for a [Google Workspace](https://workspace.google.com/) account.
@@ -92,6 +97,41 @@ Jira can be optionally configured to enable linking Hermes projects with Jira is
 
 1. Enable Jira using the `jira` block in the Hermes config file.
 
+### SharePoint / Microsoft 365
+
+1. Create a Microsoft Entra ID app registration for Hermes.
+
+1. Configure a redirect URI for the Hermes server.
+
+  - Local development example: `https://localhost:8443/authenticate`
+  - The redirect URI in Entra ID must match `sharepoint.redirect_uri` in `config.hcl`.
+
+1. Create a client secret for the app registration.
+
+1. Collect the values Hermes needs for configuration:
+
+  - Tenant ID
+  - Client ID
+  - Client secret
+  - SharePoint site ID
+  - SharePoint drive ID
+  - Your Microsoft 365 email domain (for example, `example.com`)
+
+1. Create or identify the folders Hermes will use in the SharePoint document library:
+
+  - Drafts folder
+  - Published documents folder
+  - Shortcuts folder
+
+1. Enable the `sharepoint` block in `config.hcl` and set the values above.
+
+1. If you want Microsoft distribution lists to be selectable as approvers, enable the `group_approvals` block under `sharepoint`.
+
+1. Choose an authentication mode:
+
+  - Direct Microsoft login: configure only the `sharepoint` block.
+  - ALB-fronted OIDC login: configure `sharepoint` and `oidc_alb`. Hermes prefers `oidc_alb` when it is enabled.
+
 ## Development and Usage
 
 ### Requirements
@@ -108,6 +148,36 @@ Copy the example configuration file to the root of this repo and edit the file (
 cp configs/config.hcl ./
 # Edit config.hcl...
 ```
+
+For Google Workspace deployments, configure the `google_workspace` block.
+
+For SharePoint deployments, enable and configure the `sharepoint` block in `config.hcl`:
+
+```hcl
+sharepoint {
+  redirect_uri     = "https://localhost:8443/authenticate"
+  client_id        = "YOUR_SHAREPOINT_CLIENT_ID"
+  client_secret    = "YOUR_SHAREPOINT_CLIENT_SECRET"
+  tenant_id        = "YOUR_AZURE_AD_TENANT_ID"
+  site_id          = "YOUR_SHAREPOINT_SITE_ID"
+  drive_id         = "YOUR_SHAREPOINT_DRIVE_ID"
+  domain           = "your-domain.com"
+  drafts_folder    = "DraftDocuments"
+  docs_folder      = "PublishedDocuments"
+  shortcuts_folder = "ShortcutsFolder"
+
+  group_approvals {
+    enabled = true
+    #search_prefix = "team-"
+  }
+}
+```
+
+Notes:
+
+- `group_approvals` is optional. When enabled, Hermes exposes the group search API and can validate Microsoft group membership for approver checks.
+- `search_prefix` is optional. When set, Hermes searches both `{search_prefix}{query}` and `{query}` and merges the results.
+- If `oidc_alb` is enabled, Hermes uses it ahead of direct Microsoft auth.
 
 ### Build the Project
 
@@ -140,7 +210,11 @@ The database password can be configured via the Hermes config.hcl or the `HERMES
 
 NOTE: when not using a Google service account, this will automatically open a browser to authenticate the server to read and create documents, send emails, etc.
 
+For SharePoint deployments without `oidc_alb`, Hermes uses the Microsoft login flow and serves the `/authenticate` callback route directly.
+
 ## Running Hermes in Production
+
+### Google Workspace
 
 1. [Create Service Account](https://developers.google.com/workspace/guides/create-credentials#service-account)
 
@@ -152,6 +226,16 @@ NOTE: when not using a Google service account, this will automatically open a br
 1. Configure the service account in the `auth` block under the `google_workspace` config block.
 
 1. If enabling group approvals, add the `https://www.googleapis.com/auth/admin.directory.group.readonly` role to the service user configured as the `subject` in the `auth` block (from previous step).
+
+### SharePoint / Microsoft 365
+
+For SharePoint deployments, configure the `sharepoint` block instead of the Google service account.
+
+- `redirect_uri` must match the app registration callback URL.
+- `site_id` and `drive_id` identify the SharePoint document library Hermes will use.
+- `drafts_folder`, `docs_folder`, and `shortcuts_folder` are the SharePoint folders Hermes manages.
+- `group_approvals` is optional and enables Microsoft distribution-list search for approvers.
+- `oidc_alb` is optional and can be used when Hermes is deployed behind an AWS ALB handling OIDC.
 
 ## Architecture
 
