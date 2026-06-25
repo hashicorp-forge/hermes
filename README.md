@@ -9,7 +9,7 @@ Hermes is an open source document management system created by HashiCorp to help
 
 Hermes was created and is currently maintained by HashiCorp Labs, a small team in the Office of the CTO.
 
-**Please note**: While this is not an official HashiCorp project, security is still very important to us! If you think that you've found a security issue, please contact us via email at security@hashicorp.com instead of filing a GitHub issue.
+**Please note**: While this is not an official HashiCorp project, security is still very important to us! If you think that you've found a security issue, please contact us via email at hashicorp.security@ibm.com instead of filing a GitHub issue.
 
 # Usage
 
@@ -257,7 +257,7 @@ This project is under active development and in the alpha stage. There may be br
 
 ## Feedback
 
-If you think that you've found a security issue, please contact us via email at security@hashicorp.com instead of filing a GitHub issue.
+If you think that you've found a security issue, please contact us via email at hashicorp.security@ibm.com instead of filing a GitHub issue.
 
 Found a non-security-related bug or have a feature request or other feedback? Please [open a GitHub issue](https://github.com/hashicorp-forge/hermes/issues/new).
 
