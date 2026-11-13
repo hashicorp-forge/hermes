@@ -312,6 +312,27 @@ func validateAndPrepareReview(srv *server.Server, r *http.Request, tx *gorm.DB, 
 		return nil, &httpErr
 	}
 
+	// Authorize request. Creating a review publishes the draft (assigns a
+	// document number, transitions the status, and grants read access to the
+	// configured publish groups), so only the document owner may do this. This
+	// mirrors the owner-only authorization enforced on other draft-mutating
+	// operations such as draft patch and delete.
+	userEmail, ok := r.Context().Value("userEmail").(string)
+	if !ok || userEmail == "" {
+		httpErr := structs.NewHTTPError(http.StatusUnauthorized, "No authorization information for request", nil)
+		return nil, &httpErr
+	}
+	if len(doc.Owners) == 0 || !strings.EqualFold(doc.Owners[0], userEmail) {
+		srv.Logger.Warn("unauthorized review creation attempt: user is not the document owner",
+			"doc_id", docID,
+			"method", r.Method,
+			"path", r.URL.Path,
+			"user_email", userEmail,
+		)
+		httpErr := structs.NewHTTPError(http.StatusForbidden, "Only the document owner can create a review", nil)
+		return nil, &httpErr
+	}
+
 	return doc, nil
 }
 
