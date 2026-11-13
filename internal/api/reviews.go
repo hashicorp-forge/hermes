@@ -104,6 +104,27 @@ func ReviewHandler(
 				return
 			}
 
+			// Authorize request. Creating a review publishes the draft, so
+			// only the document owner may do this.
+			userEmail, ok := r.Context().Value("userEmail").(string)
+			if !ok || userEmail == "" {
+				http.Error(w, "No authorization information for request",
+					http.StatusUnauthorized)
+				return
+			}
+			if len(doc.Owners) == 0 ||
+				!strings.EqualFold(doc.Owners[0], userEmail) {
+				l.Warn("unauthorized review creation attempt: user is not the document owner",
+					"doc_id", docID,
+					"method", r.Method,
+					"path", r.URL.Path,
+					"user_email", userEmail,
+				)
+				http.Error(w, "Only the document owner can create a review",
+					http.StatusForbidden)
+				return
+			}
+
 			// Get latest product number.
 			latestNum, err := models.GetLatestProductNumber(
 				db, doc.DocType, doc.Product)
